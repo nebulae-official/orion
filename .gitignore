@@ -31,9 +31,6 @@ Thumbs.db
 # Docker
 *.log
 
-# Cursor
-.cursor/
-
 # Secrets
 *.pem
 *.key
