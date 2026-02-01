@@ -1,0 +1,12 @@
+---
+description: General modern dev practices
+alwaysApply: true
+---
+
+# Modern Practices
+
+- Prefer async/await over callbacks.
+- Use type hints (Python) and TypeScript types; avoid Any.
+- Use dependency injection; avoid global state.
+- Fail fast with clear errors; use structured logging.
+- Prefer small, focused modules and single responsibility.
