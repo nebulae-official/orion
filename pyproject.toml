@@ -1,0 +1,13 @@
+[project]
+name = "orion"
+version = "0.1.0"
+requires-python = ">=3.14"
+description = "Project Orion monorepo"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
