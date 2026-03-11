@@ -7,4 +7,7 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
     "orion-common @ file:../../libs/orion-common",
+    "httpx>=0.27.0",
+    "websockets>=13.0",
+    "aiofiles>=24.1.0",
 ]
