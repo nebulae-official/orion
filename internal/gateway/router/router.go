@@ -25,7 +25,7 @@ func New(cfg config.Config) (chi.Router, error) {
 	r.Get("/health", handlers.Health())
 	r.Get("/ready", handlers.Ready())
 
-	// Service proxy routes.
+	// Service URLs for health aggregation and proxying.
 	services := map[string]string{
 		"scout":    cfg.ScoutURL,
 		"director": cfg.DirectorURL,
@@ -33,6 +33,9 @@ func New(cfg config.Config) (chi.Router, error) {
 		"editor":   cfg.EditorURL,
 		"pulse":    cfg.PulseURL,
 	}
+
+	// Aggregated status endpoint — checks all downstream services concurrently.
+	r.Get("/status", handlers.Status(services))
 
 	for name, url := range services {
 		proxy, err := handlers.NewServiceProxy(url)
