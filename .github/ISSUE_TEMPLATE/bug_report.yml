@@ -1,0 +1,19 @@
+name: Bug Report
+description: Report a bug
+body:
+  - type: markdown
+    attributes:
+      value: "Use Jira for backlog items. Use this only for bugs found in the repo."
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: 1. ... 2. ...
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
