@@ -15,6 +15,13 @@ type Config struct {
 	MilvusPort   string
 	OllamaHost   string
 	ComfyUIHost  string
+
+	// Service URLs for the gateway reverse proxy.
+	ScoutURL    string
+	DirectorURL string
+	MediaURL    string
+	EditorURL   string
+	PulseURL    string
 }
 
 // Load reads configuration from environment variables with sensible defaults.
@@ -30,6 +37,12 @@ func Load() Config {
 		MilvusPort:   getEnv("MILVUS_PORT", "19530"),
 		OllamaHost:   getEnv("OLLAMA_HOST", "http://localhost:11434"),
 		ComfyUIHost:  getEnv("COMFYUI_HOST", "http://localhost:8188"),
+
+		ScoutURL:    getEnv("SCOUT_URL", "http://localhost:8001"),
+		DirectorURL: getEnv("DIRECTOR_URL", "http://localhost:8002"),
+		MediaURL:    getEnv("MEDIA_URL", "http://localhost:8003"),
+		EditorURL:   getEnv("EDITOR_URL", "http://localhost:8004"),
+		PulseURL:    getEnv("PULSE_URL", "http://localhost:8005"),
 	}
 }
 
