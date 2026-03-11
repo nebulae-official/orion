@@ -1,0 +1,36 @@
+---
+description: Next.js dashboard development rules
+globs: ["dashboard/**/*.{ts,tsx,js,jsx}"]
+---
+
+# Next.js Dashboard Rules
+
+## Framework
+- Next.js 15.2 with App Router
+- React 19 with Server Components by default
+- TypeScript strict mode
+- Tailwind CSS 4.0 for styling
+
+## Routing
+- File-based routing in src/app/
+- Use layout.tsx for shared layouts
+- Use loading.tsx for loading states
+- Use error.tsx for error boundaries
+- Prefer Server Components; add "use client" only when needed
+
+## Data Fetching
+- Server Components fetch data directly (no useEffect)
+- Server Actions for mutations
+- Revalidate with revalidatePath/revalidateTag
+- Gateway API base URL from NEXT_PUBLIC_GATEWAY_URL env var
+
+## Styling
+- Tailwind utility classes only (no CSS modules, no styled-components)
+- Use cn() helper (clsx + tailwind-merge) for conditional classes
+- Design tokens via Tailwind config
+
+## TypeScript
+- Strict mode enabled
+- Explicit return types on exported functions
+- Use interface for object shapes, type for unions/intersections
+- No any — use unknown for truly unknown types
