@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"os"
+
+	"github.com/orion-rigel/orion/internal/cli/commands"
+)
 
 func main() {
-	fmt.Println("orion cli")
+	if err := commands.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

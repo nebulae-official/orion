@@ -1,7 +1,14 @@
 .DEFAULT_GOAL := help
 
 GATEWAY_BIN := bin/gateway
-CLI_BIN     := bin/cli
+CLI_BIN     := bin/orion
+
+VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+COMMIT    ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
+BUILDDATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+LDFLAGS   := -X github.com/orion-rigel/orion/internal/cli/commands.version=$(VERSION) \
+             -X github.com/orion-rigel/orion/internal/cli/commands.commit=$(COMMIT) \
+             -X github.com/orion-rigel/orion/internal/cli/commands.buildDate=$(BUILDDATE)
 
 .PHONY: help
 help: ## Show available targets
@@ -11,7 +18,7 @@ help: ## Show available targets
 .PHONY: build
 build: ## Build gateway and CLI binaries
 	go build -o $(GATEWAY_BIN) ./cmd/gateway
-	go build -o $(CLI_BIN) ./cmd/cli
+	go build -ldflags "$(LDFLAGS)" -o $(CLI_BIN) ./cmd/cli
 
 .PHONY: test
 test: ## Run Go tests
