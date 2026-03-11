@@ -1,0 +1,47 @@
+---
+description: Go service development rules for gateway and CLI
+globs: ["cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go"]
+---
+
+# Go Services Rules
+
+## Project Layout
+- cmd/{app}/main.go — entrypoints, minimal code
+- internal/{app}/ — application-specific packages (not importable externally)
+- pkg/ — shared packages importable by other projects
+
+## Routing & HTTP
+- Chi v5 router for HTTP routing
+- Middleware chain: logging -> recovery -> cors -> auth
+- Handler functions: func(w http.ResponseWriter, r *http.Request)
+- Use chi.URLParam(r, "paramName") for path parameters
+
+## Error Handling
+- Return errors, never panic (except unrecoverable init failures)
+- Wrap errors with context: fmt.Errorf("operation: %w", err)
+- HTTP handlers write error responses with appropriate status codes
+- Use errors.Is/As for error checking
+
+## Logging
+- slog for all structured logging
+- Include request_id, user_id in log context via middleware
+- Log at appropriate levels: Debug for dev, Info for operations, Error for failures
+
+## Context
+- context.Context as first parameter for all functions doing I/O
+- Propagate context through the call chain
+- Use context for cancellation and timeouts
+- Store request-scoped values via middleware
+
+## Testing
+- Table-driven tests with t.Run("case name", func(t *testing.T) {...})
+- Use testify/assert for assertions (not require in subtests)
+- httptest.NewServer for integration tests
+- t.Parallel() where safe
+- Benchmarks for performance-critical code
+
+## Dependencies
+- Chi 5.x for routing
+- pgx 5.x for PostgreSQL
+- go-redis 9.x for Redis
+- Cobra 1.9.x + Viper 1.19.x for CLI
