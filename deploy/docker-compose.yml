@@ -1,0 +1,281 @@
+version: "3.9"
+
+# Orion — Main Docker Compose
+# Profiles:
+#   default (no flag): gateway, scouts, directors, media, editor, pulse, dashboard, postgres, redis, milvus
+#   --profile full    : adds ollama, comfyui
+#   --profile gpu     : same as full + NVIDIA GPU passthrough
+
+networks:
+  orion-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  milvusdata:
+  ollamadata:
+
+services:
+
+  # ─────────────────────────────────────────────
+  # App Services
+  # ─────────────────────────────────────────────
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  scout:
+    build:
+      context: ../services/scout
+    ports:
+      - "8001:8001"
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      milvus:
+        condition: service_started
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  director:
+    build:
+      context: ../services/director
+    ports:
+      - "8002:8002"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  media:
+    build:
+      context: ../services/media
+    ports:
+      - "8003:8003"
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  editor:
+    build:
+      context: ../services/editor
+    ports:
+      - "8004:8004"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  pulse:
+    build:
+      context: ../services/pulse
+    ports:
+      - "8005:8005"
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  dashboard:
+    build:
+      context: ../dashboard
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env
+    depends_on:
+      - gateway
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ─────────────────────────────────────────────
+  # Infrastructure Services
+  # ─────────────────────────────────────────────
+
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-orion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orion}
+      POSTGRES_DB: ${POSTGRES_DB:-orion}
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orion} -d ${POSTGRES_DB:-orion}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  milvus:
+    image: milvusdb/milvus:v2.4-latest
+    command: ["milvus", "run", "standalone"]
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvusdata:/var/lib/milvus
+    environment:
+      ETCD_USE_EMBED: "true"
+      ETCD_DATA_DIR: /var/lib/milvus/etcd
+      COMMON_STORAGETYPE: local
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ─────────────────────────────────────────────
+  # Optional Services (--profile full or --profile gpu)
+  # ─────────────────────────────────────────────
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollamadata:/root/.ollama
+    networks:
+      - orion-net
+    restart: unless-stopped
+    profiles:
+      - full
+      - gpu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # No official ComfyUI image — use a community build or build from source.
+  # See: https://github.com/YanWenKun/ComfyUI-Docker for options.
+  comfyui:
+    image: yanwenkun/comfyui:latest   # placeholder — replace with your preferred image
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./comfyui/models:/app/models
+      - ./comfyui/output:/app/output
+    networks:
+      - orion-net
+    restart: unless-stopped
+    profiles:
+      - full
+      - gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
