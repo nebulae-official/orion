@@ -1,0 +1,27 @@
+---
+description: Docker and infrastructure rules
+globs: ["deploy/**", "Dockerfile", "**/Dockerfile", "docker-compose*.yml"]
+---
+
+# Docker & Infrastructure Rules
+
+## Dockerfiles
+- Multi-stage builds for Go services (builder + alpine runtime)
+- Slim base images for Python (python:3.13-slim)
+- Alpine base for Node.js (node:22-alpine)
+- Non-root user in production images
+- COPY dependency files first for layer caching
+- .dockerignore in each service directory
+
+## Docker Compose
+- Version: services at top level (compose v2 format)
+- Health checks on all services
+- Named volumes for persistent data
+- Single network (orion-net) for service communication
+- env_file for configuration
+- Profiles for optional services (gpu, monitoring)
+
+## Naming
+- Service names match directory names (lowercase, no underscores)
+- Volume names: {service}data (e.g., pgdata, redisdata)
+- Network: orion-net

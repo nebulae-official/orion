@@ -1,34 +1,54 @@
-# Orion Tech Stack (Official Stable Versions)
+# Tech Stack
 
-**Rule:** Use official stable releases only. No alpha, beta, RC, canary, or preview versions.
+Full version inventory for the Orion platform.
 
-| Technology | Version | Notes |
-| ---------- | ------- | ----- |
-| **Python** | 3.14.x | Latest stable (free-threaded, t-strings) |
-| **FastAPI** | 0.128.x | Pydantic v2 only |
-| **Pydantic** | 2.12.x | Data validation, settings |
-| **LangGraph** | 1.x | Agent orchestration (stable API) |
-| **Next.js** | 15.5.x | App Router (NOT v16 canary) |
-| **React** | 19.x | Server Components |
-| **Tailwind CSS** | 4.1.x | CSS-first config |
-| **PostgreSQL** | 18.x | Async I/O subsystem |
-| **Redis** | 8.4.x | Stable (NOT 8.6-RC) |
-| **Docker Compose** | 2.x | Compose spec v3.9 |
-| **Node.js** | 22.x LTS | Long-term support |
+## Languages & Runtimes
 
-## Python Services
+| Component  | Language   | Version  |
+|------------|-----------|---------|
+| Gateway    | Go        | 1.24    |
+| CLI        | Go        | 1.24    |
+| Services   | Python    | 3.13    |
+| Dashboard  | TypeScript| 5.x     |
+| Dashboard  | Node.js   | 22 LTS  |
 
-- `requires-python = ">=3.14"`
-- FastAPI 0.128.x, Pydantic 2.12.x, LangGraph 1.x
-- Ruff for linting
+## Web Frameworks
 
-## Dashboard
+| Component  | Framework   | Version    |
+|------------|------------|-----------|
+| Gateway    | net/http   | stdlib    |
+| Services   | FastAPI    | ≥0.115.0  |
+| Services   | Uvicorn    | ≥0.34.0   |
+| Dashboard  | Next.js    | 15.2.0    |
+| Dashboard  | React      | 19.x      |
 
-- Next.js 15.5.x (App Router)
-- React 19.x, Tailwind CSS 4.1.x
-- TypeScript 5.x
+## Data & Infrastructure
 
-## Infrastructure
+| System      | Purpose                  | Version  |
+|-------------|--------------------------|---------|
+| PostgreSQL  | Primary relational store | 16      |
+| SQLAlchemy  | Python ORM               | ≥2.0.0  |
+| Redis       | Cache & message queue    | ≥7.0    |
+| Milvus      | Vector database          | 2.x     |
 
-- PostgreSQL 18.x, Redis 8.4.x
-- Docker multi-stage builds, non-root users
+## AI / ML
+
+| System    | Purpose                    | Notes              |
+|-----------|----------------------------|--------------------|
+| Ollama    | Local LLM inference        | http://localhost:11434 |
+| ComfyUI   | Local image generation     | http://localhost:8188  |
+
+## Validation & Config
+
+| Library          | Purpose                   | Version  |
+|------------------|---------------------------|---------|
+| Pydantic         | Data validation (Python)  | ≥2.10.0 |
+| pydantic-settings| Settings management       | ≥2.7.0  |
+| structlog        | Structured logging        | ≥24.0.0 |
+
+## Frontend
+
+| Library      | Purpose           | Version |
+|--------------|-------------------|---------|
+| Tailwind CSS | Utility CSS       | ≥4.0.0  |
+| TypeScript   | Type-safe JS      | ≥5.x    |

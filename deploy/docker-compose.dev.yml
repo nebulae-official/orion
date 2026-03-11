@@ -1,0 +1,103 @@
+version: "3.9"
+
+# Orion — Development Overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Mounts source code for hot-reload where supported.
+# Disables restart policies to surface crashes quickly.
+
+services:
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+      target: dev
+    volumes:
+      - ../cmd/gateway:/app/cmd/gateway:ro
+      - ../pkg:/app/pkg:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  scout:
+    build:
+      context: ../services/scout
+      target: dev
+    volumes:
+      - ../services/scout/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  director:
+    build:
+      context: ../services/director
+      target: dev
+    volumes:
+      - ../services/director/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  media:
+    build:
+      context: ../services/media
+      target: dev
+    volumes:
+      - ../services/media/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  editor:
+    build:
+      context: ../services/editor
+      target: dev
+    volumes:
+      - ../services/editor/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  pulse:
+    build:
+      context: ../services/pulse
+      target: dev
+    volumes:
+      - ../services/pulse/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  dashboard:
+    build:
+      context: ../dashboard
+      target: dev
+    volumes:
+      - ../dashboard:/app:delegated
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+    restart: "no"
+
+  postgres:
+    ports:
+      - "5432:5432"   # already exposed; kept for clarity
+    restart: "no"
+
+  redis:
+    ports:
+      - "6379:6379"
+    restart: "no"
+
+  milvus:
+    restart: "no"

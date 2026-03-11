@@ -1,22 +1,23 @@
+# Go binaries
+bin/
+*.exe
+*.test
+
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
 .venv/
-venv/
-.env
-.env.local
 *.egg-info/
-.eggs/
+dist/
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
 
-# Node
+# Node / Next.js
 node_modules/
 .next/
-.nuxt/
-*.tsbuildinfo
+out/
+
+# Environment
+.env
 
 # IDE
 .idea/
@@ -24,13 +25,9 @@ node_modules/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Docker
-*.log
-
-# Secrets
-*.pem
-*.key
+# Build artifacts
+*.o
+*.a
+*.so
+coverage.out
+coverage.html

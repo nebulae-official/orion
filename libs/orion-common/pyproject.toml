@@ -1,0 +1,11 @@
+[project]
+name = "orion-common"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "structlog>=24.0.0",
+    "redis>=5.0.0",
+    "sqlalchemy>=2.0.0",
+]
