@@ -14,7 +14,6 @@ globs: ["deploy/**", "Dockerfile", "**/Dockerfile", "docker-compose*.yml"]
 - .dockerignore in each service directory
 
 ## Docker Compose
-- Version: services at top level (compose v2 format)
 - Health checks on all services
 - Named volumes for persistent data
 - Single network (orion-net) for service communication

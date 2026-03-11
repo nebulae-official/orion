@@ -33,7 +33,6 @@ globs: ["services/**/*.py", "libs/**/*.py"]
 ## Testing
 - pytest with async support (pytest-asyncio)
 - Fixtures for database sessions, Redis connections, FastAPI test client
-- Use factory_boy or similar for test data
 - Minimum 80% coverage target
 - Tests in tests/ directory mirroring src/ structure
 
@@ -41,3 +40,9 @@ globs: ["services/**/*.py", "libs/**/*.py"]
 - ruff for linting and import sorting
 - black for formatting (line-length 88)
 - mypy for type checking (strict mode)
+
+## FastAPI Patterns
+- Use Depends() for injection; Pydantic for request/response schemas
+- Central exception handlers; return consistent error JSON
+- Health: GET /health (liveness), GET /ready (dependencies)
+- Use APIRouter; mount at prefix in main app

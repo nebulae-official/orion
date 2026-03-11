@@ -5,6 +5,6 @@ alwaysApply: true
 
 # Tech Stack
 
-- Use versions from [docs/TECH_STACK.md](../../docs/TECH_STACK.md).
+- Use versions from docs/TECH_STACK.md.
 - Never add alpha, beta, RC, canary, or preview versions.
-- Prefer latest stable (e.g. Python 3.14.x, Next.js 15.5.x, not 16 canary).
+- Prefer latest stable releases.

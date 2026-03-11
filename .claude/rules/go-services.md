@@ -35,13 +35,11 @@ globs: ["cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go"]
 
 ## Testing
 - Table-driven tests with t.Run("case name", func(t *testing.T) {...})
-- Use testify/assert for assertions (not require in subtests)
 - httptest.NewServer for integration tests
 - t.Parallel() where safe
-- Benchmarks for performance-critical code
 
 ## Dependencies
 - Chi 5.x for routing
 - pgx 5.x for PostgreSQL
 - go-redis 9.x for Redis
-- Cobra 1.9.x + Viper 1.19.x for CLI
+- Cobra 1.9.x + Viper for CLI

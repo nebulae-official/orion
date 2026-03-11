@@ -27,7 +27,6 @@ globs: ["dashboard/**/*.{ts,tsx,js,jsx}"]
 ## Styling
 - Tailwind utility classes only (no CSS modules, no styled-components)
 - Use cn() helper (clsx + tailwind-merge) for conditional classes
-- Design tokens via Tailwind config
 
 ## TypeScript
 - Strict mode enabled

@@ -1,7 +1,6 @@
 ---
-description: Repository, Factory, Strategy, DI, Observer
-globs: "**/*.py,**/*.ts,**/*.tsx"
-alwaysApply: false
+description: Repository, Factory, Strategy, DI, Observer patterns
+globs: ["**/*.py", "**/*.ts", "**/*.tsx"]
 ---
 
 # Design Patterns

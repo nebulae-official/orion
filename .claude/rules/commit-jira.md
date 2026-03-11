@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Commits
 
-Format: `ORION-{id}: {type}: {description}`
+Format: `feat(ORION-{id}): {description}`
 
 Types: feat, fix, docs, refactor, test, chore.
-Example: `ORION-15: feat: implement ComfyUI WebSocket client`
+Example: `feat(ORION-15): implement ComfyUI WebSocket client`

@@ -46,8 +46,13 @@ Digital Twin Content Agency — autonomous AI agents for content creation and tr
 - Python: `cd services/{name} && pytest`
 - Dashboard: `cd dashboard && npm test`
 
+## Claude Tooling
+- `.claude/rules/` — Project rules (Go, Python, Docker, Next.js, commits, patterns)
+- `.claude/agents/` — Custom agents (service scaffold, provider setup, version check)
+- See individual rule/agent files for details
+
 ## Warnings
 - Do NOT commit .env files — use .env.example as template
-- Do NOT modify files in .overstory/ or .claude/
+- Do NOT modify files in .overstory/
 - Python services communicate via Redis pub/sub, not direct HTTP calls between services
 - Gateway is the single entry point for external requests
