@@ -66,10 +66,18 @@ A simple string replacement: strip the `+asyncpg` suffix.
 ### Checkpoint Cleanup
 
 Old checkpoints consume storage. Cleanup triggers:
+
 1. After pipeline reaches terminal state (COMPLETE or FAILED) in `run()`
 2. After HITL resume reaches terminal state in `resume()`
 
-Use `checkpointer.adelete(config)` or raw SQL delete against checkpoint tables keyed by `thread_id`.
+**Implementation:** Use raw SQL delete against LangGraph's checkpoint tables. `AsyncPostgresSaver` creates tables named `checkpoints` and `checkpoint_writes` (keyed by `thread_id`). The cleanup method executes:
+
+```sql
+DELETE FROM checkpoint_writes WHERE thread_id = $1;
+DELETE FROM checkpoints WHERE thread_id = $1;
+```
+
+This is coupled to LangGraph's internal schema but is the only reliable cleanup path — the `BaseCheckpointSaver` interface does not expose a public delete method. If the table names change in a future LangGraph version, the cleanup SQL must be updated.
 
 ---
 
@@ -85,12 +93,14 @@ The Analyst node runs as a LangGraph graph node in the Director service, using s
 
 ### Data Access Strategy
 
-The Analyst queries these shared tables (all defined in `orion_common.db.models`):
-- `PipelineRun`: Stage latencies, success/failure rates per content
-- `Content`: Historical content with scores, statuses
-- `Cost` (via Pulse's cost_tracker table): Per-content cost data
+The Analyst queries these shared tables (defined in `orion_common.db.models`):
 
-For benchmark comparison, the Analyst queries the last 30 days of completed content in the same niche.
+- `PipelineRun`: Pipeline duration derived from `completed_at - started_at`, success/failure rates per content. Note: this gives total pipeline duration, not per-stage breakdown (each `PipelineRun` record represents one pipeline execution, not individual stages).
+- `Content`: Historical content with statuses, hooks, script bodies for pattern analysis across the same niche.
+
+**Not in scope:** Cost data. The Pulse service stores costs in its own `costs` table which is not defined in `orion_common.db.models`. Cost analysis will be added when the cost model is promoted to the shared library.
+
+For benchmark comparison, the Analyst queries the last 30 days of completed content in the same niche (via `Content` table filtered by niche and status).
 
 ### New Files
 
@@ -133,11 +143,13 @@ class AnalystAgent:
 ### OrionState Additions
 
 ```python
-# --- Analyst outputs (extend existing) ---
+# --- Analyst outputs (new fields) ---
 performance_summary: NotRequired[str]
 improvement_suggestions: NotRequired[list[dict[str, Any]]]
-analyst_score: NotRequired[float]
+analyst_score: NotRequired[float]  # Overall pipeline quality score (0.0-1.0), distinct from critique_score which is the CritiqueAgent's confidence score
 ```
+
+**Naming clarification:** The existing `critique_score` field (set by the Strategist node's CritiqueAgent) measures script quality confidence. The new `analyst_score` measures overall pipeline performance quality. These are distinct metrics. The existing misleading comment `# --- Analyst outputs (optional) ---` above `critique_score`/`critique_feedback` in `state.py` should be renamed to `# --- Critique outputs (optional) ---` during implementation.
 
 ### Graph Node
 
@@ -157,9 +169,12 @@ The node needs a DB session to query performance data. Unlike strategist/creator
 ### HITL Gate
 
 **`analyst_hitl_gate(state)`** — pauses for human review of improvement suggestions:
+
 - Payload includes: performance summary, benchmark comparison, suggestions list, overall score
 - Approved → proceed to feedback loop or END
 - Rejected → mark as COMPLETE (no improvements applied)
+
+**Payload builder:** Add `build_analyst_review_payload(state)` in `hitl.py`, following the existing pattern of `build_strategist_review_payload()` and `build_creator_review_payload()`.
 
 ---
 
@@ -198,9 +213,12 @@ def route_after_analyst_hitl(state: OrionState) -> str:
     and iteration limit not reached, otherwise END."""
     if state.get("current_stage") == PipelineStage.FAILED:
         return END
+    # Guard: if no HITL decisions exist, do not cycle back
     decisions = state.get("hitl_decisions", [])
-    last = decisions[-1] if decisions else {}
-    if not last.get("approved", True):
+    if not decisions:
+        return END
+    last = decisions[-1]
+    if not last.get("approved", False):  # default False — absent approval = no cycle
         return END
     count = state.get("iteration_count", 0)
     max_iter = state.get("max_iterations", 3)
@@ -223,19 +241,44 @@ When `improvement_suggestions` exist in state (i.e., this is a feedback loop ite
 - Full rollback to any previous iteration is possible via checkpoint history API
 - No additional audit table needed — the checkpointer IS the audit trail
 
+### New Edge Function for Non-HITL Path
+
+The existing `route_after_creator` in `edges.py` unconditionally returns `END`. With the Analyst added, this must be updated:
+
+```python
+def route_after_creator(state: OrionState) -> str:
+    """Route after creator. With Analyst node, routes to 'analyst' on success, END on failure."""
+    if state.get("current_stage") == PipelineStage.FAILED:
+        return END
+    return "analyst"
+
+def route_after_analyst(state: OrionState) -> str:
+    """Route after analyst (non-HITL path). Always routes to END."""
+    return END
+```
+
 ### Builder Changes
 
 **`services/director/src/graph/builder.py`:**
+
 - Add `analyst` node and `analyst_review` HITL gate node
-- Add edge: `creator_review → analyst` (or `creator → analyst` when HITL disabled)
-- Add conditional edge after `analyst_review`: routes to `strategist` or `END`
-- The HITL-disabled path: `strategist → creator → analyst → END` (linear, no gates)
-- The HITL-enabled path: full topology with all three gates and feedback loop
+- Add edge: `creator_review → analyst` (HITL path) or `creator → analyst` (non-HITL path via updated `route_after_creator`)
+- Add conditional edge after `analyst_review`: routes to `strategist` or `END` (via `route_after_analyst_hitl`)
+- Add edge after `analyst`: routes to `END` (non-HITL path via `route_after_analyst`)
+- **HITL-disabled path:** `START → strategist → creator → analyst → END` (linear, no gates). Uses `route_after_creator` (now routes to `"analyst"` instead of `END`) and `route_after_analyst` (routes to `END`).
+- **HITL-enabled path:** Full topology with all three gates and feedback loop cycle.
+
+### Event Publishing in Feedback Loop
+
+When the pipeline cycles back (iteration > 0), the `CONTENT_CREATED` event must NOT be re-published. Events should only fire on the **final** completion:
+
+- `pipeline.py` publishes `CONTENT_CREATED` only when `iteration_count >= max_iterations` or when the analyst HITL gate rejects (no cycle-back)
+- Intermediate iterations are internal graph state — downstream subscribers (Pulse, etc.) should not see them
 
 ### Pipeline.run() Changes
 
 - Set `max_iterations=3` and `iteration_count=0` in initial state
-- Return iteration count in result dict
+- Return `iteration_count` and `thread_id` in result dict
 
 ---
 
@@ -294,21 +337,39 @@ Returns Chi-compatible middleware. Extracts identifier from request (IP or user 
 
 ### Router Integration
 
+**Current state:** The router uses a flat service-name-based proxy pattern (`/api/v1/{service}/*`) that forwards to backend service URLs. There are no semantic route groups like `/api/v1/content` or `/api/v1/auth` — content routes live under `/api/v1/director/*`.
+
+**Approach:** Add rate limiting at the service proxy level, mapping API Reference groups to service routes. The rate limiter middleware inspects the request method and path to determine which group applies:
+
 **`internal/gateway/router/router.go`:**
 
 ```go
-// Rate limit groups applied to route sub-routers
-r.Route("/api/v1/auth", func(r chi.Router) {
-    r.Use(middleware.RateLimit(rdb, middleware.RateLimitConfig{Group: "auth", Limit: 5, Window: time.Minute}))
-    // ... auth routes
+// Rate limiting applied per service proxy with method-aware grouping
+r.Route("/api/v1/director", func(r chi.Router) {
+    r.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
+        Group: "content_write", Limit: 20, Window: time.Minute,
+    })).Post("/*", directorProxy)
+    r.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
+        Group: "content_read", Limit: 100, Window: time.Minute,
+    })).Get("/*", directorProxy)
 })
 
-r.Route("/api/v1/content", func(r chi.Router) {
-    r.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{Group: "content_read", Limit: 100, Window: time.Minute})).Get("/*", proxy)
-    r.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{Group: "content_write", Limit: 20, Window: time.Minute})).Post("/*", proxy)
-    // ...
+r.Route("/api/v1/scout", func(r chi.Router) {
+    r.Use(middleware.RateLimit(rdb, middleware.RateLimitConfig{
+        Group: "triggers", Limit: 10, Window: time.Minute,
+    }))
+    r.Handle("/*", scoutProxy)
+})
+
+r.Route("/api/v1/pulse", func(r chi.Router) {
+    r.Use(middleware.RateLimit(rdb, middleware.RateLimitConfig{
+        Group: "system", Limit: 60, Window: time.Minute,
+    }))
+    r.Handle("/*", pulseProxy)
 })
 ```
+
+This replaces the current flat `serviceProxy(name, url)` pattern with explicit per-service route groups. Auth routes (`/api/v1/auth/*`) will be added when the auth system is implemented; until then, the auth rate limit group is defined but not mounted.
 
 ### Response Format
 
@@ -367,15 +428,25 @@ Real Prometheus client libraries replacing the placeholder. Auto-instrumented HT
 **New dependency in `libs/orion-common/pyproject.toml`:** `prometheus-fastapi-instrumentator>=7.0.0`
 
 **`libs/orion-common/orion_common/health.py` changes:**
-- Replace placeholder `/metrics` endpoint with `prometheus_client` ASGI app
-- Add `instrument_app(app, service_name)` function that:
-  1. Attaches `prometheus-fastapi-instrumentator` to the FastAPI app
-  2. Registers default HTTP metrics with `service` label
-  3. Exposes `/metrics` in Prometheus text format
+
+The placeholder `/metrics` endpoint in `create_health_router()` returns a JSON dict, but Prometheus requires its own text format served via a dedicated ASGI app. Since `APIRouter` endpoints cannot serve raw ASGI apps, the `/metrics` endpoint must be mounted at the **app level**, not the router level.
+
+Changes:
+
+- Remove the placeholder `/metrics` route from `create_health_router()`
+- Add `instrument_app(app: FastAPI, service_name: str)` as a standalone function that:
+  1. Attaches `prometheus-fastapi-instrumentator` to the FastAPI app (auto-instruments all routes)
+  2. Sets the `service` label on all default metrics
+  3. Exposes `/metrics` via the instrumentator's built-in endpoint (which handles Prometheus text format correctly)
+
+The instrumentator's `.expose()` method mounts at the app level internally, avoiding the APIRouter limitation.
 
 **Usage in each service's `main.py`:**
+
 ```python
 from orion_common.health import instrument_app
+
+# After app creation and router mounting:
 instrument_app(app, service_name="director")
 ```
 
@@ -441,9 +512,9 @@ Instrumentation points in `pipeline.py`:
 
 ## Assumptions
 
-1. The Pulse service's cost tracking table is accessible via shared PostgreSQL (same database)
-2. Redis is available for rate limiting (already required by EventBus)
-3. `prometheus-fastapi-instrumentator` v7+ supports Python 3.13
-4. LangGraph 1.x `AsyncPostgresSaver.setup()` is idempotent (safe to call on every startup)
-5. Go Gateway will use `go-redis` v9 which is already in go.mod
-6. The FRD's "Auto-Correct" (BRD §4.3) is satisfied by the feedback loop — no separate auto-correction system needed
+1. Redis is available for rate limiting (already required by EventBus)
+2. `prometheus-fastapi-instrumentator` v7+ supports Python 3.13
+3. LangGraph 1.x `AsyncPostgresSaver.setup()` is idempotent (safe to call on every startup)
+4. Go Gateway will use `go-redis` v9 which is already in go.mod
+5. The FRD's "Auto-Correct" (BRD §4.3) is satisfied by the feedback loop — no separate auto-correction system needed
+6. Cost data is out of scope for the Analyst in Sprint 7 (cost model not in orion-common shared models yet)
