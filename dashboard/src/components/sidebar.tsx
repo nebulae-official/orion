@@ -9,6 +9,8 @@ import {
   ListVideo,
   TrendingUp,
   Settings,
+  Activity,
+  Play,
   LogOut,
 } from "lucide-react";
 
@@ -22,6 +24,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "Content Queue", href: "/queue", icon: <ListVideo className="h-5 w-5" /> },
   { label: "Trends", href: "/trends", icon: <TrendingUp className="h-5 w-5" /> },
+  { label: "Generation", href: "/generation", icon: <Play className="h-5 w-5" /> },
+  { label: "System Health", href: "/system", icon: <Activity className="h-5 w-5" /> },
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
 ];
 

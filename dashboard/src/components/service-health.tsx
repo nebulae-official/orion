@@ -1,0 +1,182 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
+import { RefreshCw } from "lucide-react";
+
+interface ServiceStatus {
+  name: string;
+  displayName: string;
+  status: "healthy" | "unhealthy" | "checking";
+  uptime: string | null;
+  queueSize: number | null;
+  lastChecked: string | null;
+}
+
+const SERVICES: { name: string; displayName: string; port: number }[] = [
+  { name: "gateway", displayName: "Gateway", port: 8000 },
+  { name: "scout", displayName: "Scout (Trends)", port: 8001 },
+  { name: "director", displayName: "Director (Scripts)", port: 8002 },
+  { name: "media", displayName: "Media (Assets)", port: 8003 },
+  { name: "editor", displayName: "Editor (Publish)", port: 8004 },
+  { name: "pulse", displayName: "Pulse (Analytics)", port: 8005 },
+];
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+const REFRESH_INTERVAL = 30_000; // 30 seconds
+
+export function ServiceHealth(): React.ReactElement {
+  const [services, setServices] = useState<ServiceStatus[]>(
+    SERVICES.map((s) => ({
+      name: s.name,
+      displayName: s.displayName,
+      status: "checking",
+      uptime: null,
+      queueSize: null,
+      lastChecked: null,
+    }))
+  );
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [refreshing, setRefreshing] = useState(false);
+
+  const checkServices = useCallback(async (): Promise<void> => {
+    setRefreshing(true);
+
+    const updated = await Promise.all(
+      SERVICES.map(async (svc) => {
+        try {
+          const response = await fetch(
+            `${GATEWAY_URL}/api/v1/services/${svc.name}/health`,
+            { cache: "no-store" }
+          );
+          if (response.ok) {
+            const data = (await response.json()) as {
+              status: string;
+              uptime?: string;
+              queue_size?: number;
+            };
+            return {
+              name: svc.name,
+              displayName: svc.displayName,
+              status: data.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
+              uptime: data.uptime ?? null,
+              queueSize: data.queue_size ?? null,
+              lastChecked: new Date().toISOString(),
+            };
+          }
+          return {
+            name: svc.name,
+            displayName: svc.displayName,
+            status: "unhealthy" as const,
+            uptime: null,
+            queueSize: null,
+            lastChecked: new Date().toISOString(),
+          };
+        } catch {
+          return {
+            name: svc.name,
+            displayName: svc.displayName,
+            status: "unhealthy" as const,
+            uptime: null,
+            queueSize: null,
+            lastChecked: new Date().toISOString(),
+          };
+        }
+      })
+    );
+
+    setServices(updated);
+    setLastRefresh(new Date());
+    setRefreshing(false);
+  }, []);
+
+  useEffect(() => {
+    checkServices();
+    const interval = setInterval(checkServices, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [checkServices]);
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">Service Status</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400">
+            Updated {formatRelativeTime(lastRefresh)}
+          </span>
+          <button
+            onClick={checkServices}
+            disabled={refreshing}
+            className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            title="Refresh now"
+          >
+            <RefreshCw
+              className={cn("h-4 w-4", refreshing && "animate-spin")}
+            />
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {services.map((svc) => (
+          <div
+            key={svc.name}
+            className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className={cn(
+                  "inline-block h-3 w-3 rounded-full",
+                  svc.status === "healthy" && "bg-green-500",
+                  svc.status === "unhealthy" && "bg-red-500",
+                  svc.status === "checking" && "animate-pulse bg-yellow-400"
+                )}
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {svc.displayName}
+                </p>
+                {svc.uptime && (
+                  <p className="text-xs text-gray-400">Uptime: {svc.uptime}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {svc.queueSize !== null && (
+                <div className="text-right">
+                  <p className="text-xs text-gray-400">Queue</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {svc.queueSize}
+                  </p>
+                </div>
+              )}
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  svc.status === "healthy" &&
+                    "bg-green-100 text-green-700",
+                  svc.status === "unhealthy" &&
+                    "bg-red-100 text-red-700",
+                  svc.status === "checking" &&
+                    "bg-yellow-100 text-yellow-700"
+                )}
+              >
+                {svc.status === "checking"
+                  ? "Checking"
+                  : svc.status === "healthy"
+                    ? "Healthy"
+                    : "Unhealthy"}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-4 text-xs text-gray-400">
+        Auto-refreshes every 30 seconds
+      </p>
+    </div>
+  );
+}

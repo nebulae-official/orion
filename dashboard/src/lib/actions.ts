@@ -88,3 +88,34 @@ export async function fetchContent(
     return null;
   }
 }
+
+export async function saveProviderConfig(
+  service: string,
+  provider: string,
+  model: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await authenticatedFetch(
+      `/api/v1/providers/${service}/config`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ provider, model }),
+      }
+    );
+
+    if (!response.ok) {
+      const body = await response
+        .json()
+        .catch(() => ({ message: "Save failed" }));
+      return {
+        success: false,
+        error: body.message ?? "Failed to save provider configuration",
+      };
+    }
+
+    revalidatePath("/settings");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
