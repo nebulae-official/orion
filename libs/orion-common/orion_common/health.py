@@ -91,10 +91,31 @@ def create_health_router(
             checks=checks,
         )
 
-    @router.get("/metrics")
-    async def metrics() -> dict[str, Any]:
-        # Placeholder for Prometheus metrics.
-        # In production, use prometheus_client to expose metrics.
-        return {"service": service_name, "metrics": {}}
-
     return router
+
+
+def instrument_app(app: "FastAPI", service_name: str) -> None:
+    """Attach Prometheus metrics instrumentation to a FastAPI app.
+
+    Auto-instruments all HTTP endpoints and exposes /metrics endpoint
+    in Prometheus text format.
+
+    Args:
+        app: The FastAPI application instance.
+        service_name: Service identifier used as a metric label.
+    """
+    from prometheus_client import Info
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+    # Set service identity label
+    service_info = Info("orion_service", "Orion service information")
+    service_info.info({"service_name": service_name})
+
+    instrumentator = Instrumentator(
+        should_group_status_codes=False,
+        should_ignore_untemplated=True,
+        excluded_handlers=["/health", "/ready", "/metrics"],
+        metric_namespace=service_name.replace("-", "_"),
+    )
+    instrumentator.instrument(app)
+    instrumentator.expose(app, endpoint="/metrics", tags=["metrics"])
