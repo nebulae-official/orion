@@ -28,6 +28,9 @@ async def strategist_node(
     await logger.ainfo("strategist_node_started", trend_topic=state["trend_topic"])
 
     try:
+        suggestions = state.get("improvement_suggestions", [])
+        iteration = state.get("iteration_count", 0)
+
         request = ScriptRequest(
             trend_topic=state["trend_topic"],
             niche=state.get("niche", "technology"),
@@ -45,9 +48,10 @@ async def strategist_node(
             "strategist_node_completed",
             hook_length=len(script.hook.split()),
             critique_score=critique_result.confidence_score,
+            iteration=iteration,
         )
 
-        return {
+        result: dict[str, Any] = {
             "script_hook": script.hook,
             "script_body": script.body,
             "script_cta": script.cta,
@@ -56,6 +60,12 @@ async def strategist_node(
             "critique_feedback": critique_result.feedback,
             "current_stage": PipelineStage.CREATOR,
         }
+
+        # Increment iteration count on re-entry (feedback loop)
+        if suggestions:
+            result["iteration_count"] = iteration + 1
+
+        return result
 
     except Exception as exc:
         await logger.aexception("strategist_node_failed")
