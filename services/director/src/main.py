@@ -16,8 +16,10 @@ from orion_common.health import create_health_router
 from orion_common.logging import configure_logging
 from orion_common.milvus_client import OrionMilvusClient
 
+from .agents.critique_agent import CritiqueAgent
 from .agents.script_generator import ScriptGenerator
 from .agents.visual_prompter import VisualPrompter
+from .graph.builder import build_content_graph
 from .memory.embeddings import get_embedding_provider
 from .memory.vector_store import VectorMemory
 from .providers.factory import get_llm_provider
@@ -141,7 +143,13 @@ async def lifespan(app: FastAPI):
     visual_prompter = VisualPrompter(llm_provider)
 
     # Initialise content pipeline
-    _pipeline = ContentPipeline(llm_provider, _event_bus, vector_memory=_vector_memory)
+    _graph = build_content_graph(
+        script_generator=script_gen,
+        critique_agent=CritiqueAgent(llm_provider, script_gen),
+        visual_prompter=visual_prompter,
+        enable_hitl=False,
+    )
+    _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory)
 
     # Initialise regeneration service
     _regeneration_service = RegenerationService(
