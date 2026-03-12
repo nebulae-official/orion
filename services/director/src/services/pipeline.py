@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -19,6 +20,7 @@ from ..agents.script_generator import GeneratedScript
 from ..agents.visual_prompter import VisualPromptSet
 from ..graph.state import OrionState, PipelineStage
 from ..memory.vector_store import VectorMemory
+from ..metrics import CONFIDENCE_SCORE, CONTENT_TOTAL, GENERATION_DURATION
 from ..repositories.content_repo import ContentRepository
 
 logger = structlog.get_logger(__name__)
@@ -67,6 +69,8 @@ class ContentPipeline:
         # 2. Create pipeline run record
         pipeline_run = await repo.create_pipeline_run(content_id, stage="langgraph_pipeline")
         await repo.update_pipeline_run(pipeline_run.id, PipelineStatus.running)
+        CONTENT_TOTAL.labels(status="generating").inc()
+        pipeline_start = time.monotonic()
 
         # 3. Build initial state
         initial_state: OrionState = {
@@ -94,6 +98,7 @@ class ContentPipeline:
                 pipeline_run.id, PipelineStatus.failed, error_message=str(exc)
             )
             await repo.update_status(content_id, ContentStatus.draft)
+            CONTENT_TOTAL.labels(status="failed").inc()
             await session.commit()
             await self.cleanup_checkpoints(thread_id)
             raise
@@ -105,6 +110,7 @@ class ContentPipeline:
                 pipeline_run.id, PipelineStatus.failed, error_message=error_msg
             )
             await repo.update_status(content_id, ContentStatus.draft)
+            CONTENT_TOTAL.labels(status="failed").inc()
             await session.commit()
             raise RuntimeError(f"Pipeline failed: {error_msg}")
 
@@ -126,6 +132,11 @@ class ContentPipeline:
         )
 
         critique_score = final_state.get("critique_score", 0.0)
+
+        pipeline_duration = time.monotonic() - pipeline_start
+        GENERATION_DURATION.labels(stage="full_pipeline").observe(pipeline_duration)
+        CONFIDENCE_SCORE.observe(critique_score)
+        CONTENT_TOTAL.labels(status="review").inc()
 
         await repo.update_content(
             content_id,
