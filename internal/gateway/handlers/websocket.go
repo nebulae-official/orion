@@ -72,21 +72,27 @@ func (h *Hub) Run() {
 				slog.Error("ws_marshal_error", "error", err)
 				continue
 			}
+			var failed []*websocket.Conn
 			h.mu.RLock()
 			for conn := range h.clients {
 				if err := conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
-					h.mu.RUnlock()
-					h.unregister <- conn
-					h.mu.RLock()
+					failed = append(failed, conn)
 					continue
 				}
 				if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
-					h.mu.RUnlock()
-					h.unregister <- conn
-					h.mu.RLock()
+					failed = append(failed, conn)
 				}
 			}
 			h.mu.RUnlock()
+			// Remove failed connections outside the read lock
+			for _, conn := range failed {
+				h.mu.Lock()
+				if _, ok := h.clients[conn]; ok {
+					delete(h.clients, conn)
+					conn.Close()
+				}
+				h.mu.Unlock()
+			}
 
 		case <-h.done:
 			return
