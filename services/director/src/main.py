@@ -8,6 +8,7 @@ from typing import Any
 import structlog
 from fastapi import FastAPI
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from orion_common.config import get_settings
 from orion_common.db.session import get_engine
@@ -17,6 +18,7 @@ from orion_common.health import create_health_router
 from orion_common.logging import configure_logging
 from orion_common.milvus_client import OrionMilvusClient
 
+from .agents.analyst import AnalystAgent
 from .agents.critique_agent import CritiqueAgent
 from .agents.script_generator import ScriptGenerator
 from .agents.visual_prompter import VisualPrompter
@@ -150,13 +152,27 @@ async def lifespan(app: FastAPI):
     _checkpointer = AsyncPostgresSaver.from_conn_string(checkpointer_connstr)
     await _checkpointer.setup()
 
+    # Create async session factory for analyst node
+    engine = get_engine()
+    _async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+    @asynccontextmanager
+    async def _session_ctx():
+        async with _async_session_maker() as session:
+            yield session
+
+    # Initialise analyst agent
+    analyst_agent = AnalystAgent(llm_provider)
+
     # Initialise content pipeline
     _graph = build_content_graph(
         script_generator=script_gen,
         critique_agent=CritiqueAgent(llm_provider, script_gen),
         visual_prompter=visual_prompter,
+        analyst_agent=analyst_agent,
+        session_factory=_session_ctx,
         checkpointer=_checkpointer,
-        enable_hitl=False,
+        enable_hitl=True,
     )
     _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory, checkpointer=_checkpointer)
 
