@@ -76,7 +76,7 @@ class TestHITLInterruptFlow:
                     }),
                     model="fake",
                 )
-            elif "visual" in (system_prompt or "").lower():
+            elif "visual director" in (system_prompt or "").lower():
                 return LLMResponse(
                     content=json.dumps({
                         "style_guide": "cinematic",

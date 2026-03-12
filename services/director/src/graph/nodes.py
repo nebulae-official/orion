@@ -5,10 +5,12 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
+from langgraph.types import interrupt
 
 from ..agents.critique_agent import CritiqueAgent
 from ..agents.script_generator import GeneratedScript, ScriptGenerator, ScriptRequest
 from ..agents.visual_prompter import VisualPrompter
+from .hitl import build_creator_review_payload, build_strategist_review_payload
 from .state import OrionState, PipelineStage
 
 logger = structlog.get_logger(__name__)
@@ -94,3 +96,53 @@ async def creator_node(
             "current_stage": PipelineStage.FAILED,
             "error": str(exc),
         }
+
+
+async def strategist_hitl_gate(state: OrionState) -> dict[str, Any]:
+    """HITL gate after strategist: pause for human review of the script."""
+    if state.get("current_stage") == PipelineStage.FAILED:
+        return {}
+
+    payload = build_strategist_review_payload(state)
+    decision = interrupt(payload)
+
+    approved = decision.get("approved", True) if isinstance(decision, dict) else bool(decision)
+    feedback = decision.get("feedback") if isinstance(decision, dict) else None
+
+    if not approved:
+        await logger.ainfo("strategist_hitl_rejected", feedback=feedback)
+        return {
+            "current_stage": PipelineStage.FAILED,
+            "error": f"HITL rejected at strategist: {feedback or 'no feedback'}",
+            "hitl_decisions": [{"stage": "strategist", "approved": False, "feedback": feedback}],
+        }
+
+    await logger.ainfo("strategist_hitl_approved")
+    return {
+        "hitl_decisions": [{"stage": "strategist", "approved": True, "feedback": None}],
+    }
+
+
+async def creator_hitl_gate(state: OrionState) -> dict[str, Any]:
+    """HITL gate after creator: pause for human review of visual prompts."""
+    if state.get("current_stage") == PipelineStage.FAILED:
+        return {}
+
+    payload = build_creator_review_payload(state)
+    decision = interrupt(payload)
+
+    approved = decision.get("approved", True) if isinstance(decision, dict) else bool(decision)
+    feedback = decision.get("feedback") if isinstance(decision, dict) else None
+
+    if not approved:
+        await logger.ainfo("creator_hitl_rejected", feedback=feedback)
+        return {
+            "current_stage": PipelineStage.FAILED,
+            "error": f"HITL rejected at creator: {feedback or 'no feedback'}",
+            "hitl_decisions": [{"stage": "creator", "approved": False, "feedback": feedback}],
+        }
+
+    await logger.ainfo("creator_hitl_approved")
+    return {
+        "hitl_decisions": [{"stage": "creator", "approved": True, "feedback": None}],
+    }
