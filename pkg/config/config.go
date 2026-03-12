@@ -22,6 +22,12 @@ type Config struct {
 	MediaURL    string
 	EditorURL   string
 	PulseURL    string
+
+	// Authentication
+	JWTSecret     string
+	AdminUsername string
+	AdminPassword string
+	AdminEmail    string
 }
 
 // Load reads configuration from environment variables with sensible defaults.
@@ -43,6 +49,11 @@ func Load() Config {
 		MediaURL:    getEnv("MEDIA_URL", "http://localhost:8003"),
 		EditorURL:   getEnv("EDITOR_URL", "http://localhost:8004"),
 		PulseURL:    getEnv("PULSE_URL", "http://localhost:8005"),
+
+		JWTSecret:     getEnv("ORION_JWT_SECRET", "dev-secret-change-in-production"),
+		AdminUsername: getEnv("ORION_ADMIN_USER", "admin"),
+		AdminPassword: getEnv("ORION_ADMIN_PASS", "orion_dev"),
+		AdminEmail:    getEnv("ORION_ADMIN_EMAIL", "admin@orion.local"),
 	}
 }
 
