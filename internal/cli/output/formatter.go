@@ -23,6 +23,13 @@ const (
 	FormatText Format = "text"
 )
 
+// ServiceHealthEntry holds the health result for a single service for display.
+type ServiceHealthEntry struct {
+	Name   string
+	Status string
+	Error  string
+}
+
 // Formatter formats CLI responses for display.
 type Formatter struct {
 	format Format
@@ -61,6 +68,46 @@ func (f *Formatter) FormatStatus(s client.StatusResponse) string {
 		return f.statusTable(s)
 	default:
 		return f.statusText(s)
+	}
+}
+
+// FormatServiceHealth formats a list of service health results for display.
+func (f *Formatter) FormatServiceHealth(entries []ServiceHealthEntry) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(entries)
+	default:
+		return f.serviceHealthTable(entries)
+	}
+}
+
+// FormatSystemStatus formats the system status response for display.
+func (f *Formatter) FormatSystemStatus(s client.SystemStatusResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(s)
+	default:
+		return f.systemStatusText(s)
+	}
+}
+
+// FormatContentList formats a list of content items for display.
+func (f *Formatter) FormatContentList(resp client.ContentListResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(resp)
+	default:
+		return f.contentListTable(resp)
+	}
+}
+
+// FormatContentDetail formats a single content item for display.
+func (f *Formatter) FormatContentDetail(item client.ContentItem) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(item)
+	default:
+		return f.contentDetailText(item)
 	}
 }
 
@@ -114,6 +161,81 @@ func (f *Formatter) statusText(s client.StatusResponse) string {
 		sb.WriteString(fmt.Sprintf("  %s: %s\n", name, svc.Status))
 	}
 	return sb.String()
+}
+
+func (f *Formatter) serviceHealthTable(entries []ServiceHealthEntry) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "SERVICE\tSTATUS")
+	for _, e := range entries {
+		status := e.Status
+		if e.Error != "" {
+			status += " (" + e.Error + ")"
+		}
+		fmt.Fprintf(w, "%s\t%s\n", e.Name, status)
+	}
+	w.Flush()
+	return buf.String()
+}
+
+func (f *Formatter) systemStatusText(s client.SystemStatusResponse) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Mode:           %s\n", s.Mode))
+	sb.WriteString(fmt.Sprintf("GPU Available:  %v\n", s.GPUAvailable))
+	sb.WriteString(fmt.Sprintf("Queue Depth:    %d\n", s.QueueDepth))
+	sb.WriteString(fmt.Sprintf("Active Content: %d\n", s.ActiveCount))
+	return sb.String()
+}
+
+func (f *Formatter) contentListTable(resp client.ContentListResponse) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tTITLE\tSTATUS\tSCORE\tCREATED")
+	for _, item := range resp.Items {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%.2f\t%s\n",
+			item.ID,
+			truncate(item.Title, 40),
+			item.Status,
+			item.ConfidenceScore,
+			item.CreatedAt.Format("2006-01-02 15:04"),
+		)
+	}
+	w.Flush()
+
+	if resp.Total > 0 {
+		buf.WriteString(fmt.Sprintf("\nTotal: %d\n", resp.Total))
+	}
+	return buf.String()
+}
+
+func (f *Formatter) contentDetailText(item client.ContentItem) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("ID:         %s\n", item.ID))
+	sb.WriteString(fmt.Sprintf("Title:      %s\n", item.Title))
+	sb.WriteString(fmt.Sprintf("Status:     %s\n", item.Status))
+	sb.WriteString(fmt.Sprintf("Score:      %.2f\n", item.ConfidenceScore))
+	sb.WriteString(fmt.Sprintf("Created:    %s\n", item.CreatedAt.Format("2006-01-02 15:04:05")))
+	if !item.UpdatedAt.IsZero() {
+		sb.WriteString(fmt.Sprintf("Updated:    %s\n", item.UpdatedAt.Format("2006-01-02 15:04:05")))
+	}
+	sb.WriteString("\n--- Body ---\n")
+	sb.WriteString(item.Body)
+	sb.WriteString("\n")
+
+	if len(item.Assets) > 0 {
+		sb.WriteString("\n--- Assets ---\n")
+		for _, a := range item.Assets {
+			sb.WriteString(fmt.Sprintf("  [%s] %s — %s\n", a.Type, a.Name, a.URL))
+		}
+	}
+	return sb.String()
+}
+
+func truncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen-3] + "..."
 }
 
 func toJSON(v any) string {

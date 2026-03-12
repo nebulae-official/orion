@@ -2,11 +2,13 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -27,9 +29,60 @@ type StatusResponse struct {
 	Services map[string]HealthResponse `json:"services,omitempty"`
 }
 
+// SystemStatusResponse represents the full system status from the gateway.
+type SystemStatusResponse struct {
+	Mode         string `json:"mode"`
+	GPUAvailable bool   `json:"gpu_available"`
+	QueueDepth   int    `json:"queue_depth"`
+	ActiveCount  int    `json:"active_content_count"`
+}
+
+// ContentItem represents a content item returned by the API.
+type ContentItem struct {
+	ID              string    `json:"id"`
+	Title           string    `json:"title"`
+	Body            string    `json:"body"`
+	Status          string    `json:"status"`
+	ConfidenceScore float64   `json:"confidence_score"`
+	Assets          []Asset   `json:"assets,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at,omitempty"`
+}
+
+// Asset represents a media asset attached to a content item.
+type Asset struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	URL  string `json:"url"`
+	Name string `json:"name"`
+}
+
+// ContentListResponse wraps a list of content items from the API.
+type ContentListResponse struct {
+	Items []ContentItem `json:"items"`
+	Total int           `json:"total"`
+}
+
+// ApproveRequest is the payload for content approval.
+type ApproveRequest struct {
+	ScheduleAt string `json:"schedule_at,omitempty"`
+}
+
+// RejectRequest is the payload for content rejection.
+type RejectRequest struct {
+	Feedback string `json:"feedback"`
+	Action   string `json:"action,omitempty"`
+}
+
+// RegenerateRequest is the payload for content regeneration.
+type RegenerateRequest struct {
+	Feedback string `json:"feedback,omitempty"`
+}
+
 // OrionClient communicates with the Orion gateway over HTTP.
 type OrionClient struct {
 	baseURL    string
+	token      string
 	httpClient *http.Client
 }
 
@@ -41,6 +94,11 @@ func New(baseURL string) *OrionClient {
 			Timeout: 10 * time.Second,
 		},
 	}
+}
+
+// SetToken sets the Bearer token used for authenticated requests.
+func (c *OrionClient) SetToken(token string) {
+	c.token = token
 }
 
 // Health calls GET /health on the gateway and returns the response.
@@ -70,12 +128,131 @@ func (c *OrionClient) Status(ctx context.Context) (StatusResponse, error) {
 	return resp, nil
 }
 
+// SystemStatus calls GET /status on the gateway and returns full system info.
+func (c *OrionClient) SystemStatus(ctx context.Context) (SystemStatusResponse, error) {
+	var resp SystemStatusResponse
+	if err := c.get(ctx, "/status", &resp); err != nil {
+		return resp, fmt.Errorf("system status: %w", err)
+	}
+	return resp, nil
+}
+
+// SystemLogs retrieves log lines for a service.
+func (c *OrionClient) SystemLogs(ctx context.Context, service string, tail int) (string, error) {
+	path := fmt.Sprintf("/api/v1/logs/%s?tail=%d", service, tail)
+	req, err := c.newRequest(ctx, http.MethodGet, path, nil)
+	if err != nil {
+		return "", fmt.Errorf("creating request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("reading response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+	}
+	return string(body), nil
+}
+
+// SystemLogsStream opens a streaming connection for service logs.
+func (c *OrionClient) SystemLogsStream(ctx context.Context, service string, tail int) (io.ReadCloser, error) {
+	path := fmt.Sprintf("/api/v1/logs/%s?tail=%d&follow=true", service, tail)
+	req, err := c.newRequest(ctx, http.MethodGet, path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+
+	// Use a separate client without timeout for streaming.
+	streamClient := &http.Client{}
+	resp, err := streamClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("sending request: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
+	}
+	return resp.Body, nil
+}
+
+// ListContent retrieves content items, optionally filtered by status.
+func (c *OrionClient) ListContent(ctx context.Context, status string, limit int) (ContentListResponse, error) {
+	path := "/api/v1/content?limit=" + strconv.Itoa(limit)
+	if status != "" {
+		path += "&status=" + status
+	}
+
+	var resp ContentListResponse
+	if err := c.get(ctx, path, &resp); err != nil {
+		return resp, fmt.Errorf("list content: %w", err)
+	}
+	return resp, nil
+}
+
+// GetContent retrieves a single content item by ID.
+func (c *OrionClient) GetContent(ctx context.Context, id string) (ContentItem, error) {
+	var resp ContentItem
+	if err := c.get(ctx, "/api/v1/content/"+id, &resp); err != nil {
+		return resp, fmt.Errorf("get content: %w", err)
+	}
+	return resp, nil
+}
+
+// ApproveContent approves a content item, optionally scheduling publication.
+func (c *OrionClient) ApproveContent(ctx context.Context, id string, scheduleAt string) error {
+	payload := ApproveRequest{ScheduleAt: scheduleAt}
+	if err := c.post(ctx, "/api/v1/content/"+id+"/approve", payload, nil); err != nil {
+		return fmt.Errorf("approve content: %w", err)
+	}
+	return nil
+}
+
+// RejectContent rejects a content item with feedback and an optional action.
+func (c *OrionClient) RejectContent(ctx context.Context, id string, feedback, action string) error {
+	payload := RejectRequest{Feedback: feedback, Action: action}
+	if err := c.post(ctx, "/api/v1/content/"+id+"/reject", payload, nil); err != nil {
+		return fmt.Errorf("reject content: %w", err)
+	}
+	return nil
+}
+
+// RegenerateContent requests regeneration of a content item.
+func (c *OrionClient) RegenerateContent(ctx context.Context, id string, feedback string) error {
+	payload := RegenerateRequest{Feedback: feedback}
+	if err := c.post(ctx, "/api/v1/content/"+id+"/regenerate", payload, nil); err != nil {
+		return fmt.Errorf("regenerate content: %w", err)
+	}
+	return nil
+}
+
+// newRequest creates an HTTP request with common headers and auth.
+func (c *OrionClient) newRequest(ctx context.Context, method, path string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "orion-cli/"+Version)
+	if c.token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.token)
+	}
+	return req, nil
+}
+
 func (c *OrionClient) get(ctx context.Context, path string, out any) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+path, nil)
+	req, err := c.newRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}
-	req.Header.Set("User-Agent", "orion-cli/"+Version)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -92,8 +269,51 @@ func (c *OrionClient) get(ctx context.Context, path string, out any) error {
 		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
 	}
 
-	if err := json.Unmarshal(body, out); err != nil {
-		return fmt.Errorf("decoding response: %w", err)
+	if out != nil {
+		if err := json.Unmarshal(body, out); err != nil {
+			return fmt.Errorf("decoding response: %w", err)
+		}
+	}
+	return nil
+}
+
+func (c *OrionClient) post(ctx context.Context, path string, payload any, out any) error {
+	var body io.Reader
+	if payload != nil {
+		data, err := json.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("encoding request: %w", err)
+		}
+		body = bytes.NewReader(data)
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPost, path, body)
+	if err != nil {
+		return fmt.Errorf("creating request: %w", err)
+	}
+	if payload != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	if out != nil {
+		if err := json.Unmarshal(respBody, out); err != nil {
+			return fmt.Errorf("decoding response: %w", err)
+		}
 	}
 	return nil
 }
