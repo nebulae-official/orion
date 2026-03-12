@@ -7,6 +7,7 @@ from typing import Any
 
 import structlog
 from fastapi import FastAPI
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from orion_common.config import get_settings
 from orion_common.db.session import get_engine
@@ -36,6 +37,7 @@ _pipeline: ContentPipeline | None = None
 _event_bus: EventBus | None = None
 _regeneration_service: RegenerationService | None = None
 _vector_memory: VectorMemory | None = None
+_checkpointer: AsyncPostgresSaver | None = None
 
 
 async def _handle_trend_detected(payload: dict[str, Any]) -> None:
@@ -117,7 +119,7 @@ async def _handle_content_rejected(payload: dict[str, Any]) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _pipeline, _event_bus, _regeneration_service, _vector_memory  # noqa: PLW0603
+    global _pipeline, _event_bus, _regeneration_service, _vector_memory, _checkpointer  # noqa: PLW0603
 
     logger.info("service_starting", service="director")
 
@@ -142,11 +144,18 @@ async def lifespan(app: FastAPI):
     script_gen = ScriptGenerator(llm_provider, vector_memory=_vector_memory)
     visual_prompter = VisualPrompter(llm_provider)
 
+    # Initialise LangGraph checkpointer (PostgreSQL)
+    # settings.database_url_sync returns postgresql:// format (no +asyncpg)
+    checkpointer_connstr = settings.database_url_sync
+    _checkpointer = AsyncPostgresSaver.from_conn_string(checkpointer_connstr)
+    await _checkpointer.setup()
+
     # Initialise content pipeline
     _graph = build_content_graph(
         script_generator=script_gen,
         critique_agent=CritiqueAgent(llm_provider, script_gen),
         visual_prompter=visual_prompter,
+        checkpointer=_checkpointer,
         enable_hitl=False,
     )
     _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory)
@@ -172,6 +181,9 @@ async def lifespan(app: FastAPI):
         await _vector_memory.close()
     if _event_bus is not None:
         await _event_bus.close()
+    if _checkpointer is not None:
+        await _checkpointer.conn.aclose()
+    _checkpointer = None
     _pipeline = None
     _event_bus = None
     _regeneration_service = None
