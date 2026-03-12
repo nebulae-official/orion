@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
@@ -9,6 +10,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/redis/go-redis/v9"
+
+	"github.com/orion-rigel/orion/internal/gateway/handlers"
 	"github.com/orion-rigel/orion/internal/gateway/router"
 	"github.com/orion-rigel/orion/pkg/config"
 )
@@ -21,7 +25,34 @@ func main() {
 		"env", cfg.AppEnv,
 	)
 
-	r, err := router.New(cfg)
+	hub := handlers.NewHub()
+	go hub.Run()
+
+	// Redis pub/sub for WebSocket broadcast
+	go func() {
+		opt, err := redis.ParseURL(cfg.RedisURL)
+		if err != nil {
+			slog.Warn("redis_pubsub_disabled", "error", err)
+			return
+		}
+		rdb := redis.NewClient(opt)
+		ctx := context.Background()
+		pubsub := rdb.PSubscribe(ctx, "orion.*")
+		defer pubsub.Close()
+
+		slog.Info("ws_redis_subscription_started")
+		ch := pubsub.Channel()
+		for msg := range ch {
+			wsMsg := handlers.WSMessage{
+				Type:      msg.Channel,
+				Payload:   json.RawMessage(msg.Payload),
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+			}
+			hub.Broadcast(wsMsg)
+		}
+	}()
+
+	r, err := router.New(cfg, hub)
 	if err != nil {
 		slog.Error("failed to create router", "error", err)
 		os.Exit(1)
@@ -57,5 +88,6 @@ func main() {
 		os.Exit(1)
 	}
 
+	hub.Stop()
 	slog.Info("gateway stopped")
 }

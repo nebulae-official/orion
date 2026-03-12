@@ -16,7 +16,7 @@ import (
 
 // New creates and returns a fully-configured Chi router with middleware
 // and routes for the gateway service.
-func New(cfg config.Config) (chi.Router, error) {
+func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	r := chi.NewRouter()
 
 	// Middleware stack: RequestID -> Logger -> Recoverer -> CORS
@@ -46,6 +46,9 @@ func New(cfg config.Config) (chi.Router, error) {
 	// Auth endpoints (public)
 	r.Post("/api/v1/auth/login", handlers.Login(cfg))
 	r.Post("/api/v1/auth/refresh", handlers.RefreshToken(cfg))
+
+	// WebSocket endpoint (public — JWT validated from query param inside handler)
+	r.Get("/ws", handlers.HandleWebSocket(hub, cfg.JWTSecret))
 
 	// Redis client for rate limiting
 	opt, err := redis.ParseURL(cfg.RedisURL)
