@@ -19,6 +19,8 @@ from .routes.render import router as render_router, set_render_pipeline, set_com
 from .services.render_pipeline import RenderPipeline
 from .video.stitcher import VideoStitcher
 from .video.subtitles import SubtitleBurner
+from .video.thumbnails import ThumbnailGenerator
+from .video.validator import VideoValidator
 
 configure_logging()
 logger = structlog.get_logger()
@@ -34,6 +36,8 @@ async def lifespan(app: FastAPI):
     captioner = WhisperCaptioner()
     stitcher = VideoStitcher()
     subtitle_burner = SubtitleBurner()
+    thumbnail_generator = ThumbnailGenerator()
+    video_validator = VideoValidator()
 
     # Event bus
     event_bus = EventBus(settings.redis_url)
@@ -45,6 +49,8 @@ async def lifespan(app: FastAPI):
         stitcher=stitcher,
         subtitle_burner=subtitle_burner,
         event_bus=event_bus,
+        thumbnail_generator=thumbnail_generator,
+        video_validator=video_validator,
     )
 
     # Wire into route handlers
