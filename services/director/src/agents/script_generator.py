@@ -9,6 +9,7 @@ import structlog
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from ..memory.vector_store import VectorMemory
 from ..providers.base import LLMProvider
 
 logger = structlog.get_logger(__name__)
@@ -79,12 +80,29 @@ Niche: {niche}
 Platform: {platform}
 """
 
+_FEW_SHOT_SECTION = """\
+
+Here are examples of high-performing hooks from similar past content. \
+Use them as inspiration but create something original:
+
+{examples}
+"""
+
 
 class ScriptGenerator:
-    """Generates H-V-C scripts using the configured LLM provider."""
+    """Generates H-V-C scripts using the configured LLM provider.
 
-    def __init__(self, llm_provider: LLMProvider) -> None:
+    Optionally uses a VectorMemory instance to retrieve similar past
+    hooks as few-shot examples for improved script quality.
+    """
+
+    def __init__(
+        self,
+        llm_provider: LLMProvider,
+        vector_memory: VectorMemory | None = None,
+    ) -> None:
         self._llm = llm_provider
+        self._vector_memory = vector_memory
 
     @retry(
         stop=stop_after_attempt(3),
@@ -104,6 +122,11 @@ class ScriptGenerator:
             niche=request.niche,
             platform=platform_label,
         )
+
+        # Enrich with few-shot examples from vector memory
+        few_shot_text = await self._build_few_shot_examples(request.trend_topic)
+        if few_shot_text:
+            user_prompt += _FEW_SHOT_SECTION.format(examples=few_shot_text)
 
         await logger.ainfo(
             "generating_script",
@@ -128,6 +151,44 @@ class ScriptGenerator:
         )
 
         return script
+
+    async def _build_few_shot_examples(self, trend_topic: str) -> str:
+        """Retrieve similar hooks from vector memory as few-shot examples.
+
+        Args:
+            trend_topic: The topic to find similar hooks for.
+
+        Returns:
+            Formatted string of examples, or empty string if unavailable.
+        """
+        if self._vector_memory is None:
+            return ""
+
+        try:
+            similar_hooks = await self._vector_memory.get_similar_hooks(
+                query_text=trend_topic,
+                top_k=3,
+            )
+            if not similar_hooks:
+                return ""
+
+            lines: list[str] = []
+            for i, hook in enumerate(similar_hooks, 1):
+                hook_text = hook.get("hook_text", "")
+                score = hook.get("engagement_score", 0.0)
+                lines.append(
+                    f"{i}. \"{hook_text}\" (engagement: {score:.2f})"
+                )
+
+            await logger.ainfo(
+                "few_shot_examples_loaded",
+                count=len(similar_hooks),
+                trend_topic=trend_topic,
+            )
+            return "\n".join(lines)
+        except Exception:
+            await logger.aexception("few_shot_retrieval_failed")
+            return ""
 
     @staticmethod
     def _parse_response(raw: str) -> GeneratedScript:

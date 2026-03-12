@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 import structlog
@@ -12,8 +13,10 @@ from orion_common.db.models import ContentStatus, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
+from ..agents.critique_agent import CritiqueAgent
 from ..agents.script_generator import GeneratedScript, ScriptGenerator, ScriptRequest
 from ..agents.visual_prompter import VisualPrompter, VisualPromptSet
+from ..memory.vector_store import VectorMemory
 from ..providers.base import LLMProvider
 from ..repositories.content_repo import ContentRepository
 
@@ -21,16 +24,19 @@ logger = structlog.get_logger(__name__)
 
 
 class ContentPipeline:
-    """End-to-end pipeline: trend -> script -> visual prompts -> DB -> event."""
+    """End-to-end pipeline: trend -> script -> critique -> visual prompts -> DB -> event."""
 
     def __init__(
         self,
         llm_provider: LLMProvider,
         event_bus: EventBus,
+        vector_memory: VectorMemory | None = None,
     ) -> None:
-        self._script_gen = ScriptGenerator(llm_provider)
+        self._script_gen = ScriptGenerator(llm_provider, vector_memory=vector_memory)
         self._visual_prompter = VisualPrompter(llm_provider)
+        self._critique_agent = CritiqueAgent(llm_provider, self._script_gen)
         self._event_bus = event_bus
+        self._vector_memory = vector_memory
 
     async def run(
         self,
@@ -45,7 +51,8 @@ class ContentPipeline:
     ) -> dict[str, Any]:
         """Execute the full content creation pipeline.
 
-        Returns a dict with ``content_id``, ``script``, and ``visual_prompts``.
+        Returns a dict with ``content_id``, ``script``, ``visual_prompts``,
+        and ``critique``.
         """
         repo = ContentRepository(session)
 
@@ -84,7 +91,28 @@ class ContentPipeline:
             await session.commit()
             raise
 
-        # 3. Visual prompt extraction stage
+        # 3. Critique and auto-refine stage
+        critique_run = await repo.create_pipeline_run(content_id, stage="script_critique")
+        await repo.update_pipeline_run(critique_run.id, PipelineStatus.running)
+
+        critique_result = None
+        try:
+            script, critique_result = await self._critique_agent.critique_and_refine(
+                script=script,
+                request=script_request,
+            )
+            await repo.update_pipeline_run(critique_run.id, PipelineStatus.completed)
+        except Exception as exc:
+            await logger.aexception(
+                "critique_stage_failed",
+                content_id=str(content_id),
+            )
+            await repo.update_pipeline_run(
+                critique_run.id, PipelineStatus.failed, error_message=str(exc)
+            )
+            # Continue with the uncritiqued script
+
+        # 4. Visual prompt extraction stage
         visual_run = await repo.create_pipeline_run(content_id, stage="visual_prompt_extraction")
         await repo.update_pipeline_run(visual_run.id, PipelineStatus.running)
 
@@ -107,7 +135,7 @@ class ContentPipeline:
             await session.commit()
             raise
 
-        # 4. Persist everything
+        # 5. Persist everything
         visual_prompts_dict = prompt_set.model_dump()
         await repo.update_content(
             content_id,
@@ -118,7 +146,26 @@ class ContentPipeline:
         )
         await session.commit()
 
-        # 5. Publish CONTENT_CREATED event
+        # 6. Store hook embedding in vector memory for future few-shot examples
+        if self._vector_memory is not None:
+            try:
+                await self._vector_memory.store_hook(
+                    hook_text=script.hook,
+                    engagement_score=critique_result.confidence_score if critique_result else 0.5,
+                    content_id=str(content_id),
+                )
+                await self._vector_memory.store_content(
+                    script_text=script.body,
+                    content_id=str(content_id),
+                    created_at=datetime.now(timezone.utc).isoformat(),
+                )
+            except Exception:
+                await logger.aexception(
+                    "vector_memory_store_failed",
+                    content_id=str(content_id),
+                )
+
+        # 7. Publish CONTENT_CREATED event
         await self._event_bus.publish(
             Channels.CONTENT_CREATED,
             {
@@ -138,4 +185,5 @@ class ContentPipeline:
             "content_id": content_id,
             "script": script,
             "visual_prompts": prompt_set,
+            "critique": critique_result,
         }
