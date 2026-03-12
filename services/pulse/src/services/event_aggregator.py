@@ -17,6 +17,7 @@ from orion_common.db import PipelineRun, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
+from services.pulse.src.metrics import TRENDS_DISCARDED, TRENDS_FOUND, TRENDS_USED
 from services.pulse.src.repositories.event_repo import AnalyticsEvent, EventRepository
 from services.pulse.src.schemas import PipelineMetrics, StageMetric
 
@@ -69,9 +70,18 @@ class EventAggregator:
         await logger.ainfo("event_aggregator_started", channels=len(_ALL_CHANNELS))
 
     async def _handle_event(self, data: dict[str, Any]) -> None:
-        """Handle an incoming event by persisting it."""
+        """Handle an incoming event by persisting it and updating metrics."""
         channel = data.get("_channel", "unknown")
         service = _CHANNEL_SERVICE_MAP.get(channel, data.get("service", "unknown"))
+
+        # Update Prometheus trend counters
+        source = data.get("source", "unknown")
+        if channel == Channels.TREND_DETECTED:
+            TRENDS_FOUND.labels(source=source).inc()
+        elif channel == Channels.TREND_EXPIRED:
+            TRENDS_DISCARDED.labels(source=source, reason="expired").inc()
+        elif channel == Channels.CONTENT_CREATED:
+            TRENDS_USED.labels(source=source).inc()
 
         async with self._session_factory() as session:
             repo = EventRepository(session)

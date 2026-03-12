@@ -174,3 +174,25 @@ class CostProjection(BaseModel):
     current_cost: float = 0.0
     projected_cost: float = 0.0
     trend: str = "stable"  # "increasing", "decreasing", "stable"
+
+
+# ---------------------------------------------------------------------------
+# Trend Analytics
+# ---------------------------------------------------------------------------
+
+
+class TrendSourceCount(BaseModel):
+    """Count of trends by source."""
+
+    source: str
+    count: int
+
+
+class TrendAnalytics(BaseModel):
+    """Trend discovery analytics."""
+
+    total_found: int = 0
+    total_used: int = 0
+    total_discarded: int = 0
+    conversion_rate: float = 0.0
+    by_source: list[TrendSourceCount] = Field(default_factory=list)

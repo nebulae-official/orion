@@ -12,10 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from orion_common.db.session import get_session
 
 from services.pulse.src.repositories.event_repo import EventRepository
+from orion_common.events import Channels
+
 from services.pulse.src.schemas import (
     AnalyticsEventResponse,
     AnalyticsEventsListResponse,
     PipelineMetrics,
+    TrendAnalytics,
 )
 from services.pulse.src.services.event_aggregator import EventAggregator
 
@@ -84,3 +87,27 @@ async def get_metrics(
         return PipelineMetrics()
 
     return await _aggregator.get_pipeline_metrics(session, hours=hours)
+
+
+@router.get("/trends", response_model=TrendAnalytics)
+async def get_trend_analytics(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    hours: int = Query(default=168, ge=1, le=720, description="Hours of history"),
+) -> TrendAnalytics:
+    """Trend discovery analytics: counts by source, conversion rate."""
+    repo = EventRepository(session)
+    since = datetime.now(timezone.utc) - timedelta(hours=hours)
+
+    counts = await repo.get_event_counts_by_channel(since=since)
+
+    found = counts.get(Channels.TREND_DETECTED, 0)
+    used = counts.get(Channels.CONTENT_CREATED, 0)
+    expired = counts.get(Channels.TREND_EXPIRED, 0)
+
+    return TrendAnalytics(
+        total_found=found,
+        total_used=used,
+        total_discarded=expired,
+        conversion_rate=used / found if found > 0 else 0.0,
+        by_source=[],
+    )
