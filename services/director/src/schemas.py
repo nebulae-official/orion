@@ -54,6 +54,7 @@ class GenerateContentResponse(BaseModel):
     trend_id: uuid.UUID
     title: str
     status: str
+    thread_id: str | None = None
     script: ScriptResponse | None = None
     visual_prompts: VisualPromptsResponse | None = None
     created_at: datetime

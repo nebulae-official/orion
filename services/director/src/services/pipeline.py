@@ -32,10 +32,12 @@ class ContentPipeline:
         graph: CompiledStateGraph,
         event_bus: EventBus,
         vector_memory: VectorMemory | None = None,
+        checkpointer: Any | None = None,
     ) -> None:
         self._graph = graph
         self._event_bus = event_bus
         self._vector_memory = vector_memory
+        self._checkpointer = checkpointer
 
     async def run(
         self,
@@ -79,18 +81,19 @@ class ContentPipeline:
         }
 
         # 4. Invoke the graph
-        config = {}
-        if thread_id:
-            config = {"configurable": {"thread_id": thread_id}}
+        if not thread_id:
+            thread_id = str(uuid.uuid4())
+        config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            final_state = await self._graph.ainvoke(initial_state, config=config or None)
+            final_state = await self._graph.ainvoke(initial_state, config=config)
         except Exception as exc:
             await repo.update_pipeline_run(
                 pipeline_run.id, PipelineStatus.failed, error_message=str(exc)
             )
             await repo.update_status(content_id, ContentStatus.draft)
             await session.commit()
+            await self.cleanup_checkpoints(thread_id)
             raise
 
         # 5. Check for graph-level failure
@@ -160,8 +163,12 @@ class ContentPipeline:
 
         await logger.ainfo("pipeline_completed", content_id=str(content_id))
 
+        # 9. Cleanup checkpoints for completed pipeline
+        await self.cleanup_checkpoints(thread_id)
+
         return {
             "content_id": content_id,
+            "thread_id": thread_id,
             "script": script,
             "visual_prompts": prompt_set,
             "critique": {
@@ -214,6 +221,9 @@ class ContentPipeline:
             )
             await session.commit()
 
+        # Cleanup checkpoints after terminal state
+        await self.cleanup_checkpoints(thread_id)
+
         return {
             "content_id": content_id,
             "script": script,
@@ -223,3 +233,21 @@ class ContentPipeline:
                 "feedback": final_state.get("critique_feedback", ""),
             },
         }
+
+    async def cleanup_checkpoints(self, thread_id: str) -> None:
+        """Delete checkpoint data for a completed thread."""
+        if self._checkpointer is None:
+            return
+        try:
+            async with self._checkpointer.conn.connection() as conn:
+                async with conn.cursor() as cur:
+                    await cur.execute(
+                        "DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,)
+                    )
+                    await cur.execute(
+                        "DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,)
+                    )
+                await conn.commit()
+            await logger.ainfo("checkpoints_cleaned", thread_id=thread_id)
+        except Exception:
+            await logger.aexception("checkpoint_cleanup_failed", thread_id=thread_id)
