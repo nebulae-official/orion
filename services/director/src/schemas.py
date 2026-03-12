@@ -69,3 +69,20 @@ class ContentListItem(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class HITLResumeRequest(BaseModel):
+    """Payload to resume a paused HITL pipeline."""
+
+    thread_id: str = Field(..., description="Thread ID of the paused graph execution")
+    approved: bool = Field(..., description="Whether the human approves the current output")
+    feedback: str | None = Field(default=None, description="Optional rejection feedback")
+
+
+class HITLStatusResponse(BaseModel):
+    """Response showing the current HITL interrupt state."""
+
+    thread_id: str
+    interrupted: bool
+    stage: str | None = None
+    review_payload: dict | None = None

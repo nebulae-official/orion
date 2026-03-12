@@ -16,6 +16,7 @@ from ..schemas import (
     ContentListItem,
     GenerateContentRequest,
     GenerateContentResponse,
+    HITLResumeRequest,
     ScriptResponse,
     VisualPromptsResponse,
 )
@@ -74,6 +75,51 @@ async def generate_content(
             style_guide=visual_prompts.style_guide,
             prompts=visual_prompts.prompts,
         ),
+        created_at=content.created_at,
+    )
+
+
+@router.post("/resume", response_model=GenerateContentResponse, status_code=200)
+async def resume_pipeline(
+    request: HITLResumeRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Resume a paused HITL pipeline with human decision."""
+    pipeline = _get_pipeline()
+
+    await logger.ainfo(
+        "hitl_resume_requested",
+        thread_id=request.thread_id,
+        approved=request.approved,
+    )
+
+    decision = {"approved": request.approved, "feedback": request.feedback}
+
+    try:
+        result = await pipeline.resume(
+            session,
+            thread_id=request.thread_id,
+            decision=decision,
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    script = result.get("script")
+    visual_prompts = result.get("visual_prompts")
+
+    repo = ContentRepository(session)
+    content = await repo.get_by_id(result["content_id"])
+
+    return GenerateContentResponse(
+        content_id=content.id,
+        trend_id=content.trend_id,
+        title=content.title,
+        status=content.status.value,
+        script=ScriptResponse.from_generated(script) if script else None,
+        visual_prompts=VisualPromptsResponse(
+            style_guide=visual_prompts.style_guide,
+            prompts=visual_prompts.prompts,
+        ) if visual_prompts else None,
         created_at=content.created_at,
     )
 
