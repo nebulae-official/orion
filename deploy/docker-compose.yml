@@ -153,6 +153,28 @@ services:
       retries: 3
       start_period: 15s
 
+  publisher:
+    build:
+      context: ../services/publisher
+    ports:
+      - "8006:8006"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - orion-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
   dashboard:
     build:
       context: ../dashboard
