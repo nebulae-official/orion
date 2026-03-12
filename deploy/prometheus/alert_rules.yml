@@ -1,0 +1,69 @@
+groups:
+  - name: orion-critical
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"gateway|scout|director|media|editor|pulse"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} service is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute."
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (job)
+          /
+          sum(rate(http_requests_total[5m])) by (job)
+          > 0.10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} has an error rate above 10% for more than 5 minutes."
+
+      - alert: GPUOutOfMemory
+        expr: orion_gpu_memory_used_bytes / orion_gpu_memory_total_bytes > 0.95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GPU memory nearly exhausted on {{ $labels.instance }}"
+          description: "GPU memory usage on {{ $labels.instance }} is above 95% for more than 2 minutes."
+
+  - name: orion-warning
+    rules:
+      - alert: QueueBacklog
+        expr: orion_content_queue_size{status="REVIEW"} > 20
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Content review queue backlog"
+          description: "More than 20 items have been waiting for review for over 30 minutes."
+
+      - alert: HighProviderLatency
+        expr: histogram_quantile(0.95, rate(orion_provider_latency_seconds_bucket[5m])) > 30
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 provider latency on {{ $labels.provider }}"
+          description: "p95 latency for {{ $labels.provider }} has been above 30s for more than 10 minutes."
+
+      - alert: DailyCostExceeded
+        expr: sum(increase(orion_provider_cost_usd[24h])) > 5
+        labels:
+          severity: warning
+        annotations:
+          summary: "Daily provider cost exceeded $5"
+          description: "Total provider spend in the last 24 hours has exceeded $5."
+
+      - alert: FrequentFallbacks
+        expr: sum(rate(orion_provider_fallback_total[1h])) > 5
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frequent provider fallbacks"
+          description: "Provider fallback rate has exceeded 5/sec over the last hour."

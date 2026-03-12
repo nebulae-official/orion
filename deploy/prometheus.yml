@@ -5,7 +5,7 @@ global:
     project: orion
 
 rule_files:
-  # - "alert_rules.yml"
+  - "/etc/prometheus/alert_rules.yml"
 
 scrape_configs:
 
