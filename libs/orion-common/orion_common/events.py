@@ -11,6 +11,7 @@ class Channels:
     CONTENT_CREATED: str = "orion.content.created"
     CONTENT_UPDATED: str = "orion.content.updated"
     CONTENT_PUBLISHED: str = "orion.content.published"
+    CONTENT_REJECTED: str = "orion.content.rejected"
     TREND_DETECTED: str = "orion.trend.detected"
     TREND_EXPIRED: str = "orion.trend.expired"
     MEDIA_GENERATED: str = "orion.media.generated"

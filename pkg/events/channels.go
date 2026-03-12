@@ -6,6 +6,7 @@ const (
 	ContentCreated  = "orion.content.created"
 	ContentUpdated  = "orion.content.updated"
 	ContentPublished = "orion.content.published"
+	ContentRejected  = "orion.content.rejected"
 	TrendDetected   = "orion.trend.detected"
 	TrendExpired    = "orion.trend.expired"
 	MediaGenerated  = "orion.media.generated"

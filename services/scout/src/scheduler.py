@@ -13,6 +13,7 @@ from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
+from src.filters.deduplication import TrendDeduplicator
 from src.filters.niche_filter import NicheConfig, NicheFilter
 from src.providers.base import TrendProvider, TrendResult
 from src.repositories.trend_repo import TrendRepository
@@ -30,8 +31,9 @@ async def fetch_and_process_trends(
     event_bus: EventBus,
     region: str = "US",
     limit: int = 20,
+    deduplicator: TrendDeduplicator | None = None,
 ) -> tuple[int, int]:
-    """Core ingestion pipeline: fetch, filter, deduplicate, persist, publish.
+    """Core ingestion pipeline: fetch, deduplicate, filter, persist, publish.
 
     Args:
         providers: Trend data providers to query.
@@ -40,6 +42,7 @@ async def fetch_and_process_trends(
         event_bus: Redis event bus for publishing events.
         region: Geographic region for trend fetching.
         limit: Max trends per provider.
+        deduplicator: Optional deduplicator for fuzzy matching.
 
     Returns:
         Tuple of (total_trends_found, trends_saved).
@@ -62,10 +65,14 @@ async def fetch_and_process_trends(
 
     total_found = len(all_trends)
 
-    # 2. Apply niche filter
+    # 2. Apply deduplication before niche filter
+    if deduplicator is not None:
+        all_trends = deduplicator.deduplicate(all_trends)
+
+    # 3. Apply niche filter
     filtered = niche_filter.filter_trends(all_trends, niche_config)
 
-    # 3. Deduplicate by topic similarity and persist
+    # 4. Persist and publish
     saved_count = 0
     async for session in get_session():
         repo = TrendRepository(session)
@@ -131,6 +138,7 @@ class TrendScheduler:
         interval_minutes: int = DEFAULT_INTERVAL_MINUTES,
         region: str = "US",
         limit: int = 20,
+        deduplicator: TrendDeduplicator | None = None,
     ) -> None:
         self._providers = providers
         self._niche_filter = niche_filter
@@ -139,6 +147,7 @@ class TrendScheduler:
         self._interval_minutes = interval_minutes
         self._region = region
         self._limit = limit
+        self._deduplicator = deduplicator
         self._scheduler: AsyncScheduler | None = None
 
     async def _scheduled_job(self) -> None:
@@ -152,6 +161,7 @@ class TrendScheduler:
                 event_bus=self._event_bus,
                 region=self._region,
                 limit=self._limit,
+                deduplicator=self._deduplicator,
             )
         except Exception:
             logger.exception("scheduled_scan_error")
