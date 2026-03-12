@@ -78,6 +78,8 @@ class ContentPipeline:
             "tone": tone,
             "visual_style": visual_style,
             "current_stage": PipelineStage.STRATEGIST,
+            "iteration_count": 0,
+            "max_iterations": 3,
         }
 
         # 4. Invoke the graph
@@ -150,16 +152,24 @@ class ContentPipeline:
             except Exception:
                 await logger.aexception("vector_memory_store_failed", content_id=str(content_id))
 
-        # 8. Publish CONTENT_CREATED event
-        await self._event_bus.publish(
-            Channels.CONTENT_CREATED,
-            {
-                "content_id": str(content_id),
-                "trend_id": str(trend_id),
-                "title": content.title,
-                "status": ContentStatus.review.value,
-            },
-        )
+        # 8. Publish CONTENT_CREATED event (only on final completion, not mid-feedback-loop)
+        decisions = final_state.get("hitl_decisions", [])
+        last_decision = decisions[-1] if decisions else {}
+        final_iteration = final_state.get("iteration_count", 0)
+        max_iter = final_state.get("max_iterations", 3)
+        cycling_back = last_decision.get("approved", False) and final_iteration < max_iter
+        is_final = not cycling_back
+
+        if is_final:
+            await self._event_bus.publish(
+                Channels.CONTENT_CREATED,
+                {
+                    "content_id": str(content_id),
+                    "trend_id": str(trend_id),
+                    "title": content.title,
+                    "status": ContentStatus.review.value,
+                },
+            )
 
         await logger.ainfo("pipeline_completed", content_id=str(content_id))
 
@@ -175,6 +185,7 @@ class ContentPipeline:
                 "confidence_score": critique_score,
                 "feedback": final_state.get("critique_feedback", ""),
             },
+            "iteration_count": final_state.get("iteration_count", 0),
         }
 
     async def resume(
