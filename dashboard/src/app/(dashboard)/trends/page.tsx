@@ -1,0 +1,60 @@
+import { TrendingUp } from "lucide-react";
+import { serverFetch } from "@/lib/api-client";
+import { StatCard } from "@/components/charts/stat-card";
+import { TrendTable } from "@/components/trend-table";
+
+interface Trend {
+  id: string;
+  topic: string;
+  source: string;
+  virality_score: number;
+  status: string;
+  created_at: string;
+}
+
+interface TrendListResponse {
+  items: Trend[];
+  total: number;
+}
+
+export default async function TrendsPage(): Promise<React.ReactElement> {
+  let trends: Trend[] = [];
+  let total = 0;
+
+  try {
+    const response = await serverFetch<TrendListResponse>(
+      "/api/v1/scout/trends"
+    );
+    trends = response.items;
+    total = response.total;
+  } catch {
+    // Services may not be running
+  }
+
+  const used = trends.filter((t) => t.status === "USED").length;
+  const discarded = trends.filter((t) => t.status === "DISCARDED").length;
+
+  return (
+    <div className="p-8">
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <TrendingUp className="h-8 w-8 text-gray-700" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Trends</h1>
+            <p className="mt-1 text-gray-500">
+              Discovered trends and their pipeline status.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <StatCard title="Total Found" value={total} />
+        <StatCard title="Used for Content" value={used} />
+        <StatCard title="Discarded" value={discarded} />
+      </div>
+
+      <TrendTable trends={trends} />
+    </div>
+  );
+}
