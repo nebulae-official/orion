@@ -67,6 +67,14 @@ class PipelineStatus(str, enum.Enum):
     failed = "failed"
 
 
+class PublishStatus(str, enum.Enum):
+    """Status of a publishing attempt."""
+
+    pending = "pending"
+    published = "published"
+    failed = "failed"
+
+
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
@@ -213,3 +221,50 @@ class PipelineRun(Base):
 
     # Relationships
     content: Mapped["Content"] = relationship(back_populates="pipeline_runs")
+
+
+class SocialAccount(Base):
+    """Credentials for a connected social media platform."""
+
+    __tablename__ = "social_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    credentials: Mapped[str] = mapped_column(Text, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class PublishRecord(Base):
+    """Tracks a content publish attempt to a social platform."""
+
+    __tablename__ = "publish_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("contents.id"), nullable=False
+    )
+    platform: Mapped[str] = mapped_column(String(64), nullable=False)
+    platform_post_id: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    status: Mapped[PublishStatus] = mapped_column(
+        Enum(PublishStatus, name="publish_status"),
+        nullable=False,
+        default=PublishStatus.pending,
+    )
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    content: Mapped["Content"] = relationship()
