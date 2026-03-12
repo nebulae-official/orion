@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/orion-rigel/orion/internal/gateway/handlers"
@@ -23,10 +24,12 @@ func New(cfg config.Config) (chi.Router, error) {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.CORS)
+	r.Use(middleware.Metrics)
 
 	// Health and readiness endpoints.
 	r.Get("/health", handlers.Health())
 	r.Get("/ready", handlers.Ready())
+	r.Handle("/metrics", promhttp.Handler())
 
 	// Service URLs for health aggregation and proxying.
 	services := map[string]string{
