@@ -79,6 +79,83 @@ type RegenerateRequest struct {
 	Feedback string `json:"feedback,omitempty"`
 }
 
+// TriggerScoutRequest is the payload for triggering a scout scan.
+type TriggerScoutRequest struct {
+	Sources []string `json:"sources,omitempty"`
+	Regions []string `json:"regions,omitempty"`
+}
+
+// TriggerScoutResponse is the response from triggering a scout scan.
+type TriggerScoutResponse struct {
+	ScanID string `json:"scan_id"`
+	Status string `json:"status"`
+}
+
+// TrendItem represents a single detected trend from the scout service.
+type TrendItem struct {
+	ID         string  `json:"id"`
+	Topic      string  `json:"topic"`
+	Source     string  `json:"source"`
+	Score      float64 `json:"score"`
+	DetectedAt string  `json:"detected_at"`
+	Status     string  `json:"status"`
+}
+
+// TrendListResponse wraps a list of trends from the API.
+type TrendListResponse struct {
+	Items []TrendItem `json:"items"`
+	Total int         `json:"total"`
+}
+
+// ScoutConfigResponse represents the scout service configuration.
+type ScoutConfigResponse struct {
+	Settings map[string]string `json:"settings"`
+}
+
+// SetScoutConfigRequest is the payload for updating a scout config value.
+type SetScoutConfigRequest struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// ProviderEntry represents a single provider in the provider list.
+type ProviderEntry struct {
+	Service  string `json:"service"`
+	Provider string `json:"provider"`
+	Mode     string `json:"mode"`
+	Model    string `json:"model"`
+	Status   string `json:"status"`
+}
+
+// ProviderListResponse wraps a list of providers from the API.
+type ProviderListResponse struct {
+	Providers []ProviderEntry `json:"providers"`
+}
+
+// SwitchProviderRequest is the payload for switching a service provider.
+type SwitchProviderRequest struct {
+	Mode     string `json:"mode"`
+	Provider string `json:"provider"`
+}
+
+// ProviderStatusEntry represents a provider's detailed health and cost info.
+type ProviderStatusEntry struct {
+	Service     string  `json:"service"`
+	Provider    string  `json:"provider"`
+	Mode        string  `json:"mode"`
+	Model       string  `json:"model"`
+	Status      string  `json:"status"`
+	Latency     string  `json:"latency"`
+	CostPerCall float64 `json:"cost_per_call"`
+	TotalCost   float64 `json:"total_cost"`
+	CallCount   int     `json:"call_count"`
+}
+
+// ProviderStatusResponse wraps detailed provider status from the API.
+type ProviderStatusResponse struct {
+	Providers []ProviderStatusEntry `json:"providers"`
+}
+
 // OrionClient communicates with the Orion gateway over HTTP.
 type OrionClient struct {
 	baseURL    string
@@ -235,6 +312,75 @@ func (c *OrionClient) RegenerateContent(ctx context.Context, id string, feedback
 	return nil
 }
 
+// TriggerScout initiates a scout scan with optional source and region filters.
+func (c *OrionClient) TriggerScout(ctx context.Context, sources, regions []string) (TriggerScoutResponse, error) {
+	var resp TriggerScoutResponse
+	payload := TriggerScoutRequest{Sources: sources, Regions: regions}
+	if err := c.post(ctx, "/api/v1/scout/scan", payload, &resp); err != nil {
+		return resp, fmt.Errorf("trigger scout: %w", err)
+	}
+	return resp, nil
+}
+
+// ListTrends retrieves detected trends with optional limit and minimum score.
+func (c *OrionClient) ListTrends(ctx context.Context, limit int, minScore float64) (TrendListResponse, error) {
+	path := fmt.Sprintf("/api/v1/trends?limit=%d", limit)
+	if minScore > 0 {
+		path += fmt.Sprintf("&min_score=%.2f", minScore)
+	}
+
+	var resp TrendListResponse
+	if err := c.get(ctx, path, &resp); err != nil {
+		return resp, fmt.Errorf("list trends: %w", err)
+	}
+	return resp, nil
+}
+
+// GetScoutConfig retrieves the current scout service configuration.
+func (c *OrionClient) GetScoutConfig(ctx context.Context) (ScoutConfigResponse, error) {
+	var resp ScoutConfigResponse
+	if err := c.get(ctx, "/api/v1/scout/config", &resp); err != nil {
+		return resp, fmt.Errorf("get scout config: %w", err)
+	}
+	return resp, nil
+}
+
+// SetScoutConfig updates a single configuration key in the scout service.
+func (c *OrionClient) SetScoutConfig(ctx context.Context, key, value string) error {
+	payload := SetScoutConfigRequest{Key: key, Value: value}
+	if err := c.put(ctx, "/api/v1/scout/config", payload, nil); err != nil {
+		return fmt.Errorf("set scout config: %w", err)
+	}
+	return nil
+}
+
+// ListProviders retrieves the list of configured providers across services.
+func (c *OrionClient) ListProviders(ctx context.Context) (ProviderListResponse, error) {
+	var resp ProviderListResponse
+	if err := c.get(ctx, "/api/v1/providers", &resp); err != nil {
+		return resp, fmt.Errorf("list providers: %w", err)
+	}
+	return resp, nil
+}
+
+// SwitchProvider switches the active provider for a given service.
+func (c *OrionClient) SwitchProvider(ctx context.Context, service, mode, provider string) error {
+	payload := SwitchProviderRequest{Mode: mode, Provider: provider}
+	if err := c.put(ctx, "/api/v1/providers/"+service, payload, nil); err != nil {
+		return fmt.Errorf("switch provider: %w", err)
+	}
+	return nil
+}
+
+// ProviderStatus retrieves detailed provider health and cost information.
+func (c *OrionClient) ProviderStatus(ctx context.Context) (ProviderStatusResponse, error) {
+	var resp ProviderStatusResponse
+	if err := c.get(ctx, "/api/v1/providers/status", &resp); err != nil {
+		return resp, fmt.Errorf("provider status: %w", err)
+	}
+	return resp, nil
+}
+
 // newRequest creates an HTTP request with common headers and auth.
 func (c *OrionClient) newRequest(ctx context.Context, method, path string, body io.Reader) (*http.Request, error) {
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, body)
@@ -288,6 +434,47 @@ func (c *OrionClient) post(ctx context.Context, path string, payload any, out an
 	}
 
 	req, err := c.newRequest(ctx, http.MethodPost, path, body)
+	if err != nil {
+		return fmt.Errorf("creating request: %w", err)
+	}
+	if payload != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	if out != nil {
+		if err := json.Unmarshal(respBody, out); err != nil {
+			return fmt.Errorf("decoding response: %w", err)
+		}
+	}
+	return nil
+}
+
+func (c *OrionClient) put(ctx context.Context, path string, payload any, out any) error {
+	var body io.Reader
+	if payload != nil {
+		data, err := json.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("encoding request: %w", err)
+		}
+		body = bytes.NewReader(data)
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPut, path, body)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}
