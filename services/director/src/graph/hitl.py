@@ -36,3 +36,16 @@ def build_creator_review_payload(state: OrionState) -> dict[str, Any]:
             "cta": state.get("script_cta", ""),
         },
     }
+
+
+def build_analyst_review_payload(state: OrionState) -> dict[str, Any]:
+    """Build the interrupt payload for human review after analyst."""
+    return {
+        "stage": "analyst",
+        "instruction": "Review the performance analysis and improvement suggestions. Approve to cycle back for improvements, or reject to finalise as-is.",
+        "performance_summary": state.get("performance_summary", ""),
+        "improvement_suggestions": state.get("improvement_suggestions", []),
+        "analyst_score": state.get("analyst_score", 0.0),
+        "iteration_count": state.get("iteration_count", 0),
+        "max_iterations": state.get("max_iterations", 3),
+    }
