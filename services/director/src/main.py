@@ -158,7 +158,7 @@ async def lifespan(app: FastAPI):
         checkpointer=_checkpointer,
         enable_hitl=False,
     )
-    _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory)
+    _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory, checkpointer=_checkpointer)
 
     # Initialise regeneration service
     _regeneration_service = RegenerationService(
