@@ -142,6 +142,9 @@ class Content(Base):
     pipeline_runs: Mapped[list["PipelineRun"]] = relationship(
         back_populates="content", cascade="all, delete-orphan"
     )
+    publish_records: Mapped[list["PublishRecord"]] = relationship(
+        back_populates="content", cascade="all, delete-orphan"
+    )
 
 
 class MediaAsset(Base):
@@ -213,3 +216,68 @@ class PipelineRun(Base):
 
     # Relationships
     content: Mapped["Content"] = relationship(back_populates="pipeline_runs")
+
+
+class PublishStatus(str, enum.Enum):
+    """Status of a publish record."""
+
+    published = "published"
+    failed = "failed"
+
+
+class SocialAccount(Base):
+    """A connected social media account."""
+
+    __tablename__ = "social_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    platform: Mapped[str] = mapped_column(String(128), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(256), nullable=False)
+    credentials: Mapped[str] = mapped_column(Text, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    publish_records: Mapped[list["PublishRecord"]] = relationship(
+        back_populates="social_account", cascade="all, delete-orphan"
+    )
+
+
+class PublishRecord(Base):
+    """A record of a content publish attempt to a platform."""
+
+    __tablename__ = "publish_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    content_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("contents.id"), nullable=False
+    )
+    social_account_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("social_accounts.id"), nullable=True
+    )
+    platform: Mapped[str] = mapped_column(String(128), nullable=False)
+    platform_post_id: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    status: Mapped[PublishStatus] = mapped_column(
+        Enum(PublishStatus, name="publish_status"),
+        nullable=False,
+        default=PublishStatus.failed,
+    )
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    content: Mapped["Content"] = relationship(back_populates="publish_records")
+    social_account: Mapped["SocialAccount | None"] = relationship(
+        back_populates="publish_records"
+    )
