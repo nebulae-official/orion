@@ -9,7 +9,7 @@ dependencies = [
     "httpx>=0.28.0",
     "tenacity>=9.0.0",
     "orion-common @ file:../../libs/orion-common",
-    "langgraph>=0.2.0,<0.3.0",
+    "langgraph>=1.0.0,<2.0.0",
     "langgraph-checkpoint-postgres>=2.0.0",
     "psycopg[binary]>=3.1.0",
 ]
