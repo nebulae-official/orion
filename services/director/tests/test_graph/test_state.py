@@ -83,3 +83,28 @@ class TestHITLDecision:
         )
         assert decision.approved is False
         assert "too generic" in decision.feedback
+
+
+class TestOrionStateAnalystFields:
+    """Analyst and iteration fields exist in OrionState."""
+
+    def test_state_accepts_analyst_fields(self) -> None:
+        state: OrionState = {
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.STRATEGIST,
+            "performance_summary": "Pipeline completed in 45s",
+            "improvement_suggestions": [{"area": "hook", "suggestion": "shorter"}],
+            "analyst_score": 0.85,
+            "iteration_count": 1,
+            "max_iterations": 3,
+        }
+        assert state["analyst_score"] == 0.85
+        assert state["iteration_count"] == 1
+        assert state["max_iterations"] == 3
+        assert state["performance_summary"] == "Pipeline completed in 45s"

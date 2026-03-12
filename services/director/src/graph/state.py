@@ -52,12 +52,21 @@ class OrionState(TypedDict):
     script_cta: NotRequired[str]
     visual_cues: NotRequired[list[str]]
 
-    # --- Analyst outputs (optional) ---
+    # --- Critique outputs (optional) ---
     critique_score: NotRequired[float]
     critique_feedback: NotRequired[str]
 
     # --- Creator outputs (optional) ---
     visual_prompts: NotRequired[dict[str, Any]]
+
+    # --- Analyst outputs (optional) ---
+    performance_summary: NotRequired[str]
+    improvement_suggestions: NotRequired[list[dict[str, Any]]]
+    analyst_score: NotRequired[float]
+
+    # --- Feedback loop tracking ---
+    iteration_count: NotRequired[int]
+    max_iterations: NotRequired[int]
 
     # --- HITL tracking (accumulates via operator.add reducer) ---
     hitl_decisions: NotRequired[Annotated[list[dict[str, Any]], operator.add]]
