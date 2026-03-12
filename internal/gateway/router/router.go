@@ -33,11 +33,12 @@ func New(cfg config.Config) (chi.Router, error) {
 
 	// Service URLs for health aggregation and proxying.
 	services := map[string]string{
-		"scout":    cfg.ScoutURL,
-		"director": cfg.DirectorURL,
-		"media":    cfg.MediaURL,
-		"editor":   cfg.EditorURL,
-		"pulse":    cfg.PulseURL,
+		"scout":     cfg.ScoutURL,
+		"director":  cfg.DirectorURL,
+		"media":     cfg.MediaURL,
+		"editor":    cfg.EditorURL,
+		"pulse":     cfg.PulseURL,
+		"publisher": cfg.PublisherURL,
 	}
 
 	// Aggregated status endpoint — checks all downstream services concurrently.
