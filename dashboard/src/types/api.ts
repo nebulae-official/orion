@@ -93,3 +93,42 @@ export interface ContentFeedback {
   reason: string;
   regenerate: boolean;
 }
+
+/** A record of content published to a social platform */
+export interface PublishRecord {
+  id: string;
+  content_id: string;
+  platform: string;
+  platform_post_id: string | null;
+  status: "pending" | "published" | "failed";
+  error_message: string | null;
+  published_at: string | null;
+  created_at: string;
+}
+
+/** Request to publish content */
+export interface PublishRequest {
+  content_id: string;
+  platforms: string[];
+}
+
+/** Response from publishing */
+export interface PublishResponse {
+  content_id: string;
+  results: Array<{
+    platform: string;
+    status: string;
+    platform_post_id: string | null;
+    error: string | null;
+  }>;
+  published_at: string | null;
+}
+
+/** A connected social media account */
+export interface SocialAccount {
+  id: string;
+  platform: string;
+  display_name: string;
+  is_active: boolean;
+  created_at: string;
+}
