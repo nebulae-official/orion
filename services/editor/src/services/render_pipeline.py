@@ -24,6 +24,8 @@ from ..providers.base import TTSProvider, TTSRequest
 from ..repositories.asset_repo import EditorAssetRepository
 from ..video.stitcher import StitchRequest, VideoConfig, VideoStitcher
 from ..video.subtitles import SubtitleBurner, SubtitleStyle
+from ..video.thumbnails import ThumbnailGenerator
+from ..video.validator import VideoValidator
 
 logger = structlog.get_logger(__name__)
 
@@ -32,6 +34,8 @@ STAGE_TTS = "tts_generation"
 STAGE_CAPTIONS = "caption_generation"
 STAGE_STITCH = "video_stitching"
 STAGE_SUBTITLES = "subtitle_burning"
+STAGE_THUMBNAILS = "thumbnail_generation"
+STAGE_VALIDATION = "video_validation"
 STAGE_PUBLISH = "publish"
 
 
@@ -54,12 +58,16 @@ class RenderPipeline:
         stitcher: VideoStitcher,
         subtitle_burner: SubtitleBurner,
         event_bus: EventBus,
+        thumbnail_generator: ThumbnailGenerator | None = None,
+        video_validator: VideoValidator | None = None,
     ) -> None:
         self._tts = tts_provider
         self._captioner = captioner
         self._stitcher = stitcher
         self._burner = subtitle_burner
         self._event_bus = event_bus
+        self._thumbnail_gen = thumbnail_generator or ThumbnailGenerator()
+        self._validator = video_validator or VideoValidator()
 
     async def render(
         self,
@@ -150,7 +158,51 @@ class RenderPipeline:
                 style=style,
             )
 
-            # --- Stage 5: Save & Publish ---
+            # --- Stage 5: Thumbnail Generation ---
+            await self._set_stage(session, pipeline_run, STAGE_THUMBNAILS)
+
+            title = content.title or "Untitled"
+            niche = getattr(content, "niche", "default") or "default"
+
+            thumbnail_paths: list[str] = []
+            for platform in ("youtube", "reels", "tiktok"):
+                thumb_path = await self._thumbnail_gen.generate(
+                    video_path=final_video_path,
+                    title=title,
+                    platform=platform,
+                    niche=niche,
+                )
+                thumbnail_paths.append(thumb_path)
+
+                await repo.create(
+                    content_id=content_id,
+                    asset_type=AssetType.image,
+                    provider="editor",
+                    file_path=thumb_path,
+                    metadata={
+                        "type": "thumbnail",
+                        "platform": platform,
+                    },
+                )
+
+            # --- Stage 6: Video Quality Validation ---
+            await self._set_stage(session, pipeline_run, STAGE_VALIDATION)
+
+            validation_result = await self._validator.validate(final_video_path)
+
+            if not validation_result.valid:
+                await logger.awarning(
+                    "video_validation_issues",
+                    content_id=str(content_id),
+                    confidence_score=validation_result.confidence_score,
+                    issues=[
+                        i.model_dump()
+                        for i in validation_result.issues
+                        if not i.passed
+                    ],
+                )
+
+            # --- Stage 7: Save & Publish ---
             await self._set_stage(session, pipeline_run, STAGE_PUBLISH)
 
             await repo.create(
@@ -161,6 +213,8 @@ class RenderPipeline:
                 metadata={
                     "subtitle_style": subtitle_style,
                     "resolution": f"{video_width}x{video_height}",
+                    "validation_score": validation_result.confidence_score,
+                    "validation_passed": validation_result.valid,
                 },
             )
 
@@ -184,6 +238,9 @@ class RenderPipeline:
                     "status": "review",
                     "video_path": final_video_path,
                     "pipeline_run_id": str(pipeline_run.id),
+                    "thumbnail_paths": thumbnail_paths,
+                    "validation_score": validation_result.confidence_score,
+                    "validation_passed": validation_result.valid,
                 },
             )
 
@@ -191,6 +248,7 @@ class RenderPipeline:
                 "render_pipeline_completed",
                 content_id=str(content_id),
                 video_path=final_video_path,
+                validation_score=validation_result.confidence_score,
             )
 
         except Exception as exc:

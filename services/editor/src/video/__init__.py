@@ -1,1 +1,1 @@
-"""Video stitching and effects modules for the Editor service."""
+"""Video stitching, effects, thumbnails, and validation modules for the Editor service."""
