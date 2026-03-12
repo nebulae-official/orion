@@ -111,6 +111,46 @@ func (f *Formatter) FormatContentDetail(item client.ContentItem) string {
 	}
 }
 
+// FormatTrendList formats a list of detected trends for display.
+func (f *Formatter) FormatTrendList(resp client.TrendListResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(resp)
+	default:
+		return f.trendListTable(resp)
+	}
+}
+
+// FormatScoutConfig formats the scout configuration for display.
+func (f *Formatter) FormatScoutConfig(cfg client.ScoutConfigResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(cfg)
+	default:
+		return f.scoutConfigTable(cfg)
+	}
+}
+
+// FormatProviderList formats a list of providers for display.
+func (f *Formatter) FormatProviderList(resp client.ProviderListResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(resp)
+	default:
+		return f.providerListTable(resp)
+	}
+}
+
+// FormatProviderStatus formats detailed provider status for display.
+func (f *Formatter) FormatProviderStatus(resp client.ProviderStatusResponse) string {
+	switch f.format {
+	case FormatJSON:
+		return toJSON(resp)
+	default:
+		return f.providerStatusTable(resp)
+	}
+}
+
 func (f *Formatter) healthTable(h client.HealthResponse) string {
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
@@ -229,6 +269,76 @@ func (f *Formatter) contentDetailText(item client.ContentItem) string {
 		}
 	}
 	return sb.String()
+}
+
+func (f *Formatter) trendListTable(resp client.TrendListResponse) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "TOPIC\tSOURCE\tSCORE\tDETECTED AT\tSTATUS")
+	for _, t := range resp.Items {
+		fmt.Fprintf(w, "%s\t%s\t%.2f\t%s\t%s\n",
+			truncate(t.Topic, 40),
+			t.Source,
+			t.Score,
+			t.DetectedAt,
+			t.Status,
+		)
+	}
+	w.Flush()
+
+	if resp.Total > 0 {
+		buf.WriteString(fmt.Sprintf("\nTotal: %d\n", resp.Total))
+	}
+	return buf.String()
+}
+
+func (f *Formatter) scoutConfigTable(cfg client.ScoutConfigResponse) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "KEY\tVALUE")
+	for k, v := range cfg.Settings {
+		fmt.Fprintf(w, "%s\t%s\n", k, v)
+	}
+	w.Flush()
+	return buf.String()
+}
+
+func (f *Formatter) providerListTable(resp client.ProviderListResponse) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "SERVICE\tPROVIDER\tMODE\tMODEL\tSTATUS")
+	for _, p := range resp.Providers {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			p.Service,
+			p.Provider,
+			p.Mode,
+			p.Model,
+			p.Status,
+		)
+	}
+	w.Flush()
+	return buf.String()
+}
+
+func (f *Formatter) providerStatusTable(resp client.ProviderStatusResponse) string {
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "SERVICE\tPROVIDER\tMODE\tMODEL\tSTATUS\tLATENCY\tCOST/CALL\tTOTAL COST\tCALLS")
+	for _, p := range resp.Providers {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t$%.4f\t$%.2f\t%d\n",
+			p.Service,
+			p.Provider,
+			p.Mode,
+			p.Model,
+			p.Status,
+			p.Latency,
+			p.CostPerCall,
+			p.TotalCost,
+			p.CallCount,
+		)
+	}
+	w.Flush()
+	return buf.String()
 }
 
 func truncate(s string, maxLen int) string {
