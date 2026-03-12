@@ -89,6 +89,38 @@ export async function fetchContent(
   }
 }
 
+export async function publishContent(
+  contentId: string,
+  platforms: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await authenticatedFetch(
+      "/api/v1/publisher/publish/",
+      {
+        method: "POST",
+        body: JSON.stringify({ content_id: contentId, platforms }),
+      }
+    );
+
+    if (!response.ok) {
+      const body = await response
+        .json()
+        .catch(() => ({ detail: "Publish failed" }));
+      return {
+        success: false,
+        error: body.detail ?? "Failed to publish content",
+      };
+    }
+
+    revalidatePath("/queue");
+    revalidatePath(`/queue/${contentId}`);
+    revalidatePath("/publishing");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
+
 export async function saveProviderConfig(
   service: string,
   provider: string,

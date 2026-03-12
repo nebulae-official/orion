@@ -13,6 +13,7 @@ import {
   Activity,
   Play,
   LogOut,
+  Send,
 } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Content Queue", href: "/queue", icon: <ListVideo className="h-5 w-5" /> },
   { label: "Trends", href: "/trends", icon: <TrendingUp className="h-5 w-5" /> },
   { label: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
+  { label: "Publishing", href: "/publishing", icon: <Send className="h-5 w-5" /> },
   { label: "Generation", href: "/generation", icon: <Play className="h-5 w-5" /> },
   { label: "System Health", href: "/system", icon: <Activity className="h-5 w-5" /> },
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },

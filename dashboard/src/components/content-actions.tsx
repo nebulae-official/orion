@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast";
 import { approveContent, rejectContent } from "@/lib/actions";
 import type { ContentStatus } from "@/types/api";
-import { CheckCircle, XCircle, RotateCcw, X } from "lucide-react";
+import { CheckCircle, XCircle, RotateCcw, X, Send } from "lucide-react";
+import { PublishModal } from "@/components/publish-modal";
 
 interface ContentActionsProps {
   contentId: string;
@@ -21,10 +22,12 @@ export function ContentActions({
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [optimisticStatus, setOptimisticStatus] = useState(status);
 
   const canApprove = optimisticStatus === "review" || optimisticStatus === "draft";
   const canReject = optimisticStatus === "review" || optimisticStatus === "draft";
+  const canPublish = optimisticStatus === "approved";
 
   function handleApprove(): void {
     setOptimisticStatus("approved");
@@ -78,6 +81,16 @@ export function ContentActions({
           </span>
         )}
 
+        {canPublish && (
+          <button
+            onClick={() => setShowPublishModal(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+          >
+            <Send className="h-4 w-4" />
+            Publish
+          </button>
+        )}
+
         {optimisticStatus === "rejected" && (
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">
             <XCircle className="h-4 w-4" />
@@ -92,6 +105,13 @@ export function ContentActions({
           originalStatus={status}
           onClose={() => setShowRejectModal(false)}
           onStatusChange={setOptimisticStatus}
+        />
+      )}
+
+      {showPublishModal && (
+        <PublishModal
+          contentId={contentId}
+          onClose={() => setShowPublishModal(false)}
         />
       )}
     </>
