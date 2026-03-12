@@ -65,4 +65,6 @@ def sample_state() -> OrionState:
         "tone": "informative and engaging",
         "visual_style": "cinematic",
         "current_stage": PipelineStage.STRATEGIST,
+        "iteration_count": 0,
+        "max_iterations": 3,
     }
