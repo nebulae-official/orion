@@ -1,4 +1,4 @@
-import { GATEWAY_URL } from "@/lib/config";
+import { GATEWAY_URL, SERVER_GATEWAY_URL } from "@/lib/config";
 
 export interface ApiResponse<T> {
   data: T;
@@ -100,7 +100,7 @@ export async function serverFetch<T>(
   options: RequestInit = {},
   token?: string
 ): Promise<T> {
-  const url = `${GATEWAY_URL}${path}`;
+  const url = `${SERVER_GATEWAY_URL}${path}`;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/utils";
 import { RefreshCw } from "lucide-react";
+import { fetchSystemStatus, fetchGatewayHealth } from "@/lib/actions";
 
 interface ServiceStatus {
   name: string;
@@ -14,16 +15,15 @@ interface ServiceStatus {
   lastChecked: string | null;
 }
 
-const SERVICES: { name: string; displayName: string; port: number }[] = [
-  { name: "gateway", displayName: "Gateway", port: 8000 },
-  { name: "scout", displayName: "Scout (Trends)", port: 8001 },
-  { name: "director", displayName: "Director (Scripts)", port: 8002 },
-  { name: "media", displayName: "Media (Assets)", port: 8003 },
-  { name: "editor", displayName: "Editor (Publish)", port: 8004 },
-  { name: "pulse", displayName: "Pulse (Analytics)", port: 8005 },
+const SERVICES: { name: string; displayName: string }[] = [
+  { name: "gateway", displayName: "Gateway" },
+  { name: "scout", displayName: "Scout (Trends)" },
+  { name: "director", displayName: "Director (Scripts)" },
+  { name: "media", displayName: "Media (Assets)" },
+  { name: "editor", displayName: "Editor (Publish)" },
+  { name: "pulse", displayName: "Pulse (Analytics)" },
 ];
 
-import { GATEWAY_URL } from "@/lib/config";
 const REFRESH_INTERVAL = 30_000;
 
 export function ServiceHealth(): React.ReactElement {
@@ -43,48 +43,45 @@ export function ServiceHealth(): React.ReactElement {
   const checkServices = useCallback(async (): Promise<void> => {
     setRefreshing(true);
 
-    const updated = await Promise.all(
-      SERVICES.map(async (svc) => {
-        try {
-          const response = await fetch(
-            `${GATEWAY_URL}/api/v1/services/${svc.name}/health`,
-            { cache: "no-store" }
-          );
-          if (response.ok) {
-            const data = (await response.json()) as {
-              status: string;
-              uptime?: string;
-              queue_size?: number;
-            };
-            return {
-              name: svc.name,
-              displayName: svc.displayName,
-              status: data.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
-              uptime: data.uptime ?? null,
-              queueSize: data.queue_size ?? null,
-              lastChecked: new Date().toISOString(),
-            };
-          }
-          return {
-            name: svc.name,
-            displayName: svc.displayName,
-            status: "unhealthy" as const,
-            uptime: null,
-            queueSize: null,
-            lastChecked: new Date().toISOString(),
-          };
-        } catch {
-          return {
-            name: svc.name,
-            displayName: svc.displayName,
-            status: "unhealthy" as const,
-            uptime: null,
-            queueSize: null,
-            lastChecked: new Date().toISOString(),
-          };
-        }
-      })
-    );
+    // Check gateway health + aggregated status via server actions
+    const [statusData, gatewayData] = await Promise.all([
+      fetchSystemStatus(),
+      fetchGatewayHealth(),
+    ]);
+
+    const updated = SERVICES.map((svc) => {
+      if (svc.name === "gateway") {
+        return {
+          name: svc.name,
+          displayName: svc.displayName,
+          status: gatewayData?.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
+          uptime: null,
+          queueSize: null,
+          lastChecked: new Date().toISOString(),
+        };
+      }
+
+      const svcData = statusData?.services?.find((s) => s.service === svc.name);
+      if (svcData) {
+        return {
+          name: svc.name,
+          displayName: svc.displayName,
+          status: svcData.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
+          uptime: null,
+          queueSize: null,
+          lastChecked: new Date().toISOString(),
+        };
+      }
+
+      return {
+        name: svc.name,
+        displayName: svc.displayName,
+        status: "unhealthy" as const,
+        uptime: null,
+        queueSize: null,
+        lastChecked: new Date().toISOString(),
+      };
+    });
 
     setServices(updated);
     setLastRefresh(new Date());

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAuthToken } from "@/lib/auth";
 import type { Content, ContentFeedback } from "@/types/api";
-import { GATEWAY_URL } from "@/lib/config";
+import { SERVER_GATEWAY_URL } from "@/lib/config";
 
 async function authenticatedFetch(
   path: string,
@@ -14,7 +14,7 @@ async function authenticatedFetch(
     throw new Error("Not authenticated");
   }
 
-  return fetch(`${GATEWAY_URL}${path}`, {
+  return fetch(`${SERVER_GATEWAY_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -148,5 +148,39 @@ export async function saveProviderConfig(
     return { success: true };
   } catch {
     return { success: false, error: "Network error. Please try again." };
+  }
+}
+
+export interface SystemStatusService {
+  service: string;
+  status: string;
+  error?: string;
+}
+
+export interface SystemStatusResponse {
+  status: string;
+  services: SystemStatusService[];
+}
+
+export async function fetchSystemStatus(): Promise<SystemStatusResponse | null> {
+  try {
+    const response = await authenticatedFetch("/status");
+    if (!response.ok) return null;
+    return (await response.json()) as SystemStatusResponse;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchGatewayHealth(): Promise<{ status: string } | null> {
+  try {
+    const { SERVER_GATEWAY_URL } = await import("@/lib/config");
+    const response = await fetch(`${SERVER_GATEWAY_URL}/health`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as { status: string };
+  } catch {
+    return null;
   }
 }
