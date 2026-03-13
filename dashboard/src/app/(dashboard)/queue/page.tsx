@@ -3,9 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
+import { GATEWAY_URL } from "@/lib/config";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
-
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
 
 interface QueuePageProps {
   searchParams: Promise<{

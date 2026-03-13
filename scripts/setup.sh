@@ -36,6 +36,18 @@ echo "==> Installing dashboard dependencies..."
 (cd dashboard && npm ci)
 
 echo ""
+echo "==> Installing Python service dependencies..."
+if ! command -v uv &>/dev/null; then
+  echo "WARNING: uv not found. Install uv from https://docs.astral.sh/uv/"
+  echo "  Skipping Python service dependency installation."
+else
+  for svc in scout director media editor pulse publisher; do
+    echo "  Installing $svc dependencies..."
+    (cd services/$svc && uv sync)
+  done
+fi
+
+echo ""
 echo "==> Copying .env.example -> .env (if not exists)..."
 if [ ! -f .env ]; then
   cp .env.example .env

@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-interface Trend {
-  id: string;
-  topic: string;
-  source: string;
-  virality_score: number;
-  status: string;
-  created_at: string;
-}
+import type { Trend } from "@/types/api";
 
 interface TrendTableProps {
   trends: Trend[];

@@ -11,6 +11,7 @@ from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 
+from src.dependencies import init_event_bus, shutdown_event_bus
 from src.routes import accounts, publish
 from src.services.crypto import validate_encryption_key
 
@@ -24,8 +25,11 @@ async def lifespan(app: FastAPI):
     logger.info("service_starting", service="publisher")
     validate_encryption_key()
     logger.info("encryption_key_validated", service="publisher")
+    init_event_bus(settings.redis_url)
+    logger.info("event_bus_initialised", service="publisher")
     yield
     logger.info("service_stopping", service="publisher")
+    await shutdown_event_bus()
 
 
 app = FastAPI(title="Orion Publisher Service", lifespan=lifespan)

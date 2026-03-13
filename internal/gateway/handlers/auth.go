@@ -79,6 +79,8 @@ func (h *AuthHandler) generateToken() (string, error) {
 // Login handles POST /api/v1/auth/login.
 func (h *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, 1024)
+
 		var req loginRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, `{"message":"invalid request body"}`, http.StatusBadRequest)
@@ -127,7 +129,7 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 }
 
 // RefreshToken handles POST /api/v1/auth/refresh.
-// It validates the old token, revokes it via the blacklist (if available),
+// It validates the old token, checks the blacklist, revokes the old token,
 // and issues a new token.
 func (h *AuthHandler) RefreshToken(bl *auth.TokenBlacklist) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -144,18 +146,30 @@ func (h *AuthHandler) RefreshToken(bl *auth.TokenBlacklist) http.HandlerFunc {
 			return
 		}
 
+		claims, ok := oldToken.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, `{"message":"invalid token claims"}`, http.StatusUnauthorized)
+			return
+		}
+
+		jti, _ := claims["jti"].(string)
+
+		// Check if the old token has been revoked before issuing a new one.
+		if bl != nil && jti != "" {
+			if bl.IsRevoked(r.Context(), jti) {
+				http.Error(w, `{"message":"token has been revoked"}`, http.StatusUnauthorized)
+				return
+			}
+		}
+
 		// Revoke the old token so it cannot be reused.
-		if bl != nil {
-			if claims, ok := oldToken.Claims.(jwt.MapClaims); ok {
-				if jti, ok := claims["jti"].(string); ok && jti != "" {
-					exp, expErr := claims.GetExpirationTime()
-					if expErr == nil && exp != nil {
-						remaining := time.Until(exp.Time)
-						if remaining > 0 {
-							if err := bl.Revoke(r.Context(), jti, remaining); err != nil {
-								slog.Error("refresh_revoke_old_token_failed", "error", err)
-							}
-						}
+		if bl != nil && jti != "" {
+			exp, expErr := claims.GetExpirationTime()
+			if expErr == nil && exp != nil {
+				remaining := time.Until(exp.Time)
+				if remaining > 0 {
+					if err := bl.Revoke(r.Context(), jti, remaining); err != nil {
+						slog.Error("refresh_revoke_old_token_failed", "error", err)
 					}
 				}
 			}
@@ -202,16 +216,29 @@ func (h *AuthHandler) IssueWSTicket() http.HandlerFunc {
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		_, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
+		tok, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
 		if err != nil {
 			http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 			return
 		}
 
+		// Extract user identity to store with the ticket.
+		var ticketValue string
+		if claims, ok := tok.Claims.(jwt.MapClaims); ok {
+			identity := map[string]string{
+				"username": fmt.Sprint(claims["username"]),
+				"role":     fmt.Sprint(claims["role"]),
+			}
+			b, _ := json.Marshal(identity)
+			ticketValue = string(b)
+		} else {
+			ticketValue = `{"username":"unknown","role":"unknown"}`
+		}
+
 		ticket := uuid.New().String()
 		ticketKey := fmt.Sprintf("ws:ticket:%s", ticket)
 
-		if err := h.rdb.Set(r.Context(), ticketKey, "valid", ticketTTL).Err(); err != nil {
+		if err := h.rdb.Set(r.Context(), ticketKey, ticketValue, ticketTTL).Err(); err != nil {
 			slog.Error("failed to store ws ticket", "error", err)
 			http.Error(w, `{"message":"internal error"}`, http.StatusInternalServerError)
 			return

@@ -20,6 +20,7 @@ from orion_common.db.models import (
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
+from src.exceptions import ContentNotApprovedError, ContentNotFoundError, SafetyCheckFailedError
 from src.providers.base import PublishContent, SocialProvider
 from src.providers.twitter import TwitterProvider
 from src.schemas import PublishResponse, PublishResult
@@ -45,7 +46,7 @@ class PublishingService:
         content = await self._get_content(content_id)
 
         if content.status.value != "approved":
-            raise ValueError(
+            raise ContentNotApprovedError(
                 f"Content must be in 'approved' status, got '{content.status.value}'"
             )
 
@@ -73,9 +74,7 @@ class PublishingService:
                 platform_char_limit=provider.get_character_limit(),
             )
             if not safety.passed:
-                raise ValueError(
-                    f"Safety check failed: {'; '.join(safety.violations)}"
-                )
+                raise SafetyCheckFailedError(violations=safety.violations)
 
             hashtags = []
             if content.trend and content.trend.raw_data:
@@ -139,7 +138,7 @@ class PublishingService:
         result = await self.session.execute(stmt)
         content = result.scalar_one_or_none()
         if content is None:
-            raise ValueError(f"Content {content_id} not found")
+            raise ContentNotFoundError(f"Content {content_id} not found")
         return content
 
     async def _get_provider(self, platform: str) -> SocialProvider | None:

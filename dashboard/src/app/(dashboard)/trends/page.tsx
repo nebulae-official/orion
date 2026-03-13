@@ -1,16 +1,10 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { TrendingUp } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
 import { StatCard } from "@/components/charts/stat-card";
 import { TrendTable } from "@/components/trend-table";
-
-interface Trend {
-  id: string;
-  topic: string;
-  source: string;
-  virality_score: number;
-  status: string;
-  created_at: string;
-}
+import type { Trend } from "@/types/api";
 
 interface TrendListResponse {
   items: Trend[];
@@ -18,13 +12,22 @@ interface TrendListResponse {
 }
 
 export default async function TrendsPage(): Promise<React.ReactElement> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("orion_token")?.value;
+
+  if (!token) {
+    redirect("/login");
+  }
+
   let trends: Trend[] = [];
   let total = 0;
   let fetchError = false;
 
   try {
     const response = await serverFetch<TrendListResponse>(
-      "/api/v1/scout/trends"
+      "/api/v1/scout/trends",
+      {},
+      token
     );
     trends = response.items;
     total = response.total;

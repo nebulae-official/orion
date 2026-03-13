@@ -66,6 +66,7 @@ func main() {
 	srv := &http.Server{
 		Addr:              ":" + cfg.GatewayPort,
 		Handler:           r,
+		ReadTimeout:       30 * time.Second,
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      60 * time.Second,
 	}

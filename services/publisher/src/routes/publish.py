@@ -5,13 +5,14 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from orion_common.config import get_settings
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 
+from src.dependencies import get_event_bus
+from src.exceptions import ContentNotApprovedError, ContentNotFoundError, SafetyCheckFailedError
 from src.repositories.publish_repo import PublishRepository
 from src.schemas import (
     PublishRecordResponse,
@@ -27,26 +28,25 @@ router = APIRouter(prefix="/api/v1/publish", tags=["publish"])
 async def publish_content(
     body: PublishRequest,
     session: Annotated[AsyncSession, Depends(get_session)],
+    event_bus: Annotated[EventBus, Depends(get_event_bus)],
 ) -> PublishResponse:
     """Publish approved content to social platforms."""
-    settings = get_settings()
-    event_bus = EventBus(settings.redis_url)
-
     try:
         svc = PublishingService(session=session, event_bus=event_bus)
         return await svc.publish_content(body.content_id, body.platforms)
-    except ValueError as exc:
-        status = 409 if "approved" in str(exc) else 422
-        raise HTTPException(status_code=status, detail=str(exc))
-    finally:
-        await event_bus.close()
+    except ContentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ContentNotApprovedError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except SafetyCheckFailedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
 
 
 @router.get("/history", response_model=list[PublishRecordResponse])
 async def list_publish_history(
     session: Annotated[AsyncSession, Depends(get_session)],
     content_id: UUID | None = None,
-    limit: int = 50,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> list:
     """List publish history records."""
     repo = PublishRepository(session)

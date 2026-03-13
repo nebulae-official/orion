@@ -43,6 +43,18 @@ class CommonSettings(BaseSettings):
         default="http://localhost:8188", description="ComfyUI API base URL"
     )
 
+    # Database pool
+    db_pool_size: int = Field(default=5, description="SQLAlchemy connection pool size")
+    db_max_overflow: int = Field(
+        default=10, description="Max overflow connections beyond pool_size"
+    )
+    db_pool_recycle: int = Field(
+        default=3600, description="Seconds before a connection is recycled"
+    )
+    db_pool_timeout: int = Field(
+        default=30, description="Seconds to wait for a connection from the pool"
+    )
+
     # Internal auth
     internal_token: str = Field(
         default="",

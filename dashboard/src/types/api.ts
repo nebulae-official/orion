@@ -27,10 +27,15 @@ export interface Content {
 export interface Trend {
   id: string;
   topic: string;
-  score: number;
-  source?: string;
+  /** Normalized virality score (0-1 or 0-100 depending on source) */
+  virality_score: number;
+  /** Legacy alias for virality_score */
+  score?: number;
+  source: string;
   keywords?: string[];
-  detected_at: string;
+  status: string;
+  detected_at?: string;
+  created_at: string;
 }
 
 /** A media asset (image, video, audio) */

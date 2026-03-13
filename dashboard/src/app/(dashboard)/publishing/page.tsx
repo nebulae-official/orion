@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { serverFetch } from "@/lib/api-client";
 import { cn, formatDate } from "@/lib/utils";
 import type { PublishRecord } from "@/types/api";
@@ -9,12 +11,21 @@ const STATUS_STYLES: Record<string, { label: string; className: string }> = {
 };
 
 export default async function PublishingPage(): Promise<React.ReactElement> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("orion_token")?.value;
+
+  if (!token) {
+    redirect("/login");
+  }
+
   let records: PublishRecord[] = [];
   let fetchError = false;
 
   try {
     records = await serverFetch<PublishRecord[]>(
-      "/api/v1/publisher/publish/history?limit=100"
+      "/api/v1/publisher/publish/history?limit=100",
+      {},
+      token
     );
   } catch {
     fetchError = true;

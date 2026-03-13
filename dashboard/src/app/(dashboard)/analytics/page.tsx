@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { BarChart3 } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
 import { StatCard } from "@/components/charts/stat-card";
@@ -34,6 +36,13 @@ interface ErrorTrendData {
 }
 
 export default async function AnalyticsPage(): Promise<React.ReactElement> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("orion_token")?.value;
+
+  if (!token) {
+    redirect("/login");
+  }
+
   let funnel: FunnelMetrics = {
     generated: 0,
     review: 0,
@@ -49,10 +58,10 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
   const [funnelResult, costsResult, providerCostsResult, errorsResult] =
     await Promise.allSettled([
-      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel"),
-      serverFetch<CostSummary>("/api/v1/pulse/costs"),
-      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider"),
-      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168"),
+      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", {}, token),
+      serverFetch<CostSummary>("/api/v1/pulse/costs", {}, token),
+      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", {}, token),
+      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", {}, token),
     ]);
 
   if (funnelResult.status === "fulfilled") {

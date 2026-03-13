@@ -157,6 +157,14 @@ func HandleWebSocket(hub *Hub, rdb *redis.Client, jwtSecret string, allowedOrigi
 				http.Error(w, `{"message":"invalid or expired ticket"}`, http.StatusUnauthorized)
 				return
 			}
+			var identity map[string]string
+			if json.Unmarshal([]byte(val), &identity) == nil {
+				slog.Info("ws_ticket_authenticated",
+					"username", identity["username"],
+					"role", identity["role"],
+					"remote_addr", r.RemoteAddr,
+				)
+			}
 			authenticated = true
 		}
 

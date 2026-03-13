@@ -1,12 +1,16 @@
 name: Build
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [main]
+    types: [completed]
+  push:
     tags: ['v*']
 
 jobs:
   build-gateway:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -18,9 +22,18 @@ jobs:
           tags: orion-gateway:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: orion-gateway:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
 
   build-services:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
         service: [scout, director, media, editor, pulse, publisher]
@@ -35,9 +48,18 @@ jobs:
           tags: orion-${{ matrix.service }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: orion-${{ matrix.service }}:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
 
   build-dashboard:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -49,3 +71,11 @@ jobs:
           tags: orion-dashboard:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: orion-dashboard:${{ github.sha }}
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'

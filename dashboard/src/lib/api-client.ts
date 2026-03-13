@@ -1,4 +1,4 @@
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 
 export interface ApiResponse<T> {
   data: T;
@@ -24,27 +24,20 @@ export class ApiError extends Error {
   }
 }
 
-function getAuthToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)orion_token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
+// Authenticated requests cannot be made client-side because the JWT is stored
+// in an httpOnly cookie. Use server actions (`src/lib/actions.ts`) for
+// authenticated requests instead.
 
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${GATEWAY_URL}${path}`;
-  const token = getAuthToken();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   const response = await fetch(url, {
     ...options,

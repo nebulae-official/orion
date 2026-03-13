@@ -81,7 +81,9 @@ func newInMemoryLimiter(requestsPerWindow int, window time.Duration) *inMemoryLi
 		maxSize:  10000,
 		done:     make(chan struct{}),
 	}
-	// Evict stale entries every minute.
+	// Evict stale entries every minute. This goroutine runs for the lifetime
+	// of the process; Stop() is not called because the limiter lives as long
+	// as the server does and is cleaned up on process exit.
 	go l.evictLoop()
 	return l
 }

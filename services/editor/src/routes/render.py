@@ -83,9 +83,12 @@ async def trigger_render(
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
-    except Exception as exc:
+    except Exception:
         await logger.aexception("render_endpoint_error")
-        raise HTTPException(status_code=500, detail=str(exc)[:500])
+        raise HTTPException(
+            status_code=500,
+            detail="Internal rendering error",
+        )
 
 
 @router.post("/tts", response_model=TTSGenerateResponse)

@@ -55,7 +55,7 @@ class RedisCache:
         return value
 
 
-async def get_cache() -> RedisCache:
+def get_cache() -> RedisCache:
     """Create and return a RedisCache backed by the global Redis connection."""
-    redis = await get_redis()
+    redis = get_redis()
     return RedisCache(redis)

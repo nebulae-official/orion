@@ -1,5 +1,6 @@
 # Go binaries
 bin/
+/gateway
 *.exe
 *.test
 
@@ -39,4 +40,4 @@ build/
 site/
 
 # UV
-uv.lock
+# uv.lock is tracked for reproducible builds
