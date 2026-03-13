@@ -1,14 +1,30 @@
-FROM python:3.13-slim
+# --- builder stage ---
+FROM python:3.13-slim AS builder
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
 
 WORKDIR /app
 
 COPY libs/orion-common/ /app/libs/orion-common/
-COPY services/publisher/pyproject.toml .
-RUN sed -i 's|file:../../libs/orion-common|file:///app/libs/orion-common|' pyproject.toml
-RUN uv pip install --system -e .
-COPY services/publisher/ .
+COPY services/publisher/pyproject.toml /app/pyproject.toml
+
+ENV UV_LINK_MODE=copy
+RUN uv pip install --system --prefix /install \
+    "orion-common @ file:///app/libs/orion-common" && \
+    uv pip install --system --prefix /install -e .
+
+COPY services/publisher/ /app/
+
+# --- runtime stage ---
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY --from=builder /install /usr/local
+COPY --from=builder /app/ /app/
+
+RUN addgroup --system orion && adduser --system --ingroup orion orion
+USER orion
 
 EXPOSE 8006
 

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useVideoPlayer } from "@/contexts/video-player-context";
 import type { ScriptSegment } from "@/types/api";
 import {
   Play,
@@ -27,6 +28,7 @@ export function VideoPlayer({
 }: VideoPlayerProps): React.ReactElement {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { registerSeekTo, setCurrentTime: setContextCurrentTime } = useVideoPlayer();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -68,7 +70,13 @@ export function VideoPlayer({
     if (!video) return;
     video.currentTime = time;
     setCurrentTime(time);
-  }, []);
+    setContextCurrentTime(time);
+  }, [setContextCurrentTime]);
+
+  // Register seekTo with context so other components can use it
+  useEffect(() => {
+    registerSeekTo(seekTo);
+  }, [registerSeekTo, seekTo]);
 
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>): void => {
@@ -96,6 +104,7 @@ export function VideoPlayer({
 
     const onTimeUpdate = (): void => {
       setCurrentTime(video.currentTime);
+      setContextCurrentTime(video.currentTime);
     };
     const onLoadedMetadata = (): void => {
       setDuration(video.duration);
@@ -113,7 +122,7 @@ export function VideoPlayer({
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
       video.removeEventListener("ended", onEnded);
     };
-  }, []);
+  }, [setContextCurrentTime]);
 
   // Track active script segment
   useEffect(() => {
@@ -123,14 +132,6 @@ export function VideoPlayer({
     );
     setActiveSegment(active ?? null);
   }, [currentTime, segments]);
-
-  // Expose seekTo globally for script panel navigation
-  useEffect(() => {
-    (window as unknown as Record<string, unknown>).__orionSeekTo = seekTo;
-    return () => {
-      delete (window as unknown as Record<string, unknown>).__orionSeekTo;
-    };
-  }, [seekTo]);
 
   function formatTime(seconds: number): string {
     const m = Math.floor(seconds / 60);
@@ -188,7 +189,7 @@ export function VideoPlayer({
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={togglePlay} className="text-white hover:text-primary-light">
+          <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Play"} className="text-white hover:text-primary-light">
             {isPlaying ? (
               <Pause className="h-5 w-5" />
             ) : (
@@ -196,7 +197,7 @@ export function VideoPlayer({
             )}
           </button>
 
-          <button onClick={toggleMute} className="text-white hover:text-primary-light">
+          <button onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"} className="text-white hover:text-primary-light">
             {isMuted ? (
               <VolumeX className="h-5 w-5" />
             ) : (
@@ -213,6 +214,8 @@ export function VideoPlayer({
             <div className="relative">
               <button
                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                aria-label={`Playback speed ${playbackSpeed}x`}
+                aria-expanded={showSpeedMenu}
                 className="flex items-center gap-1 text-sm text-white hover:text-primary-light"
               >
                 <Gauge className="h-4 w-4" />
@@ -240,6 +243,7 @@ export function VideoPlayer({
 
             <button
               onClick={toggleFullscreen}
+              aria-label="Toggle fullscreen"
               className="text-white hover:text-primary-light"
             >
               <Maximize className="h-5 w-5" />

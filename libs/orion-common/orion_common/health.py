@@ -31,12 +31,17 @@ class ReadyResponse(BaseModel):
     checks: dict[str, bool] = {}
 
 
-async def check_redis(redis_url: str) -> bool:
-    """Check Redis connectivity by issuing a PING command."""
+async def check_redis(client: aioredis.Redis) -> bool:
+    """Check Redis connectivity by issuing a PING on an existing client.
+
+    Parameters
+    ----------
+    client:
+        An existing ``redis.asyncio.Redis`` instance. The caller is
+        responsible for its lifecycle — this function will **not** close it.
+    """
     try:
-        r = aioredis.from_url(redis_url)
-        await r.ping()
-        await r.aclose()
+        await client.ping()
         return True
     except Exception as e:
         logger.warning("redis_health_check_failed", error=str(e))
@@ -57,6 +62,7 @@ async def check_postgres(engine: AsyncEngine) -> bool:
 def create_health_router(
     service_name: str,
     redis_url: str | None = None,
+    redis_client: aioredis.Redis | None = None,
     db_engine: AsyncEngine | None = None,
 ) -> APIRouter:
     """Create a health check router with configurable dependency checks.
@@ -66,11 +72,20 @@ def create_health_router(
     service_name:
         Identifier for the service (e.g. "scout", "director").
     redis_url:
-        If provided, readiness checks will verify Redis connectivity.
+        If provided **and** ``redis_client`` is not given, a shared Redis
+        client will be created once and reused across all readiness checks.
+    redis_client:
+        Pre-existing ``redis.asyncio.Redis`` instance to reuse for health
+        checks.  Takes precedence over ``redis_url``.
     db_engine:
         If provided, readiness checks will verify PostgreSQL connectivity.
     """
     router = APIRouter(tags=["health"])
+
+    # Resolve or lazily create a single shared Redis client
+    _redis_client = redis_client
+    if _redis_client is None and redis_url is not None:
+        _redis_client = aioredis.from_url(redis_url, decode_responses=True)
 
     @router.get("/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
@@ -79,8 +94,8 @@ def create_health_router(
     @router.get("/ready", response_model=ReadyResponse)
     async def ready() -> ReadyResponse:
         checks: dict[str, bool] = {}
-        if redis_url:
-            checks["redis"] = await check_redis(redis_url)
+        if _redis_client is not None:
+            checks["redis"] = await check_redis(_redis_client)
         if db_engine:
             checks["postgres"] = await check_postgres(db_engine)
 

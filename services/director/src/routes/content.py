@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from orion_common.db.models import ContentStatus
@@ -26,37 +26,37 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/content", tags=["content"])
 
 
-def _get_pipeline():
-    """Return the global ContentPipeline instance (set during lifespan)."""
-    from ..main import _pipeline  # noqa: WPS436
-
-    if _pipeline is None:
+def _get_pipeline(request: Request):
+    """Return the ContentPipeline instance from app.state."""
+    pipeline = getattr(request.app.state, "pipeline", None)
+    if pipeline is None:
         raise HTTPException(status_code=503, detail="Pipeline not initialised")
-    return _pipeline
+    return pipeline
 
 
 @router.post("/generate", response_model=GenerateContentResponse, status_code=201)
 async def generate_content(
-    request: GenerateContentRequest,
+    request_body: GenerateContentRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ):
     """Trigger content generation from a trend."""
-    pipeline = _get_pipeline()
+    pipeline = _get_pipeline(request)
 
     await logger.ainfo(
         "content_generation_requested",
-        trend_id=str(request.trend_id),
-        trend_topic=request.trend_topic,
+        trend_id=str(request_body.trend_id),
+        trend_topic=request_body.trend_topic,
     )
 
     result = await pipeline.run(
         session,
-        trend_id=request.trend_id,
-        trend_topic=request.trend_topic,
-        niche=request.niche,
-        target_platform=request.target_platform.value,
-        tone=request.tone,
-        visual_style=request.visual_style,
+        trend_id=request_body.trend_id,
+        trend_topic=request_body.trend_topic,
+        niche=request_body.niche,
+        target_platform=request_body.target_platform.value,
+        tone=request_body.tone,
+        visual_style=request_body.visual_style,
     )
 
     script = result["script"]
@@ -81,24 +81,25 @@ async def generate_content(
 
 @router.post("/resume", response_model=GenerateContentResponse, status_code=200)
 async def resume_pipeline(
-    request: HITLResumeRequest,
+    request_body: HITLResumeRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ):
     """Resume a paused HITL pipeline with human decision."""
-    pipeline = _get_pipeline()
+    pipeline = _get_pipeline(request)
 
     await logger.ainfo(
         "hitl_resume_requested",
-        thread_id=request.thread_id,
-        approved=request.approved,
+        thread_id=request_body.thread_id,
+        approved=request_body.approved,
     )
 
-    decision = {"approved": request.approved, "feedback": request.feedback}
+    decision = {"approved": request_body.approved, "feedback": request_body.feedback}
 
     try:
         result = await pipeline.resume(
             session,
-            thread_id=request.thread_id,
+            thread_id=request_body.thread_id,
             decision=decision,
         )
     except RuntimeError as exc:

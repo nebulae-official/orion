@@ -22,7 +22,7 @@ def _get_engine() -> AsyncEngine:
         settings = get_settings()
         _engine = create_async_engine(
             settings.database_url,
-            echo=settings.debug,
+            echo="debug" if settings.debug else False,
             pool_pre_ping=True,
         )
     return _engine
@@ -42,6 +42,8 @@ def _get_session_factory() -> async_sessionmaker[AsyncSession]:
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Yield an async session; suitable as a FastAPI dependency.
 
+    Auto-commits on successful completion, rolls back on error.
+
     Usage::
 
         @app.get("/items")
@@ -50,7 +52,12 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
     factory = _get_session_factory()
     async with factory() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 def get_engine() -> AsyncEngine:

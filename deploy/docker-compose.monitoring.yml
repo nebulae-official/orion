@@ -1,14 +1,10 @@
-version: "3.9"
-
 # Orion — Monitoring Stack
 # Usage: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up
 #
+# NOTE: Must be run together with docker-compose.yml so that the orion-net network exists.
+#
 # Services: Prometheus, Grafana
 # Ports: Prometheus :9090, Grafana :3001
-
-networks:
-  orion-net:
-    external: true
 
 volumes:
   prometheusdata:
@@ -66,3 +62,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+
+networks:
+  orion-net:
+    external: true

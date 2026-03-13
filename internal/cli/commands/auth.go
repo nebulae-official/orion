@@ -53,16 +53,17 @@ var authLoginCmd = &cobra.Command{
 			return fmt.Errorf("authentication failed: %w", err)
 		}
 
-		viper.Set("auth_token", resp.Token)
-		viper.Set("auth_username", resp.Username)
-		viper.Set("auth_expires_at", resp.ExpiresAt.Format(time.RFC3339))
+		viper.Set("auth_token", resp.AccessToken)
+		viper.Set("auth_username", username)
+		expiresAt := time.Now().Add(time.Duration(resp.ExpiresIn) * time.Second)
+		viper.Set("auth_expires_at", expiresAt.Format(time.RFC3339))
 		viper.Set("gateway_url", apiURL)
 
 		if err := writeConfig(); err != nil {
 			return fmt.Errorf("saving config: %w", err)
 		}
 
-		fmt.Fprintf(os.Stdout, "Logged in as %s (token expires %s)\n", resp.Username, resp.ExpiresAt.Format(time.RFC3339))
+		fmt.Fprintf(os.Stdout, "Logged in as %s (token expires %s)\n", username, expiresAt.Format(time.RFC3339))
 		return nil
 	},
 }

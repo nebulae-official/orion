@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // HealthResponse represents the JSON payload returned by health endpoints.
@@ -13,29 +15,41 @@ type HealthResponse struct {
 }
 
 // Health returns a handler that reports the service is running.
-func Health() http.HandlerFunc {
+func Health(version string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(HealthResponse{
 			Status:  "ok",
 			Service: "gateway",
-			Version: "0.1.0",
+			Version: version,
 		})
 	}
 }
 
 // Ready returns a handler for readiness checks.
-// It currently always reports ready; downstream connectivity checks
-// (e.g., Redis, PostgreSQL) can be added here later.
-func Ready() http.HandlerFunc {
+// It checks Redis connectivity and returns 503 if Redis is unreachable.
+func Ready(version string, rdb *redis.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+
+		if rdb != nil {
+			if err := rdb.Ping(r.Context()).Err(); err != nil {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				json.NewEncoder(w).Encode(HealthResponse{
+					Status:  "not_ready",
+					Service: "gateway",
+					Version: version,
+				})
+				return
+			}
+		}
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(HealthResponse{
 			Status:  "ready",
 			Service: "gateway",
-			Version: "0.1.0",
+			Version: version,
 		})
 	}
 }

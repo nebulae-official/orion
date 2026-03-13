@@ -11,13 +11,10 @@ const STATUS_STYLES: Record<string, { label: string; className: string }> = {
 export default async function PublishingPage(): Promise<React.ReactElement> {
   let records: PublishRecord[] = [];
 
-  try {
-    records = await serverFetch<PublishRecord[]>(
-      "/api/v1/publisher/publish/history?limit=100"
-    );
-  } catch {
-    // API not available yet
-  }
+  records = await serverFetch<PublishRecord[]>(
+    "/api/v1/publisher/publish/history?limit=100",
+    { revalidate: 30 }
+  );
 
   return (
     <div className="p-8">

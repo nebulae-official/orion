@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast";
 import { approveContent, rejectContent } from "@/lib/actions";
 import type { ContentStatus } from "@/types/api";
-import { CheckCircle, XCircle, RotateCcw, X, Send } from "lucide-react";
+import { CheckCircle, XCircle, RotateCcw, Send } from "lucide-react";
 import { PublishModal } from "@/components/publish-modal";
+import { Modal } from "@/components/ui/modal";
 
 interface ContentActionsProps {
   contentId: string;
@@ -165,71 +166,57 @@ function RejectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-text">
-            Reject Content
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-text-dim hover:text-text-secondary"
+    <Modal isOpen={true} onClose={onClose} title="Reject Content">
+      <div className="mt-4 space-y-4">
+        <div>
+          <label
+            htmlFor="reject-reason"
+            className="block text-sm font-medium text-text-secondary"
           >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="reject-reason"
-              className="block text-sm font-medium text-text-secondary"
-            >
-              Reason for rejection
-            </label>
-            <textarea
-              id="reject-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={4}
-              placeholder="Explain why this content should be rejected..."
-              className="mt-1 block w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder:text-text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={regenerate}
-              onChange={(e) => setRegenerate(e.target.checked)}
-              className="h-4 w-4 rounded border-border bg-surface-elevated text-primary focus:ring-primary"
-            />
-            <span className="flex items-center gap-1 text-sm text-text-secondary">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Regenerate content with feedback
-            </span>
+            Reason for rejection
           </label>
+          <textarea
+            id="reject-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={4}
+            placeholder="Explain why this content should be rejected..."
+            className="mt-1 block w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder:text-text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isPending}
-            className={cn(
-              "rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger/80",
-              isPending && "cursor-not-allowed opacity-60"
-            )}
-          >
-            {isPending ? "Rejecting..." : "Reject"}
-          </button>
-        </div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={regenerate}
+            onChange={(e) => setRegenerate(e.target.checked)}
+            className="h-4 w-4 rounded border-border bg-surface-elevated text-primary focus:ring-primary"
+          />
+          <span className="flex items-center gap-1 text-sm text-text-secondary">
+            <RotateCcw className="h-3.5 w-3.5" />
+            Regenerate content with feedback
+          </span>
+        </label>
       </div>
-    </div>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <button
+          onClick={onClose}
+          className="rounded-lg px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isPending}
+          className={cn(
+            "rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger/80",
+            isPending && "cursor-not-allowed opacity-60"
+          )}
+        >
+          {isPending ? "Rejecting..." : "Reject"}
+        </button>
+      </div>
+    </Modal>
   );
 }

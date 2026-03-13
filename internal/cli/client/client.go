@@ -181,7 +181,7 @@ func (c *OrionClient) SetToken(token string) {
 // Health calls GET /health on the gateway and returns the response.
 func (c *OrionClient) Health(ctx context.Context) (HealthResponse, error) {
 	var resp HealthResponse
-	if err := c.get(ctx, "/health", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/health", nil, &resp); err != nil {
 		return resp, fmt.Errorf("health check: %w", err)
 	}
 	return resp, nil
@@ -190,7 +190,7 @@ func (c *OrionClient) Health(ctx context.Context) (HealthResponse, error) {
 // ServiceHealth calls GET /health/{service} on the gateway.
 func (c *OrionClient) ServiceHealth(ctx context.Context, service string) (HealthResponse, error) {
 	var resp HealthResponse
-	if err := c.get(ctx, "/health/"+service, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/health/"+service, nil, &resp); err != nil {
 		return resp, fmt.Errorf("service health check (%s): %w", service, err)
 	}
 	return resp, nil
@@ -199,7 +199,7 @@ func (c *OrionClient) ServiceHealth(ctx context.Context, service string) (Health
 // Status calls GET /status on the gateway and returns a system overview.
 func (c *OrionClient) Status(ctx context.Context) (StatusResponse, error) {
 	var resp StatusResponse
-	if err := c.get(ctx, "/status", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/status", nil, &resp); err != nil {
 		return resp, fmt.Errorf("status: %w", err)
 	}
 	return resp, nil
@@ -208,7 +208,7 @@ func (c *OrionClient) Status(ctx context.Context) (StatusResponse, error) {
 // SystemStatus calls GET /status on the gateway and returns full system info.
 func (c *OrionClient) SystemStatus(ctx context.Context) (SystemStatusResponse, error) {
 	var resp SystemStatusResponse
-	if err := c.get(ctx, "/status", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/status", nil, &resp); err != nil {
 		return resp, fmt.Errorf("system status: %w", err)
 	}
 	return resp, nil
@@ -270,7 +270,7 @@ func (c *OrionClient) ListContent(ctx context.Context, status string, limit int)
 	}
 
 	var resp ContentListResponse
-	if err := c.get(ctx, path, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return resp, fmt.Errorf("list content: %w", err)
 	}
 	return resp, nil
@@ -279,7 +279,7 @@ func (c *OrionClient) ListContent(ctx context.Context, status string, limit int)
 // GetContent retrieves a single content item by ID.
 func (c *OrionClient) GetContent(ctx context.Context, id string) (ContentItem, error) {
 	var resp ContentItem
-	if err := c.get(ctx, "/api/v1/content/"+id, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/api/v1/content/"+id, nil, &resp); err != nil {
 		return resp, fmt.Errorf("get content: %w", err)
 	}
 	return resp, nil
@@ -288,7 +288,7 @@ func (c *OrionClient) GetContent(ctx context.Context, id string) (ContentItem, e
 // ApproveContent approves a content item, optionally scheduling publication.
 func (c *OrionClient) ApproveContent(ctx context.Context, id string, scheduleAt string) error {
 	payload := ApproveRequest{ScheduleAt: scheduleAt}
-	if err := c.post(ctx, "/api/v1/content/"+id+"/approve", payload, nil); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/v1/content/"+id+"/approve", payload, nil); err != nil {
 		return fmt.Errorf("approve content: %w", err)
 	}
 	return nil
@@ -297,7 +297,7 @@ func (c *OrionClient) ApproveContent(ctx context.Context, id string, scheduleAt 
 // RejectContent rejects a content item with feedback and an optional action.
 func (c *OrionClient) RejectContent(ctx context.Context, id string, feedback, action string) error {
 	payload := RejectRequest{Feedback: feedback, Action: action}
-	if err := c.post(ctx, "/api/v1/content/"+id+"/reject", payload, nil); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/v1/content/"+id+"/reject", payload, nil); err != nil {
 		return fmt.Errorf("reject content: %w", err)
 	}
 	return nil
@@ -306,7 +306,7 @@ func (c *OrionClient) RejectContent(ctx context.Context, id string, feedback, ac
 // RegenerateContent requests regeneration of a content item.
 func (c *OrionClient) RegenerateContent(ctx context.Context, id string, feedback string) error {
 	payload := RegenerateRequest{Feedback: feedback}
-	if err := c.post(ctx, "/api/v1/content/"+id+"/regenerate", payload, nil); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/v1/content/"+id+"/regenerate", payload, nil); err != nil {
 		return fmt.Errorf("regenerate content: %w", err)
 	}
 	return nil
@@ -316,7 +316,7 @@ func (c *OrionClient) RegenerateContent(ctx context.Context, id string, feedback
 func (c *OrionClient) TriggerScout(ctx context.Context, sources, regions []string) (TriggerScoutResponse, error) {
 	var resp TriggerScoutResponse
 	payload := TriggerScoutRequest{Sources: sources, Regions: regions}
-	if err := c.post(ctx, "/api/v1/scout/scan", payload, &resp); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/v1/scout/scan", payload, &resp); err != nil {
 		return resp, fmt.Errorf("trigger scout: %w", err)
 	}
 	return resp, nil
@@ -330,7 +330,7 @@ func (c *OrionClient) ListTrends(ctx context.Context, limit int, minScore float6
 	}
 
 	var resp TrendListResponse
-	if err := c.get(ctx, path, &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, path, nil, &resp); err != nil {
 		return resp, fmt.Errorf("list trends: %w", err)
 	}
 	return resp, nil
@@ -339,7 +339,7 @@ func (c *OrionClient) ListTrends(ctx context.Context, limit int, minScore float6
 // GetScoutConfig retrieves the current scout service configuration.
 func (c *OrionClient) GetScoutConfig(ctx context.Context) (ScoutConfigResponse, error) {
 	var resp ScoutConfigResponse
-	if err := c.get(ctx, "/api/v1/scout/config", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/api/v1/scout/config", nil, &resp); err != nil {
 		return resp, fmt.Errorf("get scout config: %w", err)
 	}
 	return resp, nil
@@ -348,7 +348,7 @@ func (c *OrionClient) GetScoutConfig(ctx context.Context) (ScoutConfigResponse, 
 // SetScoutConfig updates a single configuration key in the scout service.
 func (c *OrionClient) SetScoutConfig(ctx context.Context, key, value string) error {
 	payload := SetScoutConfigRequest{Key: key, Value: value}
-	if err := c.put(ctx, "/api/v1/scout/config", payload, nil); err != nil {
+	if err := c.do(ctx, http.MethodPut, "/api/v1/scout/config", payload, nil); err != nil {
 		return fmt.Errorf("set scout config: %w", err)
 	}
 	return nil
@@ -357,7 +357,7 @@ func (c *OrionClient) SetScoutConfig(ctx context.Context, key, value string) err
 // ListProviders retrieves the list of configured providers across services.
 func (c *OrionClient) ListProviders(ctx context.Context) (ProviderListResponse, error) {
 	var resp ProviderListResponse
-	if err := c.get(ctx, "/api/v1/providers", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/api/v1/providers", nil, &resp); err != nil {
 		return resp, fmt.Errorf("list providers: %w", err)
 	}
 	return resp, nil
@@ -366,7 +366,7 @@ func (c *OrionClient) ListProviders(ctx context.Context) (ProviderListResponse, 
 // SwitchProvider switches the active provider for a given service.
 func (c *OrionClient) SwitchProvider(ctx context.Context, service, mode, provider string) error {
 	payload := SwitchProviderRequest{Mode: mode, Provider: provider}
-	if err := c.put(ctx, "/api/v1/providers/"+service, payload, nil); err != nil {
+	if err := c.do(ctx, http.MethodPut, "/api/v1/providers/"+service, payload, nil); err != nil {
 		return fmt.Errorf("switch provider: %w", err)
 	}
 	return nil
@@ -375,7 +375,7 @@ func (c *OrionClient) SwitchProvider(ctx context.Context, service, mode, provide
 // ProviderStatus retrieves detailed provider health and cost information.
 func (c *OrionClient) ProviderStatus(ctx context.Context) (ProviderStatusResponse, error) {
 	var resp ProviderStatusResponse
-	if err := c.get(ctx, "/api/v1/providers/status", &resp); err != nil {
+	if err := c.do(ctx, http.MethodGet, "/api/v1/providers/status", nil, &resp); err != nil {
 		return resp, fmt.Errorf("provider status: %w", err)
 	}
 	return resp, nil
@@ -394,36 +394,8 @@ func (c *OrionClient) newRequest(ctx context.Context, method, path string, body 
 	return req, nil
 }
 
-func (c *OrionClient) get(ctx context.Context, path string, out any) error {
-	req, err := c.newRequest(ctx, http.MethodGet, path, nil)
-	if err != nil {
-		return fmt.Errorf("creating request: %w", err)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("sending request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("reading response: %w", err)
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
-	}
-
-	if out != nil {
-		if err := json.Unmarshal(body, out); err != nil {
-			return fmt.Errorf("decoding response: %w", err)
-		}
-	}
-	return nil
-}
-
-func (c *OrionClient) post(ctx context.Context, path string, payload any, out any) error {
+// do is the shared HTTP request helper used by get, post, and put operations.
+func (c *OrionClient) do(ctx context.Context, method, path string, payload, out interface{}) error {
 	var body io.Reader
 	if payload != nil {
 		data, err := json.Marshal(payload)
@@ -433,48 +405,7 @@ func (c *OrionClient) post(ctx context.Context, path string, payload any, out an
 		body = bytes.NewReader(data)
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPost, path, body)
-	if err != nil {
-		return fmt.Errorf("creating request: %w", err)
-	}
-	if payload != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("sending request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("reading response: %w", err)
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
-	}
-
-	if out != nil {
-		if err := json.Unmarshal(respBody, out); err != nil {
-			return fmt.Errorf("decoding response: %w", err)
-		}
-	}
-	return nil
-}
-
-func (c *OrionClient) put(ctx context.Context, path string, payload any, out any) error {
-	var body io.Reader
-	if payload != nil {
-		data, err := json.Marshal(payload)
-		if err != nil {
-			return fmt.Errorf("encoding request: %w", err)
-		}
-		body = bytes.NewReader(data)
-	}
-
-	req, err := c.newRequest(ctx, http.MethodPut, path, body)
+	req, err := c.newRequest(ctx, method, path, body)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}

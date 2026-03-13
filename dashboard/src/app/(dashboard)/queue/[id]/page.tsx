@@ -3,10 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { VideoPlayer } from "@/components/video-player";
 import { ScriptPanel } from "@/components/script-panel";
 import { ContentActions } from "@/components/content-actions";
+import { VideoPlayerProvider } from "@/contexts/video-player-context";
 import { cn, formatDate } from "@/lib/utils";
 import type { Content, ScriptSegment } from "@/types/api";
-
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 
 interface ContentDetailPageProps {
   params: Promise<{ id: string }>;
@@ -19,7 +19,7 @@ async function fetchContent(token: string, id: string): Promise<Content | null> 
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 0 },
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) return null;
@@ -41,7 +41,7 @@ async function fetchScriptSegments(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 0 },
+        next: { revalidate: 30 },
       }
     );
 
@@ -114,21 +114,23 @@ export default async function ContentDetailPage({
       </div>
 
       {/* Video + Script */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <VideoPlayer
-            videoUrl={content.video_url}
-            thumbnailUrl={content.thumbnail_url}
-            segments={segments}
-          />
+      <VideoPlayerProvider>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <VideoPlayer
+              videoUrl={content.video_url}
+              thumbnailUrl={content.thumbnail_url}
+              segments={segments}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <ScriptPanel
+              script={content.script}
+              segments={segments}
+            />
+          </div>
         </div>
-        <div className="lg:col-span-1">
-          <ScriptPanel
-            script={content.script}
-            segments={segments}
-          />
-        </div>
-      </div>
+      </VideoPlayerProvider>
 
       {/* Description */}
       {content.body && (

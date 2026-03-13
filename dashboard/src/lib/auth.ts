@@ -3,8 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthResponse, User } from "@/types/api";
-
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 const TOKEN_COOKIE = "orion_token";
 const TOKEN_EXPIRY_COOKIE = "orion_token_expiry";
 const USER_COOKIE = "orion_user";

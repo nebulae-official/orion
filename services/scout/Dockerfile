@@ -1,21 +1,38 @@
-FROM python:3.13-slim
+# --- builder stage ---
+FROM python:3.13-slim AS builder
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
 
 WORKDIR /app
 
 # Copy shared library first
 COPY libs/orion-common/ /app/libs/orion-common/
 
-# Copy service files
-COPY services/scout/pyproject.toml .
+# Copy service dependency manifest
+COPY services/scout/pyproject.toml /app/pyproject.toml
 
-# Rewrite the local path dep so uv can resolve it in the container
-RUN sed -i 's|file:../../libs/orion-common|file:///app/libs/orion-common|' pyproject.toml
+# Override local path dep for container context
+ENV UV_LINK_MODE=copy
+RUN uv pip install --system --prefix /install \
+    "orion-common @ file:///app/libs/orion-common" && \
+    uv pip install --system --prefix /install -e .
 
-RUN uv pip install --system -e .
+COPY services/scout/ /app/
 
-COPY services/scout/ .
+# --- runtime stage ---
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code
+COPY --from=builder /app/ /app/
+
+# Add non-root user
+RUN addgroup --system orion && adduser --system --ingroup orion orion
+USER orion
 
 EXPOSE 8001
 

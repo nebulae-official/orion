@@ -34,7 +34,7 @@ configure_logging()
 logger = structlog.get_logger()
 settings = get_settings()
 
-# Module-level singletons initialised during lifespan
+# Module-level singletons for event handlers (not used by routes)
 _pipeline: ContentPipeline | None = None
 _event_bus: EventBus | None = None
 _regeneration_service: RegenerationService | None = None
@@ -176,6 +176,7 @@ async def lifespan(app: FastAPI):
         enable_hitl=True,
     )
     _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory, checkpointer=_checkpointer)
+    app.state.pipeline = _pipeline
 
     # Initialise regeneration service
     _regeneration_service = RegenerationService(

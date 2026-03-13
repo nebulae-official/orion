@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/websocket"
 	"github.com/orion-rigel/orion/internal/gateway/handlers"
 )
 
@@ -18,9 +18,9 @@ func TestHub_BroadcastReachesClient(t *testing.T) {
 	go hub.Run()
 	defer hub.Stop()
 
-	// Create test server with WebSocket handler
+	// Create test server with WebSocket handler (dev mode for token auth)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+		handlers.HandleWebSocket(hub, "test-secret", true)(w, r)
 	}))
 	defer srv.Close()
 
@@ -30,7 +30,7 @@ func TestHub_BroadcastReachesClient(t *testing.T) {
 	})
 	tokenStr, _ := tok.SignedString([]byte("test-secret"))
 
-	// Connect WebSocket
+	// Connect WebSocket using legacy token auth (dev mode)
 	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?token=" + tokenStr
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
@@ -68,7 +68,7 @@ func TestWebSocket_RejectsNoToken(t *testing.T) {
 	defer hub.Stop()
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+		handlers.HandleWebSocket(hub, "test-secret", true)(w, r)
 	}))
 	defer srv.Close()
 
@@ -76,6 +76,89 @@ func TestWebSocket_RejectsNoToken(t *testing.T) {
 	_, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err == nil {
 		t.Fatal("expected connection to be rejected")
+	}
+	if resp != nil && resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("got status %d, want 401", resp.StatusCode)
+	}
+}
+
+func TestWebSocket_TokenRejectedInProduction(t *testing.T) {
+	hub := handlers.NewHub()
+	go hub.Run()
+	defer hub.Stop()
+
+	// Production mode (isDevelopment = false, the default)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+	}))
+	defer srv.Close()
+
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": "admin", "exp": float64(9999999999),
+	})
+	tokenStr, _ := tok.SignedString([]byte("test-secret"))
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?token=" + tokenStr
+	_, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err == nil {
+		t.Fatal("expected connection to be rejected in production mode")
+	}
+	if resp != nil && resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("got status %d, want 401", resp.StatusCode)
+	}
+}
+
+func TestWebSocket_TicketAuth(t *testing.T) {
+	hub := handlers.NewHub()
+	go hub.Run()
+	defer hub.Stop()
+
+	// Production mode — ticket auth should work
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+	}))
+	defer srv.Close()
+
+	// Store a valid ticket
+	handlers.WSTicketStore.Store("test-ticket-123", 30*time.Second)
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=test-ticket-123"
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("ws dial with ticket failed: %v", err)
+	}
+	defer conn.Close()
+
+	// Verify the ticket is single-use — second attempt should fail
+	_, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err == nil {
+		t.Fatal("expected second use of ticket to be rejected")
+	}
+	if resp != nil && resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("got status %d, want 401", resp.StatusCode)
+	}
+}
+
+func TestWebSocket_ExpiredTicket(t *testing.T) {
+	hub := handlers.NewHub()
+	go hub.Run()
+	defer hub.Stop()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+	}))
+	defer srv.Close()
+
+	// Store a ticket that expires immediately
+	handlers.WSTicketStore.Store("expired-ticket", 0)
+
+	// Small sleep to ensure it's expired
+	time.Sleep(1 * time.Millisecond)
+
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=expired-ticket"
+	_, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err == nil {
+		t.Fatal("expected expired ticket to be rejected")
 	}
 	if resp != nil && resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("got status %d, want 401", resp.StatusCode)

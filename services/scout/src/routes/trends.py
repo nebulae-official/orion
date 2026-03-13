@@ -6,7 +6,7 @@ import uuid
 from typing import Annotated
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from orion_common.db.session import get_session
@@ -29,26 +29,6 @@ logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1/trends", tags=["trends"])
 
-# These are set by main.py during app startup
-_providers: list[TrendProvider] = []
-_event_bus: EventBus | None = None
-_active_niche: str | None = "tech"
-
-
-def configure_routes(
-    providers: list[TrendProvider],
-    event_bus: EventBus,
-    active_niche: str | None = "tech",
-) -> None:
-    """Wire runtime dependencies into the trends router.
-
-    Called once during application startup from main.py lifespan.
-    """
-    global _providers, _event_bus, _active_niche  # noqa: PLW0603
-    _providers = providers
-    _event_bus = event_bus
-    _active_niche = active_niche
-
 
 @router.get("", response_model=TrendListResponse)
 async def list_trends(
@@ -69,11 +49,12 @@ async def list_trends(
 
 
 @router.get("/config", response_model=NicheConfigResponse)
-async def get_niche_config() -> NicheConfigResponse:
+async def get_niche_config(request: Request) -> NicheConfigResponse:
     """Get the current active niche configuration."""
-    config = DEFAULT_NICHE_CONFIGS.get(_active_niche or "tech")
+    active_niche: str | None = getattr(request.app.state, "active_niche", "tech")
+    config = DEFAULT_NICHE_CONFIGS.get(active_niche or "tech")
     return NicheConfigResponse(
-        active_niche=_active_niche,
+        active_niche=active_niche,
         available_niches=list(DEFAULT_NICHE_CONFIGS.keys()),
         config=config,
     )
@@ -96,20 +77,26 @@ async def get_trend(
 
 @router.post("/scan", response_model=ScanResultResponse)
 async def trigger_scan(
-    request: TriggerScanRequest,
+    request_body: TriggerScanRequest,
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ScanResultResponse:
     """Trigger a manual trend scan.
 
     Runs the full ingestion pipeline on-demand: fetch from all
     providers, apply niche filter, deduplicate, persist, and publish.
     """
-    if _event_bus is None:
+    event_bus: EventBus | None = getattr(request.app.state, "event_bus", None)
+    if event_bus is None:
         raise HTTPException(
             status_code=503,
             detail="Event bus not initialized",
         )
 
-    niche_name = request.niche or _active_niche or "tech"
+    providers: list[TrendProvider] = getattr(request.app.state, "providers", [])
+    active_niche: str | None = getattr(request.app.state, "active_niche", "tech")
+
+    niche_name = request_body.niche or active_niche or "tech"
     niche_config = DEFAULT_NICHE_CONFIGS.get(niche_name)
     if niche_config is None:
         raise HTTPException(
@@ -120,12 +107,12 @@ async def trigger_scan(
     niche_filter = NicheFilter()
 
     total_found, saved = await fetch_and_process_trends(
-        providers=_providers,
+        providers=providers,
         niche_filter=niche_filter,
         niche_config=niche_config,
-        event_bus=_event_bus,
-        region=request.region,
-        limit=request.limit,
+        event_bus=event_bus,
+        region=request_body.region,
+        limit=request_body.limit,
     )
 
     return ScanResultResponse(

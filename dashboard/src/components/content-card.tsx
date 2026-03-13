@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { Content, ContentStatus } from "@/types/api";
 import { Play, FileText, Clock, CheckCircle, XCircle, Send, Sparkles } from "lucide-react";
@@ -50,9 +51,11 @@ export function ContentCard({ content }: { content: Content }): React.ReactEleme
       {/* Thumbnail */}
       <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-surface-elevated">
         {content.thumbnail_url ? (
-          <img
+          <Image
             src={content.thumbnail_url}
             alt={content.title}
+            width={400}
+            height={225}
             className="h-full w-full object-cover"
           />
         ) : (

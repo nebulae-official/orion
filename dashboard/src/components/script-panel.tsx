@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import type { ScriptSegment } from "@/types/api";
+import { useVideoPlayer } from "@/contexts/video-player-context";
 
 interface ScriptPanelProps {
   script?: string;
@@ -14,17 +14,12 @@ function formatTimestamp(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function seekTo(time: number): void {
-  const fn = (window as unknown as Record<string, unknown>).__orionSeekTo;
-  if (typeof fn === "function") {
-    (fn as (t: number) => void)(time);
-  }
-}
-
 export function ScriptPanel({
   script,
   segments = [],
 }: ScriptPanelProps): React.ReactElement {
+  const { seekTo } = useVideoPlayer();
+
   if (!script && segments.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-surface p-6">

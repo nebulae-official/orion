@@ -1,5 +1,6 @@
 """orion-common — shared library for all Orion Python services."""
 
+from orion_common.cache import RedisCache, get_cache
 from orion_common.config import CommonSettings, get_settings
 from orion_common.db import Base, get_session
 from orion_common.event_bus import EventBus
@@ -13,7 +14,9 @@ __all__ = [
     "CommonSettings",
     "EventBus",
     "OrionMilvusClient",
+    "RedisCache",
     "create_health_router",
+    "get_cache",
     "get_milvus_client",
     "get_session",
     "get_settings",

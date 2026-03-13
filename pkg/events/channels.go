@@ -10,5 +10,6 @@ const (
 	TrendDetected   = "orion.trend.detected"
 	TrendExpired    = "orion.trend.expired"
 	MediaGenerated  = "orion.media.generated"
-	MediaFailed     = "orion.media.failed"
+	MediaFailed            = "orion.media.failed"
+	PipelineStageChanged   = "orion.pipeline.stage_changed"
 )

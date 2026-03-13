@@ -1,10 +1,10 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
-
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 
 interface QueuePageProps {
   searchParams: Promise<{
@@ -38,7 +38,7 @@ async function fetchContentList(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 0 },
+        next: { revalidate: 30 },
       }
     );
 
@@ -106,7 +106,7 @@ export default async function QueuePage({
                   if (limit !== 12) params.set("limit", String(limit));
 
                   return (
-                    <a
+                    <Link
                       key={pageNum}
                       href={`/queue?${params.toString()}`}
                       className={
@@ -116,7 +116,7 @@ export default async function QueuePage({
                       }
                     >
                       {pageNum}
-                    </a>
+                    </Link>
                   );
                 }
               )}

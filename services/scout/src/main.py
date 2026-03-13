@@ -15,7 +15,7 @@ from src.filters.niche_filter import DEFAULT_NICHE_CONFIGS, NicheFilter
 from src.providers.google_trends import GoogleTrendsProvider
 from src.providers.rss import RSSProvider
 from src.providers.twitter import TwitterProvider
-from src.routes.trends import configure_routes, router as trends_router
+from src.routes.trends import router as trends_router
 from src.scheduler import TrendScheduler
 
 configure_logging()
@@ -42,12 +42,10 @@ async def lifespan(app: FastAPI):
     event_bus = EventBus(settings.redis_url)
     await event_bus.start_listening()
 
-    # Wire routes
-    configure_routes(
-        providers=providers,
-        event_bus=event_bus,
-        active_niche=ACTIVE_NICHE,
-    )
+    # Store dependencies on app.state for route access
+    app.state.providers = providers
+    app.state.event_bus = event_bus
+    app.state.active_niche = ACTIVE_NICHE
 
     # Deduplicator (applied before niche filter in the pipeline)
     deduplicator = TrendDeduplicator()

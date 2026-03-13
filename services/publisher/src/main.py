@@ -11,6 +11,7 @@ from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
 
 from src.routes import accounts, publish
+from src.services.crypto import validate_encryption_key
 
 configure_logging()
 logger = structlog.get_logger()
@@ -20,6 +21,8 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("service_starting", service="publisher")
+    validate_encryption_key()
+    logger.info("encryption_key_validated", service="publisher")
     yield
     logger.info("service_stopping", service="publisher")
 

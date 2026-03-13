@@ -18,12 +18,17 @@ func testConfig() config.Config {
 		AdminUsername: "admin",
 		AdminPassword: "testpass",
 		AdminEmail:    "admin@test.local",
+		AppEnv:        "development",
 	}
 }
 
 func TestLogin(t *testing.T) {
 	cfg := testConfig()
-	handler := handlers.Login(cfg)
+	authHandler, err := handlers.NewAuthHandler(cfg, nil)
+	if err != nil {
+		t.Fatalf("failed to create auth handler: %v", err)
+	}
+	handler := authHandler.Login()
 
 	tests := []struct {
 		name       string
@@ -86,7 +91,11 @@ func TestLogin(t *testing.T) {
 
 func TestRefreshToken(t *testing.T) {
 	cfg := testConfig()
-	handler := handlers.RefreshToken(cfg)
+	authHandler, err := handlers.NewAuthHandler(cfg, nil)
+	if err != nil {
+		t.Fatalf("failed to create auth handler: %v", err)
+	}
+	handler := authHandler.RefreshToken()
 
 	// Generate a valid token for testing
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

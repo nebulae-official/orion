@@ -2,11 +2,50 @@ name: Build
 on:
   push:
     branches: [main]
-    tags: ["v*"]
+    tags: ['v*']
+
 jobs:
-  build:
+  build-gateway:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build placeholder
-        run: echo "Docker build jobs will be added when services exist"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.gateway
+          push: false
+          tags: orion-gateway:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-services:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [scout, director, media, editor, pulse, publisher]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/${{ matrix.service }}/Dockerfile
+          push: false
+          tags: orion-${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./dashboard
+          file: dashboard/Dockerfile
+          push: false
+          tags: orion-dashboard:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

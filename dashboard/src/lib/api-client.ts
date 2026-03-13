@@ -1,4 +1,4 @@
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 
 export interface ApiResponse<T> {
   data: T;
@@ -14,27 +14,16 @@ export interface ApiError {
   status: number;
 }
 
-function getAuthToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)orion_token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${GATEWAY_URL}${path}`;
-  const token = getAuthToken();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   const response = await fetch(url, {
     ...options,
@@ -90,14 +79,15 @@ export const apiClient = {
  */
 export async function serverFetch<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit & { revalidate?: number } = {},
   token?: string
 ): Promise<T> {
   const url = `${GATEWAY_URL}${path}`;
+  const { revalidate = 60, ...fetchOptions } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
+    ...(fetchOptions.headers as Record<string, string>),
   };
 
   if (token) {
@@ -105,9 +95,9 @@ export async function serverFetch<T>(
   }
 
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers,
-    next: { revalidate: 0 },
+    next: { revalidate },
   });
 
   if (!response.ok) {

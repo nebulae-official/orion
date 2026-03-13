@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -10,16 +11,25 @@ import structlog
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from orion_common.cache import RedisCache
 from orion_common.db.models import Trend, TrendStatus
 
 logger = structlog.get_logger(__name__)
+
+TREND_LIST_CACHE_KEY = "scout:trends:active:{page}:{page_size}"
+TREND_LIST_CACHE_TTL = 30  # seconds
 
 
 class TrendRepository:
     """Async repository for Trend CRUD operations."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        cache: RedisCache | None = None,
+    ) -> None:
         self._session = session
+        self._cache = cache
 
     async def create(self, trend_data: dict[str, Any]) -> Trend:
         """Insert a new trend record.
@@ -35,6 +45,8 @@ class TrendRepository:
         await self._session.flush()
         await self._session.refresh(trend)
         logger.info("trend_created", trend_id=str(trend.id), topic=trend.topic)
+        # Invalidate list cache on create
+        await self._invalidate_list_cache()
         return trend
 
     async def get_by_id(self, trend_id: uuid.UUID) -> Trend | None:
@@ -114,4 +126,16 @@ class TrendRepository:
             trend_id=str(trend_id),
             status=status.value,
         )
+        # Invalidate list cache on status update
+        await self._invalidate_list_cache()
         return trend
+
+    async def _invalidate_list_cache(self) -> None:
+        """Invalidate cached trend list entries."""
+        if self._cache is None:
+            return
+        # Delete commonly-accessed first pages
+        for page in range(1, 6):
+            for page_size in (20, 50, 100):
+                key = TREND_LIST_CACHE_KEY.format(page=page, page_size=page_size)
+                await self._cache.delete(key)

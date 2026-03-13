@@ -23,7 +23,7 @@ const SERVICES: { name: string; displayName: string; port: number }[] = [
   { name: "pulse", displayName: "Pulse (Analytics)", port: 8005 },
 ];
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 const REFRESH_INTERVAL = 30_000;
 
 export function ServiceHealth(): React.ReactElement {

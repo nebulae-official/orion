@@ -21,15 +21,12 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
   let trends: Trend[] = [];
   let total = 0;
 
-  try {
-    const response = await serverFetch<TrendListResponse>(
-      "/api/v1/scout/trends"
-    );
-    trends = response.items;
-    total = response.total;
-  } catch {
-    // Services may not be running
-  }
+  const response = await serverFetch<TrendListResponse>(
+    "/api/v1/scout/trends",
+    { revalidate: 60 }
+  );
+  trends = response.items;
+  total = response.total;
 
   const used = trends.filter((t) => t.status === "USED").length;
   const discarded = trends.filter((t) => t.status === "DISCARDED").length;

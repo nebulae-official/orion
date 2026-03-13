@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAuthToken } from "@/lib/auth";
 import type { Content, ContentFeedback } from "@/types/api";
-
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
+import { GATEWAY_URL } from "@/lib/config";
 
 async function authenticatedFetch(
   path: string,

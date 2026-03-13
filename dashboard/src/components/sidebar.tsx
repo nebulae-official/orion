@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ import {
   LogOut,
   Send,
   Sparkles,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface NavItem {
@@ -34,18 +37,40 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
 ];
 
+export function MobileSidebarToggle({
+  onClick,
+}: {
+  onClick: () => void;
+}): React.ReactElement {
+  return (
+    <button
+      onClick={onClick}
+      className="fixed left-4 top-4 z-40 rounded-lg border border-border bg-surface p-2 text-text-secondary shadow-md transition-colors hover:bg-surface-hover md:hidden"
+      aria-label="Open navigation menu"
+    >
+      <Menu className="h-5 w-5" />
+    </button>
+  );
+}
+
 export function Sidebar(): React.ReactElement {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   function isActive(href: string): boolean {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   }
 
-  return (
-    <aside className="flex h-screen w-64 flex-col border-r border-border bg-surface">
+  const sidebarContent = (
+    <>
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-border px-6">
+      <div className="flex h-16 items-center justify-between border-b border-border px-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Sparkles className="h-4 w-4 text-white" />
@@ -57,6 +82,14 @@ export function Sidebar(): React.ReactElement {
             v1.0
           </span>
         </Link>
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="text-text-dim hover:text-text-secondary md:hidden"
+          aria-label="Close navigation menu"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -92,6 +125,34 @@ export function Sidebar(): React.ReactElement {
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile toggle button */}
+      <MobileSidebarToggle onClick={() => setMobileOpen(true)} />
+
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar - desktop: always visible, mobile: overlay */}
+      <aside
+        className={cn(
+          "flex h-screen w-64 flex-col border-r border-border bg-surface",
+          // Mobile: fixed overlay with transition
+          "fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 md:relative md:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

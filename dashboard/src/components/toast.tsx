@@ -55,7 +55,7 @@ export function ToastProvider({
   return (
     <ToastContext.Provider value={{ toast: addToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div role="region" aria-label="Notifications" aria-live="polite" aria-atomic="false" className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={() => removeToast(t.id)} />
         ))}
@@ -78,6 +78,7 @@ function ToastItem({
 
   return (
     <div
+      role="alert"
       className={cn(
         "flex items-center gap-3 rounded-lg border px-4 py-3 shadow-md transition-all",
         STYLES[toast.type]
@@ -87,6 +88,7 @@ function ToastItem({
       <p className="text-sm font-medium text-text">{toast.message}</p>
       <button
         onClick={onDismiss}
+        aria-label="Dismiss notification"
         className="ml-auto text-text-dim hover:text-text-secondary"
       >
         <X className="h-4 w-4" />

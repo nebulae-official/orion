@@ -1,5 +1,3 @@
-version: "3.9"
-
 # Orion — Development Overrides
 # Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 #

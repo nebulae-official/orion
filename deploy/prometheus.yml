@@ -46,6 +46,11 @@ scrape_configs:
       - targets: ["pulse:8005"]
     metrics_path: /metrics
 
+  - job_name: publisher
+    static_configs:
+      - targets: ["publisher:8006"]
+    metrics_path: /metrics
+
   # Postgres exporter (optional — add postgres-exporter service to enable)
   # - job_name: postgres
   #   static_configs:

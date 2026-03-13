@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 import structlog
@@ -103,6 +104,9 @@ class OrionMilvusClient:
 
     Manages connections, collection creation, and CRUD operations
     for the ``hook_embeddings`` and ``content_embeddings`` collections.
+
+    All synchronous pymilvus calls are wrapped with ``asyncio.to_thread``
+    to avoid blocking the asyncio event loop.
     """
 
     def __init__(
@@ -122,7 +126,8 @@ class OrionMilvusClient:
         if self._connected:
             return
 
-        connections.connect(
+        await asyncio.to_thread(
+            connections.connect,
             alias=self._alias,
             host=self._host,
             port=self._port,
@@ -137,7 +142,9 @@ class OrionMilvusClient:
     async def close(self) -> None:
         """Disconnect from the Milvus server."""
         if self._connected:
-            connections.disconnect(alias=self._alias)
+            await asyncio.to_thread(
+                connections.disconnect, alias=self._alias
+            )
             self._connected = False
             logger.info("milvus_disconnected")
 
@@ -146,13 +153,18 @@ class OrionMilvusClient:
         await self.connect()
 
         # Hook embeddings collection
-        if not utility.has_collection(HOOK_EMBEDDINGS_COLLECTION):
+        has_hooks = await asyncio.to_thread(
+            utility.has_collection, HOOK_EMBEDDINGS_COLLECTION
+        )
+        if not has_hooks:
             schema = _hook_embeddings_schema()
-            collection = Collection(
+            collection = await asyncio.to_thread(
+                Collection,
                 name=HOOK_EMBEDDINGS_COLLECTION,
                 schema=schema,
             )
-            collection.create_index(
+            await asyncio.to_thread(
+                collection.create_index,
                 field_name="embedding",
                 index_params={
                     "metric_type": "COSINE",
@@ -166,13 +178,18 @@ class OrionMilvusClient:
             )
 
         # Content embeddings collection
-        if not utility.has_collection(CONTENT_EMBEDDINGS_COLLECTION):
+        has_content = await asyncio.to_thread(
+            utility.has_collection, CONTENT_EMBEDDINGS_COLLECTION
+        )
+        if not has_content:
             schema = _content_embeddings_schema()
-            collection = Collection(
+            collection = await asyncio.to_thread(
+                Collection,
                 name=CONTENT_EMBEDDINGS_COLLECTION,
                 schema=schema,
             )
-            collection.create_index(
+            await asyncio.to_thread(
+                collection.create_index,
                 field_name="embedding",
                 index_params={
                     "metric_type": "COSINE",
@@ -194,14 +211,19 @@ class OrionMilvusClient:
     ) -> None:
         """Insert a hook embedding into the hook_embeddings collection."""
         await self.connect()
-        collection = Collection(HOOK_EMBEDDINGS_COLLECTION)
-        collection.insert([
-            [embedding],
-            [hook_text],
-            [engagement_score],
-            [content_id],
-        ])
-        collection.flush()
+        collection = await asyncio.to_thread(
+            Collection, HOOK_EMBEDDINGS_COLLECTION
+        )
+        await asyncio.to_thread(
+            collection.insert,
+            [
+                [embedding],
+                [hook_text],
+                [engagement_score],
+                [content_id],
+            ],
+        )
+        await asyncio.to_thread(collection.flush)
         logger.debug(
             "hook_embedding_inserted",
             content_id=content_id,
@@ -216,14 +238,19 @@ class OrionMilvusClient:
     ) -> None:
         """Insert a content embedding into the content_embeddings collection."""
         await self.connect()
-        collection = Collection(CONTENT_EMBEDDINGS_COLLECTION)
-        collection.insert([
-            [embedding],
-            [script_text],
-            [content_id],
-            [created_at],
-        ])
-        collection.flush()
+        collection = await asyncio.to_thread(
+            Collection, CONTENT_EMBEDDINGS_COLLECTION
+        )
+        await asyncio.to_thread(
+            collection.insert,
+            [
+                [embedding],
+                [script_text],
+                [content_id],
+                [created_at],
+            ],
+        )
+        await asyncio.to_thread(collection.flush)
         logger.debug(
             "content_embedding_inserted",
             content_id=content_id,
@@ -244,10 +271,13 @@ class OrionMilvusClient:
             List of dicts with hook_text, engagement_score, content_id, distance.
         """
         await self.connect()
-        collection = Collection(HOOK_EMBEDDINGS_COLLECTION)
-        collection.load()
+        collection = await asyncio.to_thread(
+            Collection, HOOK_EMBEDDINGS_COLLECTION
+        )
+        await asyncio.to_thread(collection.load)
 
-        results = collection.search(
+        results = await asyncio.to_thread(
+            collection.search,
             data=[query_embedding],
             anns_field="embedding",
             param={
@@ -289,10 +319,13 @@ class OrionMilvusClient:
             List of dicts with script_text, content_id, created_at, distance.
         """
         await self.connect()
-        collection = Collection(CONTENT_EMBEDDINGS_COLLECTION)
-        collection.load()
+        collection = await asyncio.to_thread(
+            Collection, CONTENT_EMBEDDINGS_COLLECTION
+        )
+        await asyncio.to_thread(collection.load)
 
-        results = collection.search(
+        results = await asyncio.to_thread(
+            collection.search,
             data=[query_embedding],
             anns_field="embedding",
             param={

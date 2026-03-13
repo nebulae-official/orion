@@ -14,7 +14,7 @@ func TestHealth(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/health", nil)
 		rec := httptest.NewRecorder()
 
-		handlers.Health().ServeHTTP(rec, req)
+		handlers.Health("0.1.0").ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
@@ -43,11 +43,11 @@ func TestHealth(t *testing.T) {
 }
 
 func TestReady(t *testing.T) {
-	t.Run("returns ready status", func(t *testing.T) {
+	t.Run("returns ready status without redis", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/ready", nil)
 		rec := httptest.NewRecorder()
 
-		handlers.Ready().ServeHTTP(rec, req)
+		handlers.Ready("0.1.0", nil).ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)

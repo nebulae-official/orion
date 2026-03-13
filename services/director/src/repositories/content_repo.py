@@ -8,14 +8,23 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from orion_common.cache import RedisCache
 from orion_common.db.models import Content, ContentStatus, PipelineRun, PipelineStatus
+
+CONTENT_LIST_CACHE_KEY = "director:content:list:{status}:{limit}:{offset}"
+CONTENT_LIST_CACHE_TTL = 30  # seconds
 
 
 class ContentRepository:
     """Data-access layer for the ``contents`` and ``pipeline_runs`` tables."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        cache: RedisCache | None = None,
+    ) -> None:
         self._session = session
+        self._cache = cache
 
     # ------------------------------------------------------------------
     # Content CRUD
@@ -41,6 +50,7 @@ class ContentRepository:
         )
         self._session.add(content)
         await self._session.flush()
+        await self._invalidate_list_cache()
         return content
 
     async def get_by_id(self, content_id: uuid.UUID) -> Content | None:
@@ -58,6 +68,7 @@ class ContentRepository:
             return None
         content.status = status
         await self._session.flush()
+        await self._invalidate_list_cache()
         return content
 
     async def update_content(
@@ -82,6 +93,7 @@ class ContentRepository:
         if status is not None:
             content.status = status
         await self._session.flush()
+        await self._invalidate_list_cache()
         return content
 
     async def list_by_status(
@@ -136,3 +148,21 @@ class ContentRepository:
             run.error_message = error_message
         await self._session.flush()
         return run
+
+    # ------------------------------------------------------------------
+    # Cache helpers
+    # ------------------------------------------------------------------
+
+    async def _invalidate_list_cache(self) -> None:
+        """Invalidate cached content list entries."""
+        if self._cache is None:
+            return
+        # Delete commonly-accessed cache keys
+        for status_val in [None, *ContentStatus]:
+            status_str = status_val.value if status_val else "all"
+            for limit in (50, 100, 200):
+                for offset in (0, 50, 100):
+                    key = CONTENT_LIST_CACHE_KEY.format(
+                        status=status_str, limit=limit, offset=offset
+                    )
+                    await self._cache.delete(key)

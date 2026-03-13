@@ -4,22 +4,74 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
-  lint-python:
+  go-checks:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - run: go vet ./...
+      - run: go test ./... -race -coverprofile=coverage.out
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  python-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [scout, director, media, editor, pulse, publisher]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.14"
-      - run: pip install ruff
-      - run: ruff check services/ shared/ || true
-  lint-frontend:
+          python-version: '3.13'
+      - uses: astral-sh/setup-uv@v4
+      - name: Install dependencies
+        run: |
+          cd services/${{ matrix.service }}
+          uv sync
+      - name: Lint
+        run: |
+          cd services/${{ matrix.service }}
+          uv run ruff check src/ tests/
+      - name: Type check
+        run: |
+          cd services/${{ matrix.service }}
+          uv run mypy src/ --ignore-missing-imports
+      - name: Test
+        run: |
+          cd services/${{ matrix.service }}
+          uv run pytest tests/ -v --tb=short
+
+  dashboard-checks:
     runs-on: ubuntu-latest
-    if: hashFiles('dashboard/**') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-      - run: cd dashboard && npm ci && npm run lint || true
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: dashboard/package-lock.json
+      - run: cd dashboard && npm ci
+      - run: cd dashboard && npm run lint
+      - run: cd dashboard && npm run test:ci
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

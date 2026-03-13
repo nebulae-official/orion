@@ -25,6 +25,13 @@ func main() {
 		"env", cfg.AppEnv,
 	)
 
+	// Warn about insecure development defaults.
+	if insecure := cfg.InsecureDefaults(); len(insecure) > 0 {
+		slog.Warn("Running with development defaults — NOT suitable for production",
+			"insecure_values", insecure,
+		)
+	}
+
 	hub := handlers.NewHub()
 	go hub.Run()
 

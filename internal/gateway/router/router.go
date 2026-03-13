@@ -11,6 +11,7 @@ import (
 
 	"github.com/orion-rigel/orion/internal/gateway/handlers"
 	"github.com/orion-rigel/orion/internal/gateway/middleware"
+	"github.com/orion-rigel/orion/internal/gateway/proxy"
 	"github.com/orion-rigel/orion/pkg/config"
 )
 
@@ -19,17 +20,33 @@ import (
 func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	r := chi.NewRouter()
 
-	// Middleware stack: RequestID -> Logger -> Recoverer -> CORS
+	// Middleware stack: RequestID -> Logger -> Recoverer -> Security -> CORS -> Metrics -> MaxBody
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.CORS)
+	r.Use(middleware.SecurityHeaders(cfg.IsDevelopment()))
+	r.Use(middleware.CORS(cfg.AllowedOrigins))
 	r.Use(middleware.Metrics)
+	r.Use(middleware.MaxBodySize(5 << 20)) // 5 MB
+
+	// Redis client shared across rate limiter, auth, health
+	opt, parseErr := redis.ParseURL(cfg.RedisURL)
+	var rdb *redis.Client
+	if parseErr != nil {
+		slog.Warn("redis_url_parse_failed, rate limiting disabled", "error", parseErr)
+	} else {
+		rdb = redis.NewClient(opt)
+	}
 
 	// Health and readiness endpoints.
-	r.Get("/health", handlers.Health())
-	r.Get("/ready", handlers.Ready())
-	r.Handle("/metrics", promhttp.Handler())
+	r.Get("/health", handlers.Health(cfg.AppVersion))
+	r.Get("/ready", handlers.Ready(cfg.AppVersion, rdb))
+
+	// Metrics and status behind auth.
+	r.Group(func(admin chi.Router) {
+		admin.Use(middleware.Auth(cfg.JWTSecret))
+		admin.Handle("/metrics", promhttp.Handler())
+	})
 
 	// Service URLs for health aggregation and proxying.
 	services := map[string]string{
@@ -45,31 +62,41 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	r.Get("/status", handlers.Status(services))
 
 	// Auth endpoints (public)
-	r.Post("/api/v1/auth/login", handlers.Login(cfg))
-	r.Post("/api/v1/auth/refresh", handlers.RefreshToken(cfg))
-
-	// WebSocket endpoint (public — JWT validated from query param inside handler)
-	r.Get("/ws", handlers.HandleWebSocket(hub, cfg.JWTSecret))
-
-	// Redis client for rate limiting
-	opt, err := redis.ParseURL(cfg.RedisURL)
+	authHandler, err := handlers.NewAuthHandler(cfg, rdb)
 	if err != nil {
-		slog.Warn("redis_url_parse_failed, rate limiting disabled", "error", err)
+		return nil, fmt.Errorf("creating auth handler: %w", err)
+	}
+	r.Post("/api/v1/auth/login", authHandler.Login())
+	r.Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+
+	// WebSocket ticket endpoint (protected)
+	r.Group(func(protected chi.Router) {
+		protected.Use(middleware.Auth(cfg.JWTSecret))
+		protected.Post("/api/v1/ws/ticket", authHandler.IssueWSTicket())
+	})
+
+	// WebSocket endpoint (public — auth validated inside handler)
+	r.Get("/ws", handlers.HandleWebSocket(hub, cfg.JWTSecret, cfg.IsDevelopment()))
+
+	if rdb == nil {
 		// Fall back to flat proxy without rate limiting
 		return mountFlatProxy(r, services, cfg.JWTSecret)
 	}
-	rdb := redis.NewClient(opt)
 
 	// Per-service route groups with rate limiting, protected by JWT auth
 	r.Group(func(protected chi.Router) {
 		protected.Use(middleware.Auth(cfg.JWTSecret))
 
 		for name, url := range services {
-			proxy, err := handlers.NewServiceProxy(url)
+			svcProxy, err := handlers.NewServiceProxy(url)
 			if err != nil {
 				slog.Error("creating proxy failed", "service", name, "error", err)
 				return
 			}
+
+			// Wrap the proxy with a circuit breaker per service.
+			cb := proxy.NewCircuitBreaker(name)
+			guarded := cb.Wrap(svcProxy)
 
 			rlCfg := rateLimitForService(name)
 
@@ -78,22 +105,22 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 					// Method-aware rate limiting for services with distinct read/write limits
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Post("/*", proxy.ServeHTTP)
+					})).Post("/*", guarded.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Put("/*", proxy.ServeHTTP)
+					})).Put("/*", guarded.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Delete("/*", proxy.ServeHTTP)
+					})).Delete("/*", guarded.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.readGroup, Limit: rlCfg.readLimit, Window: time.Minute,
-					})).Get("/*", proxy.ServeHTTP)
+					})).Get("/*", guarded.ServeHTTP)
 				} else {
 					// Single rate limit for all methods
 					sub.Use(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.readGroup, Limit: rlCfg.readLimit, Window: time.Minute,
 					}))
-					sub.Handle("/*", proxy)
+					sub.Handle("/*", guarded)
 				}
 			})
 
@@ -136,13 +163,16 @@ func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string) 
 		protected.Use(middleware.Auth(jwtSecret))
 
 		for name, url := range services {
-			proxy, err := handlers.NewServiceProxy(url)
+			svcProxy, err := handlers.NewServiceProxy(url)
 			if err != nil {
 				slog.Error("creating proxy failed", "service", name, "error", err)
 				return
 			}
+			cb := proxy.NewCircuitBreaker(name)
+			guarded := cb.Wrap(svcProxy)
+
 			pattern := fmt.Sprintf("/api/v1/%s/*", name)
-			protected.Handle(pattern, proxy)
+			protected.Handle(pattern, guarded)
 			slog.Info("registered service proxy (no rate limit)",
 				"service", name,
 				"target", url,
