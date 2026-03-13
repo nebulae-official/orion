@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/orion-rigel/orion/pkg/auth"
 )
 
 const userContextKey contextKey = "user"
@@ -34,12 +35,7 @@ func Auth(secret string) func(http.Handler) http.Handler {
 			}
 
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, jwt.ErrSignatureInvalid
-				}
-				return []byte(secret), nil
-			})
+			token, err := auth.ValidateToken(tokenStr, secret)
 			if err != nil || !token.Valid {
 				http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 				return

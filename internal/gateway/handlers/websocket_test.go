@@ -2,25 +2,38 @@ package handlers_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 	"github.com/orion-rigel/orion/internal/gateway/handlers"
 )
+
+func setupTestRedis(t *testing.T) (*miniredis.Miniredis, *redis.Client) {
+	t.Helper()
+	mr := miniredis.RunT(t)
+	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	return mr, rdb
+}
 
 func TestHub_BroadcastReachesClient(t *testing.T) {
 	hub := handlers.NewHub()
 	go hub.Run()
 	defer hub.Stop()
 
+	_, rdb := setupTestRedis(t)
+	defer rdb.Close()
+
 	// Create test server with WebSocket handler (dev mode for token auth)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret", true)(w, r)
+		handlers.HandleWebSocket(hub, rdb, "test-secret", nil, true)(w, r)
 	}))
 	defer srv.Close()
 
@@ -67,8 +80,11 @@ func TestWebSocket_RejectsNoToken(t *testing.T) {
 	go hub.Run()
 	defer hub.Stop()
 
+	_, rdb := setupTestRedis(t)
+	defer rdb.Close()
+
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret", true)(w, r)
+		handlers.HandleWebSocket(hub, rdb, "test-secret", nil, true)(w, r)
 	}))
 	defer srv.Close()
 
@@ -87,9 +103,12 @@ func TestWebSocket_TokenRejectedInProduction(t *testing.T) {
 	go hub.Run()
 	defer hub.Stop()
 
+	_, rdb := setupTestRedis(t)
+	defer rdb.Close()
+
 	// Production mode (isDevelopment = false, the default)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+		handlers.HandleWebSocket(hub, rdb, "test-secret", nil)(w, r)
 	}))
 	defer srv.Close()
 
@@ -113,16 +132,21 @@ func TestWebSocket_TicketAuth(t *testing.T) {
 	go hub.Run()
 	defer hub.Stop()
 
+	mr, rdb := setupTestRedis(t)
+	defer rdb.Close()
+
 	// Production mode — ticket auth should work
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+		handlers.HandleWebSocket(hub, rdb, "test-secret", nil)(w, r)
 	}))
 	defer srv.Close()
 
-	// Store a valid ticket
-	handlers.WSTicketStore.Store("test-ticket-123", 30*time.Second)
+	// Store a valid ticket in Redis (matching what IssueWSTicket does)
+	ticket := "test-ticket-123"
+	mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
+	mr.SetTTL(fmt.Sprintf("ws:ticket:%s", ticket), 30*time.Second)
 
-	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=test-ticket-123"
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=" + ticket
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		t.Fatalf("ws dial with ticket failed: %v", err)
@@ -144,18 +168,23 @@ func TestWebSocket_ExpiredTicket(t *testing.T) {
 	go hub.Run()
 	defer hub.Stop()
 
+	mr, rdb := setupTestRedis(t)
+	defer rdb.Close()
+
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.HandleWebSocket(hub, "test-secret")(w, r)
+		handlers.HandleWebSocket(hub, rdb, "test-secret", nil)(w, r)
 	}))
 	defer srv.Close()
 
-	// Store a ticket that expires immediately
-	handlers.WSTicketStore.Store("expired-ticket", 0)
+	// Store a ticket and immediately expire it via miniredis
+	ticket := "expired-ticket"
+	mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
+	mr.SetTTL(fmt.Sprintf("ws:ticket:%s", ticket), 1*time.Millisecond)
 
-	// Small sleep to ensure it's expired
-	time.Sleep(1 * time.Millisecond)
+	// Fast-forward miniredis time to expire the key
+	mr.FastForward(1 * time.Second)
 
-	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=expired-ticket"
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=" + ticket
 	_, resp, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err == nil {
 		t.Fatal("expected expired ticket to be rejected")

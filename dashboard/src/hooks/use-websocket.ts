@@ -43,6 +43,28 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
+  // Latest-ref pattern: store callbacks in refs so `connect` stays stable
+  const onMessageRef = useRef(onMessage);
+  const onErrorRef = useRef(onError);
+  const onOpenRef = useRef(onOpen);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
+  useEffect(() => {
+    onOpenRef.current = onOpen;
+  }, [onOpen]);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
 
@@ -54,7 +76,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         if (!mountedRef.current) return;
         setIsConnected(true);
         reconnectCountRef.current = 0;
-        onOpen?.();
+        onOpenRef.current?.();
       };
 
       ws.onmessage = (event: MessageEvent) => {
@@ -62,20 +84,20 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         try {
           const data = JSON.parse(event.data as string) as WebSocketMessage;
           setLastMessage(data);
-          onMessage?.(data);
+          onMessageRef.current?.(data);
         } catch {
           // Non-JSON message; ignore
         }
       };
 
       ws.onerror = (event: Event) => {
-        onError?.(event);
+        onErrorRef.current?.(event);
       };
 
       ws.onclose = () => {
         if (!mountedRef.current) return;
         setIsConnected(false);
-        onClose?.();
+        onCloseRef.current?.();
 
         // Auto-reconnect
         if (reconnectCountRef.current < maxReconnectAttempts) {
@@ -90,7 +112,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         reconnectTimerRef.current = setTimeout(connect, reconnectInterval);
       }
     }
-  }, [url, onMessage, onError, onOpen, onClose, reconnectInterval, maxReconnectAttempts]);
+  }, [url, reconnectInterval, maxReconnectAttempts]);
 
   const send = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

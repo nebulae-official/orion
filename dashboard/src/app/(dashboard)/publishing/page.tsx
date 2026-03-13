@@ -10,17 +10,28 @@ const STATUS_STYLES: Record<string, { label: string; className: string }> = {
 
 export default async function PublishingPage(): Promise<React.ReactElement> {
   let records: PublishRecord[] = [];
+  let fetchError = false;
 
-  records = await serverFetch<PublishRecord[]>(
-    "/api/v1/publisher/publish/history?limit=100",
-    { revalidate: 30 }
-  );
+  try {
+    records = await serverFetch<PublishRecord[]>(
+      "/api/v1/publisher/publish/history?limit=100",
+      { revalidate: 30 }
+    );
+  } catch {
+    fetchError = true;
+  }
 
   return (
     <div className="p-8">
       <h1 className="mb-6 font-[family-name:var(--font-display)] text-2xl font-bold text-text">
         Publishing History
       </h1>
+
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
+          Unable to load publishing history. Showing cached or empty results.
+        </div>
+      )}
 
       {records.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-12 text-center">

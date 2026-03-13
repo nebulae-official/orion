@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -61,13 +62,21 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	// Aggregated status endpoint — checks all downstream services concurrently.
 	r.Get("/status", handlers.Status(services))
 
-	// Auth endpoints (public)
+	// Auth endpoints with strict rate limiting (5 req/min per IP)
 	authHandler, err := handlers.NewAuthHandler(cfg, rdb)
 	if err != nil {
 		return nil, fmt.Errorf("creating auth handler: %w", err)
 	}
-	r.Post("/api/v1/auth/login", authHandler.Login())
-	r.Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+	if rdb != nil {
+		authRL := middleware.RateLimit(rdb, middleware.RateLimitConfig{
+			Group: "auth", Limit: 5, Window: time.Minute,
+		})
+		r.With(authRL).Post("/api/v1/auth/login", authHandler.Login())
+		r.With(authRL).Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+	} else {
+		r.Post("/api/v1/auth/login", authHandler.Login())
+		r.Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+	}
 
 	// WebSocket ticket endpoint (protected)
 	r.Group(func(protected chi.Router) {
@@ -75,58 +84,75 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 		protected.Post("/api/v1/ws/ticket", authHandler.IssueWSTicket())
 	})
 
-	// WebSocket endpoint (public — auth validated inside handler)
-	r.Get("/ws", handlers.HandleWebSocket(hub, cfg.JWTSecret, cfg.IsDevelopment()))
+	// WebSocket endpoint (public — auth validated inside handler via Redis)
+	r.Get("/ws", handlers.HandleWebSocket(hub, rdb, cfg.JWTSecret, cfg.AllowedOrigins, cfg.IsDevelopment()))
 
 	if rdb == nil {
 		// Fall back to flat proxy without rate limiting
 		return mountFlatProxy(r, services, cfg.JWTSecret)
 	}
 
+	// Build proxies before entering the route group so errors can be returned.
+	type serviceProxy struct {
+		name    string
+		url     string
+		handler http.Handler
+		rlCfg   serviceRateLimit
+	}
+
+	var proxies []serviceProxy
+	for name, url := range services {
+		svcProxy, err := handlers.NewServiceProxy(url)
+		if err != nil {
+			return nil, fmt.Errorf("creating proxy for %s: %w", name, err)
+		}
+
+		cb := proxy.NewCircuitBreaker(name)
+		guarded := cb.Wrap(svcProxy)
+
+		proxies = append(proxies, serviceProxy{
+			name:    name,
+			url:     url,
+			handler: guarded,
+			rlCfg:   rateLimitForService(name),
+		})
+	}
+
 	// Per-service route groups with rate limiting, protected by JWT auth
 	r.Group(func(protected chi.Router) {
 		protected.Use(middleware.Auth(cfg.JWTSecret))
 
-		for name, url := range services {
-			svcProxy, err := handlers.NewServiceProxy(url)
-			if err != nil {
-				slog.Error("creating proxy failed", "service", name, "error", err)
-				return
-			}
+		for _, sp := range proxies {
+			handler := sp.handler
+			rlCfg := sp.rlCfg
 
-			// Wrap the proxy with a circuit breaker per service.
-			cb := proxy.NewCircuitBreaker(name)
-			guarded := cb.Wrap(svcProxy)
-
-			rlCfg := rateLimitForService(name)
-
-			protected.Route(fmt.Sprintf("/api/v1/%s", name), func(sub chi.Router) {
+			protected.Route(fmt.Sprintf("/api/v1/%s", sp.name), func(sub chi.Router) {
 				if rlCfg.writeLimit > 0 {
 					// Method-aware rate limiting for services with distinct read/write limits
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Post("/*", guarded.ServeHTTP)
+					})).Post("/*", handler.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Put("/*", guarded.ServeHTTP)
+					})).Put("/*", handler.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.writeGroup, Limit: rlCfg.writeLimit, Window: time.Minute,
-					})).Delete("/*", guarded.ServeHTTP)
+					})).Delete("/*", handler.ServeHTTP)
 					sub.With(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.readGroup, Limit: rlCfg.readLimit, Window: time.Minute,
-					})).Get("/*", guarded.ServeHTTP)
+					})).Get("/*", handler.ServeHTTP)
 				} else {
 					// Single rate limit for all methods
 					sub.Use(middleware.RateLimit(rdb, middleware.RateLimitConfig{
 						Group: rlCfg.readGroup, Limit: rlCfg.readLimit, Window: time.Minute,
 					}))
-					sub.Handle("/*", guarded)
+					sub.Handle("/*", handler)
 				}
 			})
 
 			slog.Info("registered service proxy",
-				"service", name,
-				"target", url,
+				"service", sp.name,
+				"target", sp.url,
 				"rate_limit_group", rlCfg.readGroup,
 			)
 		}
@@ -159,23 +185,33 @@ func rateLimitForService(name string) serviceRateLimit {
 }
 
 func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string) (chi.Router, error) {
+	// Build proxies before route group so errors propagate to caller.
+	type flatEntry struct {
+		name    string
+		url     string
+		handler http.Handler
+	}
+
+	var entries []flatEntry
+	for name, url := range services {
+		svcProxy, err := handlers.NewServiceProxy(url)
+		if err != nil {
+			return nil, fmt.Errorf("creating proxy for %s: %w", name, err)
+		}
+		cb := proxy.NewCircuitBreaker(name)
+		guarded := cb.Wrap(svcProxy)
+		entries = append(entries, flatEntry{name: name, url: url, handler: guarded})
+	}
+
 	r.Group(func(protected chi.Router) {
 		protected.Use(middleware.Auth(jwtSecret))
 
-		for name, url := range services {
-			svcProxy, err := handlers.NewServiceProxy(url)
-			if err != nil {
-				slog.Error("creating proxy failed", "service", name, "error", err)
-				return
-			}
-			cb := proxy.NewCircuitBreaker(name)
-			guarded := cb.Wrap(svcProxy)
-
-			pattern := fmt.Sprintf("/api/v1/%s/*", name)
-			protected.Handle(pattern, guarded)
+		for _, e := range entries {
+			pattern := fmt.Sprintf("/api/v1/%s/*", e.name)
+			protected.Handle(pattern, e.handler)
 			slog.Info("registered service proxy (no rate limit)",
-				"service", name,
-				"target", url,
+				"service", e.name,
+				"target", e.url,
 				"pattern", pattern,
 			)
 		}

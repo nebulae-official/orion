@@ -65,6 +65,7 @@ type inMemoryLimiter struct {
 	limit    rate.Limit
 	burst    int
 	maxSize  int
+	done     chan struct{}
 }
 
 type limiterEntry struct {
@@ -78,6 +79,7 @@ func newInMemoryLimiter(requestsPerWindow int, window time.Duration) *inMemoryLi
 		limit:    rate.Limit(float64(requestsPerWindow) / window.Seconds()),
 		burst:    requestsPerWindow,
 		maxSize:  10000,
+		done:     make(chan struct{}),
 	}
 	// Evict stale entries every minute.
 	go l.evictLoop()
@@ -87,16 +89,26 @@ func newInMemoryLimiter(requestsPerWindow int, window time.Duration) *inMemoryLi
 func (l *inMemoryLimiter) evictLoop() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
-	for range ticker.C {
-		l.mu.Lock()
-		cutoff := time.Now().Add(-5 * time.Minute)
-		for key, entry := range l.limiters {
-			if entry.lastSeen.Before(cutoff) {
-				delete(l.limiters, key)
+	for {
+		select {
+		case <-ticker.C:
+			l.mu.Lock()
+			cutoff := time.Now().Add(-5 * time.Minute)
+			for key, entry := range l.limiters {
+				if entry.lastSeen.Before(cutoff) {
+					delete(l.limiters, key)
+				}
 			}
+			l.mu.Unlock()
+		case <-l.done:
+			return
 		}
-		l.mu.Unlock()
 	}
+}
+
+// Stop shuts down the eviction goroutine.
+func (l *inMemoryLimiter) Stop() {
+	close(l.done)
 }
 
 func (l *inMemoryLimiter) Allow(key string) bool {

@@ -55,12 +55,13 @@ services:
   # ─────────────────────────────────────────────
 
   migrate:
-    image: python:3.13-slim
+    image: ghcr.io/astral-sh/uv:0.5.11-python3.13-bookworm-slim
     working_dir: /app
     volumes:
-      - ..:/app
+      - ../migrations:/app/migrations
+      - ../alembic.ini:/app/alembic.ini:ro
     command: >
-      sh -c "pip install alembic sqlalchemy psycopg2-binary &&
+      sh -c "uv pip install --system alembic sqlalchemy psycopg2-binary &&
              alembic upgrade head"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-orion}:${POSTGRES_PASSWORD:-orion_dev}@postgres:5432/${POSTGRES_DB:-orion}

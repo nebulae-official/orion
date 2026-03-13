@@ -46,6 +46,7 @@ type CircuitBreaker struct {
 	consecutiveFails int
 	state            State
 	lastFailure      time.Time
+	halfOpenProbing  bool
 }
 
 // Option configures a CircuitBreaker.
@@ -114,6 +115,10 @@ func (cb *CircuitBreaker) Allow() bool {
 		return true
 	case StateHalfOpen:
 		// Allow exactly one probe request.
+		if cb.halfOpenProbing {
+			return false
+		}
+		cb.halfOpenProbing = true
 		return true
 	case StateOpen:
 		return false
@@ -130,6 +135,7 @@ func (cb *CircuitBreaker) RecordSuccess() {
 	prevState := cb.state
 	cb.consecutiveFails = 0
 	cb.state = StateClosed
+	cb.halfOpenProbing = false
 
 	if prevState != StateClosed {
 		slog.Info("circuit_breaker_closed", "service", cb.name, "previous_state", prevState.String())
@@ -144,6 +150,7 @@ func (cb *CircuitBreaker) RecordFailure() {
 
 	cb.consecutiveFails++
 	cb.lastFailure = time.Now()
+	cb.halfOpenProbing = false
 
 	if cb.consecutiveFails >= cb.maxFailures && cb.state != StateOpen {
 		cb.state = StateOpen

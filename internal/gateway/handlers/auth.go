@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	"github.com/orion-rigel/orion/pkg/auth"
 	"github.com/orion-rigel/orion/pkg/config"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -134,12 +135,7 @@ func (h *AuthHandler) RefreshToken() http.HandlerFunc {
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		_, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(h.cfg.JWTSecret), nil
-		})
+		_, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
 		if err != nil {
 			http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 			return
@@ -186,12 +182,7 @@ func (h *AuthHandler) IssueWSTicket() http.HandlerFunc {
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		_, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(h.cfg.JWTSecret), nil
-		})
+		_, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
 		if err != nil {
 			http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 			return

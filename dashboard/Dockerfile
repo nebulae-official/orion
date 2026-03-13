@@ -12,7 +12,16 @@ RUN npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+
+RUN addgroup -S orion && adduser -S orion -G orion
+
+COPY --from=builder --chown=orion:orion /app/.next/standalone ./
+COPY --from=builder --chown=orion:orion /app/.next/static ./.next/static
+
+USER orion
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget -qO- http://localhost:3000/ || exit 1
+
 CMD ["node", "server.js"]

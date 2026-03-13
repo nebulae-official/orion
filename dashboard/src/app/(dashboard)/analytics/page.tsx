@@ -45,12 +45,39 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
   let providerCosts: ProviderCostSummary[] = [];
   let errors: ErrorTrendData[] = [];
 
-  [funnel, costs, providerCosts, errors] = await Promise.all([
-    serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", { revalidate: 30 }),
-    serverFetch<CostSummary>("/api/v1/pulse/costs", { revalidate: 30 }),
-    serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", { revalidate: 30 }),
-    serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", { revalidate: 30 }),
-  ]);
+  let fetchErrors: string[] = [];
+
+  const [funnelResult, costsResult, providerCostsResult, errorsResult] =
+    await Promise.allSettled([
+      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", { revalidate: 30 }),
+      serverFetch<CostSummary>("/api/v1/pulse/costs", { revalidate: 30 }),
+      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", { revalidate: 30 }),
+      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", { revalidate: 30 }),
+    ]);
+
+  if (funnelResult.status === "fulfilled") {
+    funnel = funnelResult.value;
+  } else {
+    fetchErrors.push("pipeline funnel");
+  }
+
+  if (costsResult.status === "fulfilled") {
+    costs = costsResult.value;
+  } else {
+    fetchErrors.push("cost summary");
+  }
+
+  if (providerCostsResult.status === "fulfilled") {
+    providerCosts = providerCostsResult.value;
+  } else {
+    fetchErrors.push("provider costs");
+  }
+
+  if (errorsResult.status === "fulfilled") {
+    errors = errorsResult.value;
+  } else {
+    fetchErrors.push("error trends");
+  }
 
   const approvalRate =
     funnel.generated > 0
@@ -78,6 +105,12 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
           </div>
         </div>
       </div>
+
+      {fetchErrors.length > 0 && (
+        <div className="mb-6 rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
+          Unable to load some analytics data ({fetchErrors.join(", ")}). Partial results shown.
+        </div>
+      )}
 
       <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
         <StatCard title="Total Generated" value={funnel.generated} />

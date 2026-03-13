@@ -20,13 +20,18 @@ interface TrendListResponse {
 export default async function TrendsPage(): Promise<React.ReactElement> {
   let trends: Trend[] = [];
   let total = 0;
+  let fetchError = false;
 
-  const response = await serverFetch<TrendListResponse>(
-    "/api/v1/scout/trends",
-    { revalidate: 60 }
-  );
-  trends = response.items;
-  total = response.total;
+  try {
+    const response = await serverFetch<TrendListResponse>(
+      "/api/v1/scout/trends",
+      { revalidate: 60 }
+    );
+    trends = response.items;
+    total = response.total;
+  } catch {
+    fetchError = true;
+  }
 
   const used = trends.filter((t) => t.status === "USED").length;
   const discarded = trends.filter((t) => t.status === "DISCARDED").length;
@@ -44,6 +49,12 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
           </div>
         </div>
       </div>
+
+      {fetchError && (
+        <div className="mb-6 rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
+          Unable to load trends data. Showing cached or empty results.
+        </div>
+      )}
 
       <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
         <StatCard title="Total Found" value={total} />

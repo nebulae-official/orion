@@ -157,6 +157,79 @@ func TestCircuitBreaker_HalfOpenAfterTimeout(t *testing.T) {
 	}
 }
 
+func TestCircuitBreaker_HalfOpenSingleProbe(t *testing.T) {
+	t.Parallel()
+
+	cb := proxy.NewCircuitBreaker("test-svc",
+		proxy.WithMaxFailures(2),
+		proxy.WithResetTimeout(10*time.Millisecond),
+	)
+
+	// Trip the circuit
+	cb.RecordFailure()
+	cb.RecordFailure()
+
+	// Wait for half-open
+	time.Sleep(15 * time.Millisecond)
+
+	if cb.State() != proxy.StateHalfOpen {
+		t.Fatalf("expected half-open, got %v", cb.State())
+	}
+
+	// First call should be allowed (the probe)
+	if !cb.Allow() {
+		t.Fatal("first half-open request should be allowed as probe")
+	}
+
+	// Subsequent calls should be rejected while the probe is in flight
+	for i := range 5 {
+		if cb.Allow() {
+			t.Fatalf("request %d should be rejected while probe is in flight", i+2)
+		}
+	}
+
+	// After the probe succeeds, requests should be allowed again
+	cb.RecordSuccess()
+	if !cb.Allow() {
+		t.Fatal("requests should be allowed after successful probe")
+	}
+}
+
+func TestCircuitBreaker_HalfOpenProbeFailureAllowsRetry(t *testing.T) {
+	t.Parallel()
+
+	cb := proxy.NewCircuitBreaker("test-svc",
+		proxy.WithMaxFailures(1),
+		proxy.WithResetTimeout(10*time.Millisecond),
+	)
+
+	// Trip the circuit
+	cb.RecordFailure()
+
+	// Wait for half-open
+	time.Sleep(15 * time.Millisecond)
+
+	// Probe is allowed
+	if !cb.Allow() {
+		t.Fatal("probe should be allowed")
+	}
+
+	// Probe fails — circuit re-opens, halfOpenProbing is reset
+	cb.RecordFailure()
+
+	if cb.State() != proxy.StateOpen {
+		t.Fatalf("expected open after failed probe, got %v", cb.State())
+	}
+
+	// Wait for half-open again
+	time.Sleep(15 * time.Millisecond)
+
+	// A new probe should be allowed (halfOpenProbing was reset)
+	if !cb.Allow() {
+		t.Fatal("new probe should be allowed after failed probe reset")
+	}
+}
+
 func TestCircuitBreaker_HalfOpenFailureReopens(t *testing.T) {
 	t.Parallel()
 
