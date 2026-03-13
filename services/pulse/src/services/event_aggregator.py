@@ -17,9 +17,9 @@ from orion_common.db import PipelineRun, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
-from services.pulse.src.metrics import TRENDS_DISCARDED, TRENDS_FOUND, TRENDS_USED
-from services.pulse.src.repositories.event_repo import AnalyticsEvent, EventRepository
-from services.pulse.src.schemas import PipelineMetrics, StageMetric
+from src.metrics import TRENDS_DISCARDED, TRENDS_FOUND, TRENDS_USED
+from src.repositories.event_repo import AnalyticsEvent, EventRepository
+from src.schemas import PipelineMetrics, StageMetric
 
 logger = structlog.get_logger(__name__)
 

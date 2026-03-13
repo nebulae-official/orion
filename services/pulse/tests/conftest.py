@@ -8,8 +8,8 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
-from services.pulse.src.routes import analytics, costs, pipeline
-from services.pulse.src.services.event_aggregator import EventAggregator
+from src.routes import analytics, costs, pipeline
+from src.services.event_aggregator import EventAggregator
 
 
 @pytest.fixture

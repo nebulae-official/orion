@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import AsyncClient
 
-from services.pulse.src.schemas import PipelineMetrics
+from src.schemas import PipelineMetrics
 
 
 @pytest.mark.asyncio

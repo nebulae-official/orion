@@ -8,8 +8,8 @@ import structlog
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.pulse.src.repositories.cost_repo import ProviderCost
-from services.pulse.src.repositories.event_repo import AnalyticsEvent
+from src.repositories.cost_repo import ProviderCost
+from src.repositories.event_repo import AnalyticsEvent
 
 logger = structlog.get_logger(__name__)
 

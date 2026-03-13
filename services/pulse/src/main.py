@@ -11,10 +11,10 @@ from orion_common.event_bus import EventBus
 from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
 
-from services.pulse.src.routes import analytics, costs, pipeline
-from services.pulse.src.services.cleanup import cleanup_old_records
-from services.pulse.src.services.cost_tracker import CostTracker
-from services.pulse.src.services.event_aggregator import EventAggregator
+from .routes import analytics, costs, pipeline
+from .services.cleanup import cleanup_old_records
+from .services.cost_tracker import CostTracker
+from .services.event_aggregator import EventAggregator
 
 configure_logging()
 logger = structlog.get_logger()

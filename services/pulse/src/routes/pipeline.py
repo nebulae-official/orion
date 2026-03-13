@@ -13,9 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from orion_common.db import Content, ContentStatus, PipelineRun, PipelineStatus
 from orion_common.db.session import get_session
 
-from services.pulse.src.repositories.cost_repo import CostRepository
-from services.pulse.src.repositories.event_repo import EventRepository
-from services.pulse.src.schemas import (
+from src.repositories.cost_repo import CostRepository
+from src.repositories.event_repo import EventRepository
+from src.schemas import (
     CostProjection,
     ErrorTrend,
     FunnelMetrics,

@@ -115,7 +115,6 @@ def instrument_app(app: "FastAPI", service_name: str) -> None:
         should_group_status_codes=False,
         should_ignore_untemplated=True,
         excluded_handlers=["/health", "/ready", "/metrics"],
-        metric_namespace=service_name.replace("-", "_"),
     )
     instrumentator.instrument(app)
     instrumentator.expose(app, endpoint="/metrics", tags=["metrics"])

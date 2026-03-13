@@ -147,9 +147,10 @@ async def lifespan(app: FastAPI):
     visual_prompter = VisualPrompter(llm_provider)
 
     # Initialise LangGraph checkpointer (PostgreSQL)
-    # settings.database_url_sync returns postgresql:// format (no +asyncpg)
+    # from_conn_string returns an async context manager in newer versions
     checkpointer_connstr = settings.database_url_sync
-    _checkpointer = AsyncPostgresSaver.from_conn_string(checkpointer_connstr)
+    _checkpointer_ctx = AsyncPostgresSaver.from_conn_string(checkpointer_connstr)
+    _checkpointer = await _checkpointer_ctx.__aenter__()
     await _checkpointer.setup()
 
     # Create async session factory for analyst node
@@ -197,8 +198,8 @@ async def lifespan(app: FastAPI):
         await _vector_memory.close()
     if _event_bus is not None:
         await _event_bus.close()
-    if _checkpointer is not None:
-        await _checkpointer.conn.aclose()
+    if _checkpointer_ctx is not None:
+        await _checkpointer_ctx.__aexit__(None, None, None)
     _checkpointer = None
     _pipeline = None
     _event_bus = None

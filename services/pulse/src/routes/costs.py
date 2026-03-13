@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from orion_common.db.session import get_session
 
-from services.pulse.src.repositories.cost_repo import CostRepository
-from services.pulse.src.schemas import (
+from src.repositories.cost_repo import CostRepository
+from src.schemas import (
     CostSummary,
     DailyCostSummary,
     ProviderCostSummary,

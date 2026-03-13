@@ -1,5 +1,3 @@
-version: "3.9"
-
 # Orion — Main Docker Compose
 # Profiles:
 #   default (no flag): gateway, scouts, directors, media, editor, pulse, dashboard, postgres, redis, milvus
@@ -47,7 +45,8 @@ services:
 
   scout:
     build:
-      context: ../services/scout
+      context: ..
+      dockerfile: services/scout/Dockerfile
     ports:
       - "8001:8001"
     env_file:
@@ -61,7 +60,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8001/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8001/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -69,7 +68,8 @@ services:
 
   director:
     build:
-      context: ../services/director
+      context: ..
+      dockerfile: services/director/Dockerfile
     ports:
       - "8002:8002"
     env_file:
@@ -83,7 +83,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8002/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -91,7 +91,8 @@ services:
 
   media:
     build:
-      context: ../services/media
+      context: ..
+      dockerfile: services/media/Dockerfile
     ports:
       - "8003:8003"
     env_file:
@@ -103,7 +104,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8003/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8003/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -111,7 +112,8 @@ services:
 
   editor:
     build:
-      context: ../services/editor
+      context: ..
+      dockerfile: services/editor/Dockerfile
     ports:
       - "8004:8004"
     env_file:
@@ -125,7 +127,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8004/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8004/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -133,7 +135,8 @@ services:
 
   pulse:
     build:
-      context: ../services/pulse
+      context: ..
+      dockerfile: services/pulse/Dockerfile
     ports:
       - "8005:8005"
     env_file:
@@ -147,7 +150,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8005/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8005/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -155,7 +158,8 @@ services:
 
   publisher:
     build:
-      context: ../services/publisher
+      context: ..
+      dockerfile: services/publisher/Dockerfile
     ports:
       - "8006:8006"
     env_file:
@@ -169,7 +173,7 @@ services:
       - orion-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8006/health"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8006/health')\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -206,7 +210,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-orion}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orion_dev}
       POSTGRES_DB: ${POSTGRES_DB:-orion}
     networks:
       - orion-net
@@ -235,7 +239,7 @@ services:
       start_period: 5s
 
   milvus:
-    image: milvusdb/milvus:v2.4-latest
+    image: milvusdb/milvus:v2.4.24
     command: ["milvus", "run", "standalone"]
     ports:
       - "19530:19530"

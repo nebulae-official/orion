@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from services.pulse.src.schemas import (
+from src.schemas import (
     AnalyticsEventCreate,
     AnalyticsEventResponse,
     CostCategory,
@@ -19,7 +19,7 @@ from services.pulse.src.schemas import (
     TrendAnalytics,
     TrendSourceCount,
 )
-from services.pulse.src.services.event_aggregator import (
+from src.services.event_aggregator import (
     EventAggregator,
     _ALL_CHANNELS,
     _CHANNEL_SERVICE_MAP,

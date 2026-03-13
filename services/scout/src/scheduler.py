@@ -169,6 +169,7 @@ class TrendScheduler:
     async def start(self) -> None:
         """Start the scheduler with the configured interval."""
         self._scheduler = AsyncScheduler()
+        await self._scheduler.__aenter__()
         await self._scheduler.add_schedule(
             self._scheduled_job,
             IntervalTrigger(minutes=self._interval_minutes),
@@ -183,6 +184,6 @@ class TrendScheduler:
     async def shutdown(self) -> None:
         """Gracefully stop the scheduler."""
         if self._scheduler is not None:
-            await self._scheduler.stop()
+            await self._scheduler.__aexit__(None, None, None)
             self._scheduler = None
             logger.info("scheduler_stopped")

@@ -11,16 +11,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from orion_common.db.session import get_session
 
-from services.pulse.src.repositories.event_repo import EventRepository
+from src.repositories.event_repo import EventRepository
 from orion_common.events import Channels
 
-from services.pulse.src.schemas import (
+from src.schemas import (
     AnalyticsEventResponse,
     AnalyticsEventsListResponse,
     PipelineMetrics,
     TrendAnalytics,
 )
-from services.pulse.src.services.event_aggregator import EventAggregator
+from src.services.event_aggregator import EventAggregator
 
 logger = structlog.get_logger(__name__)
 

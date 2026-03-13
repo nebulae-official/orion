@@ -15,8 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 
-from services.pulse.src.repositories.cost_repo import CostRepository
-from services.pulse.src.schemas import CostCategory
+from src.repositories.cost_repo import CostRepository
+from src.schemas import CostCategory
 
 logger = structlog.get_logger(__name__)
 

@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from services.pulse.src.schemas import (
+from src.schemas import (
     CostCategory,
     CostProjection,
     CostRecord,
@@ -14,7 +14,7 @@ from services.pulse.src.schemas import (
     DailyCostSummary,
     ProviderCostSummary,
 )
-from services.pulse.src.services.cost_tracker import CostTracker, _COST_CHANNELS, _COST_RATES
+from src.services.cost_tracker import CostTracker, _COST_CHANNELS, _COST_RATES
 
 
 class TestCostTracker:
