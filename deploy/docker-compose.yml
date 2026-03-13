@@ -50,7 +50,7 @@ services:
       context: ..
       dockerfile: services/scout/Dockerfile
     ports:
-      - "8001:8001"
+      - "127.0.0.1:8001:8001"
     env_file:
       - ../.env
     depends_on:
@@ -73,7 +73,7 @@ services:
       context: ..
       dockerfile: services/director/Dockerfile
     ports:
-      - "8002:8002"
+      - "127.0.0.1:8002:8002"
     env_file:
       - ../.env
     depends_on:
@@ -96,7 +96,7 @@ services:
       context: ..
       dockerfile: services/media/Dockerfile
     ports:
-      - "8003:8003"
+      - "127.0.0.1:8003:8003"
     env_file:
       - ../.env
     depends_on:
@@ -117,7 +117,7 @@ services:
       context: ..
       dockerfile: services/editor/Dockerfile
     ports:
-      - "8004:8004"
+      - "127.0.0.1:8004:8004"
     env_file:
       - ../.env
     depends_on:
@@ -140,7 +140,7 @@ services:
       context: ..
       dockerfile: services/pulse/Dockerfile
     ports:
-      - "8005:8005"
+      - "127.0.0.1:8005:8005"
     env_file:
       - ../.env
     depends_on:
@@ -163,7 +163,7 @@ services:
       context: ..
       dockerfile: services/publisher/Dockerfile
     ports:
-      - "8006:8006"
+      - "127.0.0.1:8006:8006"
     env_file:
       - ../.env
     depends_on:
@@ -207,7 +207,7 @@ services:
   postgres:
     image: postgres:17-alpine
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
@@ -227,7 +227,7 @@ services:
   redis:
     image: redis:7.4-alpine
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redisdata:/data
     networks:
@@ -244,8 +244,8 @@ services:
     image: milvusdb/milvus:v2.4.24
     command: ["milvus", "run", "standalone"]
     ports:
-      - "19530:19530"
-      - "9091:9091"
+      - "127.0.0.1:19530:19530"
+      - "127.0.0.1:9091:9091"
     volumes:
       - milvusdata:/var/lib/milvus
     environment:

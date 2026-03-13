@@ -13,44 +13,36 @@ interface ContentDetailPageProps {
 }
 
 async function fetchContent(token: string, id: string): Promise<Content | null> {
-  try {
-    const response = await fetch(`${GATEWAY_URL}/api/v1/content/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 0 },
-    });
+  const response = await fetch(`${GATEWAY_URL}/api/v1/content/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    next: { revalidate: 0 },
+  });
 
-    if (!response.ok) return null;
-    return (await response.json()) as Content;
-  } catch {
-    return null;
-  }
+  if (!response.ok) return null;
+  return (await response.json()) as Content;
 }
 
 async function fetchScriptSegments(
   token: string,
   contentId: string
 ): Promise<ScriptSegment[]> {
-  try {
-    const response = await fetch(
-      `${GATEWAY_URL}/api/v1/content/${contentId}/script`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 0 },
-      }
-    );
+  const response = await fetch(
+    `${GATEWAY_URL}/api/v1/content/${contentId}/script`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 0 },
+    }
+  );
 
-    if (!response.ok) return [];
-    const data = await response.json();
-    return (data.segments ?? data ?? []) as ScriptSegment[];
-  } catch {
-    return [];
-  }
+  if (!response.ok) return [];
+  const data = await response.json();
+  return (data.segments ?? data ?? []) as ScriptSegment[];
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {

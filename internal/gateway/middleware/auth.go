@@ -56,11 +56,14 @@ func Auth(secret string, bl *auth.TokenBlacklist) func(http.Handler) http.Handle
 
 			// Check token revocation when a blacklist is configured.
 			if bl != nil {
-				if jti, ok := claims["jti"].(string); ok && jti != "" {
-					if bl.IsRevoked(r.Context(), jti) {
-						http.Error(w, `{"message":"token has been revoked"}`, http.StatusUnauthorized)
-						return
-					}
+				jti, ok := claims["jti"].(string)
+				if !ok || jti == "" {
+					http.Error(w, `{"message":"token missing required jti claim"}`, http.StatusUnauthorized)
+					return
+				}
+				if bl.IsRevoked(r.Context(), jti) {
+					http.Error(w, `{"message":"token has been revoked"}`, http.StatusUnauthorized)
+					return
 				}
 			}
 

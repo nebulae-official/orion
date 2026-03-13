@@ -127,7 +127,9 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 }
 
 // RefreshToken handles POST /api/v1/auth/refresh.
-func (h *AuthHandler) RefreshToken() http.HandlerFunc {
+// It validates the old token, revokes it via the blacklist (if available),
+// and issues a new token.
+func (h *AuthHandler) RefreshToken(bl *auth.TokenBlacklist) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -136,10 +138,27 @@ func (h *AuthHandler) RefreshToken() http.HandlerFunc {
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		_, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
+		oldToken, err := auth.ValidateToken(tokenStr, h.cfg.JWTSecret)
 		if err != nil {
 			http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 			return
+		}
+
+		// Revoke the old token so it cannot be reused.
+		if bl != nil {
+			if claims, ok := oldToken.Claims.(jwt.MapClaims); ok {
+				if jti, ok := claims["jti"].(string); ok && jti != "" {
+					exp, expErr := claims.GetExpirationTime()
+					if expErr == nil && exp != nil {
+						remaining := time.Until(exp.Time)
+						if remaining > 0 {
+							if err := bl.Revoke(r.Context(), jti, remaining); err != nil {
+								slog.Error("refresh_revoke_old_token_failed", "error", err)
+							}
+						}
+					}
+				}
+			}
 		}
 
 		newTokenStr, err := h.generateToken()
@@ -216,6 +235,11 @@ func (h *AuthHandler) Logout(bl *auth.TokenBlacklist) http.HandlerFunc {
 		}
 
 		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, `{"message":"missing authorization header"}`, http.StatusUnauthorized)
+			return
+		}
+
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {

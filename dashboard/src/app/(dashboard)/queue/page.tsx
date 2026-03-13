@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ContentCard } from "@/components/content-card";
@@ -30,26 +31,22 @@ async function fetchContentList(
   searchParams.set("page", String(params.page));
   searchParams.set("limit", String(params.limit));
 
-  try {
-    const response = await fetch(
-      `${GATEWAY_URL}/api/v1/content?${searchParams.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 0 },
-      }
-    );
-
-    if (!response.ok) {
-      return { items: [], page: params.page, limit: params.limit, total: 0 };
+  const response = await fetch(
+    `${GATEWAY_URL}/api/v1/content?${searchParams.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 0 },
     }
+  );
 
-    return (await response.json()) as PaginatedResponse<Content>;
-  } catch {
-    return { items: [], page: params.page, limit: params.limit, total: 0 };
+  if (!response.ok) {
+    throw new Error(`Content fetch failed with status ${response.status}`);
   }
+
+  return (await response.json()) as PaginatedResponse<Content>;
 }
 
 export default async function QueuePage({
@@ -121,7 +118,7 @@ export default async function QueuePage({
                   if (limit !== 12) params.set("limit", String(limit));
 
                   return (
-                    <a
+                    <Link
                       key={pageNum}
                       href={`/queue?${params.toString()}`}
                       className={
@@ -131,7 +128,7 @@ export default async function QueuePage({
                       }
                     >
                       {pageNum}
-                    </a>
+                    </Link>
                   );
                 }
               )}

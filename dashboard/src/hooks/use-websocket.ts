@@ -44,6 +44,19 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
+  const onMessageRef = useRef(onMessage);
+  const onErrorRef = useRef(onError);
+  const onOpenRef = useRef(onOpen);
+  const onCloseRef = useRef(onClose);
+
+  // Keep refs up to date
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+    onErrorRef.current = onError;
+    onOpenRef.current = onOpen;
+    onCloseRef.current = onClose;
+  }, [onMessage, onError, onOpen, onClose]);
+
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
 
@@ -56,7 +69,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         setIsConnected(true);
         reconnectCountRef.current = 0;
         backoffRef.current = 0;
-        onOpen?.();
+        onOpenRef.current?.();
       };
 
       ws.onmessage = (event: MessageEvent) => {
@@ -64,20 +77,20 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         try {
           const data = JSON.parse(event.data as string) as WebSocketMessage;
           setLastMessage(data);
-          onMessage?.(data);
+          onMessageRef.current?.(data);
         } catch {
           // Non-JSON message; ignore
         }
       };
 
       ws.onerror = (event: Event) => {
-        onError?.(event);
+        onErrorRef.current?.(event);
       };
 
       ws.onclose = () => {
         if (!mountedRef.current) return;
         setIsConnected(false);
-        onClose?.();
+        onCloseRef.current?.();
 
         // Auto-reconnect with exponential backoff + jitter
         if (reconnectCountRef.current < maxReconnectAttempts) {
@@ -102,7 +115,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         reconnectTimerRef.current = setTimeout(connect, delay);
       }
     }
-  }, [url, onMessage, onError, onOpen, onClose, reconnectInterval, maxReconnectAttempts]);
+  }, [url, reconnectInterval, maxReconnectAttempts]);
 
   const send = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

@@ -67,6 +67,7 @@ func main() {
 		Addr:              ":" + cfg.GatewayPort,
 		Handler:           r,
 		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      60 * time.Second,
 	}
 
 	// Graceful shutdown on SIGINT / SIGTERM.

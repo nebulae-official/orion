@@ -9,9 +9,19 @@ export interface ApiResponse<T> {
   };
 }
 
-export interface ApiError {
+export interface ApiErrorResponse {
   message: string;
   status: number;
+}
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
 }
 
 function getAuthToken(): string | null {
@@ -44,11 +54,7 @@ async function request<T>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({ message: "Request failed" }));
-    const error: ApiError = {
-      message: body.message ?? body.detail ?? "Request failed",
-      status: response.status,
-    };
-    throw error;
+    throw new ApiError(body.message ?? body.detail ?? "Request failed", response.status);
   }
 
   if (response.status === 204) {

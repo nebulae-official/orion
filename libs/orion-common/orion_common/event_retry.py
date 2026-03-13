@@ -94,8 +94,9 @@ class ReliableEventBus:
         self._handlers[channel].append(handler)
 
         async def _ack_wrapper(data: dict[str, Any]) -> None:
-            event_id: str | None = data.pop("_event_id", None)
-            await handler(data)
+            event_id = data.get("_event_id")
+            clean_data = {k: v for k, v in data.items() if k != "_event_id"}
+            await handler(clean_data)
             # Acknowledge by removing from pending list.
             if event_id is not None:
                 await self.acknowledge(channel, event_id)
@@ -146,11 +147,14 @@ class ReliableEventBus:
             try:
                 envelope: dict[str, Any] = json.loads(item)
             except (json.JSONDecodeError, TypeError):
+                # Corrupt entry — remove it
+                await self._redis.lrem(key, 1, item)
                 continue
 
             event_id = envelope.get("event_id", "")
             payload = envelope.get("payload", {})
 
+            all_succeeded = True
             for handler in handlers:
                 try:
                     await handler(payload)
@@ -161,11 +165,13 @@ class ReliableEventBus:
                         event_id=event_id,
                         handler=handler.__name__,
                     )
-                    continue
+                    all_succeeded = False
+                    break  # Stop trying handlers for this event
 
-            # Acknowledge after all handlers succeed for this event.
-            await self._redis.lrem(key, 1, item)
-            replayed += 1
+            if all_succeeded:
+                # Only acknowledge after all handlers succeed
+                await self._redis.lrem(key, 1, item)
+                replayed += 1
 
         await logger.ainfo(
             "replay_complete",

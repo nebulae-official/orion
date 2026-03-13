@@ -35,6 +35,7 @@ type Config struct {
 	AdminEmail    string
 
 	// Security
+	InternalToken  string
 	AllowedOrigins []string
 	TrustedProxies []string
 
@@ -68,6 +69,7 @@ func Load() Config {
 		AdminPassword: getEnv("ORION_ADMIN_PASS", "orion_dev"),
 		AdminEmail:    getEnv("ORION_ADMIN_EMAIL", "admin@orion.local"),
 
+		InternalToken:  getEnv("ORION_INTERNAL_TOKEN", ""),
 		AllowedOrigins: splitEnv("ORION_ALLOWED_ORIGINS", ""),
 		TrustedProxies: splitEnv("ORION_TRUSTED_PROXIES", ""),
 		AppVersion:     getEnv("ORION_VERSION", "0.1.0"),

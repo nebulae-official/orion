@@ -95,7 +95,7 @@ func TestRefreshToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create auth handler: %v", err)
 	}
-	handler := authHandler.RefreshToken()
+	handler := authHandler.RefreshToken(nil)
 
 	// Generate a valid token for testing
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

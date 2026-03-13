@@ -14,7 +14,7 @@ import (
 // NewServiceProxy creates a reverse proxy handler that forwards requests to
 // the given backend service URL. It strips the matched route prefix so the
 // backend receives clean paths (e.g., /api/v1/scout/trends -> /trends).
-func NewServiceProxy(target string) (http.Handler, error) {
+func NewServiceProxy(target string, internalToken string) (http.Handler, error) {
 	targetURL, err := url.Parse(target)
 	if err != nil {
 		return nil, fmt.Errorf("parsing proxy target URL %q: %w", target, err)
@@ -30,6 +30,11 @@ func NewServiceProxy(target string) (http.Handler, error) {
 		// Forward the X-Request-ID header from the gateway context.
 		if reqID := middleware.GetRequestID(req.Context()); reqID != "" {
 			req.Header.Set("X-Request-ID", reqID)
+		}
+
+		// Inject internal service-to-service authentication token.
+		if internalToken != "" {
+			req.Header.Set("X-Internal-Token", internalToken)
 		}
 	}
 

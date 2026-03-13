@@ -67,7 +67,10 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	}
 
 	// Aggregated status endpoint — checks all downstream services concurrently.
-	r.Get("/status", handlers.Status(services))
+	r.Group(func(statusGroup chi.Router) {
+		statusGroup.Use(middleware.Auth(cfg.JWTSecret, blacklist))
+		statusGroup.Get("/status", handlers.Status(services))
+	})
 
 	// Auth endpoints with strict rate limiting (5 req/min per IP)
 	authHandler, err := handlers.NewAuthHandler(cfg, rdb)
@@ -79,10 +82,10 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 			Group: "auth", Limit: 5, Window: time.Minute,
 		})
 		r.With(authRL).Post("/api/v1/auth/login", authHandler.Login())
-		r.With(authRL).Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+		r.With(authRL).Post("/api/v1/auth/refresh", authHandler.RefreshToken(blacklist))
 	} else {
 		r.Post("/api/v1/auth/login", authHandler.Login())
-		r.Post("/api/v1/auth/refresh", authHandler.RefreshToken())
+		r.Post("/api/v1/auth/refresh", authHandler.RefreshToken(blacklist))
 	}
 
 	// Logout endpoint (protected)
@@ -102,7 +105,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 
 	if rdb == nil {
 		// Fall back to flat proxy without rate limiting
-		return mountFlatProxy(r, services, cfg.JWTSecret, blacklist)
+		return mountFlatProxy(r, services, cfg.JWTSecret, blacklist, cfg.InternalToken)
 	}
 
 	// Build proxies before entering the route group so errors can be returned.
@@ -115,7 +118,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 
 	var proxies []serviceProxy
 	for name, url := range services {
-		svcProxy, err := handlers.NewServiceProxy(url)
+		svcProxy, err := handlers.NewServiceProxy(url, cfg.InternalToken)
 		if err != nil {
 			return nil, fmt.Errorf("creating proxy for %s: %w", name, err)
 		}
@@ -197,7 +200,7 @@ func rateLimitForService(name string) serviceRateLimit {
 	}
 }
 
-func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string, bl *auth.TokenBlacklist) (chi.Router, error) {
+func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string, bl *auth.TokenBlacklist, internalToken string) (chi.Router, error) {
 	// Build proxies before route group so errors propagate to caller.
 	type flatEntry struct {
 		name    string
@@ -207,7 +210,7 @@ func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string, 
 
 	var entries []flatEntry
 	for name, url := range services {
-		svcProxy, err := handlers.NewServiceProxy(url)
+		svcProxy, err := handlers.NewServiceProxy(url, internalToken)
 		if err != nil {
 			return nil, fmt.Errorf("creating proxy for %s: %w", name, err)
 		}
