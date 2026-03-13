@@ -35,5 +35,8 @@ coverage.out
 coverage.html
 build/
 
+# Documentation build output
+site/
+
 # UV
 uv.lock

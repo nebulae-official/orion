@@ -1,0 +1,162 @@
+# ============================================================================
+#
+# Orion — Digital Twin Content Agency
+# Documentation site powered by Zensical
+#
+# ============================================================================
+
+[project]
+
+site_name = "Orion Documentation"
+site_description = "Digital Twin Content Agency — autonomous AI agents for content creation, trend analysis, and social publishing."
+site_author = "Orion Team"
+#site_url = "https://docs.orion.dev/"
+copyright = """
+Copyright &copy; 2026 Orion Project
+"""
+
+docs_dir = "docs"
+site_dir = "site"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Getting Started" = [
+    { "Overview" = "getting-started/index.md" },
+    { "Installation" = "getting-started/installation.md" },
+    { "Quickstart" = "getting-started/quickstart.md" },
+    { "Configuration" = "getting-started/configuration.md" },
+    { "Troubleshooting" = "getting-started/troubleshooting.md" },
+  ]},
+  { "Architecture" = [
+    { "Overview" = "architecture/index.md" },
+    { "Data Flow" = "architecture/data-flow.md" },
+    { "Communication" = "architecture/communication.md" },
+    { "Database" = "architecture/database.md" },
+    { "Security" = "architecture/security.md" },
+  ]},
+  { "Services" = [
+    { "Overview" = "services/index.md" },
+    { "Gateway" = "services/gateway.md" },
+    { "Scout" = "services/scout.md" },
+    { "Director" = "services/director.md" },
+    { "Media" = "services/media.md" },
+    { "Editor" = "services/editor.md" },
+    { "Pulse" = "services/pulse.md" },
+    { "Publisher" = "services/publisher.md" },
+    { "Dashboard" = "services/dashboard.md" },
+    { "CLI" = "services/cli.md" },
+  ]},
+  { "LangGraph" = [
+    { "Overview" = "langgraph/index.md" },
+    { "Nodes" = "langgraph/nodes.md" },
+    { "Human-in-the-Loop" = "langgraph/hitl.md" },
+    { "Checkpoints" = "langgraph/checkpoints.md" },
+  ]},
+  { "API Reference" = [
+    { "Overview" = "api/index.md" },
+    { "Authentication" = "api/authentication.md" },
+    { "Endpoints" = "api/endpoints.md" },
+    { "WebSocket" = "api/websocket.md" },
+    { "Errors" = "api/errors.md" },
+  ]},
+  { "Deployment" = [
+    { "Overview" = "deployment/index.md" },
+    { "Docker" = "deployment/docker.md" },
+    { "Production" = "deployment/production.md" },
+    { "Monitoring" = "deployment/monitoring.md" },
+    { "CI/CD" = "deployment/ci-cd.md" },
+  ]},
+  { "Development" = [
+    { "Overview" = "development/index.md" },
+    { "Project Structure" = "development/project-structure.md" },
+    { "Adding Services" = "development/adding-services.md" },
+    { "Testing" = "development/testing.md" },
+    { "Code Style" = "development/code-style.md" },
+    { "Migrations" = "development/migrations.md" },
+    { "Git Workflow" = "development/git-workflow.md" },
+  ]},
+  { "Monitoring" = [
+    { "Overview" = "monitoring/index.md" },
+    { "Prometheus" = "monitoring/prometheus.md" },
+    { "Grafana" = "monitoring/grafana.md" },
+    { "Alerts" = "monitoring/alerts.md" },
+    { "Logging" = "monitoring/logging.md" },
+  ]},
+]
+
+# ----------------------------------------------------------------------------
+# Theme configuration
+# ----------------------------------------------------------------------------
+[project.theme]
+
+language = "en"
+
+features = [
+    "announce.dismiss",
+    "content.code.annotate",
+    "content.code.copy",
+    "content.code.select",
+    "content.footnote.tooltips",
+    "content.tabs.link",
+    "content.tooltips",
+    "navigation.footer",
+    "navigation.indexes",
+    "navigation.instant",
+    "navigation.instant.prefetch",
+    "navigation.path",
+    "navigation.sections",
+    "navigation.top",
+    "navigation.tracking",
+    "search.highlight",
+]
+
+[project.theme.icon]
+logo = "lucide/orbit"
+
+#[project.theme.font]
+#text = "Inter"
+#code = "Jetbrains Mono"
+
+[[project.theme.palette]]
+scheme = "default"
+primary = "deep purple"
+accent = "amber"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "deep purple"
+accent = "amber"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+# ----------------------------------------------------------------------------
+# Social links
+# ----------------------------------------------------------------------------
+#[[project.extra.social]]
+#icon = "fontawesome/brands/github"
+#link = "https://github.com/orion-rigel/orion"
+
+# ----------------------------------------------------------------------------
+# Markdown extensions
+# ----------------------------------------------------------------------------
+[project.markdown]
+extensions = [
+    "admonition",
+    "attr_list",
+    "def_list",
+    "footnotes",
+    "md_in_html",
+    "tables",
+    "toc",
+    "pymdownx.details",
+    "pymdownx.emoji",
+    "pymdownx.highlight",
+    "pymdownx.inlinehilite",
+    "pymdownx.keys",
+    "pymdownx.mark",
+    "pymdownx.superfences",
+    "pymdownx.tabbed",
+    "pymdownx.tasklist",
+]
