@@ -2,6 +2,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -28,10 +29,10 @@ type Config struct {
 	PublisherURL  string
 
 	// Authentication
-	JWTSecret      string
-	AdminUsername   string
-	AdminPassword  string
-	AdminEmail     string
+	JWTSecret     string
+	AdminUsername string
+	AdminPassword string
+	AdminEmail    string
 
 	// Security
 	AllowedOrigins []string
@@ -73,29 +74,60 @@ func Load() Config {
 	}
 }
 
-// IsDevelopment returns true when the application is running in development mode.
+// IsDevelopment returns true when the application environment is "development".
 func (c Config) IsDevelopment() bool {
 	return c.AppEnv == "development"
 }
 
-// InsecureDefaults returns a list of human-readable descriptions for any
-// configuration values that still hold their insecure development defaults.
-// An empty slice means the configuration is production-ready.
+// insecureDefault maps a config field name to its insecure default value.
+type insecureDefault struct {
+	Field string
+	Value string
+}
+
+// InsecureDefaults returns a list of field names that still hold their
+// development-only default values. An empty slice means the configuration
+// is safe for production.
 func (c Config) InsecureDefaults() []string {
-	var warnings []string
-	if c.JWTSecret == "dev-secret-change-in-production" {
-		warnings = append(warnings, "ORION_JWT_SECRET is the default dev value")
+	checks := []insecureDefault{
+		{"JWTSecret", "dev-secret-change-in-production"},
+		{"AdminPassword", "orion_dev"},
+		{"PostgresPass", "orion_dev"},
 	}
-	if c.AdminPassword == "orion_dev" {
-		warnings = append(warnings, "ORION_ADMIN_PASS is the default dev value")
-	}
-	if c.PostgresPass == "orion_dev" {
-		warnings = append(warnings, "POSTGRES_PASSWORD is the default dev value")
+
+	var insecure []string
+	for _, chk := range checks {
+		var current string
+		switch chk.Field {
+		case "JWTSecret":
+			current = c.JWTSecret
+		case "AdminPassword":
+			current = c.AdminPassword
+		case "PostgresPass":
+			current = c.PostgresPass
+		}
+		if current == chk.Value {
+			insecure = append(insecure, chk.Field)
+		}
 	}
 	if len(c.AllowedOrigins) == 0 {
-		warnings = append(warnings, "ORION_ALLOWED_ORIGINS is not set (CORS will allow all origins)")
+		insecure = append(insecure, "AllowedOrigins (CORS will allow all origins)")
 	}
-	return warnings
+	return insecure
+}
+
+// EnforceProduction returns an error when the application is not in
+// development mode and insecure default values are still present. The error
+// message lists every offending field so operators can fix them all at once.
+func (c Config) EnforceProduction() error {
+	if c.IsDevelopment() {
+		return nil
+	}
+	insecure := c.InsecureDefaults()
+	if len(insecure) == 0 {
+		return nil
+	}
+	return fmt.Errorf("insecure defaults in production: %s", strings.Join(insecure, ", "))
 }
 
 func getEnv(key, fallback string) string {

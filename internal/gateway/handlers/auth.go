@@ -63,6 +63,7 @@ func NewAuthHandler(cfg config.Config, rdb *redis.Client) (*AuthHandler, error) 
 func (h *AuthHandler) generateToken() (string, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
+		"jti":      uuid.New().String(),
 		"sub":      h.cfg.AdminUsername,
 		"username": h.cfg.AdminUsername,
 		"email":    h.cfg.AdminEmail,
@@ -202,5 +203,65 @@ func (h *AuthHandler) IssueWSTicket() http.HandlerFunc {
 			Ticket:    ticket,
 			ExpiresIn: int(ticketTTL.Seconds()),
 		}) //nolint:errcheck
+	}
+}
+
+// Logout handles POST /api/v1/auth/logout.
+// It revokes the current token by adding its JTI to the blacklist.
+func (h *AuthHandler) Logout(bl *auth.TokenBlacklist) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if bl == nil {
+			http.Error(w, `{"message":"logout not available"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		authHeader := r.Header.Get("Authorization")
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrSignatureInvalid
+			}
+			return []byte(h.cfg.JWTSecret), nil
+		})
+		if err != nil || !token.Valid {
+			http.Error(w, `{"message":"invalid token"}`, http.StatusUnauthorized)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, `{"message":"invalid token claims"}`, http.StatusUnauthorized)
+			return
+		}
+
+		jti, ok := claims["jti"].(string)
+		if !ok || jti == "" {
+			http.Error(w, `{"message":"token missing jti claim"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Calculate remaining TTL so the blacklist entry expires with the token.
+		exp, err := claims.GetExpirationTime()
+		if err != nil || exp == nil {
+			http.Error(w, `{"message":"token missing expiry"}`, http.StatusBadRequest)
+			return
+		}
+		remaining := time.Until(exp.Time)
+		if remaining <= 0 {
+			// Token already expired — nothing to revoke.
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"message":"logged out"}`)) //nolint:errcheck
+			return
+		}
+
+		if err := bl.Revoke(r.Context(), jti, remaining); err != nil {
+			slog.Error("logout_revoke_failed", "error", err)
+			http.Error(w, `{"message":"internal error"}`, http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message":"logged out"}`)) //nolint:errcheck
 	}
 }

@@ -14,8 +14,7 @@ export default async function PublishingPage(): Promise<React.ReactElement> {
 
   try {
     records = await serverFetch<PublishRecord[]>(
-      "/api/v1/publisher/publish/history?limit=100",
-      { revalidate: 30 }
+      "/api/v1/publisher/publish/history?limit=100"
     );
   } catch {
     fetchError = true;

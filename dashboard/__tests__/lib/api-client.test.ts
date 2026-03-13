@@ -72,11 +72,11 @@ describe("serverFetch", () => {
     vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
     const result = await serverFetch("/api/v1/test");
-    expect(result).toBeUndefined();
+    expect(result).toBeNull();
     expect(mockResponse.json).not.toHaveBeenCalled();
   });
 
-  it("uses default revalidation of 60 seconds", async () => {
+  it("uses no-cache revalidation by default", async () => {
     const mockResponse = {
       ok: true,
       status: 200,
@@ -89,25 +89,7 @@ describe("serverFetch", () => {
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        next: { revalidate: 60 },
-      })
-    );
-  });
-
-  it("allows overriding revalidation", async () => {
-    const mockResponse = {
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue({}),
-    };
-    vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
-
-    await serverFetch("/api/v1/test", { revalidate: 30 });
-
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        next: { revalidate: 30 },
+        next: { revalidate: 0 },
       })
     );
   });

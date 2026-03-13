@@ -4,8 +4,10 @@ from orion_common.cache import RedisCache, get_cache
 from orion_common.config import CommonSettings, get_settings
 from orion_common.db import Base, get_session
 from orion_common.event_bus import EventBus
+from orion_common.event_retry import ReliableEventBus
 from orion_common.events import Channels
 from orion_common.health import create_health_router
+from orion_common.middleware import InternalAuthMiddleware
 from orion_common.milvus_client import OrionMilvusClient, get_milvus_client
 
 __all__ = [
@@ -13,8 +15,10 @@ __all__ = [
     "Channels",
     "CommonSettings",
     "EventBus",
+    "InternalAuthMiddleware",
     "OrionMilvusClient",
     "RedisCache",
+    "ReliableEventBus",
     "create_health_router",
     "get_cache",
     "get_milvus_client",

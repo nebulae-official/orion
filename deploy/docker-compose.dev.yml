@@ -1,3 +1,5 @@
+version: "3.9"
+
 # Orion — Development Overrides
 # Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 #
@@ -21,7 +23,8 @@ services:
 
   scout:
     build:
-      context: ../services/scout
+      context: ..
+      dockerfile: services/scout/Dockerfile
       target: dev
     volumes:
       - ../services/scout/src:/app/src:ro
@@ -32,7 +35,8 @@ services:
 
   director:
     build:
-      context: ../services/director
+      context: ..
+      dockerfile: services/director/Dockerfile
       target: dev
     volumes:
       - ../services/director/src:/app/src:ro
@@ -43,7 +47,8 @@ services:
 
   media:
     build:
-      context: ../services/media
+      context: ..
+      dockerfile: services/media/Dockerfile
       target: dev
     volumes:
       - ../services/media/src:/app/src:ro
@@ -54,7 +59,8 @@ services:
 
   editor:
     build:
-      context: ../services/editor
+      context: ..
+      dockerfile: services/editor/Dockerfile
       target: dev
     volumes:
       - ../services/editor/src:/app/src:ro
@@ -65,7 +71,8 @@ services:
 
   pulse:
     build:
-      context: ../services/pulse
+      context: ..
+      dockerfile: services/pulse/Dockerfile
       target: dev
     volumes:
       - ../services/pulse/src:/app/src:ro

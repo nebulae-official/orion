@@ -9,6 +9,7 @@ from orion_common.config import get_settings
 from orion_common.db.session import get_engine
 from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
+from orion_common.middleware import InternalAuthMiddleware
 
 from src.routes import accounts, publish
 from src.services.crypto import validate_encryption_key
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Orion Publisher Service", lifespan=lifespan)
+app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
 health_router = create_health_router(

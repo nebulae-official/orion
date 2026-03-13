@@ -10,6 +10,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
+# --- dev stage (Next.js dev server with hot-reload) ---
+FROM base AS dev
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
+
+# --- runtime stage ---
 FROM base AS runner
 ENV NODE_ENV=production
 

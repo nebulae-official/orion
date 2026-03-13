@@ -13,6 +13,7 @@ import (
 	"github.com/orion-rigel/orion/internal/gateway/handlers"
 	"github.com/orion-rigel/orion/internal/gateway/middleware"
 	"github.com/orion-rigel/orion/internal/gateway/proxy"
+	"github.com/orion-rigel/orion/pkg/auth"
 	"github.com/orion-rigel/orion/pkg/config"
 )
 
@@ -30,22 +31,28 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	r.Use(middleware.Metrics)
 	r.Use(middleware.MaxBodySize(5 << 20)) // 5 MB
 
-	// Redis client shared across rate limiter, auth, health
+	// Redis client shared across rate limiter, auth, health, blacklist
 	opt, parseErr := redis.ParseURL(cfg.RedisURL)
 	var rdb *redis.Client
 	if parseErr != nil {
-		slog.Warn("redis_url_parse_failed, rate limiting disabled", "error", parseErr)
+		slog.Warn("redis_url_parse_failed, rate limiting and blacklist disabled", "error", parseErr)
 	} else {
 		rdb = redis.NewClient(opt)
+	}
+
+	// Token blacklist (nil-safe — callers check for nil)
+	var blacklist *auth.TokenBlacklist
+	if rdb != nil {
+		blacklist = auth.NewTokenBlacklist(rdb)
 	}
 
 	// Health and readiness endpoints.
 	r.Get("/health", handlers.Health(cfg.AppVersion))
 	r.Get("/ready", handlers.Ready(cfg.AppVersion, rdb))
 
-	// Metrics and status behind auth.
+	// Metrics behind auth.
 	r.Group(func(admin chi.Router) {
-		admin.Use(middleware.Auth(cfg.JWTSecret))
+		admin.Use(middleware.Auth(cfg.JWTSecret, blacklist))
 		admin.Handle("/metrics", promhttp.Handler())
 	})
 
@@ -78,9 +85,15 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 		r.Post("/api/v1/auth/refresh", authHandler.RefreshToken())
 	}
 
+	// Logout endpoint (protected)
+	r.Group(func(logoutGroup chi.Router) {
+		logoutGroup.Use(middleware.Auth(cfg.JWTSecret, blacklist))
+		logoutGroup.Post("/api/v1/auth/logout", authHandler.Logout(blacklist))
+	})
+
 	// WebSocket ticket endpoint (protected)
 	r.Group(func(protected chi.Router) {
-		protected.Use(middleware.Auth(cfg.JWTSecret))
+		protected.Use(middleware.Auth(cfg.JWTSecret, blacklist))
 		protected.Post("/api/v1/ws/ticket", authHandler.IssueWSTicket())
 	})
 
@@ -89,7 +102,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 
 	if rdb == nil {
 		// Fall back to flat proxy without rate limiting
-		return mountFlatProxy(r, services, cfg.JWTSecret)
+		return mountFlatProxy(r, services, cfg.JWTSecret, blacklist)
 	}
 
 	// Build proxies before entering the route group so errors can be returned.
@@ -120,7 +133,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 
 	// Per-service route groups with rate limiting, protected by JWT auth
 	r.Group(func(protected chi.Router) {
-		protected.Use(middleware.Auth(cfg.JWTSecret))
+		protected.Use(middleware.Auth(cfg.JWTSecret, blacklist))
 
 		for _, sp := range proxies {
 			handler := sp.handler
@@ -184,7 +197,7 @@ func rateLimitForService(name string) serviceRateLimit {
 	}
 }
 
-func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string) (chi.Router, error) {
+func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string, bl *auth.TokenBlacklist) (chi.Router, error) {
 	// Build proxies before route group so errors propagate to caller.
 	type flatEntry struct {
 		name    string
@@ -204,7 +217,7 @@ func mountFlatProxy(r chi.Router, services map[string]string, jwtSecret string) 
 	}
 
 	r.Group(func(protected chi.Router) {
-		protected.Use(middleware.Auth(jwtSecret))
+		protected.Use(middleware.Auth(jwtSecret, bl))
 
 		for _, e := range entries {
 			pattern := fmt.Sprintf("/api/v1/%s/*", e.name)

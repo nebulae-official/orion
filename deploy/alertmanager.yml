@@ -1,0 +1,31 @@
+# Orion — Alertmanager Configuration
+# Customize receivers for your environment (Slack, PagerDuty, email, etc.)
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: default-receiver
+
+  routes:
+    - match:
+        severity: critical
+      receiver: default-receiver
+      repeat_interval: 1h
+
+receivers:
+  - name: default-receiver
+    webhook_configs:
+      - url: http://gateway:8000/api/v1/webhooks/alerts
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname']

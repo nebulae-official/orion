@@ -43,6 +43,13 @@ class CommonSettings(BaseSettings):
         default="http://localhost:8188", description="ComfyUI API base URL"
     )
 
+    # Internal auth
+    internal_token: str = Field(
+        default="",
+        description="Shared token for internal service-to-service auth",
+        alias="ORION_INTERNAL_TOKEN",
+    )
+
     @property
     def database_url(self) -> str:
         """Async database URL for SQLAlchemy (asyncpg driver)."""
@@ -59,7 +66,11 @@ class CommonSettings(BaseSettings):
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "populate_by_name": True,
+    }
 
 
 @lru_cache

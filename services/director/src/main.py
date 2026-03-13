@@ -16,6 +16,7 @@ from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
+from orion_common.middleware import InternalAuthMiddleware
 from orion_common.milvus_client import OrionMilvusClient
 
 from .agents.analyst import AnalystAgent
@@ -211,6 +212,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Orion Director Service", lifespan=lifespan)
+app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
 health_router = create_health_router(

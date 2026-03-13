@@ -20,17 +20,15 @@ import (
 func main() {
 	cfg := config.Load()
 
+	if err := cfg.EnforceProduction(); err != nil {
+		slog.Error("refusing to start with insecure configuration", "error", err)
+		os.Exit(1)
+	}
+
 	slog.Info("starting gateway",
 		"port", cfg.GatewayPort,
 		"env", cfg.AppEnv,
 	)
-
-	// Warn about insecure development defaults.
-	if insecure := cfg.InsecureDefaults(); len(insecure) > 0 {
-		slog.Warn("Running with development defaults — NOT suitable for production",
-			"insecure_values", insecure,
-		)
-	}
 
 	hub := handlers.NewHub()
 	go hub.Run()

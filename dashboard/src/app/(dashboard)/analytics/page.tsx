@@ -49,10 +49,10 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
   const [funnelResult, costsResult, providerCostsResult, errorsResult] =
     await Promise.allSettled([
-      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", { revalidate: 30 }),
-      serverFetch<CostSummary>("/api/v1/pulse/costs", { revalidate: 30 }),
-      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", { revalidate: 30 }),
-      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", { revalidate: 30 }),
+      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel"),
+      serverFetch<CostSummary>("/api/v1/pulse/costs"),
+      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider"),
+      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168"),
     ]);
 
   if (funnelResult.status === "fulfilled") {

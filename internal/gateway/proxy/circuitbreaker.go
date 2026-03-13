@@ -2,8 +2,10 @@
 package proxy
 
 import (
+	"bufio"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -195,4 +197,24 @@ func (sr *statusRecorder) WriteHeader(code int) {
 		sr.wroteHeader = true
 	}
 	sr.ResponseWriter.WriteHeader(code)
+}
+
+// Unwrap returns the underlying ResponseWriter for optional interface access.
+func (sr *statusRecorder) Unwrap() http.ResponseWriter {
+	return sr.ResponseWriter
+}
+
+// Flush implements http.Flusher for streaming responses.
+func (sr *statusRecorder) Flush() {
+	if f, ok := sr.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+// Hijack implements http.Hijacker for WebSocket upgrades.
+func (sr *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hj, ok := sr.ResponseWriter.(http.Hijacker); ok {
+		return hj.Hijack()
+	}
+	return nil, nil, fmt.Errorf("underlying ResponseWriter does not implement http.Hijacker")
 }

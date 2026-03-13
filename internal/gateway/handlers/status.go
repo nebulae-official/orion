@@ -5,10 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"sync"
 	"time"
 )
+
+// statusClient is a dedicated HTTP client for health-checking downstream
+// services. It uses explicit timeouts and connection pool settings instead
+// of relying on http.DefaultClient.
+var statusClient = &http.Client{
+	Timeout: 5 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 2,
+		IdleConnTimeout:     30 * time.Second,
+		DialContext: (&net.Dialer{
+			Timeout: 3 * time.Second,
+		}).DialContext,
+	},
+}
 
 // ServiceHealth represents the health status of a single downstream service.
 type ServiceHealth struct {
@@ -76,7 +92,7 @@ func checkService(ctx context.Context, name, baseURL string) ServiceHealth {
 		return ServiceHealth{Service: name, Status: "unhealthy", Error: err.Error()}
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := statusClient.Do(req)
 	if err != nil {
 		return ServiceHealth{Service: name, Status: "unhealthy", Error: err.Error()}
 	}

@@ -24,8 +24,10 @@ func GetUser(ctx context.Context) (UserClaims, bool) {
 	return u, ok
 }
 
-// Auth returns middleware that validates JWT Bearer tokens.
-func Auth(secret string) func(http.Handler) http.Handler {
+// Auth returns middleware that validates JWT Bearer tokens and optionally
+// checks whether the token has been revoked. Pass a nil blacklist to skip
+// revocation checks (useful in tests or when Redis is unavailable).
+func Auth(secret string, bl *auth.TokenBlacklist) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -35,7 +37,12 @@ func Auth(secret string) func(http.Handler) http.Handler {
 			}
 
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			token, err := auth.ValidateToken(tokenStr, secret)
+			token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, jwt.ErrSignatureInvalid
+				}
+				return []byte(secret), nil
+			})
 			if err != nil || !token.Valid {
 				http.Error(w, `{"message":"invalid or expired token"}`, http.StatusUnauthorized)
 				return
@@ -45,6 +52,16 @@ func Auth(secret string) func(http.Handler) http.Handler {
 			if !ok {
 				http.Error(w, `{"message":"invalid token claims"}`, http.StatusUnauthorized)
 				return
+			}
+
+			// Check token revocation when a blacklist is configured.
+			if bl != nil {
+				if jti, ok := claims["jti"].(string); ok && jti != "" {
+					if bl.IsRevoked(r.Context(), jti) {
+						http.Error(w, `{"message":"token has been revoked"}`, http.StatusUnauthorized)
+						return
+					}
+				}
 			}
 
 			user := UserClaims{

@@ -10,6 +10,7 @@ from orion_common.db.session import get_engine, get_session
 from orion_common.event_bus import EventBus
 from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
+from orion_common.middleware import InternalAuthMiddleware
 
 from .routes import analytics, costs, pipeline
 from .services.cleanup import cleanup_old_records
@@ -61,6 +62,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Orion Pulse Service", lifespan=lifespan)
+app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
 health_router = create_health_router(

@@ -27,7 +27,7 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.gateway
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - ../.env
     depends_on:
@@ -38,11 +38,6 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
       interval: 30s
@@ -50,42 +45,15 @@ services:
       retries: 3
       start_period: 10s
 
-  # ─────────────────────────────────────────────
-  # Database Migration
-  # ─────────────────────────────────────────────
-
-  migrate:
-    image: ghcr.io/astral-sh/uv:0.5.11-python3.13-bookworm-slim
-    working_dir: /app
-    volumes:
-      - ../migrations:/app/migrations
-      - ../alembic.ini:/app/alembic.ini:ro
-    command: >
-      sh -c "uv pip install --system alembic sqlalchemy psycopg2-binary &&
-             alembic upgrade head"
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-orion}:${POSTGRES_PASSWORD:-orion_dev}@postgres:5432/${POSTGRES_DB:-orion}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - orion-net
-
-  # ─────────────────────────────────────────────
-  # Python Services
-  # ─────────────────────────────────────────────
-
   scout:
     build:
       context: ..
       dockerfile: services/scout/Dockerfile
-    expose:
-      - "8001"
+    ports:
+      - "8001:8001"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       redis:
         condition: service_healthy
       milvus:
@@ -93,11 +61,6 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8001/health')\""]
       interval: 30s
@@ -109,23 +72,18 @@ services:
     build:
       context: ..
       dockerfile: services/director/Dockerfile
-    expose:
-      - "8002"
+    ports:
+      - "8002:8002"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8002/health')\""]
       interval: 30s
@@ -137,23 +95,16 @@ services:
     build:
       context: ..
       dockerfile: services/media/Dockerfile
-    expose:
-      - "8003"
+    ports:
+      - "8003:8003"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       redis:
         condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8003/health')\""]
       interval: 30s
@@ -165,23 +116,18 @@ services:
     build:
       context: ..
       dockerfile: services/editor/Dockerfile
-    expose:
-      - "8004"
+    ports:
+      - "8004:8004"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8004/health')\""]
       interval: 30s
@@ -193,23 +139,18 @@ services:
     build:
       context: ..
       dockerfile: services/pulse/Dockerfile
-    expose:
-      - "8005"
+    ports:
+      - "8005:8005"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8005/health')\""]
       interval: 30s
@@ -221,23 +162,18 @@ services:
     build:
       context: ..
       dockerfile: services/publisher/Dockerfile
-    expose:
-      - "8006"
+    ports:
+      - "8006:8006"
     env_file:
       - ../.env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8006/health')\""]
       interval: 30s
@@ -249,7 +185,7 @@ services:
     build:
       context: ../dashboard
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     env_file:
       - ../.env
     depends_on:
@@ -257,11 +193,6 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
       interval: 30s
@@ -276,7 +207,7 @@ services:
   postgres:
     image: postgres:17-alpine
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
@@ -286,11 +217,6 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orion} -d ${POSTGRES_DB:-orion}"]
       interval: 10s
@@ -300,21 +226,15 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD:-redisdev}
     ports:
-      - "127.0.0.1:6379:6379"
+      - "6379:6379"
     volumes:
       - redisdata:/data
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redisdev}", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -324,8 +244,8 @@ services:
     image: milvusdb/milvus:v2.4.24
     command: ["milvus", "run", "standalone"]
     ports:
-      - "127.0.0.1:19530:19530"
-      - "127.0.0.1:9091:9091"
+      - "19530:19530"
+      - "9091:9091"
     volumes:
       - milvusdata:/var/lib/milvus
     environment:
@@ -335,11 +255,6 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2G
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
       interval: 30s
@@ -354,7 +269,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollamadata:/root/.ollama
     networks:
@@ -375,7 +290,7 @@ services:
   comfyui:
     image: yanwenkun/comfyui:latest   # placeholder — replace with your preferred image
     ports:
-      - "8188:8188"
+      - "127.0.0.1:8188:8188"
     volumes:
       - ./comfyui/models:/app/models
       - ./comfyui/output:/app/output

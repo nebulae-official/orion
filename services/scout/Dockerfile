@@ -1,23 +1,31 @@
 # --- builder stage ---
 FROM python:3.13-slim AS builder
 
-COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 WORKDIR /app
 
 # Copy shared library first
 COPY libs/orion-common/ /app/libs/orion-common/
 
-# Copy service dependency manifest
-COPY services/scout/pyproject.toml /app/pyproject.toml
+# Copy service files
+COPY services/scout/pyproject.toml .
 
-# Override local path dep for container context
-ENV UV_LINK_MODE=copy
-RUN uv pip install --system --prefix /install \
-    "orion-common @ file:///app/libs/orion-common" && \
-    uv pip install --system --prefix /install -e .
+# Rewrite the local path dep so uv can resolve it in the container
+RUN sed -i 's|file:../../libs/orion-common|file:///app/libs/orion-common|' pyproject.toml
 
-COPY services/scout/ /app/
+RUN uv pip install --system -e .
+
+COPY services/scout/ .
+
+# --- dev stage (hot-reload with uvicorn --reload) ---
+FROM builder AS dev
+
+WORKDIR /app
+
+EXPOSE 8001
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 
 # --- runtime stage ---
 FROM python:3.13-slim
@@ -25,7 +33,8 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Copy installed packages from builder
-COPY --from=builder /install /usr/local
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY --from=builder /app/ /app/

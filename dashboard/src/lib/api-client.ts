@@ -1,4 +1,4 @@
-import { GATEWAY_URL } from "@/lib/config";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
 
 export interface ApiResponse<T> {
   data: T;
@@ -14,16 +14,27 @@ export interface ApiError {
   status: number;
 }
 
+function getAuthToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)orion_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${GATEWAY_URL}${path}`;
+  const token = getAuthToken();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, {
     ...options,
@@ -41,12 +52,20 @@ async function request<T>(
   }
 
   if (response.status === 204) {
-    return undefined as T;
+    // No content — return null cast through unknown for type safety
+    return null as unknown as T;
   }
 
   return response.json() as Promise<T>;
 }
 
+/**
+ * Client-side API helper for **unauthenticated** endpoints only.
+ *
+ * The gateway expects Bearer tokens for authentication, but the JWT is stored
+ * in an httpOnly cookie that cannot be read by client-side JavaScript.
+ * For authenticated requests, use server actions (`src/lib/actions.ts`) instead.
+ */
 export const apiClient = {
   get<T>(path: string, init?: RequestInit): Promise<T> {
     return request<T>(path, { ...init, method: "GET" });
@@ -79,15 +98,14 @@ export const apiClient = {
  */
 export async function serverFetch<T>(
   path: string,
-  options: RequestInit & { revalidate?: number } = {},
+  options: RequestInit = {},
   token?: string
 ): Promise<T> {
   const url = `${GATEWAY_URL}${path}`;
-  const { revalidate = 60, ...fetchOptions } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(fetchOptions.headers as Record<string, string>),
+    ...(options.headers as Record<string, string>),
   };
 
   if (token) {
@@ -95,9 +113,9 @@ export async function serverFetch<T>(
   }
 
   const response = await fetch(url, {
-    ...fetchOptions,
+    ...options,
     headers,
-    next: { revalidate },
+    next: { revalidate: 0 },
   });
 
   if (!response.ok) {
@@ -106,7 +124,8 @@ export async function serverFetch<T>(
   }
 
   if (response.status === 204) {
-    return undefined as T;
+    // No content — return null cast through unknown for type safety
+    return null as unknown as T;
   }
 
   return response.json() as Promise<T>;

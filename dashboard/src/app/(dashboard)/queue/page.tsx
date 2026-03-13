@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
-import { GATEWAY_URL } from "@/lib/config";
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
 
 interface QueuePageProps {
   searchParams: Promise<{
@@ -38,7 +38,7 @@ async function fetchContentList(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 30 },
+        next: { revalidate: 0 },
       }
     );
 
@@ -68,7 +68,16 @@ export default async function QueuePage({
   const status = resolvedParams.status;
   const sort = resolvedParams.sort ?? "date";
 
-  const data = await fetchContentList(token, { status, sort, page, limit });
+  let fetchError = false;
+  let data: PaginatedResponse<Content>;
+
+  try {
+    data = await fetchContentList(token, { status, sort, page, limit });
+  } catch {
+    fetchError = true;
+    data = { items: [], page, limit, total: 0 };
+  }
+
   const totalPages = Math.ceil(data.total / limit);
 
   return (
@@ -79,6 +88,12 @@ export default async function QueuePage({
           Review and manage content in the pipeline.
         </p>
       </div>
+
+      {fetchError && (
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          Some data may be unavailable. Services may not be running.
+        </div>
+      )}
 
       <QueueFilters currentStatus={status} currentSort={sort} />
 
@@ -106,7 +121,7 @@ export default async function QueuePage({
                   if (limit !== 12) params.set("limit", String(limit));
 
                   return (
-                    <Link
+                    <a
                       key={pageNum}
                       href={`/queue?${params.toString()}`}
                       className={
@@ -116,7 +131,7 @@ export default async function QueuePage({
                       }
                     >
                       {pageNum}
-                    </Link>
+                    </a>
                   );
                 }
               )}

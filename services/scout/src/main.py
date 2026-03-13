@@ -9,6 +9,7 @@ from orion_common.config import get_settings
 from orion_common.event_bus import EventBus
 from orion_common.health import create_health_router
 from orion_common.logging import configure_logging
+from orion_common.middleware import InternalAuthMiddleware
 
 from src.filters.deduplication import TrendDeduplicator
 from src.filters.niche_filter import DEFAULT_NICHE_CONFIGS, NicheFilter
@@ -73,6 +74,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Orion Scout Service", lifespan=lifespan)
+app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 health_router = create_health_router("scout", redis_url=settings.redis_url)
 app.include_router(health_router)

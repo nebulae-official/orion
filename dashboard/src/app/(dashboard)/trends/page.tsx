@@ -24,8 +24,7 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
 
   try {
     const response = await serverFetch<TrendListResponse>(
-      "/api/v1/scout/trends",
-      { revalidate: 60 }
+      "/api/v1/scout/trends"
     );
     trends = response.items;
     total = response.total;

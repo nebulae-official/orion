@@ -3,10 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { VideoPlayer } from "@/components/video-player";
 import { ScriptPanel } from "@/components/script-panel";
 import { ContentActions } from "@/components/content-actions";
-import { VideoPlayerProvider } from "@/contexts/video-player-context";
 import { cn, formatDate } from "@/lib/utils";
 import type { Content, ScriptSegment } from "@/types/api";
-import { GATEWAY_URL } from "@/lib/config";
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
 
 interface ContentDetailPageProps {
   params: Promise<{ id: string }>;
@@ -19,7 +19,7 @@ async function fetchContent(token: string, id: string): Promise<Content | null> 
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      next: { revalidate: 30 },
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) return null;
@@ -41,7 +41,7 @@ async function fetchScriptSegments(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 30 },
+        next: { revalidate: 0 },
       }
     );
 
@@ -73,17 +73,49 @@ export default async function ContentDetailPage({
   }
 
   const { id } = await params;
-  const content = await fetchContent(token, id);
+
+  let contentFetchError = false;
+  let segmentsFetchError = false;
+
+  let content: Content | null;
+  try {
+    content = await fetchContent(token, id);
+  } catch {
+    contentFetchError = true;
+    content = null;
+  }
 
   if (!content) {
+    if (contentFetchError) {
+      return (
+        <div className="p-8">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            Some data may be unavailable. Services may not be running.
+          </div>
+        </div>
+      );
+    }
     notFound();
   }
 
-  const segments = await fetchScriptSegments(token, id);
+  let segments: ScriptSegment[];
+  try {
+    segments = await fetchScriptSegments(token, id);
+  } catch {
+    segmentsFetchError = true;
+    segments = [];
+  }
+
   const statusInfo = STATUS_LABELS[content.status] ?? STATUS_LABELS.draft;
 
   return (
     <div className="p-8">
+      {segmentsFetchError && (
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          Some data may be unavailable. Services may not be running.
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
@@ -114,23 +146,21 @@ export default async function ContentDetailPage({
       </div>
 
       {/* Video + Script */}
-      <VideoPlayerProvider>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <VideoPlayer
-              videoUrl={content.video_url}
-              thumbnailUrl={content.thumbnail_url}
-              segments={segments}
-            />
-          </div>
-          <div className="lg:col-span-1">
-            <ScriptPanel
-              script={content.script}
-              segments={segments}
-            />
-          </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <VideoPlayer
+            videoUrl={content.video_url}
+            thumbnailUrl={content.thumbnail_url}
+            segments={segments}
+          />
         </div>
-      </VideoPlayerProvider>
+        <div className="lg:col-span-1">
+          <ScriptPanel
+            script={content.script}
+            segments={segments}
+          />
+        </div>
+      </div>
 
       {/* Description */}
       {content.body && (

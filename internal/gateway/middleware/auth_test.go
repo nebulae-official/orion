@@ -60,7 +60,7 @@ func TestAuth(t *testing.T) {
 			}
 			rr := httptest.NewRecorder()
 
-			mw.Auth(testSecret)(okHandler).ServeHTTP(rr, req)
+			mw.Auth(testSecret, nil)(okHandler).ServeHTTP(rr, req)
 
 			if rr.Code != tc.wantStatus {
 				t.Errorf("got status %d, want %d", rr.Code, tc.wantStatus)

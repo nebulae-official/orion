@@ -12,6 +12,7 @@ from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 from orion_common.health import create_health_router
 from orion_common.logging import configure_logging
+from orion_common.middleware import InternalAuthMiddleware
 
 from .captions.whisper_stt import WhisperCaptioner
 from .providers.factory import get_tts_provider
@@ -92,6 +93,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Orion Editor Service", lifespan=lifespan)
+app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
 health_router = create_health_router(
