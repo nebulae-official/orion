@@ -70,10 +70,10 @@ function StageRow({ stage }: { stage: StageProgress }): React.ReactElement {
       <div
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-full",
-          stage.status === "completed" && "bg-green-100 text-green-600",
-          stage.status === "running" && "bg-blue-100 text-blue-600",
-          stage.status === "failed" && "bg-red-100 text-red-600",
-          stage.status === "pending" && "bg-gray-100 text-gray-400"
+          stage.status === "completed" && "bg-success-surface text-success-light",
+          stage.status === "running" && "bg-primary-surface text-primary-light",
+          stage.status === "failed" && "bg-danger-surface text-danger-light",
+          stage.status === "pending" && "bg-surface-elevated text-text-dim"
         )}
       >
         {stage.status === "running" ? (
@@ -92,30 +92,30 @@ function StageRow({ stage }: { stage: StageProgress }): React.ReactElement {
           <span
             className={cn(
               "text-sm font-medium",
-              stage.status === "running" && "text-blue-700",
-              stage.status === "completed" && "text-green-700",
-              stage.status === "failed" && "text-red-700",
-              stage.status === "pending" && "text-gray-400"
+              stage.status === "running" && "text-primary-light",
+              stage.status === "completed" && "text-success-light",
+              stage.status === "failed" && "text-danger-light",
+              stage.status === "pending" && "text-text-dim"
             )}
           >
             {stage.label}
           </span>
           {stage.status === "running" && (
-            <span className="text-xs text-gray-500">{stage.progress}%</span>
+            <span className="text-xs text-text-muted">{stage.progress}%</span>
           )}
         </div>
 
         {stage.status === "running" && (
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
             <div
-              className="h-full rounded-full bg-blue-500 transition-all duration-500"
+              className="h-full rounded-full bg-primary transition-all duration-500"
               style={{ width: `${stage.progress}%` }}
             />
           </div>
         )}
 
         {stage.status === "failed" && stage.error && (
-          <p className="mt-1 text-xs text-red-600">{stage.error}</p>
+          <p className="mt-1 text-xs text-danger-light">{stage.error}</p>
         )}
       </div>
     </div>
@@ -204,23 +204,23 @@ export function GenerationProgress(): React.ReactElement {
         <div
           className={cn(
             "h-2 w-2 rounded-full",
-            isConnected ? "bg-green-500" : "animate-pulse bg-red-500"
+            isConnected ? "bg-success" : "animate-pulse bg-danger"
           )}
         />
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-text-muted">
           {isConnected ? "Live" : "Reconnecting..."}
         </span>
       </div>
 
       {errors.length > 0 && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-red-800">
+        <div className="rounded-lg border border-danger/30 bg-danger-surface p-4">
+          <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-danger-light">
             <AlertCircle className="h-4 w-4" />
             Recent Errors
           </h4>
           <ul className="space-y-1">
             {errors.map((err, i) => (
-              <li key={i} className="text-xs text-red-700">
+              <li key={i} className="text-xs text-danger-light">
                 {err}
               </li>
             ))}
@@ -229,9 +229,9 @@ export function GenerationProgress(): React.ReactElement {
       )}
 
       {pipelineList.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-          <Clock className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-          <p className="text-sm text-gray-500">
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+          <Clock className="mx-auto mb-3 h-10 w-10 text-text-dim" />
+          <p className="text-sm text-text-muted">
             No active generations. Progress will appear here when content
             generation starts.
           </p>
@@ -240,14 +240,14 @@ export function GenerationProgress(): React.ReactElement {
         pipelineList.map((pipeline) => (
           <div
             key={pipeline.contentId}
-            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+            className="rounded-xl border border-border bg-surface p-6"
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-gray-900">
+              <h3 className="text-base font-semibold text-text">
                 {pipeline.title}
               </h3>
               {pipeline.estimatedTimeRemaining !== null && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-text-muted">
                   {formatTimeRemaining(pipeline.estimatedTimeRemaining)}
                 </span>
               )}

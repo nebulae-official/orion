@@ -25,15 +25,15 @@ export function useToast(): ToastContextValue {
 }
 
 const ICONS: Record<ToastType, React.ReactNode> = {
-  success: <CheckCircle className="h-5 w-5 text-green-500" />,
-  error: <AlertCircle className="h-5 w-5 text-red-500" />,
-  info: <Info className="h-5 w-5 text-blue-500" />,
+  success: <CheckCircle className="h-5 w-5 text-success-light" />,
+  error: <AlertCircle className="h-5 w-5 text-danger-light" />,
+  info: <Info className="h-5 w-5 text-info" />,
 };
 
 const STYLES: Record<ToastType, string> = {
-  success: "border-green-200 bg-green-50",
-  error: "border-red-200 bg-red-50",
-  info: "border-blue-200 bg-blue-50",
+  success: "border-success/30 bg-success-surface",
+  error: "border-danger/30 bg-danger-surface",
+  info: "border-info/30 bg-info-surface",
 };
 
 export function ToastProvider({
@@ -84,10 +84,10 @@ function ToastItem({
       )}
     >
       {ICONS[toast.type]}
-      <p className="text-sm font-medium text-gray-800">{toast.message}</p>
+      <p className="text-sm font-medium text-text">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="ml-auto text-gray-400 hover:text-gray-600"
+        className="ml-auto text-text-dim hover:text-text-secondary"
       >
         <X className="h-4 w-4" />
       </button>

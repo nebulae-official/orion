@@ -21,10 +21,10 @@ interface CostChartProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  llm_tokens: "#3b82f6",
-  image_generation: "#10b981",
-  tts_characters: "#f59e0b",
-  video_clips: "#8b5cf6",
+  llm_tokens: "var(--color-primary-light)",
+  image_generation: "var(--color-success)",
+  tts_characters: "var(--color-gold)",
+  video_clips: "var(--color-cyan)",
 };
 
 export function CostChart({ data }: CostChartProps): React.ReactElement {
@@ -41,25 +41,33 @@ export function CostChart({ data }: CostChartProps): React.ReactElement {
   }));
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h3 className="mb-4 text-lg font-semibold text-gray-900">
+    <div className="rounded-xl border border-border bg-surface p-6">
+      <h3 className="mb-4 text-lg font-semibold text-text">
         Cost by Provider
       </h3>
       {chartData.length === 0 ? (
-        <p className="py-12 text-center text-gray-400">No cost data yet</p>
+        <p className="py-12 text-center text-text-muted">No cost data yet</p>
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData}>
-            <XAxis dataKey="name" />
-            <YAxis tickFormatter={(v: number) => `$${v.toFixed(2)}`} />
-            <Tooltip formatter={(v) => `$${Number(v).toFixed(4)}`} />
-            <Legend />
+            <XAxis dataKey="name" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <YAxis tickFormatter={(v: number) => `$${v.toFixed(2)}`} stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <Tooltip
+              formatter={(v) => `$${Number(v).toFixed(4)}`}
+              contentStyle={{
+                backgroundColor: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "0.5rem",
+                color: "var(--color-text)",
+              }}
+            />
+            <Legend wrapperStyle={{ color: "var(--color-text-secondary)" }} />
             {Array.from(categories).map((cat) => (
               <Bar
                 key={cat}
                 dataKey={cat}
                 stackId="cost"
-                fill={CATEGORY_COLORS[cat] ?? "#9ca3af"}
+                fill={CATEGORY_COLORS[cat] ?? "var(--color-text-muted)"}
               />
             ))}
           </BarChart>

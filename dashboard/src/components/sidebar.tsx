@@ -14,6 +14,7 @@ import {
   Play,
   LogOut,
   Send,
+  Sparkles,
 } from "lucide-react";
 
 interface NavItem {
@@ -42,38 +43,50 @@ export function Sidebar(): React.ReactElement {
   }
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold text-gray-900">Orion</span>
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-            Dashboard
+    <aside className="flex h-screen w-64 flex-col border-r border-border bg-surface">
+      {/* Logo */}
+      <div className="flex h-16 items-center border-b border-border px-6">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <Sparkles className="h-4 w-4 text-white" />
+          </div>
+          <span className="font-[family-name:var(--font-display)] text-lg font-bold text-text">
+            Orion
+          </span>
+          <span className="rounded-full bg-primary-surface px-2 py-0.5 text-xs font-medium text-primary-light">
+            v1.0
           </span>
         </Link>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {NAV_ITEMS.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
               isActive(item.href)
-                ? "bg-blue-50 text-blue-700"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "bg-primary-surface text-primary-light shadow-[inset_0_0_0_1px_rgba(124,58,237,0.2)]"
+                : "text-text-secondary hover:bg-surface-hover hover:text-text"
             )}
           >
-            {item.icon}
+            <span className={cn(
+              isActive(item.href) ? "text-primary-light" : "text-text-muted"
+            )}>
+              {item.icon}
+            </span>
             {item.label}
           </Link>
         ))}
       </nav>
 
-      <div className="border-t border-gray-200 p-3">
+      {/* Footer */}
+      <div className="border-t border-border p-3">
         <button
           onClick={() => logout()}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-all duration-200 hover:bg-danger-surface hover:text-danger-light"
         >
           <LogOut className="h-5 w-5" />
           Sign out

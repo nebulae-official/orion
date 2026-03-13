@@ -47,21 +47,21 @@ export function PublishModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-text">
             Publish Content
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-text-dim hover:text-text-secondary"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mb-4 text-sm text-gray-600">
+        <p className="mb-4 text-sm text-text-secondary">
           Select platforms to publish to:
         </p>
 
@@ -72,18 +72,18 @@ export function PublishModal({
               className={cn(
                 "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
                 selected.includes(p.id)
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? "border-primary bg-primary-surface"
+                  : "border-border hover:bg-surface-hover"
               )}
             >
               <input
                 type="checkbox"
                 checked={selected.includes(p.id)}
                 onChange={() => togglePlatform(p.id)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-border bg-surface-elevated text-primary focus:ring-primary"
               />
               <span className="text-lg">{p.icon}</span>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-text">
                 {p.label}
               </span>
             </label>
@@ -93,7 +93,7 @@ export function PublishModal({
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover"
           >
             Cancel
           </button>
@@ -101,7 +101,7 @@ export function PublishModal({
             onClick={handlePublish}
             disabled={isPending || selected.length === 0}
             className={cn(
-              "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700",
+              "rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-muted",
               (isPending || selected.length === 0) &&
                 "cursor-not-allowed opacity-60"
             )}

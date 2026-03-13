@@ -7,10 +7,10 @@ export default function SystemPage(): React.ReactElement {
     <div className="p-8">
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <Activity className="h-8 w-8 text-gray-700" />
+          <Activity className="h-8 w-8 text-success" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">System Health</h1>
-            <p className="mt-1 text-gray-500">
+            <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">System Health</h1>
+            <p className="mt-1 text-text-secondary">
               Monitor service status, GPU usage, and queue sizes.
             </p>
           </div>

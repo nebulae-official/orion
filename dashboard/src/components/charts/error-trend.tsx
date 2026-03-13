@@ -32,23 +32,30 @@ export function ErrorTrend({ data }: ErrorTrendProps): React.ReactElement {
   }));
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h3 className="mb-4 text-lg font-semibold text-gray-900">
+    <div className="rounded-xl border border-border bg-surface p-6">
+      <h3 className="mb-4 text-lg font-semibold text-text">
         Error Trends (last 7 days)
       </h3>
       {chartData.length === 0 ? (
-        <p className="py-12 text-center text-gray-400">No error data yet</p>
+        <p className="py-12 text-center text-text-muted">No error data yet</p>
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+            <XAxis dataKey="time" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <YAxis stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "0.5rem",
+                color: "var(--color-text)",
+              }}
+            />
             <Line
               type="monotone"
               dataKey="errors"
-              stroke="#ef4444"
+              stroke="var(--color-danger)"
               strokeWidth={2}
               dot={false}
             />

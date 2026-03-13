@@ -12,7 +12,14 @@ interface ProviderPieProps {
   data: ProviderCostData[];
 }
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#6366f1"];
+const COLORS = [
+  "var(--color-primary-light)",
+  "var(--color-cyan)",
+  "var(--color-success)",
+  "var(--color-gold)",
+  "var(--color-danger)",
+  "var(--color-chart-6)",
+];
 
 export function ProviderPie({ data }: ProviderPieProps): React.ReactElement {
   const chartData = data.map((item) => ({
@@ -21,12 +28,12 @@ export function ProviderPie({ data }: ProviderPieProps): React.ReactElement {
   }));
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h3 className="mb-4 text-lg font-semibold text-gray-900">
+    <div className="rounded-xl border border-border bg-surface p-6">
+      <h3 className="mb-4 text-lg font-semibold text-text">
         Provider Usage
       </h3>
       {chartData.length === 0 ? (
-        <p className="py-12 text-center text-gray-400">No provider data yet</p>
+        <p className="py-12 text-center text-text-muted">No provider data yet</p>
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
@@ -38,6 +45,8 @@ export function ProviderPie({ data }: ProviderPieProps): React.ReactElement {
               outerRadius={100}
               dataKey="value"
               label={({ name }) => name}
+              stroke="var(--color-bg)"
+              strokeWidth={2}
             >
               {chartData.map((_, index) => (
                 <Cell
@@ -46,7 +55,15 @@ export function ProviderPie({ data }: ProviderPieProps): React.ReactElement {
                 />
               ))}
             </Pie>
-            <Tooltip formatter={(v) => `$${Number(v).toFixed(4)}`} />
+            <Tooltip
+              formatter={(v) => `$${Number(v).toFixed(4)}`}
+              contentStyle={{
+                backgroundColor: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "0.5rem",
+                color: "var(--color-text)",
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       )}

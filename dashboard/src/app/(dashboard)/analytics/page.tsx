@@ -62,21 +62,21 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
       : "0";
 
   const funnelData = [
-    { stage: "Generated", count: funnel.generated, color: "#3b82f6" },
-    { stage: "In Review", count: funnel.review, color: "#f59e0b" },
-    { stage: "Approved", count: funnel.approved, color: "#10b981" },
-    { stage: "Published", count: funnel.published, color: "#8b5cf6" },
-    { stage: "Rejected", count: funnel.rejected, color: "#ef4444" },
+    { stage: "Generated", count: funnel.generated, color: "var(--color-primary-light)" },
+    { stage: "In Review", count: funnel.review, color: "var(--color-gold)" },
+    { stage: "Approved", count: funnel.approved, color: "var(--color-success)" },
+    { stage: "Published", count: funnel.published, color: "var(--color-cyan)" },
+    { stage: "Rejected", count: funnel.rejected, color: "var(--color-danger)" },
   ];
 
   return (
     <div className="p-8">
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <BarChart3 className="h-8 w-8 text-gray-700" />
+          <BarChart3 className="h-8 w-8 text-primary-light" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-            <p className="mt-1 text-gray-500">
+            <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Analytics</h1>
+            <p className="mt-1 text-text-secondary">
               Pipeline performance, costs, and provider usage.
             </p>
           </div>

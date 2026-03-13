@@ -24,7 +24,7 @@ const SERVICES: { name: string; displayName: string; port: number }[] = [
 ];
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:8000";
-const REFRESH_INTERVAL = 30_000; // 30 seconds
+const REFRESH_INTERVAL = 30_000;
 
 export function ServiceHealth(): React.ReactElement {
   const [services, setServices] = useState<ServiceStatus[]>(
@@ -98,17 +98,17 @@ export function ServiceHealth(): React.ReactElement {
   }, [checkServices]);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-surface p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Service Status</h2>
+        <h2 className="text-lg font-semibold text-text">Service Status</h2>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-text-dim">
             Updated {formatRelativeTime(lastRefresh)}
           </span>
           <button
             onClick={checkServices}
             disabled={refreshing}
-            className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-md p-1 text-text-dim transition-colors hover:bg-surface-hover hover:text-text-secondary"
             title="Refresh now"
           >
             <RefreshCw
@@ -122,23 +122,23 @@ export function ServiceHealth(): React.ReactElement {
         {services.map((svc) => (
           <div
             key={svc.name}
-            className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3"
+            className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
           >
             <div className="flex items-center gap-3">
               <span
                 className={cn(
                   "inline-block h-3 w-3 rounded-full",
-                  svc.status === "healthy" && "bg-green-500",
-                  svc.status === "unhealthy" && "bg-red-500",
-                  svc.status === "checking" && "animate-pulse bg-yellow-400"
+                  svc.status === "healthy" && "bg-success",
+                  svc.status === "unhealthy" && "bg-danger",
+                  svc.status === "checking" && "animate-pulse bg-warning"
                 )}
               />
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text">
                   {svc.displayName}
                 </p>
                 {svc.uptime && (
-                  <p className="text-xs text-gray-400">Uptime: {svc.uptime}</p>
+                  <p className="text-xs text-text-dim">Uptime: {svc.uptime}</p>
                 )}
               </div>
             </div>
@@ -146,8 +146,8 @@ export function ServiceHealth(): React.ReactElement {
             <div className="flex items-center gap-4">
               {svc.queueSize !== null && (
                 <div className="text-right">
-                  <p className="text-xs text-gray-400">Queue</p>
-                  <p className="text-sm font-medium text-gray-700">
+                  <p className="text-xs text-text-dim">Queue</p>
+                  <p className="text-sm font-medium text-text-secondary">
                     {svc.queueSize}
                   </p>
                 </div>
@@ -156,11 +156,11 @@ export function ServiceHealth(): React.ReactElement {
                 className={cn(
                   "rounded-full px-2.5 py-0.5 text-xs font-medium",
                   svc.status === "healthy" &&
-                    "bg-green-100 text-green-700",
+                    "bg-success-surface text-success-light",
                   svc.status === "unhealthy" &&
-                    "bg-red-100 text-red-700",
+                    "bg-danger-surface text-danger-light",
                   svc.status === "checking" &&
-                    "bg-yellow-100 text-yellow-700"
+                    "bg-warning-surface text-warning-light"
                 )}
               >
                 {svc.status === "checking"
@@ -174,7 +174,7 @@ export function ServiceHealth(): React.ReactElement {
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-gray-400">
+      <p className="mt-4 text-xs text-text-dim">
         Auto-refreshes every 30 seconds
       </p>
     </div>

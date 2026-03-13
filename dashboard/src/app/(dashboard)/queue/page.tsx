@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ContentCard, ContentCardSkeleton } from "@/components/content-card";
+import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
 
@@ -74,8 +74,8 @@ export default async function QueuePage({
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Content Queue</h1>
-        <p className="mt-2 text-gray-500">
+        <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Content Queue</h1>
+        <p className="mt-2 text-text-secondary">
           Review and manage content in the pipeline.
         </p>
       </div>
@@ -84,7 +84,7 @@ export default async function QueuePage({
 
       {data.items.length === 0 ? (
         <div className="mt-12 text-center">
-          <p className="text-gray-400">No content found.</p>
+          <p className="text-text-muted">No content found.</p>
         </div>
       ) : (
         <>
@@ -111,8 +111,8 @@ export default async function QueuePage({
                       href={`/queue?${params.toString()}`}
                       className={
                         pageNum === page
-                          ? "rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white"
-                          : "rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                          ? "rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white"
+                          : "rounded-lg bg-surface px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-hover"
                       }
                     >
                       {pageNum}

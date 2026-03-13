@@ -38,10 +38,10 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
     <div className="p-8">
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-gray-700" />
+          <TrendingUp className="h-8 w-8 text-cyan" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Trends</h1>
-            <p className="mt-1 text-gray-500">
+            <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Trends</h1>
+            <p className="mt-1 text-text-secondary">
               Discovered trends and their pipeline status.
             </p>
           </div>

@@ -67,9 +67,9 @@ function StatusDot({ status }: { status: ServiceConfig["status"] }): React.React
     <span
       className={cn(
         "inline-block h-2.5 w-2.5 rounded-full",
-        status === "connected" && "bg-green-500",
-        status === "disconnected" && "bg-red-500",
-        status === "checking" && "animate-pulse bg-yellow-400"
+        status === "connected" && "bg-success",
+        status === "disconnected" && "bg-danger",
+        status === "checking" && "animate-pulse bg-warning"
       )}
       title={status}
     />
@@ -109,7 +109,6 @@ export function ProviderConfig(): React.ReactElement {
     setConfigs((prev) =>
       prev.map((c) => {
         if (c.service !== service) return c;
-        // Reset model to first available for the new provider
         const models = MODEL_OPTIONS[service]?.filter((m) => m.provider === provider) ?? [];
         return { ...c, provider, model: models[0]?.value ?? "" };
       })
@@ -133,7 +132,6 @@ export function ProviderConfig(): React.ReactElement {
 
     if (result.success) {
       setMessage({ type: "success", text: `${config.label} configuration saved.` });
-      // Re-check status
       const status = await checkStatus(service);
       setConfigs((prev) =>
         prev.map((c) => (c.service === service ? { ...c, status } : c))
@@ -152,8 +150,8 @@ export function ProviderConfig(): React.ReactElement {
           className={cn(
             "flex items-center gap-2 rounded-lg border px-4 py-3 text-sm",
             message.type === "success"
-              ? "border-green-200 bg-green-50 text-green-800"
-              : "border-red-200 bg-red-50 text-red-800"
+              ? "border-success/30 bg-success-surface text-success-light"
+              : "border-danger/30 bg-danger-surface text-danger-light"
           )}
         >
           {message.type === "success" ? (
@@ -173,10 +171,10 @@ export function ProviderConfig(): React.ReactElement {
           return (
             <div
               key={config.service}
-              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+              className="rounded-xl border border-border bg-surface p-6"
             >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-text">
                   {config.label}
                 </h3>
                 <StatusDot status={config.status} />
@@ -186,7 +184,7 @@ export function ProviderConfig(): React.ReactElement {
                 <div>
                   <label
                     htmlFor={`provider-${config.service}`}
-                    className="mb-1 block text-sm font-medium text-gray-700"
+                    className="mb-1 block text-sm font-medium text-text-secondary"
                   >
                     Provider
                   </label>
@@ -194,7 +192,7 @@ export function ProviderConfig(): React.ReactElement {
                     id={`provider-${config.service}`}
                     value={config.provider}
                     onChange={(e) => handleProviderChange(config.service, e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     {PROVIDER_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -207,7 +205,7 @@ export function ProviderConfig(): React.ReactElement {
                 <div>
                   <label
                     htmlFor={`model-${config.service}`}
-                    className="mb-1 block text-sm font-medium text-gray-700"
+                    className="mb-1 block text-sm font-medium text-text-secondary"
                   >
                     Model
                   </label>
@@ -215,7 +213,7 @@ export function ProviderConfig(): React.ReactElement {
                     id={`model-${config.service}`}
                     value={config.model}
                     onChange={(e) => handleModelChange(config.service, e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     {availableModels.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -231,8 +229,8 @@ export function ProviderConfig(): React.ReactElement {
                   className={cn(
                     "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
                     saving === config.service
-                      ? "cursor-not-allowed bg-blue-400"
-                      : "bg-blue-600 hover:bg-blue-700"
+                      ? "cursor-not-allowed bg-primary-muted"
+                      : "bg-primary hover:bg-primary-muted"
                   )}
                 >
                   {saving === config.service ? (

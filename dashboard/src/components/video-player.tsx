@@ -142,10 +142,10 @@ export function VideoPlayer({
 
   if (!videoUrl) {
     return (
-      <div className="flex aspect-video items-center justify-center rounded-xl border border-gray-200 bg-gray-100">
+      <div className="flex aspect-video items-center justify-center rounded-xl border border-border bg-surface">
         <div className="text-center">
-          <Play className="mx-auto h-12 w-12 text-gray-300" />
-          <p className="mt-2 text-sm text-gray-400">No video available</p>
+          <Play className="mx-auto h-12 w-12 text-text-dim" />
+          <p className="mt-2 text-sm text-text-muted">No video available</p>
         </div>
       </div>
     );
@@ -154,7 +154,7 @@ export function VideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="group relative overflow-hidden rounded-xl border border-gray-200 bg-black"
+      className="group relative overflow-hidden rounded-xl border border-border bg-black"
     >
       <video
         ref={videoRef}
@@ -182,13 +182,13 @@ export function VideoPlayer({
           onClick={handleProgressClick}
         >
           <div
-            className="h-full rounded-full bg-blue-500 transition-[width]"
+            className="h-full rounded-full bg-primary transition-[width]"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={togglePlay} className="text-white hover:text-blue-400">
+          <button onClick={togglePlay} className="text-white hover:text-primary-light">
             {isPlaying ? (
               <Pause className="h-5 w-5" />
             ) : (
@@ -196,7 +196,7 @@ export function VideoPlayer({
             )}
           </button>
 
-          <button onClick={toggleMute} className="text-white hover:text-blue-400">
+          <button onClick={toggleMute} className="text-white hover:text-primary-light">
             {isMuted ? (
               <VolumeX className="h-5 w-5" />
             ) : (
@@ -213,13 +213,13 @@ export function VideoPlayer({
             <div className="relative">
               <button
                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                className="flex items-center gap-1 text-sm text-white hover:text-blue-400"
+                className="flex items-center gap-1 text-sm text-white hover:text-primary-light"
               >
                 <Gauge className="h-4 w-4" />
                 {playbackSpeed}x
               </button>
               {showSpeedMenu && (
-                <div className="absolute bottom-8 right-0 rounded-lg bg-gray-900 p-1 shadow-lg">
+                <div className="absolute bottom-8 right-0 rounded-lg border border-border bg-surface-elevated p-1 shadow-lg">
                   {PLAYBACK_SPEEDS.map((speed) => (
                     <button
                       key={speed}
@@ -227,8 +227,8 @@ export function VideoPlayer({
                       className={cn(
                         "block w-full rounded px-3 py-1 text-left text-sm",
                         playbackSpeed === speed
-                          ? "bg-blue-600 text-white"
-                          : "text-white/80 hover:bg-gray-800"
+                          ? "bg-primary text-white"
+                          : "text-text-secondary hover:bg-surface-hover"
                       )}
                     >
                       {speed}x
@@ -240,7 +240,7 @@ export function VideoPlayer({
 
             <button
               onClick={toggleFullscreen}
-              className="text-white hover:text-blue-400"
+              className="text-white hover:text-primary-light"
             >
               <Maximize className="h-5 w-5" />
             </button>

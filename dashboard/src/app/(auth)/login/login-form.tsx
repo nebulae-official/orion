@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { login } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function LoginForm(): React.ReactElement {
   const router = useRouter();
@@ -32,75 +33,100 @@ export default function LoginForm(): React.ReactElement {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Orion
-          </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Sign in to the Content Agency dashboard
-          </p>
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center bg-bg overflow-hidden">
+      {/* Background glow effects */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary opacity-[0.04] blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-cyan opacity-[0.04] blur-[120px]" />
+      </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-              {error}
+      <div className="relative w-full max-w-md px-4">
+        {/* Card */}
+        <div className="rounded-2xl border border-border bg-surface p-8 shadow-2xl shadow-black/20">
+          {/* Logo */}
+          <div className="mb-8 text-center">
+            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Enter your username"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Enter your password"
-              />
-            </div>
+            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
+              Welcome to Orion
+            </h1>
+            <p className="mt-2 text-sm text-text-secondary">
+              Sign in to the Content Agency dashboard
+            </p>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={cn(
-              "w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-              loading && "cursor-not-allowed opacity-60"
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="rounded-lg border border-danger/20 bg-danger-surface px-4 py-3 text-sm text-danger-light">
+                {error}
+              </div>
             )}
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="username"
+                  className="mb-1.5 block text-sm font-medium text-text-secondary"
+                >
+                  Username
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Enter your username"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-1.5 block text-sm font-medium text-text-secondary"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Enter your password"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                "flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted hover:shadow-primary/30",
+                loading && "cursor-not-allowed opacity-60"
+              )}
+            >
+              {loading ? (
+                "Signing in..."
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Subtle brand footer */}
+        <p className="mt-6 text-center text-xs text-text-dim">
+          Orion Digital Twin Content Agency
+        </p>
       </div>
     </div>
   );

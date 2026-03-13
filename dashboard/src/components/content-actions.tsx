@@ -51,7 +51,7 @@ export function ContentActions({
             onClick={handleApprove}
             disabled={isPending}
             className={cn(
-              "inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700",
+              "inline-flex items-center gap-2 rounded-lg bg-success px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-success/80",
               isPending && "cursor-not-allowed opacity-60"
             )}
           >
@@ -65,7 +65,7 @@ export function ContentActions({
             onClick={() => setShowRejectModal(true)}
             disabled={isPending}
             className={cn(
-              "inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700",
+              "inline-flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-danger/80",
               isPending && "cursor-not-allowed opacity-60"
             )}
           >
@@ -75,7 +75,7 @@ export function ContentActions({
         )}
 
         {optimisticStatus === "approved" && (
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success-light">
             <CheckCircle className="h-4 w-4" />
             Approved
           </span>
@@ -84,7 +84,7 @@ export function ContentActions({
         {canPublish && (
           <button
             onClick={() => setShowPublishModal(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-muted"
           >
             <Send className="h-4 w-4" />
             Publish
@@ -92,7 +92,7 @@ export function ContentActions({
         )}
 
         {optimisticStatus === "rejected" && (
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-danger-light">
             <XCircle className="h-4 w-4" />
             Rejected
           </span>
@@ -165,15 +165,15 @@ function RejectModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-text">
             Reject Content
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-text-dim hover:text-text-secondary"
           >
             <X className="h-5 w-5" />
           </button>
@@ -183,7 +183,7 @@ function RejectModal({
           <div>
             <label
               htmlFor="reject-reason"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-text-secondary"
             >
               Reason for rejection
             </label>
@@ -193,7 +193,7 @@ function RejectModal({
               onChange={(e) => setReason(e.target.value)}
               rows={4}
               placeholder="Explain why this content should be rejected..."
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder:text-text-dim focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
@@ -202,9 +202,9 @@ function RejectModal({
               type="checkbox"
               checked={regenerate}
               onChange={(e) => setRegenerate(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-border bg-surface-elevated text-primary focus:ring-primary"
             />
-            <span className="flex items-center gap-1 text-sm text-gray-700">
+            <span className="flex items-center gap-1 text-sm text-text-secondary">
               <RotateCcw className="h-3.5 w-3.5" />
               Regenerate content with feedback
             </span>
@@ -214,7 +214,7 @@ function RejectModal({
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover"
           >
             Cancel
           </button>
@@ -222,7 +222,7 @@ function RejectModal({
             onClick={handleSubmit}
             disabled={isPending}
             className={cn(
-              "rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700",
+              "rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger/80",
               isPending && "cursor-not-allowed opacity-60"
             )}
           >

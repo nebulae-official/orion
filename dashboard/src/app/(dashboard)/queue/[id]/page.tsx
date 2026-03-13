@@ -54,12 +54,12 @@ async function fetchScriptSegments(
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  draft: { label: "Draft", className: "bg-gray-100 text-gray-700" },
-  generating: { label: "Generating", className: "bg-purple-100 text-purple-700" },
-  review: { label: "In Review", className: "bg-amber-100 text-amber-700" },
-  approved: { label: "Approved", className: "bg-green-100 text-green-700" },
-  published: { label: "Published", className: "bg-blue-100 text-blue-700" },
-  rejected: { label: "Rejected", className: "bg-red-100 text-red-700" },
+  draft: { label: "Draft", className: "bg-surface-elevated text-text-secondary" },
+  generating: { label: "Generating", className: "bg-primary-surface text-primary-light" },
+  review: { label: "In Review", className: "bg-warning-surface text-warning-light" },
+  approved: { label: "Approved", className: "bg-success-surface text-success-light" },
+  published: { label: "Published", className: "bg-info-surface text-info-light" },
+  rejected: { label: "Rejected", className: "bg-danger-surface text-danger-light" },
 };
 
 export default async function ContentDetailPage({
@@ -88,7 +88,7 @@ export default async function ContentDetailPage({
       <div className="mb-6 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
               {content.title}
             </h1>
             <span
@@ -100,7 +100,7 @@ export default async function ContentDetailPage({
               {statusInfo.label}
             </span>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-text-muted">
             Created {formatDate(content.created_at)}
             {content.confidence_score !== undefined && (
               <span className="ml-3">
@@ -132,11 +132,11 @@ export default async function ContentDetailPage({
 
       {/* Description */}
       {content.body && (
-        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">
+        <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+          <h2 className="mb-3 text-lg font-semibold text-text">
             Description
           </h2>
-          <p className="whitespace-pre-wrap text-sm text-gray-600">
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">
             {content.body}
           </p>
         </div>

@@ -38,7 +38,7 @@ export function QueueFilters({
     } else {
       params.set(key, value);
     }
-    params.delete("page"); // Reset to page 1 on filter change
+    params.delete("page");
     router.push(`/queue?${params.toString()}`);
   }
 
@@ -56,8 +56,8 @@ export function QueueFilters({
               className={cn(
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  ? "bg-primary text-white"
+                  : "bg-surface text-text-secondary hover:bg-surface-hover"
               )}
             >
               {s.label}
@@ -68,7 +68,7 @@ export function QueueFilters({
 
       {/* Sort */}
       <div className="ml-auto flex items-center gap-2">
-        <span className="text-sm text-gray-500">Sort by:</span>
+        <span className="text-sm text-text-muted">Sort by:</span>
         {SORT_OPTIONS.map((s) => (
           <button
             key={s.value}
@@ -76,8 +76,8 @@ export function QueueFilters({
             className={cn(
               "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
               currentSort === s.value
-                ? "bg-gray-900 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-100"
+                ? "bg-surface-elevated text-text"
+                : "bg-surface text-text-secondary hover:bg-surface-hover"
             )}
           >
             {s.label}
