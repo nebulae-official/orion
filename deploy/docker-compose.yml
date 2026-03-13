@@ -4,6 +4,8 @@
 #   --profile full    : adds ollama, comfyui
 #   --profile gpu     : same as full + NVIDIA GPU passthrough
 
+name: orion
+
 networks:
   orion-net:
     driver: bridge
