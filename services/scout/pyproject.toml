@@ -6,7 +6,7 @@ dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
-    "orion-common @ file:../../libs/orion-common",
+    "orion-common",
     "pytrends>=4.9.0",
     "apscheduler>=4.0.0a5",
     "feedparser>=6.0.0",
@@ -14,3 +14,6 @@ dependencies = [
     "tweepy>=4.14.0",
     "thefuzz>=0.22.0",
 ]
+
+[tool.uv.sources]
+orion-common = { workspace = true }
