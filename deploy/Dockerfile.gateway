@@ -35,10 +35,13 @@ EXPOSE 8000
 CMD ["go", "run", "./cmd/gateway"]
 
 # ── Stage 3: Runtime ─────────────────────────────────────────────────────
-FROM alpine:3.21
+# Use Debian slim (not Alpine) so nvidia-smi works with GPU passthrough.
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache ca-certificates wget \
-    && addgroup -S orion && adduser -S orion -G orion
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system orion && useradd --system --gid orion orion
 
 COPY --from=builder /build/gateway /usr/local/bin/gateway
 

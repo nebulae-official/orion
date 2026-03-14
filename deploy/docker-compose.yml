@@ -65,6 +65,13 @@ services:
       - orion-net
     restart: unless-stopped
     mem_limit: 512m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
       interval: 30s

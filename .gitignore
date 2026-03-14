@@ -41,3 +41,7 @@ site/
 
 # UV
 # uv.lock is tracked for reproducible builds
+
+# Test artifacts
+screenshots/
+.playwright-mcp/
