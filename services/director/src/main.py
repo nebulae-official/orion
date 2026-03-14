@@ -8,8 +8,6 @@ from typing import Any
 import structlog
 from fastapi import FastAPI
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from sqlalchemy.ext.asyncio import async_sessionmaker
-
 from orion_common.config import get_settings
 from orion_common.db.session import get_engine
 from orion_common.event_bus import EventBus
@@ -18,6 +16,7 @@ from orion_common.health import create_health_router, instrument_app
 from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 from orion_common.milvus_client import OrionMilvusClient
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from .agents.analyst import AnalystAgent
 from .agents.critique_agent import CritiqueAgent

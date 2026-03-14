@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
-from sqlalchemy import DateTime, Float, Integer, String, Text, func, select
+from orion_common.db import Base
+from sqlalchemy import DateTime, String, func, select
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
-
-from orion_common.db import Base
 
 logger = structlog.get_logger(__name__)
 
@@ -34,7 +33,7 @@ class AnalyticsEvent(Base):
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     service: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
 
 
@@ -60,7 +59,7 @@ class EventRepository:
             channel=channel,
             payload=payload,
             service=service,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
         self._session.add(event)
         await self._session.commit()
@@ -122,7 +121,7 @@ class EventRepository:
         hours: int = 1,
     ) -> float:
         """Calculate events per hour over the last N hours."""
-        since = datetime.now(timezone.utc) - timedelta(hours=hours)
+        since = datetime.now(UTC) - timedelta(hours=hours)
         query = select(func.count()).where(AnalyticsEvent.timestamp >= since)
         total = (await self._session.execute(query)).scalar_one()
         return total / hours if hours > 0 else 0.0
@@ -134,7 +133,7 @@ class EventRepository:
         bucket_minutes: int = 60,
     ) -> list[dict[str, Any]]:
         """Return error rate trends bucketed by time intervals."""
-        since = datetime.now(timezone.utc) - timedelta(hours=hours)
+        since = datetime.now(UTC) - timedelta(hours=hours)
 
         # All events since cutoff
         all_query = (

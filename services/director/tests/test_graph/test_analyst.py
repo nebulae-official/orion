@@ -8,13 +8,10 @@ from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from src.graph.nodes import analyst_node, analyst_hitl_gate
-from src.graph.hitl import build_analyst_review_payload
-from src.graph.state import OrionState, PipelineStage
 from src.agents.analyst import AnalystAgent
-from src.providers.base import LLMResponse
-
+from src.graph.hitl import build_analyst_review_payload
+from src.graph.nodes import analyst_hitl_gate, analyst_node
+from src.graph.state import OrionState, PipelineStage
 
 ANALYSIS_JSON = json.dumps({
     "performance_summary": "Pipeline completed successfully.",

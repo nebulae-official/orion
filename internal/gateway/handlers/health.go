@@ -19,7 +19,7 @@ func Health(version string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(HealthResponse{
+		_ = json.NewEncoder(w).Encode(HealthResponse{
 			Status:  "ok",
 			Service: "gateway",
 			Version: version,
@@ -36,7 +36,7 @@ func Ready(version string, rdb *redis.Client) http.HandlerFunc {
 		if rdb != nil {
 			if err := rdb.Ping(r.Context()).Err(); err != nil {
 				w.WriteHeader(http.StatusServiceUnavailable)
-				json.NewEncoder(w).Encode(HealthResponse{
+				_ = json.NewEncoder(w).Encode(HealthResponse{
 					Status:  "not_ready",
 					Service: "gateway",
 					Version: version,
@@ -46,7 +46,7 @@ func Ready(version string, rdb *redis.Client) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(HealthResponse{
+		_ = json.NewEncoder(w).Encode(HealthResponse{
 			Status:  "ready",
 			Service: "gateway",
 			Version: version,

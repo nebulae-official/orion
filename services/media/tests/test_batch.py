@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 
 import pytest
-
 from src.providers.base import ImageRequest, ImageResult
 from src.services.batch_generator import BatchGenerator, BatchImageRequest, BatchImageResult
 

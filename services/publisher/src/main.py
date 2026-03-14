@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
-
 from orion_common.config import get_settings
 from orion_common.db.session import get_engine
 from orion_common.health import create_health_router, instrument_app

@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import operator
-from enum import Enum
-from typing import Annotated, Any
+from enum import StrEnum
+from typing import Annotated, Any, NotRequired
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 
-class PipelineStage(str, Enum):
+class PipelineStage(StrEnum):
     """Which node the pipeline is currently at."""
 
     STRATEGIST = "strategist"

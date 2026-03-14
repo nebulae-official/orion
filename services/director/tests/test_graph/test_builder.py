@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
 from langgraph.graph.state import CompiledStateGraph
-
 from src.graph.builder import build_content_graph
-from src.graph.state import PipelineStage
 
 
 class TestBuildContentGraph:
     def test_build_returns_compiled_graph(self, fake_llm) -> None:
-        from src.agents.script_generator import ScriptGenerator
         from src.agents.critique_agent import CritiqueAgent
+        from src.agents.script_generator import ScriptGenerator
         from src.agents.visual_prompter import VisualPrompter
 
         script_gen = ScriptGenerator(fake_llm)
@@ -27,8 +24,8 @@ class TestBuildContentGraph:
         assert isinstance(graph, CompiledStateGraph)
 
     def test_graph_has_expected_nodes(self, fake_llm) -> None:
-        from src.agents.script_generator import ScriptGenerator
         from src.agents.critique_agent import CritiqueAgent
+        from src.agents.script_generator import ScriptGenerator
         from src.agents.visual_prompter import VisualPrompter
 
         script_gen = ScriptGenerator(fake_llm)
@@ -50,8 +47,8 @@ from langgraph.checkpoint.memory import MemorySaver
 
 class TestBuildContentGraphWithHITL:
     def test_hitl_graph_has_review_nodes(self, fake_llm) -> None:
-        from src.agents.script_generator import ScriptGenerator
         from src.agents.critique_agent import CritiqueAgent
+        from src.agents.script_generator import ScriptGenerator
         from src.agents.visual_prompter import VisualPrompter
 
         script_gen = ScriptGenerator(fake_llm)

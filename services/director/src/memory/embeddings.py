@@ -12,7 +12,6 @@ import struct
 from abc import ABC, abstractmethod
 
 import structlog
-
 from orion_common.milvus_client import EMBEDDING_DIM
 
 logger = structlog.get_logger(__name__)
@@ -77,7 +76,7 @@ class HashEmbeddingProvider(EmbeddingProvider):
 
         while len(vector) < self._dim:
             digest = hashlib.sha512(
-                f"{text}:{counter}".encode("utf-8")
+                f"{text}:{counter}".encode()
             ).digest()
             # Unpack 64 bytes into 8 float64 values
             floats = struct.unpack("8d", digest)

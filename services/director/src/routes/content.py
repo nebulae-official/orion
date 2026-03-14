@@ -6,10 +6,9 @@ import uuid
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import ContentStatus
 from orion_common.db.session import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..repositories.content_repo import ContentRepository
 from ..schemas import (

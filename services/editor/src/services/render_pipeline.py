@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
-from sqlalchemy import update
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import (
     AssetType,
     Content,
@@ -18,6 +15,8 @@ from orion_common.db.models import (
 )
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy import update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..captions.whisper_stt import WhisperCaptioner
 from ..providers.base import TTSProvider, TTSRequest
@@ -94,7 +93,7 @@ class RenderPipeline:
             content_id=content_id,
             stage="render_pipeline",
             status=PipelineStatus.running,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         session.add(pipeline_run)
         await session.flush()
@@ -227,7 +226,7 @@ class RenderPipeline:
 
             # Mark pipeline as completed
             pipeline_run.status = PipelineStatus.completed
-            pipeline_run.completed_at = datetime.now(timezone.utc)
+            pipeline_run.completed_at = datetime.now(UTC)
             await session.commit()
 
             # Publish event
@@ -254,7 +253,7 @@ class RenderPipeline:
         except Exception as exc:
             pipeline_run.status = PipelineStatus.failed
             pipeline_run.error_message = str(exc)[:2000]
-            pipeline_run.completed_at = datetime.now(timezone.utc)
+            pipeline_run.completed_at = datetime.now(UTC)
             await session.commit()
 
             await self._event_bus.publish(

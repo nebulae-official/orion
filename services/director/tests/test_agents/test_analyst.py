@@ -7,10 +7,8 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from src.agents.analyst import AnalystAgent, AnalysisResult, ImprovementSuggestion
+from src.agents.analyst import AnalysisResult, AnalystAgent
 from src.providers.base import LLMProvider, LLMResponse
-
 
 ANALYSIS_JSON = json.dumps({
     "performance_summary": "Pipeline completed in 45s. Critique score 0.85 is above average.",

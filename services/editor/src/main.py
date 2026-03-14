@@ -5,7 +5,6 @@ from typing import Any
 
 import structlog
 from fastapi import FastAPI
-
 from orion_common.config import get_settings
 from orion_common.db.session import get_engine
 from orion_common.event_bus import EventBus
@@ -16,7 +15,8 @@ from orion_common.middleware import InternalAuthMiddleware
 
 from .captions.whisper_stt import WhisperCaptioner
 from .providers.factory import get_tts_provider
-from .routes.render import router as render_router, set_render_pipeline, set_components
+from .routes.render import router as render_router
+from .routes.render import set_components, set_render_pipeline
 from .services.render_pipeline import RenderPipeline
 from .video.stitcher import VideoStitcher
 from .video.subtitles import SubtitleBurner

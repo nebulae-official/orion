@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 import structlog
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
 from orion_common.db.models import (
     Content,
     ContentStatus,
@@ -19,6 +15,9 @@ from orion_common.db.models import (
 )
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.exceptions import ContentNotApprovedError, ContentNotFoundError, SafetyCheckFailedError
 from src.providers.base import PublishContent, SocialProvider
@@ -97,14 +96,14 @@ class PublishingService:
                 platform_post_id=result.platform_post_id,
                 status=PublishStatus(result.status),
                 error_message=result.error,
-                published_at=datetime.now(timezone.utc) if result.status == "published" else None,
+                published_at=datetime.now(UTC) if result.status == "published" else None,
             )
             self.session.add(record)
 
             if result.status == "published":
                 any_published = True
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if any_published:
             content.status = ContentStatus.published
             await self.session.flush()

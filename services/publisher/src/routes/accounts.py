@@ -6,10 +6,9 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import SocialAccount
 from orion_common.db.session import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.publish_repo import PublishRepository
 from src.schemas import SocialAccountCreate, SocialAccountResponse

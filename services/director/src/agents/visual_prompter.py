@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from enum import Enum
+from enum import StrEnum
 
 import structlog
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ from .script_generator import GeneratedScript
 logger = structlog.get_logger(__name__)
 
 
-class VisualStyle(str, Enum):
+class VisualStyle(StrEnum):
     """Supported visual generation styles."""
 
     cinematic = "cinematic"

@@ -6,8 +6,7 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-from src.services.render_pipeline import RenderPipeline, STAGE_TTS, STAGE_CAPTIONS
+from src.services.render_pipeline import STAGE_CAPTIONS, STAGE_TTS, RenderPipeline
 
 
 class TestRenderPipeline:
@@ -103,7 +102,7 @@ class TestRenderPipeline:
             repo_instance.create.return_value = MagicMock(id=uuid.uuid4())
             MockRepo.return_value = repo_instance
 
-            run = await pipeline.render(content_id=content_id, session=session)
+            await pipeline.render(content_id=content_id, session=session)
 
         tts.synthesize.assert_called_once()
         captioner.transcribe.assert_called_once()

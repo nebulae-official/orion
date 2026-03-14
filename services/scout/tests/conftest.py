@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-
 from src.providers.base import TrendProvider, TrendResult
-from src.routes.trends import configure_routes, router as trends_router
+from src.routes.trends import configure_routes
+from src.routes.trends import router as trends_router
 
 
 class FakeTrendProvider(TrendProvider):

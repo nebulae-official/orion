@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
@@ -86,7 +86,7 @@ class TrendDeduplicator:
         if not existing:
             return list(trends)
 
-        cutoff = datetime.now(timezone.utc) - timedelta(days=self._lookback_days)
+        cutoff = datetime.now(UTC) - timedelta(days=self._lookback_days)
         recent_topics: list[str] = []
 
         for item in existing:

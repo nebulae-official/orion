@@ -245,7 +245,7 @@ func (h *AuthHandler) IssueWSTicket() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ticketResponse{
+		_ = json.NewEncoder(w).Encode(ticketResponse{
 			Ticket:    ticket,
 			ExpiresIn: int(ticketTTL.Seconds()),
 		}) //nolint:errcheck

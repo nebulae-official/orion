@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import UTC, datetime
 
 from orion_common.cache import RedisCache
 from orion_common.db.models import Content, ContentStatus, PipelineRun, PipelineStatus
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 CONTENT_LIST_CACHE_KEY = "director:content:list:{status}:{limit}:{offset}"
 CONTENT_LIST_CACHE_TTL = 30  # seconds
@@ -141,9 +140,9 @@ class ContentRepository:
             return None
         run.status = status
         if status == PipelineStatus.running:
-            run.started_at = datetime.now(timezone.utc)
+            run.started_at = datetime.now(UTC)
         elif status in (PipelineStatus.completed, PipelineStatus.failed):
-            run.completed_at = datetime.now(timezone.utc)
+            run.completed_at = datetime.now(UTC)
         if error_message is not None:
             run.error_message = error_message
         await self._session.flush()

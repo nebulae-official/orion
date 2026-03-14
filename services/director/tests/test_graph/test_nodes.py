@@ -6,13 +6,11 @@ import json
 import uuid
 
 import pytest
-
-from src.graph.nodes import strategist_node, creator_node
-from src.graph.state import OrionState, PipelineStage
-from src.agents.script_generator import ScriptGenerator
 from src.agents.critique_agent import CritiqueAgent
+from src.agents.script_generator import ScriptGenerator
 from src.agents.visual_prompter import VisualPrompter
-
+from src.graph.nodes import creator_node, strategist_node
+from src.graph.state import OrionState, PipelineStage
 
 SCRIPT_JSON = json.dumps({
     "hook": "AI just changed everything",
@@ -88,6 +86,7 @@ class TestStrategistNode:
     ) -> None:
         """If script generation fails, strategist sets error and FAILED stage."""
         from unittest.mock import AsyncMock
+
         from src.providers.base import LLMProvider
 
         bad_llm = AsyncMock(spec=LLMProvider)
@@ -142,6 +141,7 @@ class TestCreatorNode:
     async def test_creator_sets_failed_on_error(self) -> None:
         """If visual prompt extraction fails, creator sets error."""
         from unittest.mock import AsyncMock
+
         from src.providers.base import LLMProvider
 
         bad_llm = AsyncMock(spec=LLMProvider)

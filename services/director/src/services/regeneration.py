@@ -6,11 +6,10 @@ import uuid
 from typing import Any
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import ContentStatus, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..agents.script_generator import GeneratedScript, ScriptGenerator, ScriptRequest
 from ..agents.visual_prompter import VisualPrompter

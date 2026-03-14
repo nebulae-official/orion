@@ -8,7 +8,6 @@ from typing import Any
 
 import structlog
 from fastapi import FastAPI
-
 from orion_common.config import get_settings
 from orion_common.db.models import AssetType
 from orion_common.db.session import get_session
@@ -21,7 +20,8 @@ from orion_common.middleware import InternalAuthMiddleware
 from .providers.base import ImageRequest
 from .providers.factory import get_image_provider
 from .repositories.asset_repo import MediaAssetRepository
-from .routes.images import configure_router, router as images_router
+from .routes.images import configure_router
+from .routes.images import router as images_router
 from .services.batch_generator import BatchGenerator, BatchImageRequest
 
 configure_logging()

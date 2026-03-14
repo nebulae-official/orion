@@ -7,7 +7,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-
 from src.routes import analytics, costs, pipeline
 from src.services.event_aggregator import EventAggregator
 

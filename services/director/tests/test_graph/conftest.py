@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
-from unittest.mock import AsyncMock
 
 import pytest
-
-from src.agents.script_generator import GeneratedScript, ScriptRequest
-from src.agents.visual_prompter import VisualPromptSet
+from src.agents.script_generator import GeneratedScript
 from src.graph.state import OrionState, PipelineStage
 from src.providers.base import LLMProvider, LLMResponse
 

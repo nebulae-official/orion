@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-
 from src.providers.base import TTSProvider, TTSRequest, TTSResult
-from src.routes.render import router as render_router, set_components, set_render_pipeline
+from src.routes.render import router as render_router
+from src.routes.render import set_components, set_render_pipeline
 
 
 class FakeTTSProvider(TTSProvider):

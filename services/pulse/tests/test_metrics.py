@@ -5,10 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from src.schemas import (
-    AnalyticsEventCreate,
-    AnalyticsEventResponse,
     CostCategory,
     ErrorTrend,
     FunnelMetrics,
@@ -20,9 +17,9 @@ from src.schemas import (
     TrendSourceCount,
 )
 from src.services.event_aggregator import (
-    EventAggregator,
     _ALL_CHANNELS,
     _CHANNEL_SERVICE_MAP,
+    EventAggregator,
 )
 
 

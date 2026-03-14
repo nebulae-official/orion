@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
-
 from orion_common.config import get_settings
 from orion_common.event_bus import EventBus
 from orion_common.health import create_health_router

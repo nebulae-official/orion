@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 
 import structlog
-
 from orion_common.config import CommonSettings
 
 from .svd_comfyui import SVDProvider

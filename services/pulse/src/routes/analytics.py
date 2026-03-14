@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
+from orion_common.db.session import get_session
+from orion_common.events import Channels
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from orion_common.db.session import get_session
-
 from src.repositories.event_repo import EventRepository
-from orion_common.events import Channels
-
 from src.schemas import (
     AnalyticsEventResponse,
     AnalyticsEventsListResponse,
@@ -50,7 +48,7 @@ async def list_events(
 
     since = None
     if hours:
-        since = datetime.now(timezone.utc) - timedelta(hours=hours)
+        since = datetime.now(UTC) - timedelta(hours=hours)
 
     events, total = await repo.list_events(
         page=page,
@@ -96,7 +94,7 @@ async def get_trend_analytics(
 ) -> TrendAnalytics:
     """Trend discovery analytics: counts by source, conversion rate."""
     repo = EventRepository(session)
-    since = datetime.now(timezone.utc) - timedelta(hours=hours)
+    since = datetime.now(UTC) - timedelta(hours=hours)
 
     counts = await repo.get_event_counts_by_channel(since=since)
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import structlog
 from pydantic import BaseModel, Field
 
-from .effects import build_ken_burns_filter, build_audio_fade_filter
+from .effects import build_audio_fade_filter, build_ken_burns_filter
 
 logger = structlog.get_logger(__name__)
 

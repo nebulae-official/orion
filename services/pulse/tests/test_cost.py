@@ -5,16 +5,14 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from src.schemas import (
     CostCategory,
     CostProjection,
-    CostRecord,
     CostSummary,
     DailyCostSummary,
     ProviderCostSummary,
 )
-from src.services.cost_tracker import CostTracker, _COST_CHANNELS, _COST_RATES
+from src.services.cost_tracker import _COST_CHANNELS, _COST_RATES, CostTracker
 
 
 class TestCostTracker:

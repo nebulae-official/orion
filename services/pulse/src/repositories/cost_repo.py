@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
+from orion_common.db import Base
 from sqlalchemy import DateTime, Float, String, func, select
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
-
-from orion_common.db import Base
 
 logger = structlog.get_logger(__name__)
 
@@ -38,7 +37,7 @@ class ProviderCost(Base):
         "metadata", JSON, nullable=True
     )
     recorded_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
 
 
@@ -68,7 +67,7 @@ class CostRepository:
             amount=amount,
             units=units,
             metadata_=metadata or {},
-            recorded_at=datetime.now(timezone.utc),
+            recorded_at=datetime.now(UTC),
         )
         self._session.add(record)
         await self._session.commit()
@@ -119,7 +118,7 @@ class CostRepository:
         days: int = 30,
     ) -> list[dict[str, Any]]:
         """Return daily cost aggregation for the last N days."""
-        since = datetime.now(timezone.utc) - timedelta(days=days)
+        since = datetime.now(UTC) - timedelta(days=days)
 
         query = (
             select(
@@ -196,7 +195,7 @@ class CostRepository:
         days_history: int = 7,
     ) -> list[dict[str, Any]]:
         """Project costs for daily, weekly, and monthly periods."""
-        since = datetime.now(timezone.utc) - timedelta(days=days_history)
+        since = datetime.now(UTC) - timedelta(days=days_history)
 
         query = select(func.sum(ProviderCost.amount).label("total")).where(
             ProviderCost.recorded_at >= since

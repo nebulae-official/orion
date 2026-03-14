@@ -7,13 +7,11 @@ from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
-from orion_common.events import Channels
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.filters.niche_filter import DEFAULT_NICHE_CONFIGS, NicheConfig, NicheFilter
+from src.filters.niche_filter import DEFAULT_NICHE_CONFIGS, NicheFilter
 from src.providers.base import TrendProvider
 from src.repositories.trend_repo import TrendRepository
 from src.scheduler import fetch_and_process_trends

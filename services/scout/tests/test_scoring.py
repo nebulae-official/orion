@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from src.filters.niche_filter import NicheConfig, NicheFilter, _EXCLUSION_PENALTY, _KEYWORD_BOOST
+from src.filters.niche_filter import _KEYWORD_BOOST, NicheConfig, NicheFilter
 from src.providers.base import TrendResult
 
 

@@ -6,11 +6,10 @@ import uuid
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import PipelineRun
 from orion_common.db.session import get_session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..captions.formatter import to_srt
 from ..captions.whisper_stt import WhisperCaptioner

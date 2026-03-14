@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.cache import RedisCache
 from orion_common.db.models import Trend, TrendStatus
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -94,7 +92,7 @@ class TrendRepository:
         Used for deduplication — returns True if a matching topic
         already exists within the given time window.
         """
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=hours)
         query = select(func.count()).where(
             Trend.topic == topic,
             Trend.detected_at >= cutoff,
@@ -117,7 +115,7 @@ class TrendRepository:
 
         trend.status = status
         if status == TrendStatus.expired:
-            trend.expired_at = datetime.now(timezone.utc)
+            trend.expired_at = datetime.now(UTC)
 
         await self._session.flush()
         await self._session.refresh(trend)

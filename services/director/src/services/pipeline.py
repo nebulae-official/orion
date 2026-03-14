@@ -4,17 +4,16 @@ from __future__ import annotations
 
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.models import ContentStatus, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..agents.script_generator import GeneratedScript
 from ..agents.visual_prompter import VisualPromptSet
@@ -158,7 +157,7 @@ class ContentPipeline:
                 await self._vector_memory.store_content(
                     script_text=script.body,
                     content_id=str(content_id),
-                    created_at=datetime.now(timezone.utc).isoformat(),
+                    created_at=datetime.now(UTC).isoformat(),
                 )
             except Exception:
                 await logger.aexception("vector_memory_store_failed", content_id=str(content_id))

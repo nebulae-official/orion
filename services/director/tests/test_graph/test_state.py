@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from src.graph.state import OrionState, PipelineStage, HITLDecision
+from src.graph.state import HITLDecision, OrionState, PipelineStage
 
 
 class TestOrionState:

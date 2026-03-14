@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
-
 from src.providers.base import ImageProvider, ImageRequest, ImageResult
 from src.providers.fallback import FallbackImageProvider
 

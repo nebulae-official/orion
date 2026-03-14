@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from enum import Enum
+from enum import StrEnum
 
 import structlog
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ from ..providers.base import LLMProvider
 logger = structlog.get_logger(__name__)
 
 
-class TargetPlatform(str, Enum):
+class TargetPlatform(StrEnum):
     """Supported short-form video platforms."""
 
     youtube_shorts = "youtube_shorts"

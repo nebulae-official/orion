@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-
 from src.schemas import PublishResult, SafetyCheckResult
 from src.services.publisher import PublishingService
 

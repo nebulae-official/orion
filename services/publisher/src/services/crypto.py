@@ -17,7 +17,8 @@ def _get_key() -> bytes:
     if not key:
         raise RuntimeError(
             "ORION_ENCRYPTION_KEY environment variable is required but not set. "
-            "Generate one with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+            "Generate one with: "  # noqa: E501
+            "python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
         )
     return key.encode()
 
@@ -36,7 +37,8 @@ def validate_encryption_key() -> None:
     except (ValueError, InvalidToken) as exc:
         raise RuntimeError(
             f"ORION_ENCRYPTION_KEY is not a valid Fernet key: {exc}. "
-            "Generate one with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+            "Generate one with: "  # noqa: E501
+            "python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
         ) from exc
 
 

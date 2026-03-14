@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import structlog
 from sqlalchemy import delete
@@ -27,7 +27,7 @@ async def cleanup_old_records(
     Returns:
         Dict with counts of deleted events and costs.
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(days=retention_days)
+    cutoff = datetime.now(UTC) - timedelta(days=retention_days)
 
     events_result = await session.execute(
         delete(AnalyticsEvent).where(AnalyticsEvent.recorded_at < cutoff)

@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.filters.deduplication import TrendDeduplicator
 from src.providers.base import TrendResult
 from src.providers.rss import RSSProvider
@@ -141,7 +140,7 @@ class TestTrendDeduplicator:
         existing = [
             {
                 "topic": "AI coding assistants review",
-                "created_at": datetime.now(timezone.utc) - timedelta(days=1),
+                "created_at": datetime.now(UTC) - timedelta(days=1),
             }
         ]
         result = dedup.deduplicate(trends, existing_content_topics=existing)
@@ -158,7 +157,7 @@ class TestTrendDeduplicator:
         existing = [
             {
                 "topic": "AI coding assistants",
-                "created_at": datetime.now(timezone.utc) - timedelta(days=30),
+                "created_at": datetime.now(UTC) - timedelta(days=30),
             }
         ]
         result = dedup.deduplicate(trends, existing_content_topics=existing)

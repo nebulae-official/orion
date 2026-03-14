@@ -184,7 +184,7 @@ class ThumbnailGenerator:
                 font = ImageFont.truetype(
                     "DejaVuSans-Bold.ttf", style.font_size
                 )
-        except (OSError, IOError):
+        except OSError:
             font = ImageFont.load_default()
 
         # Draw title text

@@ -6,10 +6,9 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies import get_event_bus
 from src.exceptions import ContentNotApprovedError, ContentNotFoundError, SafetyCheckFailedError

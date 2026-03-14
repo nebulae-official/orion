@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
-
-import pytest
-
-from src.providers.base import TTSProvider, TTSRequest, TTSResult
+from src.providers.base import TTSRequest, TTSResult
 from src.schemas import (
     CaptionRequest,
     CaptionResponse,
@@ -14,7 +10,6 @@ from src.schemas import (
     RenderRequest,
     RenderResponse,
     TTSGenerateRequest,
-    TTSGenerateResponse,
 )
 
 

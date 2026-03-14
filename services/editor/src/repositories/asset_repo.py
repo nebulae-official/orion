@@ -5,10 +5,9 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from orion_common.db.models import AssetType, MediaAsset
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from orion_common.db.models import AssetType, MediaAsset
 
 
 class EditorAssetRepository:

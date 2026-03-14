@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 import structlog
+from orion_common.db.models import Content, ContentStatus, PipelineRun, PipelineStatus
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from tenacity import retry, stop_after_attempt, wait_exponential
-
-from orion_common.db.models import Content, ContentStatus, PipelineRun, PipelineStatus
 
 from ..providers.base import LLMProvider
 
@@ -178,7 +177,7 @@ class AnalystAgent:
         self, session: AsyncSession, niche: str
     ) -> dict[str, Any]:
         """Get benchmark data for the same niche over the last 30 days."""
-        cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+        cutoff = datetime.now(UTC) - timedelta(days=30)
 
         # Note: Content table has no `niche` column. We query all recent
         # completed content as a baseline.

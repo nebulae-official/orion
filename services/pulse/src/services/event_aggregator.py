@@ -6,19 +6,18 @@ pipeline metrics (throughput, latency per stage, error rates).
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
 from orion_common.db import PipelineRun, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.metrics import TRENDS_DISCARDED, TRENDS_FOUND, TRENDS_USED
-from src.repositories.event_repo import AnalyticsEvent, EventRepository
+from src.repositories.event_repo import EventRepository
 from src.schemas import PipelineMetrics, StageMetric
 
 logger = structlog.get_logger(__name__)
@@ -98,7 +97,7 @@ class EventAggregator:
         hours: int = 24,
     ) -> PipelineMetrics:
         """Calculate pipeline metrics from PipelineRun records."""
-        since = datetime.now(timezone.utc) - timedelta(hours=hours)
+        since = datetime.now(UTC) - timedelta(hours=hours)
 
         # Stage-level metrics
         query = (

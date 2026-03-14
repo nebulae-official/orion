@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
+from orion_common.db import Content, ContentStatus
+from orion_common.db.session import get_session
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from orion_common.db import Content, ContentStatus, PipelineRun, PipelineStatus
-from orion_common.db.session import get_session
 
 from src.repositories.cost_repo import CostRepository
 from src.repositories.event_repo import EventRepository
@@ -59,13 +58,13 @@ async def get_provider_usage(
 ) -> list[ProviderUsage]:
     """Provider usage breakdown with request counts and costs."""
     repo = CostRepository(session)
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     provider_data = await repo.get_costs_by_provider(since=since)
 
     # Count errors from event repo
     event_repo = EventRepository(session)
     error_counts = await event_repo.get_event_counts_by_channel(since=since)
-    total_errors = sum(
+    sum(
         v for k, v in error_counts.items() if "failed" in k
     )
 

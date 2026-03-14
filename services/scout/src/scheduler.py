@@ -7,8 +7,6 @@ from typing import Any
 import structlog
 from apscheduler import AsyncScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-
-from orion_common.config import get_settings
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels

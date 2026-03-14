@@ -6,8 +6,7 @@ import json
 import uuid
 
 import pytest
-
-from src.graph.hitl import build_strategist_review_payload, build_creator_review_payload
+from src.graph.hitl import build_creator_review_payload, build_strategist_review_payload
 from src.graph.state import OrionState, PipelineStage
 
 
@@ -57,15 +56,13 @@ class TestHITLInterruptFlow:
     @pytest.mark.asyncio
     async def test_graph_interrupts_and_resumes(self, fake_llm) -> None:
         """With HITL enabled, graph should pause and resume correctly."""
-        from src.agents.script_generator import ScriptGenerator
-        from src.agents.critique_agent import CritiqueAgent
-        from src.agents.visual_prompter import VisualPrompter
-        from src.providers.base import LLMResponse
-
         from langgraph.checkpoint.memory import MemorySaver
         from langgraph.types import Command
-
+        from src.agents.critique_agent import CritiqueAgent
+        from src.agents.script_generator import ScriptGenerator
+        from src.agents.visual_prompter import VisualPrompter
         from src.graph.builder import build_content_graph
+        from src.providers.base import LLMResponse
 
         async def smart_generate(prompt, system_prompt=None, temperature=0.7, max_tokens=2048):
             if "Evaluate this short-form video script" in (prompt or ""):

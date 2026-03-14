@@ -10,10 +10,9 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.repositories.cost_repo import CostRepository
 from src.schemas import CostCategory

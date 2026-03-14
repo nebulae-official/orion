@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from orion_common.db.session import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.cost_repo import CostRepository
 from src.schemas import (
@@ -30,7 +29,7 @@ async def get_costs(
 ) -> CostSummary:
     """Get total cost summary for the specified period."""
     repo = CostRepository(session)
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     data = await repo.get_total_costs(since=since)
     return CostSummary(**data)
 
@@ -53,7 +52,7 @@ async def get_costs_by_provider(
 ) -> list[ProviderCostSummary]:
     """Get costs grouped by provider."""
     repo = CostRepository(session)
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     rows = await repo.get_costs_by_provider(since=since)
     return [
         ProviderCostSummary(

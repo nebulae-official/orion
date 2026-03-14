@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import uuid
-from unittest.mock import AsyncMock
-
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-
 from src.providers.base import ImageProvider, ImageRequest, ImageResult
-from src.routes.images import configure_router, router as images_router
+from src.routes.images import configure_router
+from src.routes.images import router as images_router
 from src.services.batch_generator import BatchGenerator
 
 

@@ -5,12 +5,11 @@ from __future__ import annotations
 import uuid
 
 from langgraph.graph import END
-
 from src.graph.edges import (
-    route_after_strategist,
-    route_after_creator,
     route_after_analyst,
     route_after_analyst_hitl,
+    route_after_creator,
+    route_after_strategist,
 )
 from src.graph.state import OrionState, PipelineStage
 
