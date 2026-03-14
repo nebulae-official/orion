@@ -97,7 +97,7 @@ func checkService(ctx context.Context, name, baseURL string) ServiceHealth {
 		return ServiceHealth{Service: name, Status: "unhealthy", Error: err.Error()}
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return ServiceHealth{

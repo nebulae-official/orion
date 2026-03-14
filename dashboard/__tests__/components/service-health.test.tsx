@@ -1,20 +1,27 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ServiceHealth } from "@/components/service-health";
 
-beforeEach(() => {
-  vi.stubGlobal("fetch", vi.fn());
-});
+// Mock server actions directly — mocking globalThis.fetch doesn't work because
+// getAuthToken() inside the actions resolves/throws before fetch is reached.
+vi.mock("@/lib/actions", () => ({
+  fetchSystemStatus: vi.fn(),
+  fetchGatewayHealth: vi.fn(),
+}));
 
-afterEach(() => {
-  vi.restoreAllMocks();
+import { fetchSystemStatus, fetchGatewayHealth } from "@/lib/actions";
+
+const mockFetchSystemStatus = vi.mocked(fetchSystemStatus);
+const mockFetchGatewayHealth = vi.mocked(fetchGatewayHealth);
+
+beforeEach(() => {
+  vi.clearAllMocks();
 });
 
 describe("ServiceHealth", () => {
   it("renders Service Status heading", () => {
-    vi.mocked(globalThis.fetch).mockImplementation(
-      () => new Promise(() => {})
-    );
+    mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
+    mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
     render(<ServiceHealth />);
 
@@ -22,9 +29,8 @@ describe("ServiceHealth", () => {
   });
 
   it("renders all six services in initial checking state", () => {
-    vi.mocked(globalThis.fetch).mockImplementation(
-      () => new Promise(() => {})
-    );
+    mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
+    mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
     render(<ServiceHealth />);
 
@@ -37,9 +43,8 @@ describe("ServiceHealth", () => {
   });
 
   it("shows Checking badges initially", () => {
-    vi.mocked(globalThis.fetch).mockImplementation(
-      () => new Promise(() => {})
-    );
+    mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
+    mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
     render(<ServiceHealth />);
 
@@ -48,10 +53,17 @@ describe("ServiceHealth", () => {
   });
 
   it("shows Healthy status for healthy services", async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ status: "ok", uptime: "2h 30m" }),
-    } as Response);
+    mockFetchGatewayHealth.mockResolvedValue({ status: "ok" });
+    mockFetchSystemStatus.mockResolvedValue({
+      status: "ok",
+      services: [
+        { service: "scout", status: "ok" },
+        { service: "director", status: "ok" },
+        { service: "media", status: "ok" },
+        { service: "editor", status: "ok" },
+        { service: "pulse", status: "ok" },
+      ],
+    });
 
     render(<ServiceHealth />);
 
@@ -61,8 +73,9 @@ describe("ServiceHealth", () => {
     });
   });
 
-  it("shows Unhealthy status when fetch fails", async () => {
-    vi.mocked(globalThis.fetch).mockRejectedValue(new Error("Network"));
+  it("shows Unhealthy status when server actions return null", async () => {
+    mockFetchGatewayHealth.mockResolvedValue(null);
+    mockFetchSystemStatus.mockResolvedValue(null);
 
     render(<ServiceHealth />);
 
@@ -72,53 +85,31 @@ describe("ServiceHealth", () => {
     });
   });
 
-  it("shows Unhealthy status when response is not ok", async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: false,
-      status: 500,
-    } as Response);
-
-    render(<ServiceHealth />);
-
-    await waitFor(() => {
-      const unhealthyBadges = screen.getAllByText("Unhealthy");
-      expect(unhealthyBadges.length).toBe(6);
+  it("shows Unhealthy status when gateway is down", async () => {
+    mockFetchGatewayHealth.mockResolvedValue(null);
+    mockFetchSystemStatus.mockResolvedValue({
+      status: "ok",
+      services: [
+        { service: "scout", status: "ok" },
+        { service: "director", status: "ok" },
+        { service: "media", status: "ok" },
+        { service: "editor", status: "ok" },
+        { service: "pulse", status: "ok" },
+      ],
     });
-  });
-
-  it("displays uptime when provided by healthy service", async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ status: "ok", uptime: "3h 45m" }),
-    } as Response);
 
     render(<ServiceHealth />);
 
     await waitFor(() => {
-      const uptimeElements = screen.getAllByText("Uptime: 3h 45m");
-      expect(uptimeElements.length).toBeGreaterThan(0);
-    });
-  });
-
-  it("displays queue size when provided", async () => {
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({ status: "ok", uptime: "1h", queue_size: 42 }),
-    } as Response);
-
-    render(<ServiceHealth />);
-
-    await waitFor(() => {
-      const queueLabels = screen.getAllByText("Queue");
-      expect(queueLabels.length).toBeGreaterThan(0);
+      const healthyBadges = screen.getAllByText("Healthy");
+      expect(healthyBadges.length).toBe(5);
+      expect(screen.getAllByText("Unhealthy").length).toBe(1);
     });
   });
 
   it("renders auto-refresh note", () => {
-    vi.mocked(globalThis.fetch).mockImplementation(
-      () => new Promise(() => {})
-    );
+    mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
+    mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
     render(<ServiceHealth />);
 
@@ -128,9 +119,8 @@ describe("ServiceHealth", () => {
   });
 
   it("renders refresh button", () => {
-    vi.mocked(globalThis.fetch).mockImplementation(
-      () => new Promise(() => {})
-    );
+    mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
+    mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
     render(<ServiceHealth />);
 

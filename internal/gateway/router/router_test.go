@@ -55,14 +55,14 @@ func newServiceStub(t *testing.T, name string) *httptest.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"status":  "ok",
 			"service": name,
 		})
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"service": name,
 			"path":    r.URL.Path,
 		})
@@ -420,7 +420,7 @@ func TestRouter_WebSocketTicketFlow(t *testing.T) {
 	var authResp struct {
 		AccessToken string `json:"access_token"`
 	}
-	json.NewDecoder(resp.Body).Decode(&authResp)
+	_ = json.NewDecoder(resp.Body).Decode(&authResp)
 
 	// Step 2: Attempt WS without token — should get 401
 	wsResp, err := http.Get(srv.URL + "/ws")

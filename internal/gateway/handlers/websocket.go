@@ -206,10 +206,9 @@ func HandleWebSocket(hub *Hub, rdb *redis.Client, jwtSecret string, allowedOrigi
 		go func() {
 			defer func() { hub.unregister <- conn }()
 			conn.SetReadLimit(512)
-			conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+			_ = conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 			conn.SetPongHandler(func(string) error {
-				conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-				return nil
+				return conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 			})
 			for {
 				if _, _, err := conn.ReadMessage(); err != nil {

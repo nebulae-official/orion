@@ -60,7 +60,7 @@ func TestHub_BroadcastReachesClient(t *testing.T) {
 	hub.Broadcast(msg)
 
 	// Read the message
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 	_, data, err := conn.ReadMessage()
 	if err != nil {
 		t.Fatalf("read message failed: %v", err)
@@ -143,7 +143,7 @@ func TestWebSocket_TicketAuth(t *testing.T) {
 
 	// Store a valid ticket in Redis (matching what IssueWSTicket does)
 	ticket := "test-ticket-123"
-	mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
+	_ = mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
 	mr.SetTTL(fmt.Sprintf("ws:ticket:%s", ticket), 30*time.Second)
 
 	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "?ticket=" + ticket
@@ -178,7 +178,7 @@ func TestWebSocket_ExpiredTicket(t *testing.T) {
 
 	// Store a ticket and immediately expire it via miniredis
 	ticket := "expired-ticket"
-	mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
+	_ = mr.Set(fmt.Sprintf("ws:ticket:%s", ticket), "valid")
 	mr.SetTTL(fmt.Sprintf("ws:ticket:%s", ticket), 1*time.Millisecond)
 
 	// Fast-forward miniredis time to expire the key
