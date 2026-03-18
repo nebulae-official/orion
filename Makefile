@@ -94,6 +94,18 @@ test-e2e: ## Run E2E tests (starts Docker stack)
 	uv run pytest tests/e2e/ -v -m e2e
 
 # ==============================================================================
+# Performance Benchmarks
+# ==============================================================================
+
+.PHONY: bench
+bench: ## Run pytest-benchmark suite
+	uv run --group benchmark pytest tests/benchmark/ -v --benchmark-only
+
+.PHONY: load-test
+load-test: ## Run Locust load test (opens web UI at :8089)
+	cd tests/benchmark && uv run --group benchmark locust -f locustfile.py
+
+# ==============================================================================
 # Python — Test, Lint, Type-check
 # ==============================================================================
 
