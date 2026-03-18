@@ -3,15 +3,16 @@
 Digital Twin Content Agency — autonomous AI agents for content creation and trend analysis.
 
 ## Tech Stack
-- **Gateway & CLI:** Go 1.24, Chi 5.x router, Cobra 1.9.x CLI, slog logging
+- **Gateway:** Go 1.24, Chi 5.x router, slog logging
+- **CLI:** Python 3.13, Typer, httpx, Rich
 - **AI Services:** Python 3.13, FastAPI 0.115.x, Pydantic 2.10.x, SQLAlchemy 2.0.x
 - **Dashboard:** Next.js 15.2, React 19, Tailwind CSS 4.0, TypeScript
 - **Infrastructure:** PostgreSQL 17, Redis 7.4, Milvus 2.4, Ollama, ComfyUI
 
 ## Architecture
 - cmd/gateway/ — Go HTTP gateway (port 8000), routes requests to Python services
-- cmd/cli/ — Go CLI tool for interacting with the gateway
-- services/{scout,director,media,editor,pulse} — Python FastAPI microservices
+- cli/ — Python CLI tool (Typer) for interacting with the gateway
+- services/{scout,director,media,editor,pulse,publisher} — Python FastAPI microservices
 - libs/orion-common/ — Shared Python library (models, DB, Redis, config, logging)
 - dashboard/ — Next.js admin dashboard (port 3000)
 - deploy/ — Docker Compose files and infrastructure config
@@ -22,6 +23,8 @@ Digital Twin Content Agency — autonomous AI agents for content creation and tr
 - `make lint` — Run golangci-lint
 - `docker compose -f deploy/docker-compose.yml up` — Start all services
 - `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up` — Dev mode with hot reload
+- `make cli-test` — Run CLI tests
+- `make cli-lint` — Lint CLI code
 
 ## Code Style
 ### Go
@@ -44,6 +47,7 @@ Digital Twin Content Agency — autonomous AI agents for content creation and tr
 ## Testing
 - Go: `go test ./...` from root
 - Python: `cd services/{name} && pytest`
+- CLI: `cd cli && pytest`
 - Dashboard: `cd dashboard && npm test`
 
 ## Claude Tooling

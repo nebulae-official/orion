@@ -7,7 +7,7 @@ Full version inventory for the Orion platform.
 | Component | Language   | Version |
 | --------- | ---------- | ------- |
 | Gateway   | Go         | 1.24    |
-| CLI       | Go         | 1.24    |
+| CLI       | Python     | 3.13    |
 | Services  | Python     | 3.13    |
 | Dashboard | TypeScript | 5.x     |
 | Dashboard | Node.js    | 22 LTS  |
@@ -19,6 +19,7 @@ Full version inventory for the Orion platform.
 | Gateway   | net/http  | stdlib   |
 | Services  | FastAPI   | ≥0.115.0 |
 | Services  | Uvicorn   | ≥0.34.0  |
+| CLI       | Typer     | >=0.15.0 |
 | Dashboard | Next.js   | 15.2.0   |
 | Dashboard | React     | 19.x     |
 

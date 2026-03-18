@@ -5,7 +5,6 @@
 # ==============================================================================
 
 GATEWAY_BIN := bin/gateway
-CLI_BIN     := bin/orion
 COMPOSE     := docker compose -f deploy/docker-compose.yml
 COMPOSE_DEV := $(COMPOSE) -f deploy/docker-compose.dev.yml
 COMPOSE_MON := $(COMPOSE) -f deploy/docker-compose.monitoring.yml
@@ -14,9 +13,6 @@ SERVICES    := scout director media editor pulse publisher
 VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT    ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 BUILDDATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-LDFLAGS   := -X github.com/orion-rigel/orion/internal/cli/commands.version=$(VERSION) \
-             -X github.com/orion-rigel/orion/internal/cli/commands.commit=$(COMMIT) \
-             -X github.com/orion-rigel/orion/internal/cli/commands.buildDate=$(BUILDDATE)
 
 # ==============================================================================
 # Help
@@ -36,9 +32,8 @@ help: ## Show available targets
 # ==============================================================================
 
 .PHONY: build
-build: ## Build gateway and CLI binaries
+build: ## Build gateway binary
 	go build -o $(GATEWAY_BIN) ./cmd/gateway
-	go build -ldflags "$(LDFLAGS)" -o $(CLI_BIN) ./cmd/cli
 
 .PHONY: run
 run: ## Run the gateway locally
@@ -67,6 +62,26 @@ lint-fix: ## Run Go linter with auto-fix
 .PHONY: clean
 clean: ## Remove build artifacts
 	rm -rf bin/
+
+# ==============================================================================
+# CLI (Python/Typer)
+# ==============================================================================
+
+.PHONY: cli-dev
+cli-dev: ## Run CLI in development mode
+	cd cli && uv run orion $(ARGS)
+
+.PHONY: cli-test
+cli-test: ## Run CLI tests
+	cd cli && uv run pytest
+
+.PHONY: cli-lint
+cli-lint: ## Run ruff and mypy on CLI
+	cd cli && uv run ruff check src/ && uv run mypy src/
+
+.PHONY: cli-build
+cli-build: ## Build CLI wheel
+	cd cli && uv build
 
 # ==============================================================================
 # Python — Test, Lint, Type-check
@@ -202,7 +217,7 @@ pre-commit: ## Run pre-commit hooks on all files
 fmt: py-format ## Format all code (alias for py-format)
 
 .PHONY: check
-check: lint py-lint py-typecheck dash-lint ## Run all linters and type checkers
+check: lint py-lint py-typecheck cli-lint dash-lint ## Run all linters and type checkers
 
 .PHONY: test-all
-test-all: test py-test dash-test ## Run all tests (Go + Python + Dashboard)
+test-all: test py-test cli-test dash-test ## Run all tests (Go + Python + CLI + Dashboard)
