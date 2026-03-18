@@ -10,14 +10,15 @@ import tomli_w
 
 logger = structlog.get_logger()
 
-DEFAULT_CONFIG_DIR = Path.home() / ".orion"
 DEFAULT_GATEWAY_URL = "http://localhost:8000"
 
 
 class CLIConfig:
     """Manages CLI configuration from ~/.orion/config.toml."""
 
-    def __init__(self, config_dir: Path = DEFAULT_CONFIG_DIR) -> None:
+    def __init__(self, config_dir: Path | None = None) -> None:
+        if config_dir is None:
+            config_dir = Path.home() / ".orion"
         self._config_dir = config_dir
         self._config_file = config_dir / "config.toml"
         self._token_file = config_dir / "token"
