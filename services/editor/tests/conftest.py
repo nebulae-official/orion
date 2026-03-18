@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from src.providers.base import TTSProvider, TTSRequest, TTSResult
@@ -64,7 +65,7 @@ def editor_app(
     return app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(editor_app: FastAPI) -> AsyncClient:
     transport = ASGITransport(app=editor_app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:

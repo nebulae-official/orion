@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from src.routes import analytics, costs, pipeline
@@ -47,7 +48,7 @@ def pulse_app(mock_aggregator: EventAggregator) -> FastAPI:
     return app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(pulse_app: FastAPI) -> AsyncClient:
     transport = ASGITransport(app=pulse_app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:

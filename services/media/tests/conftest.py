@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from src.providers.base import ImageProvider, ImageRequest, ImageResult
@@ -58,7 +59,7 @@ def media_app(fake_provider: FakeImageProvider, batch_generator: BatchGenerator)
     return app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(media_app: FastAPI) -> AsyncClient:
     transport = ASGITransport(app=media_app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:

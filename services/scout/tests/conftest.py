@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock
 
 import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from src.providers.base import TrendProvider, TrendResult
@@ -59,7 +60,7 @@ def scout_app(fake_provider: FakeTrendProvider, mock_event_bus: AsyncMock) -> Fa
     return app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(scout_app: FastAPI) -> AsyncClient:
     transport = ASGITransport(app=scout_app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:
