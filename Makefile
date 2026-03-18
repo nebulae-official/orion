@@ -84,6 +84,16 @@ cli-build: ## Build CLI wheel
 	cd cli && uv build
 
 # ==============================================================================
+# E2E Testing
+# ==============================================================================
+
+COMPOSE_E2E := $(COMPOSE) -f deploy/docker-compose.e2e.yml
+
+.PHONY: test-e2e
+test-e2e: ## Run E2E tests (starts Docker stack)
+	uv run pytest tests/e2e/ -v -m e2e
+
+# ==============================================================================
 # Python — Test, Lint, Type-check
 # ==============================================================================
 
