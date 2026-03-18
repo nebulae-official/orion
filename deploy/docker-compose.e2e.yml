@@ -1,0 +1,92 @@
+# E2E test overrides — replaces AI providers with deterministic mock servers.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d
+
+services:
+  # Mock servers
+  mock-llm:
+    build:
+      context: ../tests/e2e/mocks
+      dockerfile: Dockerfile
+    environment:
+      SERVER_MODULE: llm_server:app
+      SERVER_PORT: "9001"
+    ports:
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    networks:
+      - orion-net
+
+  mock-comfyui:
+    build:
+      context: ../tests/e2e/mocks
+      dockerfile: Dockerfile
+    environment:
+      SERVER_MODULE: comfyui_server:app
+      SERVER_PORT: "9002"
+    ports:
+      - "9002:9002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    networks:
+      - orion-net
+
+  mock-tts:
+    build:
+      context: ../tests/e2e/mocks
+      dockerfile: Dockerfile
+    environment:
+      SERVER_MODULE: tts_server:app
+      SERVER_PORT: "9003"
+    ports:
+      - "9003:9003"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9003/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    networks:
+      - orion-net
+
+  mock-fal:
+    build:
+      context: ../tests/e2e/mocks
+      dockerfile: Dockerfile
+    environment:
+      SERVER_MODULE: fal_server:app
+      SERVER_PORT: "9004"
+    ports:
+      - "9004:9004"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9004/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    networks:
+      - orion-net
+
+  # Override service environment to point at mock providers
+  director:
+    environment:
+      OLLAMA_URL: http://mock-llm:9001
+      LLM_BASE_URL: http://mock-llm:9001
+
+  media:
+    environment:
+      COMFYUI_URL: http://mock-comfyui:9002
+      FAL_URL: http://mock-fal:9004
+
+  editor:
+    environment:
+      TTS_URL: http://mock-tts:9003
+      FAL_URL: http://mock-fal:9004
+
+  publisher:
+    environment:
+      TWITTER_API_URL: http://mock-fal:9004
