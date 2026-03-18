@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
+requires_db = pytest.mark.skipif(
+    os.getenv("DATABASE_URL") is None,
+    reason="Requires running database",
+)
 from httpx import AsyncClient
 
 
@@ -65,6 +71,7 @@ async def test_generate_image_missing_prompt(client: AsyncClient) -> None:
     assert resp.status_code == 422
 
 
+@requires_db
 @pytest.mark.asyncio
 async def test_get_assets_requires_db(client: AsyncClient) -> None:
     """GET /api/v1/media/assets/{content_id} needs DB session."""

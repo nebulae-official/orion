@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+requires_db = pytest.mark.skipif(
+    os.getenv("DATABASE_URL") is None,
+    reason="Requires running database",
+)
 from httpx import AsyncClient
 
 
@@ -93,6 +99,7 @@ async def test_render_trigger(client: AsyncClient, mock_pipeline: AsyncMock) -> 
     assert data["status"] == "completed"
 
 
+@requires_db
 @pytest.mark.asyncio
 async def test_render_status_requires_db(client: AsyncClient) -> None:
     """GET /api/v1/editor/render/{id}/status needs DB."""
