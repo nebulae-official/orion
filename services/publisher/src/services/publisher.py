@@ -52,6 +52,13 @@ class PublishingService:
         text = content.script_body or content.title
         has_media = len(content.media_assets) > 0
 
+        safety = await check_content_safety(
+            text=text,
+            has_media=has_media,
+        )
+        if not safety.passed:
+            raise SafetyCheckFailedError(violations=safety.violations)
+
         results: list[PublishResult] = []
         any_published = False
 
@@ -66,14 +73,6 @@ class PublishingService:
                     )
                 )
                 continue
-
-            safety = await check_content_safety(
-                text=text,
-                has_media=has_media,
-                platform_char_limit=provider.get_character_limit(),
-            )
-            if not safety.passed:
-                raise SafetyCheckFailedError(violations=safety.violations)
 
             hashtags = []
             if content.trend and content.trend.raw_data:

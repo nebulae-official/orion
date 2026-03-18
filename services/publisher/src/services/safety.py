@@ -21,7 +21,7 @@ _BLOCKLIST: list[str] = [
 async def check_content_safety(
     text: str,
     has_media: bool,
-    platform_char_limit: int,
+    platform_char_limit: int | None = None,
 ) -> SafetyCheckResult:
     """Run rule-based safety checks before publishing.
 
@@ -40,7 +40,7 @@ async def check_content_safety(
         violations.append("Content text is too short (minimum 10 characters)")
 
     # Check 2: Platform character limit
-    if len(text) > platform_char_limit:
+    if platform_char_limit is not None and len(text) > platform_char_limit:
         violations.append(
             f"Content exceeds platform limit ({len(text)}/{platform_char_limit} chars)"
         )

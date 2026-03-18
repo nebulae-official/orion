@@ -35,7 +35,7 @@ def format_tweet_text(
         if len(text) <= TWEET_CHAR_LIMIT:
             return text
 
-    if len(text) > TWEET_CHAR_LIMIT:
+    if len(text) >= TWEET_CHAR_LIMIT:
         return text[: TWEET_CHAR_LIMIT - 1] + "…"
 
     return text

@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
+from src.exceptions import ContentNotApprovedError, SafetyCheckFailedError
 from src.schemas import PublishResult, SafetyCheckResult
 from src.services.publisher import PublishingService
 
@@ -18,7 +19,7 @@ async def test_publish_rejects_non_approved():
     mock_content.status.value = "draft"
 
     with patch.object(svc, "_get_content", return_value=mock_content):
-        with pytest.raises(ValueError, match="must be in 'approved' status"):
+        with pytest.raises(ContentNotApprovedError, match="must be in 'approved' status"):
             await svc.publish_content(uuid4(), ["twitter"])
 
 
@@ -38,7 +39,7 @@ async def test_publish_rejects_on_safety_failure():
             return_value=SafetyCheckResult(passed=False, violations=["blocked word"]),
         ),
     ):
-        with pytest.raises(ValueError, match="Safety check failed"):
+        with pytest.raises(SafetyCheckFailedError, match="Safety check failed"):
             await svc.publish_content(uuid4(), ["twitter"])
 
 
