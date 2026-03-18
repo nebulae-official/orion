@@ -54,7 +54,7 @@ async def get_niche_config(request: Request) -> NicheConfigResponse:
     return NicheConfigResponse(
         active_niche=active_niche,
         available_niches=list(DEFAULT_NICHE_CONFIGS.keys()),
-        config=config,
+        config=config.model_dump() if config else None,
     )
 
 

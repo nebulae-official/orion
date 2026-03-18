@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient
+
+requires_db = pytest.mark.skipif(
+    os.getenv("DATABASE_URL") is None,
+    reason="Requires running database",
+)
 
 
 @pytest.mark.asyncio
@@ -71,6 +77,7 @@ async def test_trigger_scan_with_valid_niche(client: AsyncClient) -> None:
     assert data["trends_found"] == 8
 
 
+@requires_db
 @pytest.mark.asyncio
 async def test_list_trends_requires_db_session(client: AsyncClient) -> None:
     """GET /api/v1/trends depends on DB session — returns error without real DB."""
@@ -80,6 +87,7 @@ async def test_list_trends_requires_db_session(client: AsyncClient) -> None:
     assert resp.status_code in (500, 422)
 
 
+@requires_db
 @pytest.mark.asyncio
 async def test_get_trend_by_id_requires_db(client: AsyncClient) -> None:
     """GET /api/v1/trends/{id} depends on DB session."""
