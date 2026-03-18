@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from orion_common.events import Channels
 from src.schemas import (
     CostCategory,
     CostProjection,
@@ -41,13 +42,13 @@ class TestCostTracker:
         tracker = CostTracker(event_bus, session_factory)
 
         with patch(
-            "services.pulse.src.services.cost_tracker.CostRepository"
+            "src.services.cost_tracker.CostRepository"
         ) as MockRepo:
             repo = AsyncMock()
             MockRepo.return_value = repo
 
             await tracker._handle_cost_event({
-                "_channel": "orion.media_generated",
+                "_channel": Channels.MEDIA_GENERATED,
                 "provider": "fal_ai",
                 "cost": {"units": 5, "media_type": "image"},
             })
@@ -92,7 +93,7 @@ class TestCostTracker:
     def test_infer_category_media_image(self) -> None:
         """_infer_category infers image_generation for media events."""
         result = CostTracker._infer_category(
-            "orion.media_generated",
+            Channels.MEDIA_GENERATED,
             {"media_type": "image"},
         )
         assert result == CostCategory.image_generation
@@ -100,7 +101,7 @@ class TestCostTracker:
     def test_infer_category_media_video(self) -> None:
         """_infer_category infers video_clips for video media events."""
         result = CostTracker._infer_category(
-            "orion.media_generated",
+            Channels.MEDIA_GENERATED,
             {"media_type": "video"},
         )
         assert result == CostCategory.video_clips
@@ -108,7 +109,7 @@ class TestCostTracker:
     def test_infer_category_media_audio(self) -> None:
         """_infer_category infers tts_characters for audio media events."""
         result = CostTracker._infer_category(
-            "orion.media_generated",
+            Channels.MEDIA_GENERATED,
             {"media_type": "audio"},
         )
         assert result == CostCategory.tts_characters

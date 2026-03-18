@@ -119,7 +119,7 @@ class TestEventAggregator:
         aggregator = EventAggregator(event_bus, session_factory)
 
         with patch(
-            "services.pulse.src.services.event_aggregator.EventRepository"
+            "src.services.event_aggregator.EventRepository"
         ) as MockRepo:
             repo = AsyncMock()
             MockRepo.return_value = repo
