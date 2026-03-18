@@ -16,6 +16,7 @@ members = [
     "services/pulse",
     "services/publisher",
     "libs/orion-common",
+    "cli",
 ]
 
 [tool.ruff]

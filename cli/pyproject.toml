@@ -1,0 +1,31 @@
+[project]
+name = "orion-cli"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "typer[all]>=0.15.0",
+    "httpx>=0.27.0",
+    "orion-common",
+    "structlog>=24.0.0",
+    "tomli>=2.0.0",
+    "tomli-w>=1.0.0",
+    "websockets>=13.0",
+]
+
+[project.scripts]
+orion = "orion_cli.main:app"
+
+[tool.uv.sources]
+orion-common = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "respx>=0.22.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
