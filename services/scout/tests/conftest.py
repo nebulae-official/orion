@@ -8,7 +8,6 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from src.providers.base import TrendProvider, TrendResult
-from src.routes.trends import configure_routes
 from src.routes.trends import router as trends_router
 
 
@@ -54,11 +53,9 @@ def scout_app(fake_provider: FakeTrendProvider, mock_event_bus: AsyncMock) -> Fa
     """Create a minimal FastAPI app with the trends router mounted."""
     app = FastAPI(title="Scout Test")
     app.include_router(trends_router)
-    configure_routes(
-        providers=[fake_provider],
-        event_bus=mock_event_bus,
-        active_niche="tech",
-    )
+    app.state.providers = [fake_provider]
+    app.state.event_bus = mock_event_bus
+    app.state.active_niche = "tech"
     return app
 
 
