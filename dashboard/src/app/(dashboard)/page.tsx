@@ -6,10 +6,10 @@ import {
   TrendingUp,
   CheckCircle,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import { DEMO_MODE } from "@/lib/config";
-import { demoContent, demoTrends } from "@/lib/demo-data";
+import { demoContent, demoTrends, demoPipelineActivity } from "@/lib/demo-data";
+import { PipelineActivity } from "@/components/charts/pipeline-activity";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,23 +116,6 @@ const dotStyles: Record<
 };
 
 // ---------------------------------------------------------------------------
-// Bar chart data (static placeholder)
-// ---------------------------------------------------------------------------
-
-const barHeights = [
-  { h: "h-[40%]", color: "bg-primary/20" },
-  { h: "h-[60%]", color: "bg-primary/40" },
-  { h: "h-[85%]", color: "bg-primary-container/60" },
-  { h: "h-[50%]", color: "bg-primary/30" },
-  { h: "h-[70%]", color: "bg-primary/50" },
-  { h: "h-[95%]", color: "bg-primary-container" },
-  { h: "h-[65%]", color: "bg-primary/40" },
-  { h: "h-[45%]", color: "bg-secondary/30" },
-  { h: "h-[75%]", color: "bg-secondary/50" },
-  { h: "h-[90%]", color: "bg-secondary-container" },
-];
-
-// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -217,20 +200,7 @@ export default function Home(): React.ReactElement {
             </span>
           </div>
 
-          {/* Bar chart placeholder */}
-          <div className="w-full h-64 flex items-end gap-2 px-4">
-            {barHeights.map((bar, i) => (
-              <div
-                key={i}
-                className={`flex-1 ${bar.color} rounded-t-sm ${bar.h}`}
-              />
-            ))}
-          </div>
-
-          {/* Decorative watermark icon */}
-          <div className="absolute bottom-0 right-0 p-8 opacity-20 pointer-events-none">
-            <Sparkles className="h-24 w-24 text-primary-container" />
-          </div>
+          <PipelineActivity data={DEMO_MODE ? demoPipelineActivity : []} />
         </div>
 
         {/* Recent Events (1/3) */}

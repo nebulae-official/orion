@@ -377,6 +377,41 @@ export const demoEarnings = {
 };
 
 // ---------------------------------------------------------------------------
+// Pipeline Activity (last 7 days)
+// ---------------------------------------------------------------------------
+
+export interface PipelineActivityDay {
+  day: string;
+  trends: number;
+  generated: number;
+  published: number;
+}
+
+function generatePipelineActivity(): PipelineActivityDay[] {
+  const days: PipelineActivityDay[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86_400_000);
+    const label = d.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+    // Realistic-looking pattern: weekdays busier than weekends
+    const dayOfWeek = d.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const base = isWeekend ? 3 : 7;
+    const trends = base + Math.floor(Math.random() * 6);
+    const generated = Math.max(1, trends - 2 - Math.floor(Math.random() * 3));
+    const published = Math.max(0, generated - 1 - Math.floor(Math.random() * 3));
+    days.push({ day: label, trends, generated, published });
+  }
+  return days;
+}
+
+export const demoPipelineActivity: PipelineActivityDay[] =
+  generatePipelineActivity();
+
+// ---------------------------------------------------------------------------
 // Paginated helpers
 // ---------------------------------------------------------------------------
 
