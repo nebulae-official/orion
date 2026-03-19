@@ -3,6 +3,7 @@
 #   default (no flag): gateway, scouts, directors, media, editor, pulse, dashboard, postgres, redis, milvus
 #   --profile full    : adds ollama, comfyui
 #   --profile gpu     : same as full + NVIDIA GPU passthrough
+#   --profile tools   : adds pgAdmin, Databasus (database tools)
 
 name: orion
 
@@ -15,6 +16,8 @@ volumes:
   redisdata:
   milvusdata:
   ollamadata:
+  pgadmindata:
+  databasus-data:
 
 services:
 
@@ -368,6 +371,51 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  # ─────────────────────────────────────────────
+  # Database Tools (--profile tools)
+  # ─────────────────────────────────────────────
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: orion-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@orion.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-orion_dev}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - orion-net
+    profiles:
+      - tools
+
+  databasus:
+    image: databasus/databasus:latest
+    container_name: orion-databasus
+    ports:
+      - "4005:4005"
+    volumes:
+      - databasus-data:/databasus-data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - orion-net
+    profiles:
+      - tools
 
   # No official ComfyUI image — use a community build or build from source.
   # See: https://github.com/YanWenKun/ComfyUI-Docker for options.

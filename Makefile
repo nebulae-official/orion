@@ -204,6 +204,14 @@ up-dev: ## Start in development mode (hot reload)
 up-monitoring: ## Start with monitoring stack (Prometheus, Grafana)
 	$(COMPOSE_MON) up -d
 
+.PHONY: up-tools
+up-tools: ## Start database tools (pgAdmin + Databasus)
+	$(COMPOSE) --profile tools up -d pgadmin databasus
+
+.PHONY: down-tools
+down-tools: ## Stop database tools
+	$(COMPOSE) --profile tools down
+
 .PHONY: down
 down: ## Stop all services
 	$(COMPOSE) down
