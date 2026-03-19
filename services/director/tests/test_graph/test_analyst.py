@@ -13,14 +13,14 @@ from src.graph.hitl import build_analyst_review_payload
 from src.graph.nodes import analyst_hitl_gate, analyst_node
 from src.graph.state import OrionState, PipelineStage
 
-ANALYSIS_JSON = json.dumps({
-    "performance_summary": "Pipeline completed successfully.",
-    "benchmark_comparison": {"avg_duration_seconds": 50, "avg_critique_score": 0.75, "percentile_rank": 80},
-    "suggestions": [
-        {"area": "hook", "suggestion": "Use questions", "expected_impact": "high", "rationale": "Engagement"}
-    ],
-    "overall_score": 0.82,
-})
+ANALYSIS_JSON = json.dumps(
+    {
+        "performance_summary": "Pipeline completed successfully.",
+        "benchmark_comparison": {"avg_duration_seconds": 50, "avg_critique_score": 0.75, "percentile_rank": 80},
+        "suggestions": [{"area": "hook", "suggestion": "Use questions", "expected_impact": "high", "rationale": "Engagement"}],
+        "overall_score": 0.82,
+    }
+)
 
 
 @asynccontextmanager

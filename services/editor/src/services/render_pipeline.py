@@ -103,9 +103,7 @@ class RenderPipeline:
             await self._set_stage(session, pipeline_run, STAGE_TTS)
 
             script_text = content.script_body or content.title
-            tts_result = await self._tts.synthesize(
-                TTSRequest(text=script_text, voice_id=voice_id)
-            )
+            tts_result = await self._tts.synthesize(TTSRequest(text=script_text, voice_id=voice_id))
 
             await repo.create(
                 content_id=content_id,
@@ -118,20 +116,14 @@ class RenderPipeline:
             # --- Stage 2: Caption Generation ---
             await self._set_stage(session, pipeline_run, STAGE_CAPTIONS)
 
-            caption_result = await self._captioner.transcribe(
-                tts_result.file_path
-            )
+            caption_result = await self._captioner.transcribe(tts_result.file_path)
 
             # --- Stage 3: Video Stitching ---
             await self._set_stage(session, pipeline_run, STAGE_STITCH)
 
-            image_assets = await repo.get_by_content_id(
-                content_id, asset_type=AssetType.image
-            )
+            image_assets = await repo.get_by_content_id(content_id, asset_type=AssetType.image)
             if not image_assets:
-                raise ValueError(
-                    f"No image assets found for content {content_id}"
-                )
+                raise ValueError(f"No image assets found for content {content_id}")
 
             image_paths = [a.file_path for a in image_assets]
             video_config = VideoConfig(
@@ -194,11 +186,7 @@ class RenderPipeline:
                     "video_validation_issues",
                     content_id=str(content_id),
                     confidence_score=validation_result.confidence_score,
-                    issues=[
-                        i.model_dump()
-                        for i in validation_result.issues
-                        if not i.passed
-                    ],
+                    issues=[i.model_dump() for i in validation_result.issues if not i.passed],
                 )
 
             # --- Stage 7: Save & Publish ---
@@ -219,9 +207,7 @@ class RenderPipeline:
 
             # Update content status to review
             await session.execute(
-                update(Content)
-                .where(Content.id == content_id)
-                .values(status=ContentStatus.review)
+                update(Content).where(Content.id == content_id).values(status=ContentStatus.review)
             )
 
             # Mark pipeline as completed
@@ -274,9 +260,7 @@ class RenderPipeline:
         return pipeline_run
 
     @staticmethod
-    async def _set_stage(
-        session: AsyncSession, run: PipelineRun, stage: str
-    ) -> None:
+    async def _set_stage(session: AsyncSession, run: PipelineRun, stage: str) -> None:
         """Update the current stage on the pipeline run record."""
         run.stage = stage
         await session.flush()

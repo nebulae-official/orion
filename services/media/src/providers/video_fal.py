@@ -138,9 +138,7 @@ class FalVideoProvider(VideoProvider):
 
                 await asyncio.sleep(self._poll_interval)
 
-        raise RuntimeError(
-            f"Fal.ai video job timed out after {self._max_poll_attempts} polls"
-        )
+        raise RuntimeError(f"Fal.ai video job timed out after {self._max_poll_attempts} polls")
 
     async def _download_video(self, url: str, request_id: str) -> Path:
         """Download a video from a URL and save it locally."""

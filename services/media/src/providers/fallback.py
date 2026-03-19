@@ -35,9 +35,7 @@ class FallbackImageProvider(ImageProvider):
                 )
                 errors.append(f"{type(provider).__name__}: {e}")
                 continue
-        raise RuntimeError(
-            f"All image providers failed: {'; '.join(errors) or 'none available'}"
-        )
+        raise RuntimeError(f"All image providers failed: {'; '.join(errors) or 'none available'}")
 
     async def is_available(self) -> bool:
         """Return True if at least one provider is available."""

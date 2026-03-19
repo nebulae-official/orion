@@ -61,9 +61,7 @@ class TwitterProvider(TrendProvider):
             )
         return self._client
 
-    async def fetch_trends(
-        self, region: str = "US", limit: int = 20
-    ) -> list[TrendResult]:
+    async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
         """Fetch and verify trends from X using recent tweet search.
 
         Queries X API v2 for each existing trend topic, calculates velocity
@@ -173,10 +171,7 @@ class TwitterProvider(TrendProvider):
         volume_score = min(100.0, math.log10(max(total_volume, 1)) * 25.0)
 
         # Combine velocity and volume
-        combined = (
-            velocity_score * _VELOCITY_WEIGHT
-            + volume_score * _VOLUME_WEIGHT
-        )
+        combined = velocity_score * _VELOCITY_WEIGHT + volume_score * _VOLUME_WEIGHT
 
         # Cross-reference bonus: boost score if confirmed by other sources
         if self._is_cross_referenced(topic):
@@ -218,8 +213,7 @@ class TwitterProvider(TrendProvider):
                 count = sum(
                     1
                     for tweet in response.data
-                    if tweet.created_at
-                    and tweet.created_at.timestamp() >= cutoff
+                    if tweet.created_at and tweet.created_at.timestamp() >= cutoff
                 )
                 volumes[label] = count
 

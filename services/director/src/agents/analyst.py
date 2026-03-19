@@ -32,15 +32,9 @@ class AnalysisResult(BaseModel):
     """Full analysis result from the AnalystAgent."""
 
     performance_summary: str = Field(description="Summary of pipeline performance")
-    benchmark_comparison: dict[str, Any] = Field(
-        description="Comparison against recent content"
-    )
-    suggestions: list[ImprovementSuggestion] = Field(
-        description="Prioritized improvement suggestions"
-    )
-    overall_score: float = Field(
-        ge=0.0, le=1.0, description="Overall pipeline quality score"
-    )
+    benchmark_comparison: dict[str, Any] = Field(description="Comparison against recent content")
+    suggestions: list[ImprovementSuggestion] = Field(description="Prioritized improvement suggestions")
+    overall_score: float = Field(ge=0.0, le=1.0, description="Overall pipeline quality score")
 
 
 _ANALYST_SYSTEM_PROMPT = """\
@@ -124,16 +118,10 @@ class AnalystAgent:
             hook=script_hook,
             body=script_body,
             critique_score=critique_score,
-            pipeline_duration=(
-                f"{pipeline_duration:.1f}s" if pipeline_duration else "N/A"
-            ),
+            pipeline_duration=(f"{pipeline_duration:.1f}s" if pipeline_duration else "N/A"),
             benchmark_count=benchmark["count"],
             avg_critique_score=f"{benchmark['avg_critique_score']:.2f}",
-            avg_duration=(
-                f"{benchmark['avg_duration']:.1f}s"
-                if benchmark["avg_duration"]
-                else "N/A"
-            ),
+            avg_duration=(f"{benchmark['avg_duration']:.1f}s" if benchmark["avg_duration"] else "N/A"),
         )
 
         response = await self._llm.generate(
@@ -154,9 +142,7 @@ class AnalystAgent:
 
         return result
 
-    async def _get_pipeline_duration(
-        self, session: AsyncSession, content_id: UUID
-    ) -> float | None:
+    async def _get_pipeline_duration(self, session: AsyncSession, content_id: UUID) -> float | None:
         """Get total pipeline duration in seconds for this content."""
         stmt = select(PipelineRun).where(
             PipelineRun.content_id == content_id,
@@ -173,9 +159,7 @@ class AnalystAgent:
             return (run.completed_at - run.started_at).total_seconds()
         return None
 
-    async def _get_benchmarks(
-        self, session: AsyncSession, niche: str
-    ) -> dict[str, Any]:
+    async def _get_benchmarks(self, session: AsyncSession, niche: str) -> dict[str, Any]:
         """Get benchmark data for the same niche over the last 30 days."""
         cutoff = datetime.now(UTC) - timedelta(days=30)
 
@@ -203,9 +187,7 @@ class AnalystAgent:
             durations = []
             for run in runs:
                 if run.completed_at and run.started_at:
-                    durations.append(
-                        (run.completed_at - run.started_at).total_seconds()
-                    )
+                    durations.append((run.completed_at - run.started_at).total_seconds())
             if durations:
                 avg_duration = sum(durations) / len(durations)
 

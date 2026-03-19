@@ -139,9 +139,7 @@ class FalAIProvider(ImageProvider):
 
                 await asyncio.sleep(self._poll_interval)
 
-        raise RuntimeError(
-            f"Fal.ai job timed out after {self._max_poll_attempts} polls"
-        )
+        raise RuntimeError(f"Fal.ai job timed out after {self._max_poll_attempts} polls")
 
     async def _download_image(self, url: str, request_id: str) -> Path:
         """Download an image from a URL and save it locally."""

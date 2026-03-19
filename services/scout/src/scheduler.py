@@ -101,9 +101,7 @@ async def fetch_and_process_trends(
                     "score": db_trend.score,
                     "detected_at": db_trend.detected_at.isoformat(),
                 }
-                await event_bus.publish(
-                    Channels.TREND_DETECTED, event_payload
-                )
+                await event_bus.publish(Channels.TREND_DETECTED, event_payload)
             except Exception:
                 logger.exception(
                     "trend_save_error",

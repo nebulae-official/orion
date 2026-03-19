@@ -38,9 +38,7 @@ class FallbackVideoProvider(VideoProvider):
                 )
                 errors.append(f"{type(provider).__name__}: {e}")
                 continue
-        raise RuntimeError(
-            f"All video providers failed: {'; '.join(errors) or 'none available'}"
-        )
+        raise RuntimeError(f"All video providers failed: {'; '.join(errors) or 'none available'}")
 
     async def is_available(self) -> bool:
         """Return True if at least one video provider is available."""

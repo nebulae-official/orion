@@ -107,9 +107,7 @@ class EventAggregator:
                 func.count()
                 .filter(PipelineRun.status == PipelineStatus.completed)
                 .label("completed"),
-                func.count()
-                .filter(PipelineRun.status == PipelineStatus.failed)
-                .label("failed"),
+                func.count().filter(PipelineRun.status == PipelineStatus.failed).label("failed"),
                 func.avg(
                     func.extract(
                         "epoch",

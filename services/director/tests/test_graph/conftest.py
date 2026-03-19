@@ -15,10 +15,7 @@ class FakeLLMProvider(LLMProvider):
 
     def __init__(
         self,
-        response_content: str = (
-            '{"hook":"test","body":"test body",'
-            '"cta":"test cta","visual_cues":["scene 1"]}'
-        ),
+        response_content: str = ('{"hook":"test","body":"test body","cta":"test cta","visual_cues":["scene 1"]}'),
     ) -> None:
         self._response_content = response_content
 

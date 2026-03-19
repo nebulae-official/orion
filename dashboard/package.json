@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src/",
     "test": "vitest",
     "test:ci": "vitest run"
   },
@@ -29,10 +29,12 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "jsdom": "^28.1.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.57.1",
     "vitest": "^4.1.0"
   }
 }

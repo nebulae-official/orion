@@ -64,9 +64,7 @@ class ElevenLabsProvider(TTSProvider):
 
     async def synthesize(self, request: TTSRequest) -> TTSResult:
         """Call ElevenLabs TTS endpoint and save the resulting audio."""
-        voice_id = (
-            request.voice_id if request.voice_id != "default" else DEFAULT_VOICE_ID
-        )
+        voice_id = request.voice_id if request.voice_id != "default" else DEFAULT_VOICE_ID
         url = f"{ELEVENLABS_BASE_URL}/v1/text-to-speech/{voice_id}"
 
         headers = {

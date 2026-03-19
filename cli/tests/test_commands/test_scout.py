@@ -2,9 +2,8 @@
 
 import httpx
 import respx
-from typer.testing import CliRunner
-
 from orion_cli.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -28,7 +27,10 @@ def test_list_trends() -> None:
 @respx.mock
 def test_trigger_scan() -> None:
     respx.post("http://localhost:8000/api/v1/scout/scan").mock(
-        return_value=httpx.Response(200, json={"status": "triggered", "providers": ["google_trends", "rss"]})
+        return_value=httpx.Response(
+            200,
+            json={"status": "triggered", "providers": ["google_trends", "rss"]},
+        )
     )
     result = runner.invoke(app, ["scout", "trigger", "--token", "jwt-123"])
     assert result.exit_code == 0

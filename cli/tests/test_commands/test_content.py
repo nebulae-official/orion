@@ -2,9 +2,8 @@
 
 import httpx
 import respx
-from typer.testing import CliRunner
-
 from orion_cli.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -49,7 +48,13 @@ def test_reject_content() -> None:
 def test_view_content() -> None:
     respx.get("http://localhost:8000/api/v1/director/content/c1").mock(
         return_value=httpx.Response(
-            200, json={"id": "c1", "title": "AI Tools 2026", "status": "approved", "script": "Hook: ..."}
+            200,
+            json={
+                "id": "c1",
+                "title": "AI Tools 2026",
+                "status": "approved",
+                "script": "Hook: ...",
+            },
         ),
     )
     result = runner.invoke(app, ["content", "view", "c1", "--token", "jwt-123"])

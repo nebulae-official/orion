@@ -43,16 +43,12 @@ class VideoStitcher:
     """
 
     def __init__(self, output_dir: str | None = None) -> None:
-        self._output_dir = Path(
-            output_dir or os.getenv("EDITOR_OUTPUT_DIR", DEFAULT_OUTPUT_DIR)
-        )
+        self._output_dir = Path(output_dir or os.getenv("EDITOR_OUTPUT_DIR", DEFAULT_OUTPUT_DIR))
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def stitch(self, request: StitchRequest) -> str:
         """Stitch images and audio into a video and return the output path."""
-        output_path = request.output_path or str(
-            self._output_dir / f"{uuid.uuid4()}.mp4"
-        )
+        output_path = request.output_path or str(self._output_dir / f"{uuid.uuid4()}.mp4")
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
         cfg = request.config
@@ -107,11 +103,16 @@ class VideoStitcher:
 
         # Input each image as a loop with its display duration
         for img in image_paths:
-            cmd.extend([
-                "-loop", "1",
-                "-t", str(cfg.duration_per_image),
-                "-i", img,
-            ])
+            cmd.extend(
+                [
+                    "-loop",
+                    "1",
+                    "-t",
+                    str(cfg.duration_per_image),
+                    "-i",
+                    img,
+                ]
+            )
 
         # Audio input
         cmd.extend(["-i", audio_path])
@@ -140,30 +141,37 @@ class VideoStitcher:
 
         # Concatenate all video segments
         concat_inputs = "".join(f"[v{i}]" for i in range(n))
-        filter_parts.append(
-            f"{concat_inputs}concat=n={n}:v=1:a=0[outv]"
-        )
+        filter_parts.append(f"{concat_inputs}concat=n={n}:v=1:a=0[outv]")
 
         # Audio fade
         audio_fade = build_audio_fade_filter(total_duration)
-        filter_parts.append(
-            f"[{audio_input_idx}:a]{audio_fade}[outa]"
-        )
+        filter_parts.append(f"[{audio_input_idx}:a]{audio_fade}[outa]")
 
         filter_graph = ";\n".join(filter_parts)
 
-        cmd.extend([
-            "-filter_complex", filter_graph,
-            "-map", "[outv]",
-            "-map", "[outa]",
-            "-c:v", "libx264",
-            "-preset", "fast",
-            "-crf", "23",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            "-shortest",
-            "-pix_fmt", "yuv420p",
-            output_path,
-        ])
+        cmd.extend(
+            [
+                "-filter_complex",
+                filter_graph,
+                "-map",
+                "[outv]",
+                "-map",
+                "[outa]",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "fast",
+                "-crf",
+                "23",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                "-shortest",
+                "-pix_fmt",
+                "yuv420p",
+                output_path,
+            ]
+        )
 
         return cmd

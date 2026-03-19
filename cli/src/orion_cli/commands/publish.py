@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -15,7 +15,7 @@ app = typer.Typer()
 
 @app.command()
 def accounts(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """List connected social media accounts."""
@@ -27,8 +27,10 @@ def accounts(
 @app.command()
 def send(
     content_id: str,
-    platform: Annotated[str, typer.Option(help="Target platform (twitter, youtube, tiktok, linkedin)")],
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    platform: Annotated[
+        str, typer.Option(help="Target platform (twitter, youtube, tiktok, linkedin)")
+    ],
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Publish content to a platform."""
@@ -44,7 +46,7 @@ def send(
 
 @app.command()
 def history(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Show publishing history."""

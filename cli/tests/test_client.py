@@ -3,7 +3,6 @@
 import httpx
 import pytest
 import respx
-
 from orion_cli.client import GatewayClient
 
 

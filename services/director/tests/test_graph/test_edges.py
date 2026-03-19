@@ -17,21 +17,34 @@ from src.graph.state import OrionState, PipelineStage
 class TestRouteAfterStrategist:
     def test_routes_to_creator_on_success(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.CREATOR,
-            "script_hook": "hook", "script_body": "body", "script_cta": "cta",
-            "visual_cues": [], "critique_score": 0.8, "critique_feedback": "good",
+            "script_hook": "hook",
+            "script_body": "body",
+            "script_cta": "cta",
+            "visual_cues": [],
+            "critique_score": 0.8,
+            "critique_feedback": "good",
         }
         assert route_after_strategist(state) == "creator"
 
     def test_routes_to_end_on_failure(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
-            "current_stage": PipelineStage.FAILED, "error": "something broke",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.FAILED,
+            "error": "something broke",
         }
         assert route_after_strategist(state) == END
 
@@ -41,19 +54,29 @@ class TestRouteAfterCreator:
 
     def test_routes_to_analyst_on_success(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
-            "current_stage": PipelineStage.COMPLETE, "visual_prompts": {"prompts": []},
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.COMPLETE,
+            "visual_prompts": {"prompts": []},
         }
         assert route_after_creator(state) == "analyst"
 
     def test_routes_to_end_on_failure(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
-            "current_stage": PipelineStage.FAILED, "error": "failed",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.FAILED,
+            "error": "failed",
         }
         assert route_after_creator(state) == END
 
@@ -61,9 +84,13 @@ class TestRouteAfterCreator:
 class TestRouteAfterAnalyst:
     def test_routes_to_end(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.COMPLETE,
         }
         assert route_after_analyst(state) == END
@@ -72,27 +99,39 @@ class TestRouteAfterAnalyst:
 class TestRouteAfterAnalystHitl:
     def test_routes_to_end_on_failure(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.FAILED,
         }
         assert route_after_analyst_hitl(state) == END
 
     def test_routes_to_end_on_no_decisions(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.COMPLETE,
         }
         assert route_after_analyst_hitl(state) == END
 
     def test_routes_to_end_on_rejection(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.COMPLETE,
             "hitl_decisions": [{"stage": "analyst", "approved": False, "feedback": "no"}],
         }
@@ -100,9 +139,13 @@ class TestRouteAfterAnalystHitl:
 
     def test_routes_to_strategist_on_approval_under_limit(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.COMPLETE,
             "hitl_decisions": [{"stage": "analyst", "approved": True, "feedback": None}],
             "iteration_count": 1,
@@ -112,9 +155,13 @@ class TestRouteAfterAnalystHitl:
 
     def test_routes_to_end_on_approval_at_limit(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "test", "niche": "tech", "target_platform": "youtube_shorts",
-            "tone": "informative", "visual_style": "cinematic",
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "test",
+            "niche": "tech",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
             "current_stage": PipelineStage.COMPLETE,
             "hitl_decisions": [{"stage": "analyst", "approved": True, "feedback": None}],
             "iteration_count": 3,

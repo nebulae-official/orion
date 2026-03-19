@@ -110,16 +110,12 @@ class RegenerationService:
         await repo.update_status(content_uuid, ContentStatus.generating)
 
         # Create pipeline run for regeneration
-        regen_run = await repo.create_pipeline_run(
-            content_uuid, stage=f"regeneration_attempt_{attempt_count}"
-        )
+        regen_run = await repo.create_pipeline_run(content_uuid, stage=f"regeneration_attempt_{attempt_count}")
         await repo.update_pipeline_run(regen_run.id, PipelineStatus.running)
 
         try:
             # Build request with feedback-enriched tone
-            enriched_tone = (
-                f"{tone}. IMPORTANT FEEDBACK TO ADDRESS: {feedback_context}"
-            )
+            enriched_tone = f"{tone}. IMPORTANT FEEDBACK TO ADDRESS: {feedback_context}"
             script_request = ScriptRequest(
                 trend_topic=trend_topic,
                 niche=niche,
@@ -127,9 +123,7 @@ class RegenerationService:
                 tone=enriched_tone,
             )
 
-            script: GeneratedScript = await self._script_gen.generate_script(
-                script_request
-            )
+            script: GeneratedScript = await self._script_gen.generate_script(script_request)
             await repo.update_pipeline_run(regen_run.id, PipelineStatus.completed)
         except Exception as exc:
             await repo.update_pipeline_run(
@@ -143,9 +137,7 @@ class RegenerationService:
 
         # Generate new visual prompts
         try:
-            prompt_set = await self._visual_prompter.extract_prompts(
-                script, style=visual_style
-            )
+            prompt_set = await self._visual_prompter.extract_prompts(script, style=visual_style)
         except Exception:
             await logger.aexception(
                 "regeneration_visual_prompts_failed",

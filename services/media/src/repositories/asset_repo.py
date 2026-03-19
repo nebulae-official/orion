@@ -41,9 +41,7 @@ class MediaAssetRepository:
         """Fetch a single asset by primary key."""
         return await self._session.get(MediaAsset, asset_id)
 
-    async def get_by_content_id(
-        self, content_id: uuid.UUID
-    ) -> Sequence[MediaAsset]:
+    async def get_by_content_id(self, content_id: uuid.UUID) -> Sequence[MediaAsset]:
         """Return all assets linked to a given content piece."""
         stmt = (
             select(MediaAsset)
@@ -55,10 +53,6 @@ class MediaAssetRepository:
 
     async def list_recent(self, limit: int = 50) -> Sequence[MediaAsset]:
         """Return the most recently created assets."""
-        stmt = (
-            select(MediaAsset)
-            .order_by(MediaAsset.created_at.desc())
-            .limit(limit)
-        )
+        stmt = select(MediaAsset).order_by(MediaAsset.created_at.desc()).limit(limit)
         result = await self._session.execute(stmt)
         return result.scalars().all()

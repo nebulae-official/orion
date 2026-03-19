@@ -7,12 +7,12 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from httpx import AsyncClient
 
 requires_db = pytest.mark.skipif(
     os.getenv("DATABASE_URL") is None,
     reason="Requires running database",
 )
-from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
@@ -65,7 +65,10 @@ async def test_captions_generate(client: AsyncClient, mock_captioner: AsyncMock)
     mock_result.language = "en"
     mock_captioner.transcribe.return_value = mock_result
 
-    with patch("src.routes.render.to_srt", return_value="1\n00:00:00,000 --> 00:00:02,500\nHello world\n"):
+    with patch(
+        "src.routes.render.to_srt",
+        return_value="1\n00:00:00,000 --> 00:00:02,500\nHello world\n",
+    ):
         resp = await client.post(
             "/api/v1/editor/captions",
             json={"audio_path": "/tmp/test_audio.mp3", "language": "en"},

@@ -174,7 +174,6 @@ export function ProviderConfig(): React.ReactElement {
     }
     loadStatuses();
     // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleProviderChange(service: string, provider: string): void {

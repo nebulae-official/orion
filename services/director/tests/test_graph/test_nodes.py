@@ -12,42 +12,46 @@ from src.agents.visual_prompter import VisualPrompter
 from src.graph.nodes import creator_node, strategist_node
 from src.graph.state import OrionState, PipelineStage
 
-SCRIPT_JSON = json.dumps({
-    "hook": "AI just changed everything",
-    "body": "A breakthrough in artificial intelligence has...",
-    "cta": "Follow for more AI news",
-    "visual_cues": ["robot typing", "code on screen"],
-})
+SCRIPT_JSON = json.dumps(
+    {
+        "hook": "AI just changed everything",
+        "body": "A breakthrough in artificial intelligence has...",
+        "cta": "Follow for more AI news",
+        "visual_cues": ["robot typing", "code on screen"],
+    }
+)
 
-CRITIQUE_JSON = json.dumps({
-    "hook_strength": 0.9,
-    "value_density": 0.8,
-    "cta_clarity": 0.7,
-    "feedback": "Strong hook, body could use more detail",
-})
+CRITIQUE_JSON = json.dumps(
+    {
+        "hook_strength": 0.9,
+        "value_density": 0.8,
+        "cta_clarity": 0.7,
+        "feedback": "Strong hook, body could use more detail",
+    }
+)
 
-VISUAL_JSON = json.dumps({
-    "style_guide": "cinematic dark tech",
-    "prompts": [
-        {
-            "scene_number": 1,
-            "description": "robot typing on keyboard, neon lighting",
-            "style": "cinematic",
-            "camera_angle": "close-up",
-            "mood": "futuristic",
-            "negative_prompt": "blurry, low quality",
-        }
-    ],
-})
+VISUAL_JSON = json.dumps(
+    {
+        "style_guide": "cinematic dark tech",
+        "prompts": [
+            {
+                "scene_number": 1,
+                "description": "robot typing on keyboard, neon lighting",
+                "style": "cinematic",
+                "camera_angle": "close-up",
+                "mood": "futuristic",
+                "negative_prompt": "blurry, low quality",
+            }
+        ],
+    }
+)
 
 
 class TestStrategistNode:
     """Strategist node generates a script and critiques it."""
 
     @pytest.mark.asyncio
-    async def test_strategist_produces_script_and_critique(
-        self, fake_llm, sample_state
-    ) -> None:
+    async def test_strategist_produces_script_and_critique(self, fake_llm, sample_state) -> None:
         """Strategist should populate script fields and critique score."""
         call_count = 0
 
@@ -56,9 +60,11 @@ class TestStrategistNode:
             call_count += 1
             if call_count <= 1:
                 from src.providers.base import LLMResponse
+
                 return LLMResponse(content=SCRIPT_JSON, model="fake")
             else:
                 from src.providers.base import LLMResponse
+
                 return LLMResponse(content=CRITIQUE_JSON, model="fake")
 
         fake_llm.generate = mock_generate
@@ -81,9 +87,7 @@ class TestStrategistNode:
         assert "critique_feedback" in result
 
     @pytest.mark.asyncio
-    async def test_strategist_sets_failed_on_error(
-        self, sample_state
-    ) -> None:
+    async def test_strategist_sets_failed_on_error(self, sample_state) -> None:
         """If script generation fails, strategist sets error and FAILED stage."""
         from unittest.mock import AsyncMock
 

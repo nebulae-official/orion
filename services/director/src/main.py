@@ -79,9 +79,7 @@ async def _handle_content_rejected(payload: dict[str, Any]) -> None:
     from orion_common.db.session import get_session
 
     if _regeneration_service is None:
-        await logger.awarning(
-            "regeneration_service_not_ready", event="content_rejected"
-        )
+        await logger.awarning("regeneration_service_not_ready", event="content_rejected")
         return
 
     content_id = payload.get("content_id", "")
@@ -214,9 +212,7 @@ app = FastAPI(title="Orion Director Service", lifespan=lifespan)
 app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
-health_router = create_health_router(
-    "director", redis_url=settings.redis_url, db_engine=engine
-)
+health_router = create_health_router("director", redis_url=settings.redis_url, db_engine=engine)
 app.include_router(health_router)
 app.include_router(content_router)
 instrument_app(app, service_name="director")

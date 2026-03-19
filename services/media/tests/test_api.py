@@ -7,12 +7,12 @@ import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from httpx import AsyncClient
 
 requires_db = pytest.mark.skipif(
     os.getenv("DATABASE_URL") is None,
     reason="Requires running database",
 )
-from httpx import AsyncClient
 
 
 @pytest.mark.asyncio

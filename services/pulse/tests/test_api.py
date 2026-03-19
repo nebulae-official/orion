@@ -21,9 +21,7 @@ async def test_get_metrics_returns_defaults(client: AsyncClient) -> None:
     with patch(
         "src.services.event_aggregator.EventAggregator.get_pipeline_metrics",
         new_callable=AsyncMock,
-        return_value=PipelineMetrics(
-            throughput_per_hour=5.0, error_rate=0.02, stages=[]
-        ),
+        return_value=PipelineMetrics(throughput_per_hour=5.0, error_rate=0.02, stages=[]),
     ):
         resp = await client.get("/api/v1/analytics/metrics?hours=24")
 

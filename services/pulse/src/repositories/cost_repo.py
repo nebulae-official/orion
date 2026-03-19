@@ -26,16 +26,12 @@ class ProviderCost(Base):
 
     __tablename__ = "provider_costs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     provider: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
     category: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     units: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-    metadata_: Mapped[dict[str, Any] | None] = mapped_column(
-        "metadata", JSON, nullable=True
-    )
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
     recorded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
@@ -184,10 +180,7 @@ class CostRepository:
             providers[row.provider]["total_cost"] += cost
             providers[row.provider]["request_count"] += row.error_count
 
-        return [
-            {**v, "total_cost": round(v["total_cost"], 4)}
-            for v in providers.values()
-        ]
+        return [{**v, "total_cost": round(v["total_cost"], 4)} for v in providers.values()]
 
     async def get_cost_projection(
         self,

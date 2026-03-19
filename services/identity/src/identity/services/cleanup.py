@@ -18,6 +18,6 @@ async def prune_expired_tokens(session: AsyncSession) -> int:
     )
     result = await session.execute(stmt)
     await session.commit()
-    count = result.rowcount
+    count = result.rowcount  # type: ignore[attr-defined]
     logger.info("pruned_expired_tokens", count=count)
     return count

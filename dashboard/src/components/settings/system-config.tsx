@@ -7,12 +7,10 @@ import {
   Sun,
   Moon,
   Monitor,
-  RefreshCw,
   Bell,
   BellOff,
   Database,
   Server,
-  Info,
   Check,
 } from "lucide-react";
 

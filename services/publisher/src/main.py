@@ -35,9 +35,7 @@ app = FastAPI(title="Orion Publisher Service", lifespan=lifespan)
 app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
-health_router = create_health_router(
-    "publisher", redis_url=settings.redis_url, db_engine=engine
-)
+health_router = create_health_router("publisher", redis_url=settings.redis_url, db_engine=engine)
 app.include_router(health_router)
 app.include_router(accounts.router)
 app.include_router(publish.router)

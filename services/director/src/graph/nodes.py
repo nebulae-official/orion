@@ -45,7 +45,8 @@ async def strategist_node(
         script: GeneratedScript = await script_generator.generate_script(request)
 
         script, critique_result = await critique_agent.critique_and_refine(
-            script=script, request=request,
+            script=script,
+            request=request,
         )
 
         await logger.ainfo(
@@ -96,7 +97,8 @@ async def creator_node(
         )
 
         prompt_set = await visual_prompter.extract_prompts(
-            script, style=state.get("visual_style", "cinematic"),
+            script,
+            style=state.get("visual_style", "cinematic"),
         )
 
         await logger.ainfo("creator_node_completed", prompt_count=len(prompt_set.prompts))

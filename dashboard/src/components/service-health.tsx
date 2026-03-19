@@ -44,7 +44,7 @@ export function ServiceHealth(): React.ReactElement {
       checks: null,
     }))
   );
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [, setLastRefresh] = useState<Date>(new Date());
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);

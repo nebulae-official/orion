@@ -45,9 +45,7 @@ class TestNicheFilter:
         # 50 - 60 = -10, clamped to 0, below min_score 15 → filtered out
         assert len(result) == 0
 
-    def test_min_score_threshold(
-        self, niche_filter: NicheFilter, tech_config: NicheConfig
-    ) -> None:
+    def test_min_score_threshold(self, niche_filter: NicheFilter, tech_config: NicheConfig) -> None:
         """Trends below min_score are dropped."""
         trends = [TrendResult(topic="Random topic", score=10.0, source="rss")]
         result = niche_filter.filter_trends(trends, tech_config)
@@ -72,9 +70,7 @@ class TestNicheFilter:
         result = niche_filter.filter_trends([], tech_config)
         assert result == []
 
-    def test_score_clamped_to_100(
-        self, niche_filter: NicheFilter
-    ) -> None:
+    def test_score_clamped_to_100(self, niche_filter: NicheFilter) -> None:
         """Score is clamped to a maximum of 100."""
         config = NicheConfig(
             keywords=["AI", "machine learning", "startup", "cloud"],
@@ -89,9 +85,7 @@ class TestNicheFilter:
         assert len(result) == 1
         assert result[0].score <= 100.0
 
-    def test_score_clamped_to_zero(
-        self, niche_filter: NicheFilter
-    ) -> None:
+    def test_score_clamped_to_zero(self, niche_filter: NicheFilter) -> None:
         """Score is clamped to a minimum of 0."""
         config = NicheConfig(
             excluded_topics=["bad", "terrible", "awful"],

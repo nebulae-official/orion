@@ -1,8 +1,8 @@
 """Tests for CLI configuration management."""
 
-import tomli_w
-import pytest
 from pathlib import Path
+
+import tomli_w
 
 
 def test_default_config(tmp_path: Path) -> None:

@@ -30,23 +30,16 @@ class BatchImageResult(BaseModel):
 class BatchGenerator:
     """Generate multiple images concurrently with a concurrency limit."""
 
-    def __init__(
-        self, provider: ImageProvider, max_concurrent: int = 3
-    ) -> None:
+    def __init__(self, provider: ImageProvider, max_concurrent: int = 3) -> None:
         self._provider = provider
         self._semaphore = asyncio.Semaphore(max_concurrent)
 
-    async def generate_batch(
-        self, request: BatchImageRequest
-    ) -> BatchImageResult:
+    async def generate_batch(self, request: BatchImageRequest) -> BatchImageResult:
         """Process all prompts in parallel (up to max_concurrent).
 
         Individual failures are collected rather than aborting the batch.
         """
-        tasks = [
-            self._generate_one(idx, img_req)
-            for idx, img_req in enumerate(request.prompts)
-        ]
+        tasks = [self._generate_one(idx, img_req) for idx, img_req in enumerate(request.prompts)]
         outcomes = await asyncio.gather(*tasks, return_exceptions=False)
 
         results: list[ImageResult] = []
@@ -67,9 +60,7 @@ class BatchGenerator:
 
         return BatchImageResult(results=results, failed=failed)
 
-    async def _generate_one(
-        self, idx: int, request: ImageRequest
-    ) -> ImageResult | str:
+    async def _generate_one(self, idx: int, request: ImageRequest) -> ImageResult | str:
         """Generate a single image within the semaphore limit."""
         async with self._semaphore:
             try:

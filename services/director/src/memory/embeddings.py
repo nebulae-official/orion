@@ -75,9 +75,7 @@ class HashEmbeddingProvider(EmbeddingProvider):
         counter = 0
 
         while len(vector) < self._dim:
-            digest = hashlib.sha512(
-                f"{text}:{counter}".encode()
-            ).digest()
+            digest = hashlib.sha512(f"{text}:{counter}".encode()).digest()
             # Unpack 64 bytes into 8 float64 values
             floats = struct.unpack("8d", digest)
             vector.extend(floats)

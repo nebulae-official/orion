@@ -40,9 +40,7 @@ class GoogleTrendsProvider(TrendProvider):
         """Create a fresh pytrends client (not thread-safe, so per-call)."""
         return TrendReq(hl=self._hl, tz=self._tz)
 
-    async def fetch_trends(
-        self, region: str = "US", limit: int = 20
-    ) -> list[TrendResult]:
+    async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
         """Fetch daily trending searches from Google Trends.
 
         Runs the synchronous pytrends calls in a thread-pool executor
@@ -54,9 +52,7 @@ class GoogleTrendsProvider(TrendProvider):
 
         for attempt in range(1, self._retries + 1):
             try:
-                results = await loop.run_in_executor(
-                    None, self._fetch_sync, region, limit
-                )
+                results = await loop.run_in_executor(None, self._fetch_sync, region, limit)
                 logger.info(
                     "google_trends_fetched",
                     region=region,
@@ -97,15 +93,11 @@ class GoogleTrendsProvider(TrendProvider):
         # Real-time trending searches (supplementary)
         if len(results) < limit:
             remaining = limit - len(results)
-            results.extend(
-                self._fetch_realtime_trends(client, region, remaining)
-            )
+            results.extend(self._fetch_realtime_trends(client, region, remaining))
 
         return results[:limit]
 
-    def _fetch_daily_trends(
-        self, client: TrendReq, region: str, limit: int
-    ) -> list[TrendResult]:
+    def _fetch_daily_trends(self, client: TrendReq, region: str, limit: int) -> list[TrendResult]:
         """Fetch daily trending searches."""
         try:
             df = client.trending_searches(pn=region)

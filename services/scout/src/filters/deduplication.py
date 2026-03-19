@@ -117,9 +117,7 @@ class TrendDeduplicator:
 
         return result
 
-    def _merge_similar(
-        self, trends: list[TrendResult]
-    ) -> list[TrendResult]:
+    def _merge_similar(self, trends: list[TrendResult]) -> list[TrendResult]:
         """Merge trends with similar topics, keeping the highest score."""
         if not trends:
             return []
@@ -152,11 +150,7 @@ class TrendDeduplicator:
                         best = trend_b
 
             # Build merged result with combined source info
-            source_str = (
-                best.source
-                if len(sources) == 1
-                else ",".join(sorted(sources))
-            )
+            source_str = best.source if len(sources) == 1 else ",".join(sorted(sources))
             raw = dict(best.raw_data) if best.raw_data else {}
             raw["merged_sources"] = sorted(sources)
 

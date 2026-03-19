@@ -66,9 +66,7 @@ class ThumbnailGenerator:
     """
 
     def __init__(self, output_dir: str | None = None) -> None:
-        self._output_dir = Path(
-            output_dir or os.getenv("EDITOR_THUMBNAIL_DIR", DEFAULT_OUTPUT_DIR)
-        )
+        self._output_dir = Path(output_dir or os.getenv("EDITOR_THUMBNAIL_DIR", DEFAULT_OUTPUT_DIR))
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def generate(
@@ -104,9 +102,7 @@ class ThumbnailGenerator:
         frame_path = await self._extract_frame(video_path, frame_time, width, height)
 
         # Apply text overlay
-        thumbnail_path = self._apply_text_overlay(
-            frame_path, title, width, height, style
-        )
+        thumbnail_path = self._apply_text_overlay(frame_path, title, width, height, style)
 
         # Clean up intermediate frame
         Path(frame_path).unlink(missing_ok=True)
@@ -128,11 +124,16 @@ class ThumbnailGenerator:
         frame_path = str(self._output_dir / f"frame_{uuid.uuid4()}.png")
 
         cmd = [
-            "ffmpeg", "-y",
-            "-ss", str(time_sec),
-            "-i", video_path,
-            "-vframes", "1",
-            "-vf", (
+            "ffmpeg",
+            "-y",
+            "-ss",
+            str(time_sec),
+            "-i",
+            video_path,
+            "-vframes",
+            "1",
+            "-vf",
+            (
                 f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
                 f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:black"
             ),
@@ -148,9 +149,7 @@ class ThumbnailGenerator:
 
         if process.returncode != 0:
             error_msg = stderr.decode(errors="replace")
-            raise RuntimeError(
-                f"ffmpeg frame extraction failed: {error_msg[:500]}"
-            )
+            raise RuntimeError(f"ffmpeg frame extraction failed: {error_msg[:500]}")
 
         return frame_path
 
@@ -181,9 +180,7 @@ class ThumbnailGenerator:
             if style.font_path and Path(style.font_path).exists():
                 font = ImageFont.truetype(style.font_path, style.font_size)
             else:
-                font = ImageFont.truetype(
-                    "DejaVuSans-Bold.ttf", style.font_size
-                )
+                font = ImageFont.truetype("DejaVuSans-Bold.ttf", style.font_size)
         except OSError:
             font = ImageFont.load_default()
 

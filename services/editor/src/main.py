@@ -67,9 +67,7 @@ async def lifespan(app: FastAPI):
 
         content_id_str = payload.get("content_id")
         if not content_id_str:
-            await logger.awarning(
-                "media_generated_missing_content_id", payload=payload
-            )
+            await logger.awarning("media_generated_missing_content_id", payload=payload)
             return
 
         content_id = UUID(content_id_str)
@@ -79,9 +77,7 @@ async def lifespan(app: FastAPI):
             try:
                 await pipeline.render(content_id=content_id, session=session)
             except Exception:
-                await logger.aexception(
-                    "auto_render_failed", content_id=content_id_str
-                )
+                await logger.aexception("auto_render_failed", content_id=content_id_str)
 
     await event_bus.subscribe(Channels.MEDIA_GENERATED, on_media_generated)
     await event_bus.start_listening()
@@ -96,8 +92,6 @@ app = FastAPI(title="Orion Editor Service", lifespan=lifespan)
 app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
-health_router = create_health_router(
-    "editor", redis_url=settings.redis_url, db_engine=engine
-)
+health_router = create_health_router("editor", redis_url=settings.redis_url, db_engine=engine)
 app.include_router(health_router)
 app.include_router(render_router)

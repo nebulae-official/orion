@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typer
 
-from orion_cli.commands import system, auth, scout, content, pipeline, publish, admin
+from orion_cli.commands import admin, auth, content, pipeline, publish, scout, system
 
 app = typer.Typer(
     name="orion",

@@ -71,9 +71,7 @@ class SubtitleBurner:
     """Burn ASS subtitles with karaoke word-highlighting into a video."""
 
     def __init__(self, output_dir: str | None = None) -> None:
-        self._output_dir = Path(
-            output_dir or os.getenv("EDITOR_OUTPUT_DIR", DEFAULT_OUTPUT_DIR)
-        )
+        self._output_dir = Path(output_dir or os.getenv("EDITOR_OUTPUT_DIR", DEFAULT_OUTPUT_DIR))
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def burn_subtitles(
@@ -87,9 +85,7 @@ class SubtitleBurner:
 
         Returns the path to the output video with subtitles burned in.
         """
-        output_path = output_path or str(
-            self._output_dir / f"{uuid.uuid4()}_subtitled.mp4"
-        )
+        output_path = output_path or str(self._output_dir / f"{uuid.uuid4()}_subtitled.mp4")
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
         # Generate ASS subtitle file
@@ -109,14 +105,22 @@ class SubtitleBurner:
         escaped_ass = ass_path.replace("\\", "\\\\").replace(":", "\\:")
 
         cmd = [
-            "ffmpeg", "-y",
-            "-i", video_path,
-            "-vf", f"ass={escaped_ass}",
-            "-c:v", "libx264",
-            "-preset", "fast",
-            "-crf", "23",
-            "-c:a", "copy",
-            "-pix_fmt", "yuv420p",
+            "ffmpeg",
+            "-y",
+            "-i",
+            video_path,
+            "-vf",
+            f"ass={escaped_ass}",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-crf",
+            "23",
+            "-c:a",
+            "copy",
+            "-pix_fmt",
+            "yuv420p",
             output_path,
         ]
 
@@ -141,9 +145,7 @@ class SubtitleBurner:
                 returncode=process.returncode,
                 stderr=error_msg[:2000],
             )
-            raise RuntimeError(
-                f"ffmpeg subtitle burn failed: {error_msg[:500]}"
-            )
+            raise RuntimeError(f"ffmpeg subtitle burn failed: {error_msg[:500]}")
 
         # Clean up temporary ASS file
         Path(ass_path).unlink(missing_ok=True)

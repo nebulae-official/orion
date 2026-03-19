@@ -76,9 +76,7 @@ class VideoValidator:
         width = video_stream.get("width", 0)
         height = video_stream.get("height", 0)
         codec = video_stream.get("codec_name", "unknown")
-        duration = float(
-            probe_data.get("format", {}).get("duration", 0)
-        )
+        duration = float(probe_data.get("format", {}).get("duration", 0))
 
         # Parse FPS from r_frame_rate (e.g. "30/1")
         fps_str = video_stream.get("r_frame_rate", "0/1")
@@ -90,9 +88,7 @@ class VideoValidator:
         issues.append(
             ValidationIssue(
                 check="resolution",
-                passed=(
-                    width == EXPECTED_WIDTH and height == EXPECTED_HEIGHT
-                ),
+                passed=(width == EXPECTED_WIDTH and height == EXPECTED_HEIGHT),
                 expected=f"{EXPECTED_WIDTH}x{EXPECTED_HEIGHT}",
                 actual=f"{width}x{height}",
                 weight=1.0,
@@ -148,12 +144,8 @@ class VideoValidator:
 
         # Calculate weighted confidence score
         total_weight = sum(issue.weight for issue in issues)
-        passed_weight = sum(
-            issue.weight for issue in issues if issue.passed
-        )
-        confidence_score = (
-            passed_weight / total_weight if total_weight > 0 else 0.0
-        )
+        passed_weight = sum(issue.weight for issue in issues if issue.passed)
+        confidence_score = passed_weight / total_weight if total_weight > 0 else 0.0
 
         valid = all(issue.passed for issue in issues)
 
@@ -185,8 +177,10 @@ class VideoValidator:
         """Run ffprobe to extract video metadata as JSON."""
         cmd = [
             "ffprobe",
-            "-v", "quiet",
-            "-print_format", "json",
+            "-v",
+            "quiet",
+            "-print_format",
+            "json",
             "-show_format",
             "-show_streams",
             video_path,

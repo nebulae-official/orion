@@ -11,11 +11,7 @@ from src.schemas import SafetyCheckResult
 logger = structlog.get_logger(__name__)
 
 # Loaded once from env; comma-separated list
-_BLOCKLIST: list[str] = [
-    w.strip().lower()
-    for w in os.environ.get("ORION_CONTENT_BLOCKLIST", "").split(",")
-    if w.strip()
-]
+_BLOCKLIST: list[str] = [w.strip().lower() for w in os.environ.get("ORION_CONTENT_BLOCKLIST", "").split(",") if w.strip()]
 
 
 async def check_content_safety(
@@ -41,9 +37,7 @@ async def check_content_safety(
 
     # Check 2: Platform character limit
     if platform_char_limit is not None and len(text) > platform_char_limit:
-        violations.append(
-            f"Content exceeds platform limit ({len(text)}/{platform_char_limit} chars)"
-        )
+        violations.append(f"Content exceeds platform limit ({len(text)}/{platform_char_limit} chars)")
 
     # Check 3: Keyword blocklist
     text_lower = text.lower()

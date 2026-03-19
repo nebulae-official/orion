@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -15,7 +15,7 @@ app = typer.Typer()
 
 @app.command("list")
 def list_content(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """List all content items."""
@@ -27,7 +27,7 @@ def list_content(
 @app.command()
 def view(
     content_id: str,
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """View a specific content item."""
@@ -39,7 +39,7 @@ def view(
 @app.command()
 def approve(
     content_id: str,
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Approve a content item for publishing."""
@@ -51,7 +51,7 @@ def approve(
 @app.command()
 def reject(
     content_id: str,
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Reject a content item."""
@@ -63,7 +63,7 @@ def reject(
 @app.command()
 def regenerate(
     content_id: str,
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Regenerate a content item with feedback."""

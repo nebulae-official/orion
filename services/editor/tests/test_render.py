@@ -48,9 +48,7 @@ class TestRenderPipeline:
         )
 
         captioner = AsyncMock()
-        captioner.transcribe.return_value = MagicMock(
-            segments=[], full_text="test", language="en"
-        )
+        captioner.transcribe.return_value = MagicMock(segments=[], full_text="test", language="en")
 
         stitcher = AsyncMock()
         stitcher.stitch.return_value = "/tmp/raw_video.mp4"
@@ -94,13 +92,11 @@ class TestRenderPipeline:
         mock_asset = MagicMock()
         mock_asset.file_path = "/tmp/image.png"
 
-        with patch(
-            "src.services.render_pipeline.EditorAssetRepository"
-        ) as MockRepo:
+        with patch("src.services.render_pipeline.EditorAssetRepository") as mock_repo:
             repo_instance = AsyncMock()
             repo_instance.get_by_content_id.return_value = [mock_asset]
             repo_instance.create.return_value = MagicMock(id=uuid.uuid4())
-            MockRepo.return_value = repo_instance
+            mock_repo.return_value = repo_instance
 
             await pipeline.render(content_id=content_id, session=session)
 
@@ -119,9 +115,7 @@ class TestRenderPipeline:
 
         with patch("src.services.render_pipeline.EditorAssetRepository"):
             with pytest.raises(ValueError, match="not found"):
-                await pipeline.render(
-                    content_id=uuid.uuid4(), session=session
-                )
+                await pipeline.render(content_id=uuid.uuid4(), session=session)
 
     @pytest.mark.asyncio
     async def test_render_no_images_raises(self) -> None:
@@ -131,9 +125,7 @@ class TestRenderPipeline:
             file_path="/tmp/audio.mp3", duration_seconds=10.0, provider="test"
         )
         captioner = AsyncMock()
-        captioner.transcribe.return_value = MagicMock(
-            segments=[], full_text="test", language="en"
-        )
+        captioner.transcribe.return_value = MagicMock(segments=[], full_text="test", language="en")
 
         pipeline = self._make_pipeline(tts=tts, captioner=captioner)
         session = AsyncMock()
@@ -142,17 +134,13 @@ class TestRenderPipeline:
         content.script_body = "Script"
         session.get.return_value = content
 
-        with patch(
-            "src.services.render_pipeline.EditorAssetRepository"
-        ) as MockRepo:
+        with patch("src.services.render_pipeline.EditorAssetRepository") as mock_repo:
             repo_instance = AsyncMock()
             repo_instance.get_by_content_id.return_value = []  # No images
-            MockRepo.return_value = repo_instance
+            mock_repo.return_value = repo_instance
 
             with pytest.raises(ValueError, match="No image assets"):
-                await pipeline.render(
-                    content_id=uuid.uuid4(), session=session
-                )
+                await pipeline.render(content_id=uuid.uuid4(), session=session)
 
     def test_resolve_subtitle_style_tiktok(self) -> None:
         """_resolve_subtitle_style returns tiktok preset by default."""

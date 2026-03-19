@@ -120,10 +120,7 @@ class SVDProvider(VideoProvider):
         output_dir: str = "/tmp/orion/media/video",
     ) -> None:
         self._host = host.rstrip("/")
-        self._ws_url = (
-            self._host.replace("http://", "ws://").replace("https://", "wss://")
-            + "/ws"
-        )
+        self._ws_url = self._host.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
         self._output_dir = Path(output_dir)
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -200,9 +197,7 @@ class SVDProvider(VideoProvider):
             resp.raise_for_status()
             return resp.json()["prompt_id"]
 
-    async def _wait_for_completion(
-        self, prompt_id: str, client_id: str
-    ) -> list[dict]:
+    async def _wait_for_completion(self, prompt_id: str, client_id: str) -> list[dict]:
         """Listen on the WebSocket until the prompt finishes executing."""
         ws_url = f"{self._ws_url}?clientId={client_id}"
         output_files: list[dict] = []
@@ -214,26 +209,24 @@ class SVDProvider(VideoProvider):
                 msg = json.loads(raw_msg)
                 msg_type = msg.get("type")
 
-                if msg_type == "executed" and msg.get("data", {}).get(
-                    "prompt_id"
-                ) == prompt_id:
+                if msg_type == "executed" and msg.get("data", {}).get("prompt_id") == prompt_id:
                     node_output = msg["data"].get("output", {})
                     gifs = node_output.get("gifs", [])
                     output_files.extend(gifs)
                     videos = node_output.get("videos", [])
                     output_files.extend(videos)
 
-                if msg_type == "execution_complete" and msg.get("data", {}).get(
-                    "prompt_id"
-                ) == prompt_id:
+                if (
+                    msg_type == "execution_complete"
+                    and msg.get("data", {}).get("prompt_id") == prompt_id
+                ):
                     break
 
-                if msg_type == "execution_error" and msg.get("data", {}).get(
-                    "prompt_id"
-                ) == prompt_id:
-                    error = msg.get("data", {}).get(
-                        "exception_message", "unknown"
-                    )
+                if (
+                    msg_type == "execution_error"
+                    and msg.get("data", {}).get("prompt_id") == prompt_id
+                ):
+                    error = msg.get("data", {}).get("exception_message", "unknown")
                     raise RuntimeError(f"SVD ComfyUI execution error: {error}")
 
         return output_files

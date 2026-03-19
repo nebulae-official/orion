@@ -60,9 +60,7 @@ async def trigger_render(
 ) -> RenderResponse:
     """Trigger the full render pipeline for a content piece."""
     if _render_pipeline is None:
-        raise HTTPException(
-            status_code=503, detail="Render pipeline not initialised"
-        )
+        raise HTTPException(status_code=503, detail="Render pipeline not initialised")
 
     try:
         run = await _render_pipeline.render(
@@ -94,9 +92,7 @@ async def trigger_render(
 async def generate_tts(body: TTSGenerateRequest) -> TTSGenerateResponse:
     """Generate TTS audio from text (standalone endpoint)."""
     if _tts_provider is None:
-        raise HTTPException(
-            status_code=503, detail="TTS provider not initialised"
-        )
+        raise HTTPException(status_code=503, detail="TTS provider not initialised")
 
     result = await _tts_provider.synthesize(
         TTSRequest(
@@ -117,17 +113,14 @@ async def generate_tts(body: TTSGenerateRequest) -> TTSGenerateResponse:
 async def generate_captions(body: CaptionRequest) -> CaptionResponse:
     """Generate captions from an audio file (standalone endpoint)."""
     if _captioner is None:
-        raise HTTPException(
-            status_code=503, detail="Captioner not initialised"
-        )
+        raise HTTPException(status_code=503, detail="Captioner not initialised")
 
     result = await _captioner.transcribe(body.audio_path, language=body.language)
     srt = to_srt(result)
 
     return CaptionResponse(
         segments=[
-            CaptionSegmentSchema(start=s.start, end=s.end, text=s.text)
-            for s in result.segments
+            CaptionSegmentSchema(start=s.start, end=s.end, text=s.text) for s in result.segments
         ],
         full_text=result.full_text,
         language=result.language,

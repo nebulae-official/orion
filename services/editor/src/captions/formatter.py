@@ -90,9 +90,7 @@ def to_ass(
         else:
             text = seg.text
 
-        dialogue_lines.append(
-            f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}"
-        )
+        dialogue_lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")
 
     return header + "\n".join(dialogue_lines) + "\n"
 
@@ -100,7 +98,6 @@ def to_ass(
 def to_word_json(result: CaptionResult) -> str:
     """Convert word-level timestamps to a JSON string for karaoke rendering."""
     words: list[dict[str, Any]] = [
-        {"word": w.word, "start": w.start, "end": w.end}
-        for w in result.words
+        {"word": w.word, "start": w.start, "end": w.end} for w in result.words
     ]
     return json.dumps({"words": words, "language": result.language}, indent=2)

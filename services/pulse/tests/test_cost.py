@@ -41,17 +41,17 @@ class TestCostTracker:
 
         tracker = CostTracker(event_bus, session_factory)
 
-        with patch(
-            "src.services.cost_tracker.CostRepository"
-        ) as MockRepo:
+        with patch("src.services.cost_tracker.CostRepository") as mock_repo:
             repo = AsyncMock()
-            MockRepo.return_value = repo
+            mock_repo.return_value = repo
 
-            await tracker._handle_cost_event({
-                "_channel": Channels.MEDIA_GENERATED,
-                "provider": "fal_ai",
-                "cost": {"units": 5, "media_type": "image"},
-            })
+            await tracker._handle_cost_event(
+                {
+                    "_channel": Channels.MEDIA_GENERATED,
+                    "provider": "fal_ai",
+                    "cost": {"units": 5, "media_type": "image"},
+                }
+            )
 
             repo.create.assert_called_once()
 
@@ -63,10 +63,12 @@ class TestCostTracker:
         tracker = CostTracker(event_bus, session_factory)
 
         # No cost field → should not attempt to persist
-        await tracker._handle_cost_event({
-            "_channel": "orion.content_created",
-            "provider": "test",
-        })
+        await tracker._handle_cost_event(
+            {
+                "_channel": "orion.content_created",
+                "provider": "test",
+            }
+        )
         # No exception, no session creation
 
     @pytest.mark.asyncio
@@ -76,11 +78,13 @@ class TestCostTracker:
         session_factory = MagicMock()
         tracker = CostTracker(event_bus, session_factory)
 
-        await tracker._handle_cost_event({
-            "_channel": "orion.content_created",
-            "provider": "test",
-            "cost": {"units": 0},
-        })
+        await tracker._handle_cost_event(
+            {
+                "_channel": "orion.content_created",
+                "provider": "test",
+                "cost": {"units": 0},
+            }
+        )
 
     def test_infer_category_explicit(self) -> None:
         """_infer_category uses explicit category when provided."""

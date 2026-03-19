@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -25,7 +25,7 @@ def health(
 
 @app.command()
 def status(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Show status of all services."""
@@ -33,7 +33,11 @@ def status(
     data = asyncio.run(client.get("/status"))
     services = data.get("services", {})
     rows = [
-        {"name": name, "status": info.get("status", "unknown"), "latency_ms": info.get("latency_ms", "")}
+        {
+            "name": name,
+            "status": info.get("status", "unknown"),
+            "latency_ms": info.get("latency_ms", ""),
+        }
         for name, info in services.items()
     ]
     print_output(rows, fmt=fmt, title="Service Status")

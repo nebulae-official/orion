@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from enum import Enum
+from enum import StrEnum
 from io import StringIO
 from typing import Any
 
@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.table import Table
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
     TABLE = "table"
     JSON = "json"
     PLAIN = "plain"

@@ -67,8 +67,7 @@ def build_crossfade_filter(
         Offset in seconds where the crossfade begins.
     """
     return (
-        f"{segment_a}{segment_b}xfade=transition=fade"
-        f":duration={duration}:offset={offset}{output}"
+        f"{segment_a}{segment_b}xfade=transition=fade:duration={duration}:offset={offset}{output}"
     )
 
 
@@ -82,7 +81,4 @@ def build_audio_fade_filter(
     Returns a filter string like ``afade=t=in:d=0.5,afade=t=out:st=X:d=1.0``.
     """
     fade_out_start = max(0.0, total_duration - fade_out)
-    return (
-        f"afade=t=in:d={fade_in},"
-        f"afade=t=out:st={fade_out_start}:d={fade_out}"
-    )
+    return f"afade=t=in:d={fade_in},afade=t=out:st={fade_out_start}:d={fade_out}"

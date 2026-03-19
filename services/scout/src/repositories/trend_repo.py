@@ -49,14 +49,10 @@ class TrendRepository:
 
     async def get_by_id(self, trend_id: uuid.UUID) -> Trend | None:
         """Fetch a single trend by its primary key."""
-        result = await self._session.execute(
-            select(Trend).where(Trend.id == trend_id)
-        )
+        result = await self._session.execute(select(Trend).where(Trend.id == trend_id))
         return result.scalar_one_or_none()
 
-    async def get_active(
-        self, page: int = 1, page_size: int = 20
-    ) -> tuple[list[Trend], int]:
+    async def get_active(self, page: int = 1, page_size: int = 20) -> tuple[list[Trend], int]:
         """Fetch active trends with pagination.
 
         Returns:
@@ -65,17 +61,14 @@ class TrendRepository:
         base_query = select(Trend).where(Trend.status == TrendStatus.active)
 
         # Total count
-        count_query = select(func.count()).select_from(
-            base_query.subquery()
-        )
+        count_query = select(func.count()).select_from(base_query.subquery())
         total_result = await self._session.execute(count_query)
         total = total_result.scalar_one()
 
         # Paginated results
         offset = (page - 1) * page_size
         query = (
-            base_query
-            .order_by(Trend.score.desc(), Trend.detected_at.desc())
+            base_query.order_by(Trend.score.desc(), Trend.detected_at.desc())
             .offset(offset)
             .limit(page_size)
         )
@@ -84,9 +77,7 @@ class TrendRepository:
 
         return trends, total
 
-    async def exists_by_topic(
-        self, topic: str, hours: int = 24
-    ) -> bool:
+    async def exists_by_topic(self, topic: str, hours: int = 24) -> bool:
         """Check if a trend with the same topic was detected recently.
 
         Used for deduplication — returns True if a matching topic
@@ -101,9 +92,7 @@ class TrendRepository:
         count = result.scalar_one()
         return count > 0
 
-    async def update_status(
-        self, trend_id: uuid.UUID, status: TrendStatus
-    ) -> Trend | None:
+    async def update_status(self, trend_id: uuid.UUID, status: TrendStatus) -> Trend | None:
         """Update the status of a trend.
 
         Returns:

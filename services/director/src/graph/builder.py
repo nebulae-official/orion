@@ -77,11 +77,13 @@ def build_content_graph(
 
         workflow.add_edge(START, "strategist")
         workflow.add_conditional_edges(
-            "strategist", route_after_strategist,
+            "strategist",
+            route_after_strategist,
             {"creator": "strategist_review", END: END},
         )
         workflow.add_conditional_edges(
-            "strategist_review", route_after_strategist,
+            "strategist_review",
+            route_after_strategist,
             {"creator": "creator", END: END},
         )
 
@@ -89,21 +91,25 @@ def build_content_graph(
             workflow.add_node("analyst_review", analyst_hitl_gate)
 
             workflow.add_conditional_edges(
-                "creator", route_after_creator_hitl,
+                "creator",
+                route_after_creator_hitl,
                 {"creator_review": "creator_review", END: END},
             )
             workflow.add_conditional_edges(
-                "creator_review", route_after_creator,
+                "creator_review",
+                route_after_creator,
                 {"analyst": "analyst", END: END},
             )
             workflow.add_edge("analyst", "analyst_review")
             workflow.add_conditional_edges(
-                "analyst_review", route_after_analyst_hitl,
+                "analyst_review",
+                route_after_analyst_hitl,
                 {"strategist": "strategist", END: END},
             )
         else:
             workflow.add_conditional_edges(
-                "creator", route_after_creator_hitl,
+                "creator",
+                route_after_creator_hitl,
                 {"creator_review": "creator_review", END: END},
             )
             workflow.add_edge("creator_review", END)

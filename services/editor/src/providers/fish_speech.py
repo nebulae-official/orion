@@ -44,9 +44,9 @@ class FishSpeechProvider(TTSProvider):
         base_url: str | None = None,
         output_dir: str = DEFAULT_OUTPUT_DIR,
     ) -> None:
-        self._base_url = (
-            base_url or os.getenv("FISH_SPEECH_URL", DEFAULT_FISH_SPEECH_URL)
-        ).rstrip("/")
+        self._base_url = (base_url or os.getenv("FISH_SPEECH_URL", DEFAULT_FISH_SPEECH_URL)).rstrip(
+            "/"
+        )
         self._output_dir = Path(output_dir)
         self._output_dir.mkdir(parents=True, exist_ok=True)
 

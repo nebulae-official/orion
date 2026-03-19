@@ -32,9 +32,7 @@ _provider: ImageProvider | None = None
 _batch_generator: BatchGenerator | None = None
 
 
-def configure_router(
-    provider: ImageProvider, batch_generator: BatchGenerator
-) -> None:
+def configure_router(provider: ImageProvider, batch_generator: BatchGenerator) -> None:
     """Inject runtime dependencies into the router module."""
     global _provider, _batch_generator  # noqa: PLW0603
     _provider = provider

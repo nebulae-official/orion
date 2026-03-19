@@ -31,9 +31,7 @@ class RSSProvider(TrendProvider):
     def __init__(self, feed_urls: list[str] | None = None) -> None:
         self._feed_urls = feed_urls or DEFAULT_FEEDS
 
-    async def fetch_trends(
-        self, region: str = "US", limit: int = 20
-    ) -> list[TrendResult]:
+    async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
         """Fetch trending topics from all configured RSS feeds.
 
         Runs synchronous feedparser calls in a thread-pool executor.
@@ -43,9 +41,7 @@ class RSSProvider(TrendProvider):
 
         for url in self._feed_urls:
             try:
-                results = await loop.run_in_executor(
-                    None, self._parse_feed, url, limit
-                )
+                results = await loop.run_in_executor(None, self._parse_feed, url, limit)
                 all_results.extend(results)
             except Exception:
                 logger.exception("rss_feed_error", url=url)

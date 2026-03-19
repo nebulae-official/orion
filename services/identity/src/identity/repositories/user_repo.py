@@ -234,4 +234,4 @@ async def revoke_all_user_tokens(
     )
     result = await session.execute(stmt)
     await session.flush()
-    return result.rowcount  # type: ignore[return-value]
+    return result.rowcount  # type: ignore[attr-defined]

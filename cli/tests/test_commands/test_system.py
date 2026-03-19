@@ -1,11 +1,9 @@
 """Tests for system commands (health, status, providers)."""
 
 import httpx
-import pytest
 import respx
-from typer.testing import CliRunner
-
 from orion_cli.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

@@ -59,9 +59,7 @@ async def test_publish_success():
     mock_provider = AsyncMock()
     mock_provider.get_character_limit.return_value = 280
     mock_provider.get_platform_name.return_value = "twitter"
-    mock_provider.publish.return_value = PublishResult(
-        platform="twitter", status="published", platform_post_id="123"
-    )
+    mock_provider.publish.return_value = PublishResult(platform="twitter", status="published", platform_post_id="123")
 
     with (
         patch.object(svc, "_get_content", return_value=mock_content),

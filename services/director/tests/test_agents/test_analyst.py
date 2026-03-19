@@ -10,23 +10,25 @@ import pytest
 from src.agents.analyst import AnalysisResult, AnalystAgent
 from src.providers.base import LLMProvider, LLMResponse
 
-ANALYSIS_JSON = json.dumps({
-    "performance_summary": "Pipeline completed in 45s. Critique score 0.85 is above average.",
-    "benchmark_comparison": {
-        "avg_duration_seconds": 50,
-        "avg_critique_score": 0.75,
-        "percentile_rank": 80,
-    },
-    "suggestions": [
-        {
-            "area": "hook",
-            "suggestion": "Use a question format for higher engagement",
-            "expected_impact": "high",
-            "rationale": "Questions in hooks increase retention by 20%",
-        }
-    ],
-    "overall_score": 0.82,
-})
+ANALYSIS_JSON = json.dumps(
+    {
+        "performance_summary": "Pipeline completed in 45s. Critique score 0.85 is above average.",
+        "benchmark_comparison": {
+            "avg_duration_seconds": 50,
+            "avg_critique_score": 0.75,
+            "percentile_rank": 80,
+        },
+        "suggestions": [
+            {
+                "area": "hook",
+                "suggestion": "Use a question format for higher engagement",
+                "expected_impact": "high",
+                "rationale": "Questions in hooks increase retention by 20%",
+            }
+        ],
+        "overall_score": 0.82,
+    }
+)
 
 
 class FakeAnalystLLM(LLMProvider):

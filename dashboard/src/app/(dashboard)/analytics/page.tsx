@@ -65,7 +65,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
   let providerCosts: ProviderCostSummary[] = [];
   let errors: ErrorTrendData[] = [];
 
-  let fetchErrors: string[] = [];
+  const fetchErrors: string[] = [];
 
   if (DEMO_MODE) {
     funnel = demoFunnel;

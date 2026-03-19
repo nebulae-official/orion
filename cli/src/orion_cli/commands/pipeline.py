@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 import websockets
@@ -18,7 +18,7 @@ app = typer.Typer()
 
 @app.command()
 def status(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Show pipeline run history."""
@@ -30,7 +30,7 @@ def status(
 @app.command()
 def run(
     trend_id: str,
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Trigger a pipeline run for a trend."""
@@ -41,7 +41,7 @@ def run(
 
 @app.command()
 def logs(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
 ) -> None:
     """Stream live pipeline events via WebSocket."""
     cfg = CLIConfig()

@@ -64,9 +64,7 @@ app = FastAPI(title="Orion Pulse Service", lifespan=lifespan)
 app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 engine = get_engine()
-health_router = create_health_router(
-    "pulse", redis_url=settings.redis_url, db_engine=engine
-)
+health_router = create_health_router("pulse", redis_url=settings.redis_url, db_engine=engine)
 app.include_router(health_router)
 app.include_router(analytics.router)
 app.include_router(costs.router)

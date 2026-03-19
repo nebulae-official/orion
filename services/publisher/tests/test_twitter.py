@@ -28,24 +28,18 @@ def test_format_tweet_text_hashtags_trimmed_if_no_space():
 
 
 def test_character_limit():
-    provider = TwitterProvider(
-        api_key="k", api_secret="s", access_token="t", access_token_secret="ts"
-    )
+    provider = TwitterProvider(api_key="k", api_secret="s", access_token="t", access_token_secret="ts")
     assert provider.get_character_limit() == 280
 
 
 def test_platform_name():
-    provider = TwitterProvider(
-        api_key="k", api_secret="s", access_token="t", access_token_secret="ts"
-    )
+    provider = TwitterProvider(api_key="k", api_secret="s", access_token="t", access_token_secret="ts")
     assert provider.get_platform_name() == "twitter"
 
 
 @pytest.mark.asyncio
 async def test_publish_success():
-    provider = TwitterProvider(
-        api_key="k", api_secret="s", access_token="t", access_token_secret="ts"
-    )
+    provider = TwitterProvider(api_key="k", api_secret="s", access_token="t", access_token_secret="ts")
 
     mock_response = MagicMock()
     mock_response.data = {"id": "12345"}

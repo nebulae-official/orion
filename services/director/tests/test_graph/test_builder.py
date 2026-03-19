@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.state import CompiledStateGraph
 from src.graph.builder import build_content_graph
 
@@ -40,9 +41,6 @@ class TestBuildContentGraph:
         node_names = set(graph.nodes.keys())
         assert "strategist" in node_names
         assert "creator" in node_names
-
-
-from langgraph.checkpoint.memory import MemorySaver
 
 
 class TestBuildContentGraphWithHITL:

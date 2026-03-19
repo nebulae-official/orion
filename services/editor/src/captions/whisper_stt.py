@@ -46,9 +46,7 @@ class WhisperCaptioner:
     """
 
     def __init__(self, model_size: str | None = None) -> None:
-        self._model_size = model_size or os.getenv(
-            "WHISPER_MODEL_SIZE", DEFAULT_MODEL_SIZE
-        )
+        self._model_size = model_size or os.getenv("WHISPER_MODEL_SIZE", DEFAULT_MODEL_SIZE)
         self._model = None
 
     def _get_model(self):
@@ -63,18 +61,14 @@ class WhisperCaptioner:
             )
         return self._model
 
-    async def transcribe(
-        self, audio_path: str, language: str = "en"
-    ) -> CaptionResult:
+    async def transcribe(self, audio_path: str, language: str = "en") -> CaptionResult:
         """Transcribe *audio_path* and return word-level captions.
 
         The heavy Whisper inference runs in a thread executor to avoid
         blocking the async event loop.
         """
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None, self._transcribe_sync, audio_path, language
-        )
+        result = await loop.run_in_executor(None, self._transcribe_sync, audio_path, language)
         await logger.ainfo(
             "audio_transcribed",
             audio_path=audio_path,

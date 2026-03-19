@@ -23,9 +23,7 @@ class TrendProvider(ABC):
     """
 
     @abstractmethod
-    async def fetch_trends(
-        self, region: str = "US", limit: int = 20
-    ) -> list[TrendResult]:
+    async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
         """Fetch current trends from the provider.
 
         Args:

@@ -13,10 +13,14 @@ from src.graph.state import OrionState, PipelineStage
 class TestStrategistReviewPayload:
     def test_payload_contains_script_and_critique(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "AI coding", "niche": "technology",
-            "target_platform": "youtube_shorts", "tone": "informative",
-            "visual_style": "cinematic", "current_stage": PipelineStage.CREATOR,
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "AI coding",
+            "niche": "technology",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.CREATOR,
             "script_hook": "AI is writing code now",
             "script_body": "In a stunning development...",
             "script_cta": "Follow for AI updates",
@@ -34,12 +38,19 @@ class TestStrategistReviewPayload:
 class TestCreatorReviewPayload:
     def test_payload_contains_visual_prompts(self) -> None:
         state: OrionState = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "AI coding", "niche": "technology",
-            "target_platform": "youtube_shorts", "tone": "informative",
-            "visual_style": "cinematic", "current_stage": PipelineStage.COMPLETE,
-            "script_hook": "hook", "script_body": "body", "script_cta": "cta",
-            "visual_cues": ["scene 1"], "critique_score": 0.8,
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "AI coding",
+            "niche": "technology",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.COMPLETE,
+            "script_hook": "hook",
+            "script_body": "body",
+            "script_cta": "cta",
+            "visual_cues": ["scene 1"],
+            "critique_score": 0.8,
             "critique_feedback": "ok",
             "visual_prompts": {
                 "style_guide": "cinematic",
@@ -67,32 +78,45 @@ class TestHITLInterruptFlow:
         async def smart_generate(prompt, system_prompt=None, temperature=0.7, max_tokens=2048):
             if "Evaluate this short-form video script" in (prompt or ""):
                 return LLMResponse(
-                    content=json.dumps({
-                        "hook_strength": 0.9, "value_density": 0.8,
-                        "cta_clarity": 0.7, "feedback": "Good",
-                    }),
+                    content=json.dumps(
+                        {
+                            "hook_strength": 0.9,
+                            "value_density": 0.8,
+                            "cta_clarity": 0.7,
+                            "feedback": "Good",
+                        }
+                    ),
                     model="fake",
                 )
             elif "visual director" in (system_prompt or "").lower():
                 return LLMResponse(
-                    content=json.dumps({
-                        "style_guide": "cinematic",
-                        "prompts": [{
-                            "scene_number": 1, "description": "test scene",
-                            "style": "cinematic", "camera_angle": "wide",
-                            "mood": "epic", "negative_prompt": "blurry",
-                        }],
-                    }),
+                    content=json.dumps(
+                        {
+                            "style_guide": "cinematic",
+                            "prompts": [
+                                {
+                                    "scene_number": 1,
+                                    "description": "test scene",
+                                    "style": "cinematic",
+                                    "camera_angle": "wide",
+                                    "mood": "epic",
+                                    "negative_prompt": "blurry",
+                                }
+                            ],
+                        }
+                    ),
                     model="fake",
                 )
             else:
                 return LLMResponse(
-                    content=json.dumps({
-                        "hook": "AI changes everything",
-                        "body": "Major breakthrough in AI...",
-                        "cta": "Follow for updates",
-                        "visual_cues": ["robot", "code"],
-                    }),
+                    content=json.dumps(
+                        {
+                            "hook": "AI changes everything",
+                            "body": "Major breakthrough in AI...",
+                            "cta": "Follow for updates",
+                            "visual_cues": ["robot", "code"],
+                        }
+                    ),
                     model="fake",
                 )
 
@@ -113,10 +137,14 @@ class TestHITLInterruptFlow:
 
         config = {"configurable": {"thread_id": "test-hitl-1"}}
         initial_state = {
-            "content_id": uuid.uuid4(), "trend_id": uuid.uuid4(),
-            "trend_topic": "AI breakthroughs", "niche": "technology",
-            "target_platform": "youtube_shorts", "tone": "informative",
-            "visual_style": "cinematic", "current_stage": PipelineStage.STRATEGIST,
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "AI breakthroughs",
+            "niche": "technology",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.STRATEGIST,
         }
 
         # First invoke — should interrupt at strategist_review
@@ -124,12 +152,14 @@ class TestHITLInterruptFlow:
 
         # Resume with approval — should hit creator_review interrupt
         result = await graph.ainvoke(
-            Command(resume={"approved": True}), config=config,
+            Command(resume={"approved": True}),
+            config=config,
         )
 
         # Resume again to complete
         result = await graph.ainvoke(
-            Command(resume={"approved": True}), config=config,
+            Command(resume={"approved": True}),
+            config=config,
         )
 
         # Now the graph should be complete

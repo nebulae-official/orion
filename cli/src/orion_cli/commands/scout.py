@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -15,7 +15,7 @@ app = typer.Typer()
 
 @app.command("list-trends")
 def list_trends(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """List detected trends."""
@@ -26,7 +26,7 @@ def list_trends(
 
 @app.command()
 def trigger(
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Trigger an immediate trend scan."""
@@ -38,7 +38,7 @@ def trigger(
 @app.command()
 def configure(
     niche: Annotated[str, typer.Argument(help="Niche to activate (tech, gaming, finance)")],
-    token: Annotated[Optional[str], typer.Option(help="JWT token")] = None,
+    token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Configure the active niche for trend scanning."""

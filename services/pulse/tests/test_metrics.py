@@ -118,11 +118,9 @@ class TestEventAggregator:
 
         aggregator = EventAggregator(event_bus, session_factory)
 
-        with patch(
-            "src.services.event_aggregator.EventRepository"
-        ) as MockRepo:
+        with patch("src.services.event_aggregator.EventRepository") as mock_repo:
             repo = AsyncMock()
-            MockRepo.return_value = repo
+            mock_repo.return_value = repo
 
             await aggregator._handle_event(
                 {"_channel": "orion.trend_detected", "topic": "AI News", "source": "rss"}

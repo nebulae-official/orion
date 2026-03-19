@@ -121,9 +121,7 @@ class VisualPrompter:
 
         system_prompt = _SYSTEM_PROMPT.format(style=style)
 
-        visual_cues_text = "\n".join(
-            f"- Scene {i + 1}: {cue}" for i, cue in enumerate(script.visual_cues)
-        )
+        visual_cues_text = "\n".join(f"- Scene {i + 1}: {cue}" for i, cue in enumerate(script.visual_cues))
 
         user_prompt = _USER_PROMPT.format(
             hook=script.hook,

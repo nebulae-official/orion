@@ -24,15 +24,18 @@ class CritiqueScores(BaseModel):
     """Individual critique dimensions for a generated script."""
 
     hook_strength: float = Field(
-        ge=0.0, le=1.0,
+        ge=0.0,
+        le=1.0,
         description="How attention-grabbing the hook is (0-1)",
     )
     value_density: float = Field(
-        ge=0.0, le=1.0,
+        ge=0.0,
+        le=1.0,
         description="How much value is packed into the content (0-1)",
     )
     cta_clarity: float = Field(
-        ge=0.0, le=1.0,
+        ge=0.0,
+        le=1.0,
         description="How clear and actionable the CTA is (0-1)",
     )
 
@@ -42,7 +45,8 @@ class CritiqueResult(BaseModel):
 
     scores: CritiqueScores
     confidence_score: float = Field(
-        ge=0.0, le=1.0,
+        ge=0.0,
+        le=1.0,
         description="Overall confidence score (weighted average of dimensions)",
     )
     feedback: str = Field(
@@ -150,11 +154,7 @@ class CritiqueAgent:
         scores = self._parse_critique(response.content)
 
         # Compute overall confidence as weighted average
-        confidence = (
-            scores.hook_strength * 0.4
-            + scores.value_density * 0.35
-            + scores.cta_clarity * 0.25
-        )
+        confidence = scores.hook_strength * 0.4 + scores.value_density * 0.35 + scores.cta_clarity * 0.25
 
         result = CritiqueResult(
             scores=scores,
@@ -235,9 +235,9 @@ class CritiqueAgent:
         cleaned = raw.strip()
         if cleaned.startswith("```"):
             first_newline = cleaned.index("\n")
-            cleaned = cleaned[first_newline + 1:]
+            cleaned = cleaned[first_newline + 1 :]
         if cleaned.endswith("```"):
-            cleaned = cleaned[:cleaned.rfind("```")]
+            cleaned = cleaned[: cleaned.rfind("```")]
         cleaned = cleaned.strip()
 
         data = json.loads(cleaned)

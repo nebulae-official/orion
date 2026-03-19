@@ -1,7 +1,5 @@
 """Trend API endpoints for the Scout service."""
 
-from __future__ import annotations
-
 import uuid
 from typing import Annotated
 
@@ -16,6 +14,7 @@ from src.providers.base import TrendProvider
 from src.repositories.trend_repo import TrendRepository
 from src.scheduler import fetch_and_process_trends
 from src.schemas import (
+    NicheConfigRequest,
     NicheConfigResponse,
     ScanResultResponse,
     TrendListResponse,
@@ -54,7 +53,7 @@ async def get_niche_config(request: Request) -> NicheConfigResponse:
     return NicheConfigResponse(
         active_niche=active_niche,
         available_niches=list(DEFAULT_NICHE_CONFIGS.keys()),
-        config=config.model_dump() if config else None,
+        config=NicheConfigRequest(**config.model_dump()) if config else None,
     )
 
 

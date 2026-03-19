@@ -18,9 +18,7 @@ class FakeTrendProvider(TrendProvider):
     def __init__(self, trends: list[TrendResult] | None = None) -> None:
         self._trends = trends or []
 
-    async def fetch_trends(
-        self, region: str = "US", limit: int = 20
-    ) -> list[TrendResult]:
+    async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
         return self._trends[:limit]
 
 

@@ -41,48 +41,105 @@ class NicheConfig(BaseModel):
 DEFAULT_NICHE_CONFIGS: dict[str, NicheConfig] = {
     "tech": NicheConfig(
         keywords=[
-            "AI", "artificial intelligence", "machine learning", "startup",
-            "software", "programming", "developer", "cloud", "SaaS", "API",
-            "open source", "cybersecurity", "blockchain", "robotics", "GPU",
+            "AI",
+            "artificial intelligence",
+            "machine learning",
+            "startup",
+            "software",
+            "programming",
+            "developer",
+            "cloud",
+            "SaaS",
+            "API",
+            "open source",
+            "cybersecurity",
+            "blockchain",
+            "robotics",
+            "GPU",
         ],
         excluded_topics=[
-            "celebrity", "gossip", "horoscope", "reality TV",
+            "celebrity",
+            "gossip",
+            "horoscope",
+            "reality TV",
         ],
         min_score=15.0,
         categories=["technology", "software", "AI"],
     ),
     "gaming": NicheConfig(
         keywords=[
-            "game", "gaming", "esports", "PlayStation", "Xbox", "Nintendo",
-            "Steam", "Twitch", "streamer", "GPU", "console", "PC gaming",
-            "indie game", "RPG", "FPS",
+            "game",
+            "gaming",
+            "esports",
+            "PlayStation",
+            "Xbox",
+            "Nintendo",
+            "Steam",
+            "Twitch",
+            "streamer",
+            "GPU",
+            "console",
+            "PC gaming",
+            "indie game",
+            "RPG",
+            "FPS",
         ],
         excluded_topics=[
-            "gambling", "casino", "lottery",
+            "gambling",
+            "casino",
+            "lottery",
         ],
         min_score=15.0,
         categories=["gaming", "esports", "entertainment"],
     ),
     "finance": NicheConfig(
         keywords=[
-            "stock", "market", "crypto", "bitcoin", "ethereum", "investing",
-            "fintech", "banking", "economy", "inflation", "interest rate",
-            "IPO", "earnings", "trading", "DeFi",
+            "stock",
+            "market",
+            "crypto",
+            "bitcoin",
+            "ethereum",
+            "investing",
+            "fintech",
+            "banking",
+            "economy",
+            "inflation",
+            "interest rate",
+            "IPO",
+            "earnings",
+            "trading",
+            "DeFi",
         ],
         excluded_topics=[
-            "scam", "ponzi", "get rich quick",
+            "scam",
+            "ponzi",
+            "get rich quick",
         ],
         min_score=20.0,
         categories=["finance", "investing", "cryptocurrency"],
     ),
     "health": NicheConfig(
         keywords=[
-            "health", "fitness", "nutrition", "mental health", "wellness",
-            "medical", "research", "clinical trial", "FDA", "vaccine",
-            "exercise", "diet", "sleep", "mindfulness", "therapy",
+            "health",
+            "fitness",
+            "nutrition",
+            "mental health",
+            "wellness",
+            "medical",
+            "research",
+            "clinical trial",
+            "FDA",
+            "vaccine",
+            "exercise",
+            "diet",
+            "sleep",
+            "mindfulness",
+            "therapy",
         ],
         excluded_topics=[
-            "miracle cure", "detox cleanse", "anti-vax",
+            "miracle cure",
+            "detox cleanse",
+            "anti-vax",
         ],
         min_score=15.0,
         categories=["health", "fitness", "wellness"],
@@ -97,9 +154,7 @@ _EXCLUSION_PENALTY = 30.0
 class NicheFilter:
     """Filters and adjusts trend scores based on niche configuration."""
 
-    def filter_trends(
-        self, trends: list[TrendResult], config: NicheConfig
-    ) -> list[TrendResult]:
+    def filter_trends(self, trends: list[TrendResult], config: NicheConfig) -> list[TrendResult]:
         """Apply niche filtering to a list of trends.
 
         1. Boost score for keyword matches.
@@ -123,16 +178,12 @@ class NicheFilter:
             adjusted_score = trend.score
 
             # Boost for keyword matches
-            keyword_matches = sum(
-                1 for kw in keywords_lower if kw in topic_lower
-            )
+            keyword_matches = sum(1 for kw in keywords_lower if kw in topic_lower)
             if keyword_matches > 0:
                 adjusted_score += _KEYWORD_BOOST * keyword_matches
 
             # Penalty for excluded topic matches
-            exclusion_matches = sum(
-                1 for ex in excluded_lower if ex in topic_lower
-            )
+            exclusion_matches = sum(1 for ex in excluded_lower if ex in topic_lower)
             if exclusion_matches > 0:
                 adjusted_score -= _EXCLUSION_PENALTY * exclusion_matches
 

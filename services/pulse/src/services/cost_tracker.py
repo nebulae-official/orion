@@ -21,10 +21,10 @@ logger = structlog.get_logger(__name__)
 
 # Default cost rates per unit (configurable via settings in production)
 _COST_RATES: dict[str, float] = {
-    CostCategory.llm_tokens: 0.00003,        # per token
-    CostCategory.image_generation: 0.02,      # per image
-    CostCategory.tts_characters: 0.000015,    # per character
-    CostCategory.video_clips: 0.05,           # per clip
+    CostCategory.llm_tokens: 0.00003,  # per token
+    CostCategory.image_generation: 0.02,  # per image
+    CostCategory.tts_characters: 0.000015,  # per character
+    CostCategory.video_clips: 0.05,  # per clip
 }
 
 # Channels that carry cost-relevant events

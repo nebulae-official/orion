@@ -176,9 +176,7 @@ class ScriptGenerator:
             for i, hook in enumerate(similar_hooks, 1):
                 hook_text = hook.get("hook_text", "")
                 score = hook.get("engagement_score", 0.0)
-                lines.append(
-                    f"{i}. \"{hook_text}\" (engagement: {score:.2f})"
-                )
+                lines.append(f'{i}. "{hook_text}" (engagement: {score:.2f})')
 
             await logger.ainfo(
                 "few_shot_examples_loaded",

@@ -1,8 +1,7 @@
 """Tests for output formatting."""
 
-from io import StringIO
 
-from orion_cli.output import format_output, OutputFormat
+from orion_cli.output import OutputFormat, format_output
 
 
 def test_json_format() -> None:
