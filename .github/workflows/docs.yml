@@ -4,10 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs-site/**'
+      - 'docs/**'
+      - 'zensical.toml'
   workflow_dispatch:
 
 permissions:
+  contents: read
   pages: write
   id-token: write
 
@@ -20,22 +22,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - uses: astral-sh/setup-uv@v7
+
+      - name: Set up UV
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - run: uv pip install --system mkdocs-material pymdownx-extensions
-      - run: cd docs-site && mkdocs build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Install dependencies
+        run: uv sync --group docs
+
+      - name: Build docs
+        run: uv run --group docs zensical build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-site/site
+          path: site/
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
