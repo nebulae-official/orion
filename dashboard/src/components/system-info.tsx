@@ -27,6 +27,8 @@ interface SystemInfoData {
 }
 
 const REFRESH_INTERVAL = 5_000;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2_000;
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -76,7 +78,7 @@ export function SystemInfo(): React.ReactElement {
   const [secondsAgo, setSecondsAgo] = useState(0);
   const lastRefreshRef = useRef<Date>(new Date());
 
-  const fetchInfo = useCallback(async (): Promise<void> => {
+  const fetchInfo = useCallback(async (retries = 0): Promise<void> => {
     if (DEMO_MODE) {
       setInfo(demoSystemInfo);
       setError(null);
@@ -85,8 +87,9 @@ export function SystemInfo(): React.ReactElement {
       setSecondsAgo(0);
       return;
     }
+    const url = `${GATEWAY_URL}/api/v1/system/info`;
     try {
-      const response = await fetch(`${GATEWAY_URL}/api/v1/system/info`, {
+      const response = await fetch(url, {
         cache: "no-store",
       });
       if (response.ok) {
@@ -94,10 +97,20 @@ export function SystemInfo(): React.ReactElement {
         setInfo(data);
         setError(null);
       } else {
-        setError("System info unavailable");
+        console.error(`System info endpoint returned ${response.status} from ${url}`);
+        if (retries < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+          return fetchInfo(retries + 1);
+        }
+        setError(`Unable to reach gateway at ${url} (HTTP ${response.status})`);
       }
-    } catch {
-      setError("Failed to fetch system info");
+    } catch (err) {
+      console.error(`Failed to fetch system info from ${url}:`, err);
+      if (retries < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+        return fetchInfo(retries + 1);
+      }
+      setError(`Unable to reach gateway at ${url}`);
     } finally {
       setLoading(false);
       lastRefreshRef.current = new Date();
@@ -154,6 +167,9 @@ export function SystemInfo(): React.ReactElement {
         <div className="flex flex-col items-center py-6 text-center">
           <Server className="mb-2 h-10 w-10 text-text-dim" />
           <p className="text-sm text-text-muted">{error}</p>
+          <p className="mt-1 text-xs text-text-dim">
+            Check that the gateway is running and accessible.
+          </p>
         </div>
       ) : loading ? (
         <div className="flex items-center justify-center py-8">

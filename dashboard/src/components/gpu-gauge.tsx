@@ -173,6 +173,7 @@ export function GpuGauge(): React.ReactElement {
   const [gpus, setGpus] = useState<GpuInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noGpu, setNoGpu] = useState(false);
   const [secondsAgo, setSecondsAgo] = useState(0);
   const lastRefreshRef = useRef<Date>(new Date());
 
@@ -180,6 +181,7 @@ export function GpuGauge(): React.ReactElement {
     if (DEMO_MODE) {
       setGpus(demoGpuInfo);
       setError(null);
+      setNoGpu(false);
       setLoading(false);
       lastRefreshRef.current = new Date();
       setSecondsAgo(0);
@@ -193,11 +195,21 @@ export function GpuGauge(): React.ReactElement {
         const data = (await response.json()) as GpuResponse;
         setGpus(data.gpus ?? []);
         setError(null);
+        setNoGpu(false);
+      } else if (response.status === 503) {
+        // nvidia-smi not available — no GPU on this host
+        setGpus([]);
+        setError(null);
+        setNoGpu(true);
       } else {
+        console.error(`GPU endpoint returned ${response.status}`);
         setError("GPU info unavailable");
+        setNoGpu(false);
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch GPU info:", err);
       setError("Failed to fetch GPU info");
+      setNoGpu(false);
     } finally {
       setLoading(false);
       lastRefreshRef.current = new Date();
@@ -261,6 +273,14 @@ export function GpuGauge(): React.ReactElement {
       ) : loading ? (
         <div className="flex items-center justify-center py-8">
           <RefreshCw className="h-6 w-6 animate-spin text-text-dim" />
+        </div>
+      ) : noGpu ? (
+        <div className="flex flex-col items-center py-6 text-center">
+          <Cpu className="mb-2 h-10 w-10 text-text-dim" />
+          <p className="text-sm font-medium text-text-muted">No GPU detected</p>
+          <p className="mt-1 text-xs text-text-dim">
+            No CUDA-capable GPU found on this host. GPU metrics will appear here when a supported device is available.
+          </p>
         </div>
       ) : gpus.length > 0 ? (
         <div className={cn(
