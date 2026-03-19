@@ -13,7 +13,7 @@ interface DependencyChecks {
 interface ServiceStatus {
   name: string;
   displayName: string;
-  status: "healthy" | "unhealthy" | "checking";
+  status: "healthy" | "unhealthy" | "checking" | "auth_required";
   uptime: string | null;
   queueSize: number | null;
   lastChecked: string | null;
@@ -47,15 +47,20 @@ export function ServiceHealth(): React.ReactElement {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
   const lastRefreshRef = useRef<Date>(new Date());
 
   const checkServices = useCallback(async (): Promise<void> => {
     setRefreshing(true);
 
-    const [statusData, gatewayData] = await Promise.all([
+    const [statusResult, gatewayData] = await Promise.all([
       fetchSystemStatus(),
       fetchGatewayHealth(),
     ]);
+
+    const statusData = statusResult.data;
+    const authFailed = statusResult.authFailed;
+    setAuthRequired(authFailed);
 
     const updated = SERVICES.map((svc) => {
       if (svc.name === "gateway") {
@@ -63,6 +68,19 @@ export function ServiceHealth(): React.ReactElement {
           name: svc.name,
           displayName: svc.displayName,
           status: gatewayData?.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
+          uptime: null,
+          queueSize: null,
+          lastChecked: new Date().toISOString(),
+          checks: null,
+        };
+      }
+
+      // If auth failed, show auth_required instead of unhealthy
+      if (authFailed) {
+        return {
+          name: svc.name,
+          displayName: svc.displayName,
+          status: "auth_required" as const,
           uptime: null,
           queueSize: null,
           lastChecked: new Date().toISOString(),
@@ -159,7 +177,8 @@ export function ServiceHealth(): React.ReactElement {
                   "inline-block h-3 w-3 rounded-full",
                   svc.status === "healthy" && "bg-success",
                   svc.status === "unhealthy" && "bg-danger",
-                  svc.status === "checking" && "animate-pulse bg-warning"
+                  svc.status === "checking" && "animate-pulse bg-warning",
+                  svc.status === "auth_required" && "bg-text-dim"
                 )}
               />
               <div>
@@ -189,19 +208,29 @@ export function ServiceHealth(): React.ReactElement {
                   svc.status === "unhealthy" &&
                     "bg-danger-surface text-danger-light",
                   svc.status === "checking" &&
-                    "bg-warning-surface text-warning-light"
+                    "bg-warning-surface text-warning-light",
+                  svc.status === "auth_required" &&
+                    "bg-surface-elevated text-text-dim"
                 )}
               >
                 {svc.status === "checking"
                   ? "Checking"
                   : svc.status === "healthy"
                     ? "Healthy"
-                    : "Unhealthy"}
+                    : svc.status === "auth_required"
+                      ? "Auth Required"
+                      : "Unhealthy"}
               </span>
             </div>
           </div>
         ))}
       </div>
+
+      {authRequired && (
+        <p className="mt-4 text-xs text-text-muted">
+          Sign in for full service status
+        </p>
+      )}
 
       <p className="mt-4 text-xs text-text-dim">
         Auto-refreshes every 5 seconds
@@ -215,7 +244,8 @@ export function InfrastructureStatus(): React.ReactElement {
   const [services, setServices] = useState<ServiceStatus[]>([]);
 
   const fetchStatus = useCallback(async (): Promise<void> => {
-    const statusData = await fetchSystemStatus();
+    const statusResult = await fetchSystemStatus();
+    const statusData = statusResult.data;
     if (!statusData?.services) return;
 
     const updated = statusData.services.map((svcData) => ({

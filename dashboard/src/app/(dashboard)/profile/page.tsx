@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { UserCircle } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
+import { getSession } from "@/lib/auth";
 import { DEMO_MODE } from "@/lib/config";
 import { demoUser } from "@/lib/demo-data";
 import type { User } from "@/types/api";
@@ -24,6 +25,7 @@ export default async function ProfilePage(): Promise<React.ReactElement> {
 
   let profile: UserProfile | null = null;
   let fetchError = false;
+  let usingCachedProfile = false;
 
   if (DEMO_MODE) {
     profile = {
@@ -42,6 +44,15 @@ export default async function ProfilePage(): Promise<React.ReactElement> {
       );
     } catch {
       fetchError = true;
+
+      // Fall back to user data from cookie
+      const session = await getSession();
+      if (session.user) {
+        profile = {
+          ...session.user,
+        };
+        usingCachedProfile = true;
+      }
     }
   }
 
@@ -61,13 +72,19 @@ export default async function ProfilePage(): Promise<React.ReactElement> {
         </div>
       </div>
 
-      {fetchError && (
+      {fetchError && !usingCachedProfile && (
         <div className="mb-6 rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
           Unable to load profile data. Please try again later.
         </div>
       )}
 
-      {profile && <ProfileEditor profile={profile} />}
+      {usingCachedProfile && (
+        <div className="mb-6 rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
+          Showing cached profile. Some features may be unavailable.
+        </div>
+      )}
+
+      {profile && <ProfileEditor profile={profile} readOnly={usingCachedProfile} />}
     </div>
   );
 }

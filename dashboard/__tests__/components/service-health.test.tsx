@@ -56,15 +56,18 @@ describe("ServiceHealth", () => {
   it("shows Healthy status for healthy services", async () => {
     mockFetchGatewayHealth.mockResolvedValue({ status: "ok" });
     mockFetchSystemStatus.mockResolvedValue({
-      status: "ok",
-      services: [
-        { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
-      ],
+      data: {
+        status: "ok",
+        services: [
+          { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
+        ],
+      },
+      authFailed: false,
     });
 
     render(<ServiceHealth />);
@@ -77,7 +80,7 @@ describe("ServiceHealth", () => {
 
   it("shows Unhealthy status when server actions return null", async () => {
     mockFetchGatewayHealth.mockResolvedValue(null);
-    mockFetchSystemStatus.mockResolvedValue(null);
+    mockFetchSystemStatus.mockResolvedValue({ data: null, authFailed: false });
 
     render(<ServiceHealth />);
 
@@ -87,18 +90,35 @@ describe("ServiceHealth", () => {
     });
   });
 
+  it("shows Auth Required when auth fails", async () => {
+    mockFetchGatewayHealth.mockResolvedValue({ status: "ok" });
+    mockFetchSystemStatus.mockResolvedValue({ data: null, authFailed: true });
+
+    render(<ServiceHealth />);
+
+    await waitFor(() => {
+      const authBadges = screen.getAllByText("Auth Required");
+      expect(authBadges.length).toBe(6);
+      expect(screen.getAllByText("Healthy").length).toBe(1);
+      expect(screen.getByText("Sign in for full service status")).toBeInTheDocument();
+    });
+  });
+
   it("shows Unhealthy status when gateway is down", async () => {
     mockFetchGatewayHealth.mockResolvedValue(null);
     mockFetchSystemStatus.mockResolvedValue({
-      status: "ok",
-      services: [
-        { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
-        { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
-      ],
+      data: {
+        status: "ok",
+        services: [
+          { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
+          { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
+        ],
+      },
+      authFailed: false,
     });
 
     render(<ServiceHealth />);

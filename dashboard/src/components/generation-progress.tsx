@@ -217,7 +217,7 @@ export function GenerationProgress(): React.ReactElement {
     }
   }, []);
 
-  const { isConnected } = useWebSocket({
+  const { isConnected, status: wsStatus } = useWebSocket({
     url: DEMO_MODE ? "" : gatewayWsUrl,
     onMessage: handleMessage,
     enabled: !DEMO_MODE,
@@ -231,13 +231,25 @@ export function GenerationProgress(): React.ReactElement {
         <div
           className={cn(
             "h-2 w-2 rounded-full",
-            (isConnected || DEMO_MODE) ? "bg-success" : "animate-pulse bg-danger"
+            (isConnected || DEMO_MODE) ? "bg-success" : wsStatus === "disconnected" ? "bg-text-dim" : "animate-pulse bg-danger"
           )}
         />
         <span className="text-sm text-text-muted">
-          {DEMO_MODE ? "Live (Demo)" : isConnected ? "Live" : "Reconnecting..."}
+          {DEMO_MODE
+            ? "Live (Demo)"
+            : isConnected
+              ? "Live"
+              : wsStatus === "disconnected"
+                ? "WebSocket unavailable"
+                : "Reconnecting..."}
         </span>
       </div>
+
+      {!DEMO_MODE && wsStatus === "disconnected" && (
+        <div className="rounded-lg border border-border bg-surface-elevated p-3 text-xs text-text-muted">
+          Live updates unavailable. Refresh the page to retry.
+        </div>
+      )}
 
       {errors.length > 0 && (
         <div className="rounded-lg border border-danger/30 bg-danger-surface p-4">

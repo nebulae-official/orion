@@ -43,8 +43,10 @@ const TIMEZONES = [
 
 export function ProfileEditor({
   profile,
+  readOnly = false,
 }: {
   profile: UserProfile;
+  readOnly?: boolean;
 }): React.ReactElement {
   // Profile form state
   const [name, setName] = useState(profile.name);
@@ -178,12 +180,12 @@ export function ProfileEditor({
       </div>
 
       {/* Edit Forms */}
-      <div className="space-y-6 lg:col-span-2">
+      <div className={cn("space-y-6 lg:col-span-2", readOnly && "pointer-events-none opacity-60")}>
         {/* Edit Profile */}
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <CircleUser className="h-5 w-5 text-primary" />
-            Edit Profile
+            {readOnly ? "Profile Details" : "Edit Profile"}
           </h3>
 
           <form onSubmit={handleProfileSubmit} className="space-y-4">

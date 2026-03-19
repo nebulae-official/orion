@@ -20,8 +20,11 @@ export interface UseWebSocketOptions {
   enabled?: boolean;
 }
 
+export type WebSocketStatus = "connecting" | "connected" | "reconnecting" | "disconnected";
+
 export interface UseWebSocketReturn {
   isConnected: boolean;
+  status: WebSocketStatus;
   lastMessage: WebSocketMessage | null;
   send: (data: unknown) => void;
   disconnect: () => void;
@@ -35,11 +38,12 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
     onOpen,
     onClose,
     reconnectInterval = 3000,
-    maxReconnectAttempts = 10,
+    maxReconnectAttempts = 5,
     enabled = true,
   } = options;
 
   const [isConnected, setIsConnected] = useState(false);
+  const [status, setStatus] = useState<WebSocketStatus>("connecting");
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectCountRef = useRef(0);
@@ -70,6 +74,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
       ws.onopen = () => {
         if (!mountedRef.current) return;
         setIsConnected(true);
+        setStatus("connected");
         reconnectCountRef.current = 0;
         backoffRef.current = 0;
         onOpenRef.current?.();
@@ -97,6 +102,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
 
         // Auto-reconnect with exponential backoff + jitter
         if (reconnectCountRef.current < maxReconnectAttempts) {
+          setStatus("reconnecting");
           const delay = Math.min(
             reconnectInterval * Math.pow(2, backoffRef.current),
             30000
@@ -104,11 +110,14 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
           reconnectCountRef.current += 1;
           backoffRef.current += 1;
           reconnectTimerRef.current = setTimeout(connect, delay);
+        } else {
+          setStatus("disconnected");
         }
       };
     } catch {
       // Connection failed; retry with exponential backoff + jitter
       if (reconnectCountRef.current < maxReconnectAttempts) {
+        setStatus("reconnecting");
         const delay = Math.min(
           reconnectInterval * Math.pow(2, backoffRef.current),
           30000
@@ -116,6 +125,8 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         reconnectCountRef.current += 1;
         backoffRef.current += 1;
         reconnectTimerRef.current = setTimeout(connect, delay);
+      } else {
+        setStatus("disconnected");
       }
     }
   }, [url, reconnectInterval, maxReconnectAttempts, enabled]);
@@ -148,5 +159,5 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
     };
   }, [connect]);
 
-  return { isConnected, lastMessage, send, disconnect };
+  return { isConnected, status, lastMessage, send, disconnect };
 }

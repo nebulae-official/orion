@@ -171,16 +171,29 @@ export interface SystemStatusResponse {
   services: SystemStatusService[];
 }
 
-export async function fetchSystemStatus(): Promise<SystemStatusResponse | null> {
+export async function fetchSystemStatus(): Promise<{
+  data: SystemStatusResponse | null;
+  authFailed: boolean;
+}> {
   if (DEMO_MODE) {
-    return demoSystemStatus;
+    return { data: demoSystemStatus, authFailed: false };
   }
   try {
+    const token = await getAuthToken();
+    if (!token) {
+      return { data: null, authFailed: true };
+    }
     const response = await authenticatedFetch("/status");
-    if (!response.ok) return null;
-    return (await response.json()) as SystemStatusResponse;
+    if (response.status === 401 || response.status === 403) {
+      return { data: null, authFailed: true };
+    }
+    if (!response.ok) return { data: null, authFailed: false };
+    return {
+      data: (await response.json()) as SystemStatusResponse,
+      authFailed: false,
+    };
   } catch {
-    return null;
+    return { data: null, authFailed: false };
   }
 }
 
