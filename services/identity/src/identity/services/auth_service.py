@@ -6,30 +6,28 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
+import bcrypt
 import structlog
 from fastapi import HTTPException
 from orion_common.db.models import User
-from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..repositories import user_repo
 
 logger = structlog.get_logger()
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
-
 # Refresh tokens expire after 30 days by default.
 REFRESH_TOKEN_TTL_DAYS = 30
 
 
 def hash_password(password: str) -> str:
-    """Hash a plaintext password using bcrypt (cost 12)."""
-    return _pwd_context.hash(password)
+    """Hash password with bcrypt cost factor 12."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """Verify a plaintext password against a bcrypt hash."""
-    return _pwd_context.verify(password, password_hash)
+    """Verify password against bcrypt hash."""
+    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
 def generate_refresh_token() -> tuple[str, str]:
