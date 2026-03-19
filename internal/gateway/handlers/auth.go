@@ -98,11 +98,6 @@ type identityRefreshResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-// identityErrorResponse is the error envelope from the identity service.
-type identityErrorResponse struct {
-	Detail string `json:"detail"`
-}
-
 // HTTPClient is an interface for making HTTP requests (enables testing).
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
