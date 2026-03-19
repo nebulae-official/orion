@@ -154,7 +154,7 @@ export function SystemInfo(): React.ReactElement {
             Updated {secondsAgo}s ago
           </span>
           <button
-            onClick={fetchInfo}
+            onClick={() => fetchInfo()}
             className="rounded-md p-1 text-text-dim transition-colors hover:bg-surface-hover hover:text-text-secondary"
             title="Refresh"
           >
