@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
 import {
   Check,
+  CheckCircle,
   Loader2,
   AlertCircle,
   RotateCcw,
@@ -15,6 +16,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { ApiError } from "@/lib/api-client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,6 +47,7 @@ interface ServiceConfig {
   provider: string;
   model: string;
   status: "connected" | "disconnected" | "checking";
+  errorMessage?: string;
   params: ModelParams;
 }
 
@@ -125,25 +128,47 @@ export function ProviderConfig(): React.ReactElement {
   const [expandedParams, setExpandedParams] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const checkStatus = useCallback(async (service: string): Promise<"connected" | "disconnected"> => {
+  const checkStatus = useCallback(async (service: string): Promise<{ status: "connected" | "disconnected"; error?: string }> => {
     if (DEMO_MODE) {
-      return "connected";
+      return { status: "connected" };
     }
     try {
       await apiClient.get(`/api/v1/providers/${service}/status`);
-      return "connected";
-    } catch {
-      return "disconnected";
+      return { status: "connected" };
+    } catch (err: unknown) {
+      let errorMessage = "Connection failed";
+      if (err instanceof ApiError) {
+        if (err.status === 404) {
+          errorMessage = "Model not found";
+        } else if (err.status === 401 || err.status === 403) {
+          errorMessage = "Authentication failed";
+        } else if (err.status === 408) {
+          errorMessage = "Connection timed out";
+        } else if (err.status === 503) {
+          errorMessage = "Service unavailable";
+        } else {
+          errorMessage = err.message;
+        }
+      } else if (err instanceof Error) {
+        if (err.message.includes("fetch") || err.message.includes("ECONNREFUSED")) {
+          errorMessage = "Service not running";
+        } else if (err.message.includes("timeout") || err.message.includes("ETIMEDOUT")) {
+          errorMessage = "Connection timed out";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      return { status: "disconnected", error: errorMessage };
     }
   }, []);
 
   useEffect(() => {
     async function loadStatuses(): Promise<void> {
       const updated = await Promise.all(
-        configs.map(async (c) => ({
-          ...c,
-          status: await checkStatus(c.service),
-        }))
+        configs.map(async (c) => {
+          const result = await checkStatus(c.service);
+          return { ...c, status: result.status, errorMessage: result.error };
+        })
       );
       setConfigs(updated);
     }
@@ -189,9 +214,9 @@ export function ProviderConfig(): React.ReactElement {
 
     if (result.success) {
       setMessage({ type: "success", text: `${config.label} configuration saved.` });
-      const status = await checkStatus(service);
+      const { status, error } = await checkStatus(service);
       setConfigs((prev) =>
-        prev.map((c) => (c.service === service ? { ...c, status } : c))
+        prev.map((c) => (c.service === service ? { ...c, status, errorMessage: error } : c))
       );
     } else {
       setMessage({ type: "error", text: result.error ?? "Failed to save configuration." });
@@ -211,24 +236,21 @@ export function ProviderConfig(): React.ReactElement {
       // Simulate a connection test
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setConfigs((prev) =>
-        prev.map((c) => (c.service === service ? { ...c, status: "connected" } : c))
+        prev.map((c) => (c.service === service ? { ...c, status: "connected", errorMessage: undefined } : c))
       );
       setMessage({ type: "success", text: `${config.label} connection successful.` });
       setTesting(null);
       return;
     }
 
-    try {
-      await apiClient.get(`/api/v1/providers/${service}/status`);
-      setConfigs((prev) =>
-        prev.map((c) => (c.service === service ? { ...c, status: "connected" } : c))
-      );
+    const { status, error } = await checkStatus(service);
+    setConfigs((prev) =>
+      prev.map((c) => (c.service === service ? { ...c, status, errorMessage: error } : c))
+    );
+    if (status === "connected") {
       setMessage({ type: "success", text: `${config.label} connection successful.` });
-    } catch {
-      setConfigs((prev) =>
-        prev.map((c) => (c.service === service ? { ...c, status: "disconnected" } : c))
-      );
-      setMessage({ type: "error", text: `${config.label} connection failed. Check provider is running.` });
+    } else {
+      setMessage({ type: "error", text: `${config.label} connection failed: ${error ?? "Unknown error"}.` });
     }
     setTesting(null);
   }
@@ -238,10 +260,10 @@ export function ProviderConfig(): React.ReactElement {
     setMessage({ type: "success", text: "All provider configurations reset to defaults." });
     // Re-check statuses
     Promise.all(
-      DEFAULT_CONFIGS.map(async (c) => ({
-        ...c,
-        status: await checkStatus(c.service),
-      }))
+      DEFAULT_CONFIGS.map(async (c) => {
+        const result = await checkStatus(c.service);
+        return { ...c, status: result.status, errorMessage: result.error };
+      })
     ).then(setConfigs);
   }
 
@@ -482,6 +504,20 @@ export function ProviderConfig(): React.ReactElement {
                     Test
                   </button>
                 </div>
+
+                {/* Connection status message */}
+                {config.status === "connected" && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-success">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    <span>Connected</span>
+                  </div>
+                )}
+                {config.status === "disconnected" && config.errorMessage && (
+                  <div className="mt-2 flex items-center gap-2 rounded-lg bg-danger-surface/50 px-3 py-2 text-xs text-danger-light">
+                    <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span>{config.errorMessage}</span>
+                  </div>
+                )}
               </div>
             </div>
           );
