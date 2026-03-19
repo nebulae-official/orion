@@ -32,6 +32,13 @@ func NewServiceProxy(target string, internalToken string) (http.Handler, error) 
 			req.Header.Set("X-Request-ID", reqID)
 		}
 
+		// Forward authenticated user identity to backend services.
+		if user, ok := middleware.GetUser(req.Context()); ok {
+			req.Header.Set("X-User-ID", user.UserID)
+			req.Header.Set("X-User-Role", user.Role)
+			req.Header.Set("X-User-Email", user.Email)
+		}
+
 		// Inject internal service-to-service authentication token.
 		if internalToken != "" {
 			req.Header.Set("X-Internal-Token", internalToken)

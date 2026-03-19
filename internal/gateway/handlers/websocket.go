@@ -160,7 +160,8 @@ func HandleWebSocket(hub *Hub, rdb *redis.Client, jwtSecret string, allowedOrigi
 			var identity map[string]string
 			if json.Unmarshal([]byte(val), &identity) == nil {
 				slog.Info("ws_ticket_authenticated",
-					"username", identity["username"],
+					"user_id", identity["user_id"],
+					"name", identity["name"],
 					"role", identity["role"],
 					"remote_addr", r.RemoteAddr,
 				)

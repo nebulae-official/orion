@@ -64,6 +64,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 		"editor":    cfg.EditorURL,
 		"pulse":     cfg.PulseURL,
 		"publisher": cfg.PublisherURL,
+		"identity":  cfg.IdentityURL,
 	}
 
 	// Aggregated status endpoint — checks all downstream services concurrently.
@@ -81,15 +82,28 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating auth handler: %w", err)
 	}
+
+	oauthHandler := handlers.NewOAuthHandler(cfg, rdb)
+
 	if rdb != nil {
 		authRL := middleware.RateLimit(rdb, middleware.RateLimitConfig{
 			Group: "auth", Limit: 5, Window: time.Minute,
 		})
 		r.With(authRL).Post("/api/v1/auth/login", authHandler.Login())
+		r.With(authRL).Post("/api/v1/auth/register", authHandler.Register())
 		r.With(authRL).Post("/api/v1/auth/refresh", authHandler.RefreshToken(blacklist))
+		r.With(authRL).Get("/api/v1/auth/oauth/github", oauthHandler.GitHubInitiate())
+		r.With(authRL).Get("/api/v1/auth/oauth/github/callback", oauthHandler.GitHubCallback())
+		r.With(authRL).Get("/api/v1/auth/oauth/google", oauthHandler.GoogleInitiate())
+		r.With(authRL).Get("/api/v1/auth/oauth/google/callback", oauthHandler.GoogleCallback())
 	} else {
 		r.Post("/api/v1/auth/login", authHandler.Login())
+		r.Post("/api/v1/auth/register", authHandler.Register())
 		r.Post("/api/v1/auth/refresh", authHandler.RefreshToken(blacklist))
+		r.Get("/api/v1/auth/oauth/github", oauthHandler.GitHubInitiate())
+		r.Get("/api/v1/auth/oauth/github/callback", oauthHandler.GitHubCallback())
+		r.Get("/api/v1/auth/oauth/google", oauthHandler.GoogleInitiate())
+		r.Get("/api/v1/auth/oauth/google/callback", oauthHandler.GoogleCallback())
 	}
 
 	// Logout endpoint (protected)

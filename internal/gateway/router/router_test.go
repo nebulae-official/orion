@@ -37,6 +37,7 @@ func testConfig(backends map[string]string, redisAddr string) config.Config {
 		AdminUsername:   "admin",
 		AdminPassword:  "secret",
 		AdminEmail:     "admin@test.local",
+		IdentityURL:    get("identity"),
 		ScoutURL:       get("scout"),
 		DirectorURL:    get("director"),
 		MediaURL:       get("media"),
@@ -72,11 +73,114 @@ func newServiceStub(t *testing.T, name string) *httptest.Server {
 	return srv
 }
 
+// newIdentityStub creates a mock identity service for auth tests.
+func newIdentityStub(t *testing.T) *httptest.Server {
+	t.Helper()
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/internal/users/authenticate", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"detail":"bad request"}`, http.StatusBadRequest)
+			return
+		}
+		if req.Email == "admin@test.local" && req.Password == "secret" {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]string{
+				"user_id":       "00000000-0000-0000-0000-000000000002",
+				"email":         "admin@test.local",
+				"role":          "admin",
+				"name":          "Admin",
+				"avatar_url":    "",
+				"refresh_token": "rt-test-token-123",
+			})
+			return
+		}
+		http.Error(w, `{"detail":"invalid credentials"}`, http.StatusUnauthorized)
+	})
+
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+			Name     string `json:"name"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"detail":"bad request"}`, http.StatusBadRequest)
+			return
+		}
+		if req.Email == "exists@test.local" {
+			http.Error(w, `{"detail":"conflict"}`, http.StatusConflict)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"id":    "00000000-0000-0000-0000-000000000099",
+			"email": req.Email,
+			"name":  req.Name,
+			"role":  "editor",
+		})
+	})
+
+	mux.HandleFunc("/internal/tokens/refresh", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			RefreshToken string `json:"refresh_token"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"detail":"bad request"}`, http.StatusBadRequest)
+			return
+		}
+		if req.RefreshToken == "rt-test-token-123" {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"user_id":       "00000000-0000-0000-0000-000000000002",
+				"email":         "admin@test.local",
+				"role":          "admin",
+				"name":          "Admin",
+				"refresh_token": "rt-test-token-456",
+			})
+			return
+		}
+		http.Error(w, `{"detail":"invalid token"}`, http.StatusUnauthorized)
+	})
+
+	mux.HandleFunc("/internal/tokens/revoke", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"message":"revoked"}`))
+	})
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status":  "ok",
+			"service": "identity",
+		})
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"service": "identity",
+			"path":    r.URL.Path,
+		})
+	})
+
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	return srv
+}
+
 // setupRouter creates a full router with miniredis and stubbed services.
 func setupRouter(t *testing.T) (*httptest.Server, config.Config) {
 	t.Helper()
 
 	mr := miniredis.RunT(t)
+
+	identityStub := newIdentityStub(t)
 
 	stubs := make(map[string]*httptest.Server)
 	backends := make(map[string]string)
@@ -85,6 +189,7 @@ func setupRouter(t *testing.T) (*httptest.Server, config.Config) {
 		stubs[svc] = s
 		backends[svc] = s.URL
 	}
+	backends["identity"] = identityStub.URL
 
 	cfg := testConfig(backends, mr.Addr())
 	hub := handlers.NewHub()
@@ -105,13 +210,13 @@ func setupRouter(t *testing.T) (*httptest.Server, config.Config) {
 func generateTestToken() string {
 	now := time.Now()
 	claims := jwt.MapClaims{
-		"sub":      "admin",
-		"jti":      fmt.Sprintf("test-%d", now.UnixNano()),
-		"username": "admin",
-		"email":    "admin@test.local",
-		"role":     "admin",
-		"iat":      now.Unix(),
-		"exp":      now.Add(24 * time.Hour).Unix(),
+		"sub":   "00000000-0000-0000-0000-000000000002",
+		"jti":   fmt.Sprintf("test-%d", now.UnixNano()),
+		"name":  "Admin",
+		"email": "admin@test.local",
+		"role":  "admin",
+		"iat":   now.Unix(),
+		"exp":   now.Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	s, _ := token.SignedString([]byte(testJWTSecret))
@@ -222,7 +327,7 @@ func TestRouter_LoginAndAuthFlow(t *testing.T) {
 
 	// Step 1: Login with valid credentials
 	loginBody, _ := json.Marshal(map[string]string{
-		"username": "admin",
+		"email":    "admin@test.local",
 		"password": "secret",
 	})
 	resp, err := http.Post(srv.URL+"/api/v1/auth/login", "application/json", bytes.NewReader(loginBody))
@@ -236,13 +341,15 @@ func TestRouter_LoginAndAuthFlow(t *testing.T) {
 	}
 
 	var authResp struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int    `json:"expires_in"`
-		User        struct {
-			Username string `json:"username"`
-			Email    string `json:"email"`
-			Role     string `json:"role"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+		TokenType    string `json:"token_type"`
+		ExpiresIn    int    `json:"expires_in"`
+		User         struct {
+			ID    string `json:"id"`
+			Email string `json:"email"`
+			Name  string `json:"name"`
+			Role  string `json:"role"`
 		} `json:"user"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
@@ -252,11 +359,20 @@ func TestRouter_LoginAndAuthFlow(t *testing.T) {
 	if authResp.AccessToken == "" {
 		t.Fatal("expected non-empty access_token")
 	}
+	if authResp.RefreshToken == "" {
+		t.Fatal("expected non-empty refresh_token")
+	}
 	if authResp.TokenType != "Bearer" {
 		t.Errorf("want token_type=Bearer, got %q", authResp.TokenType)
 	}
-	if authResp.User.Username != "admin" {
-		t.Errorf("want username=admin, got %q", authResp.User.Username)
+	if authResp.User.Email != "admin@test.local" {
+		t.Errorf("want email=admin@test.local, got %q", authResp.User.Email)
+	}
+	if authResp.User.Name != "Admin" {
+		t.Errorf("want name=Admin, got %q", authResp.User.Name)
+	}
+	if authResp.ExpiresIn != 900 {
+		t.Errorf("want expires_in=900, got %d", authResp.ExpiresIn)
 	}
 
 	// Step 2: Use the token to access a protected proxy endpoint
@@ -274,7 +390,7 @@ func TestRouter_LoginAndAuthFlow(t *testing.T) {
 
 	// Step 3: Login with invalid credentials should fail
 	badLogin, _ := json.Marshal(map[string]string{
-		"username": "admin",
+		"email":    "admin@test.local",
 		"password": "wrong",
 	})
 	badResp, err := http.Post(srv.URL+"/api/v1/auth/login", "application/json", bytes.NewReader(badLogin))
@@ -408,7 +524,7 @@ func TestRouter_WebSocketTicketFlow(t *testing.T) {
 
 	// Step 1: Login to get a token
 	loginBody, _ := json.Marshal(map[string]string{
-		"username": "admin",
+		"email":    "admin@test.local",
 		"password": "secret",
 	})
 	resp, err := http.Post(srv.URL+"/api/v1/auth/login", "application/json", bytes.NewReader(loginBody))

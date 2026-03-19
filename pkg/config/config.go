@@ -34,6 +34,16 @@ type Config struct {
 	AdminPassword string
 	AdminEmail    string
 
+	// Identity service
+	IdentityURL string
+
+	// OAuth
+	GitHubClientID     string
+	GitHubClientSecret string
+	GoogleClientID     string
+	GoogleClientSecret string
+	OAuthRedirectBase  string
+
 	// Security
 	InternalToken  string
 	AllowedOrigins []string
@@ -68,6 +78,14 @@ func Load() Config {
 		AdminUsername: getEnv("ORION_ADMIN_USER", "admin"),
 		AdminPassword: getEnv("ORION_ADMIN_PASS", "orion_dev"),
 		AdminEmail:    getEnv("ORION_ADMIN_EMAIL", "admin@orion.local"),
+
+		IdentityURL: getEnv("IDENTITY_URL", "http://identity:8007"),
+
+		GitHubClientID:     getEnv("GITHUB_CLIENT_ID", ""),
+		GitHubClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
+		GoogleClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
+		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+		OAuthRedirectBase:  getEnv("OAUTH_REDIRECT_BASE", "http://localhost:3000"),
 
 		InternalToken:  getEnv("ORION_INTERNAL_TOKEN", ""),
 		AllowedOrigins: splitEnv("ORION_ALLOWED_ORIGINS", ""),
