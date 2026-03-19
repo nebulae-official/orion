@@ -19,16 +19,16 @@ The Go gateway reads configuration from environment variables via `pkg/config/co
 | `APP_ENV`           | `development`                     | Environment mode (`development`, `staging`, `production`) |
 | `GATEWAY_PORT`      | `8000`                            | HTTP listen port                                          |
 | `ORION_JWT_SECRET`  | `dev-secret-change-in-production` | JWT signing key (HS256)                                   |
-| `ORION_ADMIN_USER`  | `admin`                           | Default admin username                                    |
-| `ORION_ADMIN_PASS`  | `orion_dev`                       | Default admin password                                    |
-| `ORION_ADMIN_EMAIL` | `admin@orion.local`               | Admin email address                                       |
 
 !!! danger "Change the JWT secret in production"
-The default `dev-secret-change-in-production` value must be replaced with a strong, random secret before deploying. Generate one with:
+    The default `dev-secret-change-in-production` value must be replaced with a strong, random secret before deploying. Generate one with:
 
     ```bash
     openssl rand -base64 64
     ```
+
+!!! warning "Deprecated"
+    `ORION_ADMIN_USER` and `ORION_ADMIN_PASS` are deprecated. User accounts are now managed through the Identity service with DB-backed credentials. Create the initial admin user via registration or database seeding.
 
 ## :material-connection: Service URLs
 
@@ -42,6 +42,7 @@ The gateway proxies requests to Python services using these URLs. Each variable 
 | `EDITOR_URL`    | `http://localhost:8004` | Editor (video rendering)          |
 | `PULSE_URL`     | `http://localhost:8005` | Pulse (analytics)                 |
 | `PUBLISHER_URL` | `http://localhost:8006` | Publisher (social publishing)     |
+| `IDENTITY_URL`  | `http://localhost:8007` | Identity (user management)        |
 
 In Docker Compose, these automatically resolve to container hostnames:
 
@@ -53,9 +54,38 @@ MEDIA_URL=http://media:8003
 EDITOR_URL=http://editor:8004
 PULSE_URL=http://pulse:8005
 PUBLISHER_URL=http://publisher:8006
+IDENTITY_URL=http://identity:8007
 ```
 
 When running services locally (without Docker), use `localhost` with the appropriate port.
+
+## :material-shield-lock: OAuth & Authentication
+
+The gateway supports OAuth 2.0 login with GitHub and Google. Configure these to enable social login:
+
+| Variable               | Default                 | Description                        |
+| ---------------------- | ----------------------- | ---------------------------------- |
+| `GITHUB_CLIENT_ID`     | --                      | GitHub OAuth app client ID         |
+| `GITHUB_CLIENT_SECRET` | --                      | GitHub OAuth app client secret     |
+| `GOOGLE_CLIENT_ID`     | --                      | Google OAuth client ID             |
+| `GOOGLE_CLIENT_SECRET` | --                      | Google OAuth client secret         |
+| `OAUTH_REDIRECT_BASE`  | `http://localhost:8000` | Base URL for OAuth callback URLs   |
+
+!!! tip "Setting up OAuth"
+    - **GitHub:** Create an OAuth App at `Settings > Developer settings > OAuth Apps`. Set the callback URL to `{OAUTH_REDIRECT_BASE}/api/v1/auth/oauth/github/callback`.
+    - **Google:** Create credentials at `Google Cloud Console > APIs & Services > Credentials`. Set the redirect URI to `{OAUTH_REDIRECT_BASE}/api/v1/auth/oauth/google/callback`.
+
+## :material-email: Email (SMTP)
+
+The Identity service sends transactional emails for verification, password reset, and user invitations. In development, emails are logged to the console.
+
+| Variable    | Default               | Description                        |
+| ----------- | --------------------- | ---------------------------------- |
+| `SMTP_HOST` | `localhost`           | SMTP server hostname               |
+| `SMTP_PORT` | `587`                 | SMTP port (587 for STARTTLS)       |
+| `SMTP_USER` | --                    | SMTP authentication username       |
+| `SMTP_PASS` | --                    | SMTP authentication password       |
+| `SMTP_FROM` | `noreply@orion.local` | From address for outbound emails   |
 
 ## :material-database: Data Layer
 

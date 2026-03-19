@@ -9,7 +9,13 @@ A tour of all pages in the Orion Dashboard. Each section describes what you see 
 
 ## :lucide-log-in: Login
 
-The login page authenticates you against the Orion Gateway. Enter your username and password, then click **Sign in**.
+The login page authenticates you against the Orion Gateway. You can sign in with:
+
+- **Email and password** -- Enter your credentials and click **Sign in**
+- **GitHub OAuth** -- Click the **Continue with GitHub** button to authenticate via your GitHub account
+- **Google OAuth** -- Click the **Continue with Google** button to authenticate via your Google account
+
+New users can click the **Register** link to create an account.
 
 ![Login page](../assets/guides/login-page.png)
 
@@ -33,6 +39,8 @@ Pages available from the sidebar:
 | Generation | Real-time progress tracking for content generation |
 | System Health | System overview, service status, infrastructure, and GPU monitoring |
 | Settings | AI providers, API keys, pipeline config, and system preferences (4 tabs) |
+| Profile | View and edit your account, change password, manage OAuth connections |
+| Users (admin) | Manage user accounts, roles, and invitations |
 
 ---
 
@@ -184,9 +192,31 @@ Dashboard preferences and environment information.
 
 ![System Settings](../assets/guides/settings-system.png)
 
-- **Dashboard Preferences** -- Theme (light/dark/system), refresh interval, notification toggles, and default landing page
+- **Dashboard Preferences** -- Theme (light/dark/system), refresh interval, notification toggles, and default landing page. These preferences are saved per-user via the Identity service.
 - **Data Management** -- Database and Redis connection information
 - **Environment** -- Current environment details and version info
+
+---
+
+## :lucide-user: Profile
+
+The profile page lets you manage your account details and security settings.
+
+- **Account Information** -- View and edit your display name, email address, and avatar
+- **Change Password** -- Update your password (requires current password)
+- **OAuth Connections** -- View linked GitHub and Google accounts, link or unlink providers
+- **User Preferences** -- Personal settings like default landing page and notification preferences
+
+---
+
+## :lucide-users: Users (Admin Only)
+
+The admin users page is accessible only to users with the `admin` role. It provides user management capabilities:
+
+- **User List** -- View all registered users with their name, email, role, and status
+- **Invite User** -- Send an invitation email to add new users
+- **Role Management** -- Change a user's role between `user` and `admin`
+- **Account Status** -- Activate or deactivate user accounts
 
 ---
 

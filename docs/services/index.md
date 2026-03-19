@@ -1,6 +1,6 @@
 # :lucide-server: Services
 
-Orion is composed of nine distinct components: a Go HTTP gateway that serves as the single entry point, six Python FastAPI microservices that handle the AI content pipeline, a Next.js admin dashboard, and a Python CLI for terminal-based control.
+Orion is composed of ten distinct components: a Go HTTP gateway that serves as the single entry point, seven Python FastAPI microservices (six for the AI content pipeline plus an Identity service for user management), a Next.js admin dashboard, and a Python CLI for terminal-based control.
 
 All external traffic enters through the Gateway, which handles authentication, rate limiting, and request proxying. The Python services communicate with each other exclusively through Redis pub/sub events — there are no direct HTTP calls between them. This decoupled architecture allows each service to be developed, tested, deployed, and scaled independently.
 
@@ -23,6 +23,7 @@ graph TB
         ED["Editor :8004"]
         PL["Pulse :8005"]
         PB["Publisher :8006"]
+        ID["Identity :8007"]
     end
 
     subgraph Clients["Clients"]
@@ -81,6 +82,12 @@ graph TB
 
     Python 3.13 / FastAPI — Social media publishing (Twitter, YouTube, TikTok)
 
+-   :lucide-shield: **[Identity](identity.md)** — Port 8007
+
+    ---
+
+    Python 3.13 / FastAPI — User management, authentication, OAuth linking
+
 -   :lucide-monitor: **[Dashboard](dashboard.md)** — Port 3000
 
     ---
@@ -119,7 +126,7 @@ docker compose -f deploy/docker-compose.yml ps
 
 ## :material-layers: Shared Library
 
-All six Python services depend on `libs/orion-common/`, a shared library that provides cross-cutting concerns:
+All seven Python services depend on `libs/orion-common/`, a shared library that provides cross-cutting concerns:
 
 - **Config** — `CommonSettings` (Pydantic BaseSettings) with automatic environment variable binding and cached singleton access via `get_settings()`
 - **Database** — SQLAlchemy 2.0 async engine, session factory, declarative base models, and migration utilities

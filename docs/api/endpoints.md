@@ -11,8 +11,39 @@ Complete API endpoint reference organized by service.
 | `GET`  | `/health`              | No     | Gateway liveness probe  |
 | `GET`  | `/ready`               | No     | Gateway readiness probe |
 | `GET`  | `/metrics`             | No     | Prometheus metrics      |
-| `POST` | `/api/v1/auth/login`   | No     | Authenticate            |
-| `POST` | `/api/v1/auth/refresh` | Bearer | Refresh JWT             |
+
+---
+
+## :material-shield-lock: Authentication
+
+| Method | Path                                      | Auth   | Description                    |
+| ------ | ----------------------------------------- | ------ | ------------------------------ |
+| `POST` | `/api/v1/auth/login`                      | No     | Email/password login           |
+| `POST` | `/api/v1/auth/register`                   | No     | Register new user              |
+| `POST` | `/api/v1/auth/refresh`                    | No     | Refresh access token           |
+| `POST` | `/api/v1/auth/forgot-password`            | No     | Request password reset email   |
+| `POST` | `/api/v1/auth/reset-password`             | No     | Complete password reset        |
+| `POST` | `/api/v1/auth/verify-email`               | No     | Verify email with token        |
+| `GET`  | `/api/v1/auth/oauth/github`               | No     | Initiate GitHub OAuth          |
+| `GET`  | `/api/v1/auth/oauth/github/callback`      | No     | GitHub OAuth callback          |
+| `GET`  | `/api/v1/auth/oauth/google`               | No     | Initiate Google OAuth          |
+| `GET`  | `/api/v1/auth/oauth/google/callback`      | No     | Google OAuth callback          |
+
+---
+
+## :lucide-shield: Identity (Users)
+
+| Method | Path                                   | Auth   | Description                |
+| ------ | -------------------------------------- | ------ | -------------------------- |
+| `GET`  | `/api/v1/identity/users/me`            | Bearer | Get current user profile   |
+| `PUT`  | `/api/v1/identity/users/me`            | Bearer | Update current user profile|
+| `GET`  | `/api/v1/identity/users/me/settings`   | Bearer | Get user preferences       |
+| `PUT`  | `/api/v1/identity/users/me/settings`   | Bearer | Update user preferences    |
+| `PUT`  | `/api/v1/identity/users/me/password`   | Bearer | Change password            |
+| `GET`  | `/api/v1/identity/users`               | Admin  | List all users             |
+| `POST` | `/api/v1/identity/users/invite`        | Admin  | Invite user via email      |
+| `PUT`  | `/api/v1/identity/users/:id/role`      | Admin  | Change user role           |
+| `PUT`  | `/api/v1/identity/users/:id/status`    | Admin  | Activate/deactivate user   |
 
 ---
 

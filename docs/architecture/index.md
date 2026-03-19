@@ -1,6 +1,6 @@
 # :lucide-boxes: Architecture
 
-Orion follows a microservices architecture with an event-driven communication model. A Go gateway acts as the single entry point, routing HTTP requests to six Python FastAPI services that communicate through Redis pub/sub.
+Orion follows a microservices architecture with an event-driven communication model. A Go gateway acts as the single entry point, handling OAuth authentication and JWT validation before routing HTTP requests to seven Python FastAPI services that communicate through Redis pub/sub.
 
 ## :material-layers: System Layers
 
@@ -23,6 +23,7 @@ graph LR
         ED["Editor"]
         PL["Pulse"]
         PB["Publisher"]
+        ID["Identity"]
     end
 
     subgraph Infra["Infrastructure Layer"]
@@ -55,18 +56,43 @@ graph LR
 - **Service to Data** -- Direct connections to PostgreSQL, Redis, and Milvus
 - **Real-time Updates** -- WebSocket hub in the gateway subscribes to Redis channels
 
+## :material-shield-lock: Authentication
+
+The gateway implements DB-backed multi-user auth with OAuth (GitHub/Google), short-lived JWT access tokens, and refresh token rotation:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway
+    participant Identity
+    participant Service
+
+    Client->>Gateway: POST /api/v1/auth/login
+    Gateway->>Identity: Validate credentials
+    Identity->>Gateway: User + refresh token
+    Gateway->>Client: JWT (15-min) + refresh token (30-day)
+
+    Client->>Gateway: API request + Bearer JWT
+    Gateway->>Gateway: Validate JWT
+    Gateway->>Service: Proxy + X-User-ID/Role/Email headers
+    Service->>Client: Response (user-scoped data)
+```
+
+See **[Security](security.md)** for full details on OAuth flows, token rotation, and theft detection.
+
 ## :material-view-grid: Service Responsibilities
 
 | Service   | Port | Language   | Role                                         |
 | --------- | ---- | ---------- | -------------------------------------------- |
-| Gateway   | 8000 | Go         | HTTP routing, auth, rate limiting, WebSocket |
+| Gateway   | 8000 | Go         | HTTP routing, OAuth, JWT auth, rate limiting, WebSocket |
 | Scout     | 8001 | Python     | Trend detection from external sources        |
 | Director  | 8002 | Python     | Content pipeline orchestration (LangGraph)   |
 | Media     | 8003 | Python     | Image generation (ComfyUI/Fal.ai)            |
 | Editor    | 8004 | Python     | Video rendering (TTS, captions, stitching)   |
 | Pulse     | 8005 | Python     | Analytics, cost tracking, pipeline history   |
 | Publisher | 8006 | Python     | Social media publishing                      |
-| Dashboard | 3000 | TypeScript | Admin UI                                     |
+| Identity  | 8007 | Python     | User management, auth, OAuth linking         |
+| Dashboard | 3000 | TypeScript | Admin UI with OAuth login                    |
 
 ## :material-book-open-variant: Further Reading
 

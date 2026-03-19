@@ -18,17 +18,19 @@ Orion — Digital Twin Content Agency. Autonomous AI agents detect trends, gener
 ## Architecture
 
 ```
-Gateway (Go, :8000) → reverse proxy → Python services (:8001-8006)
+Gateway (Go, :8000) → OAuth + JWT auth → reverse proxy → Python services (:8001-8007)
                     ↕ Redis pub/sub (inter-service events)
+                    → Identity (:8007) for user/auth management
 Dashboard (Next.js, :3000) → Gateway API
 CLI (Python/Typer) → Gateway API
 ```
 
-- `cmd/gateway/` — Go HTTP gateway, single entry point for all external requests
+- `cmd/gateway/` — Go HTTP gateway, single entry point for all external requests. DB-backed multi-user auth with OAuth (GitHub/Google), JWT access tokens (15-min), opaque refresh tokens (30-day). Forwards `X-User-ID`, `X-User-Role`, `X-User-Email` headers to downstream services.
 - `cli/` — Python CLI (UV workspace member), shares models with orion-common
 - `services/{scout,director,media,editor,pulse,publisher}` — FastAPI microservices
+- `services/identity/` — FastAPI user management service (CRUD, OAuth linking, token management)
 - `libs/orion-common/` — Shared Python library (models, event bus, health, config, middleware)
-- `dashboard/` — Next.js admin dashboard (App Router, Server Components)
+- `dashboard/` — Next.js admin dashboard (App Router, Server Components, OAuth login, profile, admin users)
 - `deploy/` — Docker Compose files (main, dev, monitoring, e2e)
 - `tests/e2e/` — E2E tests with mock AI providers
 - `tests/benchmark/` — pytest-benchmark + Locust load tests
@@ -94,7 +96,8 @@ make py-format          # ruff format on all services
 - **Event-driven:** Services communicate via Redis pub/sub channels (e.g., `orion.media.generated`). Event bus is in `libs/orion-common/event_bus.py`.
 - **Strategy pattern:** Providers (LLM, image, video, TTS) are swappable LOCAL/CLOUD via factory. See `services/media/src/providers/factory.py`.
 - **LangGraph orchestration:** Director uses a StateGraph DAG with agents (Analyst, Critique, ScriptGenerator, VisualPrompter) and PostgreSQL checkpointing.
-- **Gateway proxy:** All service requests go through the Go gateway which adds JWT auth, rate limiting, circuit breakers, and reverse proxies to the appropriate service.
+- **Gateway proxy:** All service requests go through the Go gateway which handles OAuth (GitHub/Google), JWT auth (15-min access tokens), rate limiting, circuit breakers, and reverse proxies to the appropriate service. The gateway forwards `X-User-ID`, `X-User-Role`, and `X-User-Email` headers to downstream services after JWT validation.
+- **User context:** Services use `get_current_user()` dependency to extract the authenticated user from gateway-forwarded headers. All user-scoped queries filter by `user_id` for per-user data isolation.
 - **Shared client factory:** CLI commands use `get_client()` from `cli/src/orion_cli/commands/__init__.py`, not per-module singletons.
 - **DB-dependent tests:** Tests needing PostgreSQL use `@requires_db` skip marker. They run when `DATABASE_URL` is set.
 

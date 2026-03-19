@@ -57,6 +57,7 @@ nav = [
     { "Editor" = "services/editor.md" },
     { "Pulse" = "services/pulse.md" },
     { "Publisher" = "services/publisher.md" },
+    { "Identity" = "services/identity.md" },
     { "Dashboard" = "services/dashboard.md" },
     { "CLI" = "services/cli.md" },
   ]},

@@ -50,6 +50,7 @@ All Orion services are containerized and orchestrated via Docker Compose.
 | editor    | python:3.13-slim        | 8004 | `GET /health` |
 | pulse     | python:3.13-slim        | 8005 | `GET /health` |
 | publisher | python:3.13-slim        | 8006 | `GET /health` |
+| identity  | python:3.13-slim        | 8007 | `GET /health` |
 | dashboard | node:22-alpine          | 3000 | `GET /`       |
 
 ### Infrastructure Services
