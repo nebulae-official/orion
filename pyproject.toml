@@ -22,6 +22,7 @@ members = [
     "services/editor",
     "services/pulse",
     "services/publisher",
+    "services/identity",
     "libs/orion-common",
     "cli",
 ]
