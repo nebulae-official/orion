@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Activity,
   LayoutDashboard,
   ListVideo,
   TrendingUp,
@@ -140,7 +141,7 @@ export default function Home(): React.ReactElement {
     ? getDemoMetrics()
     : { queueCount: 0, trendCount: 0, approvedCount: 0, reviewCount: 0 };
 
-  const recentEvents = DEMO_MODE ? demoRecentEvents : demoRecentEvents;
+  const recentEvents = DEMO_MODE ? demoRecentEvents : [];
 
   return (
     <div className="p-8">
@@ -238,26 +239,38 @@ export default function Home(): React.ReactElement {
             Recent Events
           </h2>
 
-          <div className="space-y-6">
-            {recentEvents.map((event) => {
-              const dot = dotStyles[event.color];
-              return (
-                <div key={event.id} className="flex gap-4 items-start">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-1.5 ${dot.bg} ${dot.shadow}`}
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-on-surface">
-                      {event.title}
-                    </p>
-                    <p className="text-xs text-on-surface-variant mt-1">
-                      {event.meta}
-                    </p>
+          {recentEvents.length > 0 ? (
+            <div className="space-y-6">
+              {recentEvents.map((event) => {
+                const dot = dotStyles[event.color];
+                return (
+                  <div key={event.id} className="flex gap-4 items-start">
+                    <div
+                      className={`w-2 h-2 rounded-full mt-1.5 ${dot.bg} ${dot.shadow}`}
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-on-surface">
+                        {event.title}
+                      </p>
+                      <p className="text-xs text-on-surface-variant mt-1">
+                        {event.meta}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Activity className="h-8 w-8 text-on-surface-variant mb-3" />
+              <p className="text-sm text-on-surface-variant">
+                No recent events
+              </p>
+              <p className="text-xs text-on-surface-variant/60 mt-1">
+                Events will appear as content moves through the pipeline
+              </p>
+            </div>
+          )}
 
           <Link
             href="/system"
