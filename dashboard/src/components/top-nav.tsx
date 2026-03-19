@@ -1,8 +1,30 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Search, Bell, CircleUser } from "lucide-react";
+import type { User } from "@/types/api";
+
+function getUserFromCookie(): User | null {
+  if (typeof document === "undefined") return null;
+  try {
+    const match = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("orion_user="));
+    if (!match) return null;
+    return JSON.parse(decodeURIComponent(match.split("=").slice(1).join("="))) as User;
+  } catch {
+    return null;
+  }
+}
 
 export function TopNav(): React.ReactElement {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUser(getUserFromCookie());
+  }, []);
+
   return (
     <header className="fixed top-0 right-0 w-full md:w-[calc(100%-5rem)] lg:w-[calc(100%-18rem)] h-16 flex justify-between items-center px-4 md:px-8 z-40 bg-transparent backdrop-blur-md">
       {/* Left: System label — offset on mobile to avoid hamburger button */}
@@ -32,12 +54,18 @@ export function TopNav(): React.ReactElement {
           >
             <Bell className="h-5 w-5" />
           </button>
-          <button
-            className="hover:text-violet-300 transition-colors"
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 hover:text-violet-300 transition-colors"
             aria-label="User profile"
           >
             <CircleUser className="h-5 w-5" />
-          </button>
+            {user?.name && (
+              <span className="hidden lg:inline text-sm font-medium">
+                {user.name}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
     </header>

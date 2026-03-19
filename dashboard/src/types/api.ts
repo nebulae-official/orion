@@ -72,14 +72,17 @@ export interface ScriptSegment {
 /** User session info */
 export interface User {
   id: string;
-  username: string;
   email: string;
+  name: string;
   role: "admin" | "editor" | "viewer";
+  avatar_url: string | null;
+  email_verified: boolean;
 }
 
 /** Auth response from login */
 export interface AuthResponse {
   access_token: string;
+  refresh_token?: string;
   token_type: string;
   expires_in: number;
   user: User;

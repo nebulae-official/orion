@@ -13,6 +13,7 @@ import type {
   PaginatedResponse,
   PublishRecord,
   Trend,
+  User,
 } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -358,3 +359,28 @@ export function getDemoContentPage(
   const items = filtered.slice(start, start + limit);
   return { items, page, limit, total };
 }
+
+// ---------------------------------------------------------------------------
+// User / Auth (demo)
+// ---------------------------------------------------------------------------
+
+export const demoUser: User = {
+  id: "00000000-0000-0000-0000-000000000002",
+  email: "admin@orion.local",
+  name: "Admin",
+  role: "admin",
+  avatar_url: null,
+  email_verified: true,
+};
+
+export interface AdminUser extends User {
+  is_active: boolean;
+  created_at: string;
+}
+
+export const demoAdminUsers: AdminUser[] = [
+  { id: "00000000-0000-0000-0000-000000000002", email: "admin@orion.local", name: "Admin", role: "admin", avatar_url: null, email_verified: true, is_active: true, created_at: daysAgo(90) },
+  { id: "00000000-0000-0000-0000-000000000003", email: "editor@orion.local", name: "Jane Editor", role: "editor", avatar_url: null, email_verified: true, is_active: true, created_at: daysAgo(60) },
+  { id: "00000000-0000-0000-0000-000000000004", email: "viewer@orion.local", name: "Bob Viewer", role: "viewer", avatar_url: null, email_verified: true, is_active: true, created_at: daysAgo(30) },
+  { id: "00000000-0000-0000-0000-000000000005", email: "inactive@orion.local", name: "Inactive User", role: "viewer", avatar_url: null, email_verified: false, is_active: false, created_at: daysAgo(120) },
+];

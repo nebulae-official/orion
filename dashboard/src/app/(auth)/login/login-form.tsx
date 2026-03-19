@@ -2,16 +2,18 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { login } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { GATEWAY_URL } from "@/lib/config";
+import { Sparkles, ArrowRight, Github, Chrome } from "lucide-react";
 
 export default function LoginForm(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ export default function LoginForm(): React.ReactElement {
     setError(null);
     setLoading(true);
 
-    const result = await login(username, password);
+    const result = await login(email, password);
 
     if (result.success) {
       router.push(redirect);
@@ -66,30 +68,38 @@ export default function LoginForm(): React.ReactElement {
             <div className="space-y-4">
               <div>
                 <label
-                  htmlFor="username"
+                  htmlFor="email"
                   className="mb-1.5 block text-sm font-medium text-text-secondary"
                 >
-                  Username
+                  Email
                 </label>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="mb-1.5 block text-sm font-medium text-text-secondary"
-                >
-                  Password
-                </label>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-text-secondary"
+                  >
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-primary hover:text-primary-muted transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <input
                   id="password"
                   name="password"
@@ -121,6 +131,42 @@ export default function LoginForm(): React.ReactElement {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-text-muted">or continue with</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          {/* OAuth buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <a
+              href={`${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=${encodeURIComponent(redirect)}`}
+              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-white/5 hover:border-primary/30"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
+            <a
+              href={`${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(redirect)}`}
+              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-white/5 hover:border-primary/30"
+            >
+              <Chrome className="h-4 w-4" />
+              Google
+            </a>
+          </div>
+
+          {/* Create account link */}
+          <p className="mt-6 text-center text-sm text-text-secondary">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-primary hover:text-primary-muted transition-colors"
+            >
+              Create an account
+            </Link>
+          </p>
         </div>
 
         {/* Subtle brand footer */}

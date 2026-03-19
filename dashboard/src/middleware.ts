@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export function middleware(request: NextRequest): NextResponse {
@@ -8,8 +8,8 @@ export function middleware(request: NextRequest): NextResponse {
 
   // Demo mode: bypass authentication entirely
   if (DEMO_MODE) {
-    // Redirect /login to home in demo mode
-    if (pathname === "/login") {
+    // Redirect auth pages to home in demo mode
+    if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();

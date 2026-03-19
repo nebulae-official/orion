@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
+import type { User } from "@/types/api";
 import {
   BarChart3,
   LayoutDashboard,
@@ -17,6 +18,8 @@ import {
   Send,
   Menu,
   X,
+  Users,
+  UserCircle,
 } from "lucide-react";
 
 interface NavItem {
@@ -34,10 +37,28 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Generation", href: "/generation", icon: <Sparkles className="h-5 w-5" /> },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+];
+
 const FOOTER_NAV_ITEMS: NavItem[] = [
   { label: "System Health", href: "/system", icon: <Activity className="h-5 w-5" /> },
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
+  { label: "Profile", href: "/profile", icon: <UserCircle className="h-5 w-5" /> },
 ];
+
+function getUserFromCookie(): User | null {
+  if (typeof document === "undefined") return null;
+  try {
+    const match = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("orion_user="));
+    if (!match) return null;
+    return JSON.parse(decodeURIComponent(match.split("=").slice(1).join("="))) as User;
+  } catch {
+    return null;
+  }
+}
 
 export function MobileSidebarToggle({
   onClick,
@@ -82,6 +103,12 @@ function NavLink({
 export function Sidebar(): React.ReactElement {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  // Read user from cookie on mount
+  useEffect(() => {
+    setUser(getUserFromCookie());
+  }, []);
 
   // Close sidebar on route change
   useEffect(() => {
@@ -92,6 +119,8 @@ export function Sidebar(): React.ReactElement {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   }
+
+  const isAdmin = user?.role === "admin";
 
   const sidebarContent = (
     <>
@@ -125,6 +154,25 @@ export function Sidebar(): React.ReactElement {
             active={isActive(item.href)}
           />
         ))}
+
+        {/* Admin Section */}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-1 px-4 md:px-2 lg:px-4">
+              <p className="font-[family-name:var(--font-display)] uppercase tracking-widest text-[10px] text-slate-500 md:hidden lg:block">
+                Admin
+              </p>
+              <div className="hidden md:block lg:hidden h-px bg-white/5 mt-1" />
+            </div>
+            {ADMIN_NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                active={isActive(item.href)}
+              />
+            ))}
+          </>
+        )}
       </nav>
 
       {/* Footer Navigation */}
