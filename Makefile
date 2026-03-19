@@ -173,8 +173,8 @@ dash-lint: ## Run dashboard linter
 # ==============================================================================
 
 .PHONY: docs
-docs: ## Start docs dev server with live reload
-	uv run --group docs zensical serve
+docs: ## Start docs dev server with live reload (port 8080)
+	uv run --group docs zensical serve --dev-addr 0.0.0.0:8080
 
 .PHONY: docs-build
 docs-build: ## Build documentation site
