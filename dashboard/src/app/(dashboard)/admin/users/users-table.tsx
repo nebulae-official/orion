@@ -98,7 +98,7 @@ export function UsersTable({
 
       {/* Invite Form */}
       {showInvite && (
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="glass-card luminous-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-text">
               Invite a new user
@@ -192,7 +192,7 @@ export function UsersTable({
       )}
 
       {/* Users Table */}
-      <div className="overflow-x-auto rounded-xl border border-border bg-surface shadow-lg shadow-black/10">
+      <div className="overflow-x-auto glass-card luminous-border rounded-xl shadow-lg shadow-black/10">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">

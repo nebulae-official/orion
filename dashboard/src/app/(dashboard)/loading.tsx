@@ -12,7 +12,7 @@ export default function DashboardLoading(): React.ReactElement {
         {Array.from({ length: 4 }, (_, i) => (
           <div
             key={i}
-            className="animate-pulse rounded-xl border border-border bg-surface p-6"
+            className="animate-pulse glass-card luminous-border rounded-xl p-6"
           >
             <div className="h-4 w-24 rounded bg-surface-elevated" />
             <div className="mt-2 h-8 w-16 rounded bg-surface-elevated" />
@@ -25,7 +25,7 @@ export default function DashboardLoading(): React.ReactElement {
         {Array.from({ length: 8 }, (_, i) => (
           <div
             key={i}
-            className="animate-pulse rounded-xl border border-border bg-surface shadow-sm"
+            className="animate-pulse glass-card luminous-border rounded-xl shadow-sm"
           >
             <div className="aspect-video w-full rounded-t-xl bg-surface-elevated" />
             <div className="p-4">

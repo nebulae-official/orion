@@ -300,7 +300,7 @@ export function ProviderConfig(): React.ReactElement {
           return (
             <div
               key={config.service}
-              className="rounded-xl border border-border bg-surface p-6"
+              className="glass-card luminous-border rounded-xl p-6"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-text">

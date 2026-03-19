@@ -174,7 +174,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
         {DEMO_MODE ? (
           <>
             <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div className="rounded-xl border border-border bg-surface p-6">
+              <div className="glass-card luminous-border rounded-xl p-6">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-emerald-400" />
                   <p className="text-sm font-medium text-text-muted">Total Earnings</p>
@@ -183,7 +183,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
                   ${demoEarnings.total_earnings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-surface p-6">
+              <div className="glass-card luminous-border rounded-xl p-6">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
                   <p className="text-sm font-medium text-text-muted">Earnings This Month</p>
@@ -192,7 +192,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
                   ${demoEarnings.earnings_this_month.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-surface p-6">
+              <div className="glass-card luminous-border rounded-xl p-6">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-emerald-400" />
                   <p className="text-sm font-medium text-text-muted">Avg Per Post</p>
@@ -208,7 +208,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
               <EarningsTrend data={demoEarnings.trend} />
             </div>
 
-            <div className="rounded-xl border border-border bg-surface p-6">
+            <div className="glass-card luminous-border rounded-xl p-6">
               <h3 className="mb-4 text-lg font-semibold text-text">Top Earning Content</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
@@ -252,7 +252,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
             </div>
           </>
         ) : (
-          <div className="rounded-xl border border-border bg-surface p-12 text-center">
+          <div className="glass-card luminous-border rounded-xl p-12 text-center">
             <DollarSign className="mx-auto mb-3 h-10 w-10 text-text-dim" />
             <p className="text-text-muted">
               Earnings data will appear once platform integrations are connected.

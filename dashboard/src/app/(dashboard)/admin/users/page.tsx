@@ -85,15 +85,15 @@ export default async function AdminUsersPage(): Promise<React.ReactElement> {
 
       {/* Stats */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="glass-card luminous-border rounded-xl p-4">
           <p className="text-sm text-text-secondary">Total Users</p>
           <p className="text-2xl font-bold text-text">{total}</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="glass-card luminous-border rounded-xl p-4">
           <p className="text-sm text-text-secondary">Active</p>
           <p className="text-2xl font-bold text-success">{activeCount}</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="glass-card luminous-border rounded-xl p-4">
           <p className="text-sm text-text-secondary">Disabled</p>
           <p className="text-2xl font-bold text-text-muted">
             {total - activeCount}

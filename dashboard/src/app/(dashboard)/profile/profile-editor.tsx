@@ -168,7 +168,7 @@ export function ProfileEditor({
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Profile Summary Card */}
       <div className="lg:col-span-1 space-y-6">
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+        <div className="glass-card luminous-border rounded-2xl p-6">
           <div className="flex flex-col items-center text-center">
             {/* Large Avatar */}
             <div className="relative mb-4">
@@ -262,7 +262,7 @@ export function ProfileEditor({
         </div>
 
         {/* Connected Accounts (sidebar) */}
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+        <div className="glass-card luminous-border rounded-2xl p-6">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <Link2 className="h-5 w-5 text-primary" />
             Connected Accounts
@@ -339,7 +339,7 @@ export function ProfileEditor({
       {/* Edit Forms */}
       <div className={cn("space-y-6 lg:col-span-2", readOnly && "pointer-events-none opacity-60")}>
         {/* Edit Profile */}
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+        <div className="glass-card luminous-border rounded-2xl p-6">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <CircleUser className="h-5 w-5 text-primary" />
             {readOnly ? "Profile Details" : "Edit Profile"}
@@ -449,7 +449,7 @@ export function ProfileEditor({
         </div>
 
         {/* Change Password */}
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+        <div className="glass-card luminous-border rounded-2xl p-6">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <Key className="h-5 w-5 text-primary" />
             Change Password
@@ -540,7 +540,7 @@ export function ProfileEditor({
         </div>
 
         {/* Publishing Accounts */}
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+        <div className="glass-card luminous-border rounded-2xl p-6">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
             <Video className="h-5 w-5 text-primary" />
             Publishing Accounts

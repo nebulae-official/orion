@@ -47,14 +47,14 @@ export function TrendTable({ trends }: TrendTableProps): React.ReactElement {
 
   if (trends.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-12 text-center text-text-muted">
+      <div className="glass-card luminous-border rounded-xl p-12 text-center text-text-muted">
         No trends found. Scout may not be running.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface">
+    <div className="overflow-hidden glass-card luminous-border rounded-xl">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-border bg-surface-elevated">
           <tr>

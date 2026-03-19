@@ -42,7 +42,7 @@ export function CostChart({ data }: CostChartProps): React.ReactElement {
   }));
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
+    <div className="glass-card luminous-border rounded-xl p-6">
       <h3 className="mb-4 text-lg font-semibold text-text">
         Cost by Provider
       </h3>

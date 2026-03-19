@@ -237,7 +237,7 @@ export function ApiKeysConfig(): React.ReactElement {
           return (
             <div
               key={entry.provider}
-              className="rounded-xl border border-border bg-surface p-6"
+              className="glass-card luminous-border rounded-xl p-6"
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">

@@ -46,7 +46,7 @@ export function ContentCard({ content }: { content: Content }): React.ReactEleme
   return (
     <Link
       href={`/queue/${content.id}`}
-      className="group block rounded-xl border border-border bg-surface shadow-sm transition-all hover:border-border-light hover:shadow-md"
+      className="group block glass-card luminous-border rounded-xl shadow-sm hover:scale-[1.01] transition-all duration-300"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-surface-elevated">
@@ -105,7 +105,7 @@ export function ContentCard({ content }: { content: Content }): React.ReactEleme
 
 export function ContentCardSkeleton(): React.ReactElement {
   return (
-    <div className="animate-pulse rounded-xl border border-border bg-surface shadow-sm">
+    <div className="animate-pulse glass-card luminous-border rounded-xl shadow-sm">
       <div className="aspect-video w-full rounded-t-xl bg-surface-elevated" />
       <div className="p-4">
         <div className="mb-2 h-5 w-20 rounded-full bg-surface-elevated" />

@@ -193,7 +193,7 @@ export function PipelineConfig(): React.ReactElement {
       )}
 
       {/* Content Generation */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Zap className="h-5 w-5 text-primary" />
@@ -242,7 +242,7 @@ export function PipelineConfig(): React.ReactElement {
       </section>
 
       {/* Trend Detection */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Radar className="h-5 w-5 text-primary" />
@@ -309,7 +309,7 @@ export function PipelineConfig(): React.ReactElement {
       </section>
 
       {/* Publishing */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Send className="h-5 w-5 text-primary" />

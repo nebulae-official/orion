@@ -50,14 +50,14 @@ export default async function PublishingPage(): Promise<React.ReactElement> {
       )}
 
       {records.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-12 text-center">
+        <div className="glass-card luminous-border rounded-xl p-12 text-center">
           <p className="text-text-muted">No publishing records yet</p>
           <p className="mt-1 text-sm text-text-dim">
             Approve content and click Publish to get started
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface">
+        <div className="overflow-hidden glass-card luminous-border rounded-xl">
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-surface-elevated">
               <tr>

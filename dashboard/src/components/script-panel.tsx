@@ -22,7 +22,7 @@ export function ScriptPanel({
 
   if (!script && segments.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-6">
+      <div className="glass-card luminous-border rounded-xl p-6">
         <h2 className="text-lg font-semibold text-text">Script</h2>
         <p className="mt-2 text-sm text-text-dim">No script available.</p>
       </div>
@@ -30,7 +30,7 @@ export function ScriptPanel({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-surface">
+    <div className="glass-card luminous-border rounded-xl">
       <div className="border-b border-border px-6 py-4">
         <h2 className="text-lg font-semibold text-text">Script</h2>
       </div>

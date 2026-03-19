@@ -144,7 +144,7 @@ export function SystemConfig(): React.ReactElement {
       )}
 
       {/* Dashboard Preferences */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Monitor className="h-5 w-5 text-primary" />
@@ -246,7 +246,7 @@ export function SystemConfig(): React.ReactElement {
       </section>
 
       {/* Data Management */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Database className="h-5 w-5 text-primary" />
@@ -278,7 +278,7 @@ export function SystemConfig(): React.ReactElement {
       </section>
 
       {/* Environment Info */}
-      <section className="rounded-xl border border-border bg-surface p-6">
+      <section className="glass-card luminous-border rounded-xl p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-surface">
             <Server className="h-5 w-5 text-primary" />

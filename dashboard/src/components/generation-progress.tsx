@@ -268,7 +268,7 @@ export function GenerationProgress(): React.ReactElement {
       )}
 
       {pipelineList.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+        <div className="glass-card luminous-border rounded-xl p-8 text-center">
           <Clock className="mx-auto mb-3 h-10 w-10 text-text-dim" />
           <p className="text-sm text-text-muted">
             No active generations. Progress will appear here when content
@@ -279,7 +279,7 @@ export function GenerationProgress(): React.ReactElement {
         pipelineList.map((pipeline) => (
           <div
             key={pipeline.contentId}
-            className="rounded-xl border border-border bg-surface p-6"
+            className="glass-card luminous-border rounded-xl p-6"
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-text">
