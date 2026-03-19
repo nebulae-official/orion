@@ -232,6 +232,26 @@ ps: ## Show running containers and health status
 restart: down up ## Restart all services
 
 # ==============================================================================
+# Database — Backup, Restore, Migrate
+# ==============================================================================
+
+.PHONY: db-backup
+db-backup: ## Create a database backup
+	./scripts/db-backup.sh
+
+.PHONY: db-restore
+db-restore: ## Restore database from backup (usage: make db-restore FILE=backups/orion_xxx.dump)
+	./scripts/db-restore.sh $(FILE)
+
+.PHONY: db-migrate
+db-migrate: ## Run database migrations
+	./scripts/db-migrate.sh
+
+.PHONY: db-migrate-dry
+db-migrate-dry: ## Show migration SQL without executing
+	./scripts/db-migrate.sh --dry-run
+
+# ==============================================================================
 # Setup & Utilities
 # ==============================================================================
 
