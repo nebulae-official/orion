@@ -26,17 +26,37 @@ var statusClient = &http.Client{
 	},
 }
 
+// DependencyChecks holds the status of per-service dependencies.
+type DependencyChecks struct {
+	Redis    bool `json:"redis"`
+	Postgres bool `json:"postgres"`
+}
+
 // ServiceHealth represents the health status of a single downstream service.
 type ServiceHealth struct {
-	Service string `json:"service"`
-	Status  string `json:"status"`
-	Error   string `json:"error,omitempty"`
+	Service   string            `json:"service"`
+	Status    string            `json:"status"`
+	Error     string            `json:"error,omitempty"`
+	Uptime    string            `json:"uptime"`
+	QueueSize int               `json:"queue_size"`
+	Checks    *DependencyChecks `json:"checks,omitempty"`
 }
 
 // StatusResponse is the aggregated status of all downstream services.
 type StatusResponse struct {
 	Status   string          `json:"status"`
 	Services []ServiceHealth `json:"services"`
+}
+
+// readyResponse is the expected JSON shape from a service's /ready endpoint.
+type readyResponse struct {
+	Status    string `json:"status"`
+	Uptime    string `json:"uptime"`
+	QueueSize int    `json:"queue_size"`
+	Checks    struct {
+		Redis    bool `json:"redis"`
+		Postgres bool `json:"postgres"`
+	} `json:"checks"`
 }
 
 // Status returns a handler that concurrently checks the /health endpoint
@@ -83,11 +103,12 @@ func Status(serviceURLs map[string]string) http.HandlerFunc {
 	}
 }
 
-// checkService calls GET /health on a single service and returns its status.
+// checkService calls GET /health and GET /ready on a single service and
+// returns its status enriched with uptime, queue size, and dependency checks.
 func checkService(ctx context.Context, name, baseURL string) ServiceHealth {
-	url := fmt.Sprintf("%s/health", baseURL)
+	healthURL := fmt.Sprintf("%s/health", baseURL)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, healthURL, nil)
 	if err != nil {
 		return ServiceHealth{Service: name, Status: "unhealthy", Error: err.Error()}
 	}
@@ -107,5 +128,43 @@ func checkService(ctx context.Context, name, baseURL string) ServiceHealth {
 		}
 	}
 
-	return ServiceHealth{Service: name, Status: "ok"}
+	// Also try /ready for enriched data
+	result := ServiceHealth{Service: name, Status: "ok"}
+	enrichFromReady(ctx, baseURL, &result)
+
+	return result
+}
+
+// enrichFromReady calls /ready on the service and populates uptime, queue
+// size, and dependency checks if available.
+func enrichFromReady(ctx context.Context, baseURL string, sh *ServiceHealth) {
+	readyURL := fmt.Sprintf("%s/ready", baseURL)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, readyURL, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := statusClient.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	var ready readyResponse
+	if err := json.Unmarshal(body, &ready); err != nil {
+		return
+	}
+
+	sh.Uptime = ready.Uptime
+	sh.QueueSize = ready.QueueSize
+	sh.Checks = &DependencyChecks{
+		Redis:    ready.Checks.Redis,
+		Postgres: ready.Checks.Postgres,
+	}
 }

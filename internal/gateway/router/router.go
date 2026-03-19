@@ -72,7 +72,8 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 		statusGroup.Get("/status", handlers.Status(services))
 	})
 
-	// GPU telemetry endpoint (public — no auth needed for monitoring).
+	// System info and GPU telemetry endpoints (public — no auth needed for monitoring).
+	r.Get("/api/v1/system/info", handlers.SystemInfoHandler())
 	r.Get("/api/v1/system/gpu", handlers.GPU())
 
 	// Auth endpoints with strict rate limiting (5 req/min per IP)
