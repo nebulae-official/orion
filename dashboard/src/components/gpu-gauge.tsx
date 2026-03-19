@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Cpu, RefreshCw } from "lucide-react";
+import { Cpu, RefreshCw, ChevronRight, ChevronDown } from "lucide-react";
 
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
 import { demoGpuInfo } from "@/lib/demo-data";
@@ -81,92 +81,170 @@ function GaugeRing({
   );
 }
 
-function GpuCard({ gpu }: { gpu: GpuInfo }): React.ReactElement {
+function GpuDetailMetrics({ gpu }: { gpu: GpuInfo }): React.ReactElement {
   const vramPercent =
     gpu.vram_total_mb > 0
       ? (gpu.vram_used_mb / gpu.vram_total_mb) * 100
       : 0;
 
   return (
-    <div className="rounded-lg border border-border p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <Cpu className="h-4 w-4 text-text-muted" />
-        <h3 className="text-sm font-semibold text-text truncate">{gpu.name}</h3>
+    <div className="flex flex-col gap-4 sm:flex-row p-4 pt-0">
+      <div className="flex flex-1 items-center justify-center">
+        <GaugeRing percent={vramPercent} size={120} strokeWidth={10} />
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex flex-1 items-center justify-center">
-          <GaugeRing percent={vramPercent} size={120} strokeWidth={10} />
+      <div className="flex-1 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-text-muted">VRAM Used</span>
+          <span className="font-medium text-text">
+            {Math.round(gpu.vram_used_mb)} / {Math.round(gpu.vram_total_mb)} MB
+          </span>
         </div>
-
-        <div className="flex-1 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-text-muted">GPU Utilization</span>
+          <span className="font-medium text-text">
+            {gpu.utilization_percent}%
+          </span>
+        </div>
+        {gpu.temperature_c !== null && (
           <div className="flex justify-between text-sm">
-            <span className="text-text-muted">VRAM Used</span>
-            <span className="font-medium text-text">
-              {Math.round(gpu.vram_used_mb)} / {Math.round(gpu.vram_total_mb)} MB
+            <span className="text-text-muted">Temperature</span>
+            <span
+              className={cn(
+                "font-medium",
+                gpu.temperature_c > 85
+                  ? "text-danger-light"
+                  : gpu.temperature_c > 70
+                    ? "text-warning-light"
+                    : "text-text"
+              )}
+            >
+              {gpu.temperature_c}°C
             </span>
           </div>
+        )}
+        {gpu.power_draw_w !== null && (
           <div className="flex justify-between text-sm">
-            <span className="text-text-muted">GPU Utilization</span>
-            <span className="font-medium text-text">
-              {gpu.utilization_percent}%
-            </span>
+            <span className="text-text-muted">Power Draw</span>
+            <span className="font-medium text-text">{gpu.power_draw_w} W</span>
           </div>
-          {gpu.temperature_c !== null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">Temperature</span>
-              <span
-                className={cn(
-                  "font-medium",
-                  gpu.temperature_c > 85
-                    ? "text-danger-light"
-                    : gpu.temperature_c > 70
-                      ? "text-warning-light"
-                      : "text-text"
-                )}
-              >
-                {gpu.temperature_c}°C
-              </span>
-            </div>
-          )}
-          {gpu.power_draw_w !== null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">Power Draw</span>
-              <span className="font-medium text-text">{gpu.power_draw_w} W</span>
-            </div>
-          )}
-          {gpu.clock_gpu_mhz !== null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">GPU Clock</span>
-              <span className="font-medium text-text">{gpu.clock_gpu_mhz} MHz</span>
-            </div>
-          )}
-          {gpu.clock_mem_mhz !== null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">Memory Clock</span>
-              <span className="font-medium text-text">{gpu.clock_mem_mhz} MHz</span>
-            </div>
-          )}
-          {gpu.fan_speed_percent !== null && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">Fan Speed</span>
-              <span className="font-medium text-text">{gpu.fan_speed_percent}%</span>
-            </div>
-          )}
-          {gpu.driver_version && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">Driver</span>
-              <span className="font-medium text-text">{gpu.driver_version}</span>
-            </div>
-          )}
-          {gpu.cuda_version && (
-            <div className="flex justify-between text-sm">
-              <span className="text-text-muted">CUDA</span>
-              <span className="font-medium text-text">{gpu.cuda_version}</span>
-            </div>
-          )}
-        </div>
+        )}
+        {gpu.clock_gpu_mhz !== null && (
+          <div className="flex justify-between text-sm">
+            <span className="text-text-muted">GPU Clock</span>
+            <span className="font-medium text-text">{gpu.clock_gpu_mhz} MHz</span>
+          </div>
+        )}
+        {gpu.clock_mem_mhz !== null && (
+          <div className="flex justify-between text-sm">
+            <span className="text-text-muted">Memory Clock</span>
+            <span className="font-medium text-text">{gpu.clock_mem_mhz} MHz</span>
+          </div>
+        )}
+        {gpu.fan_speed_percent !== null && (
+          <div className="flex justify-between text-sm">
+            <span className="text-text-muted">Fan Speed</span>
+            <span className="font-medium text-text">{gpu.fan_speed_percent}%</span>
+          </div>
+        )}
+        {gpu.driver_version && (
+          <div className="flex justify-between text-sm">
+            <span className="text-text-muted">Driver</span>
+            <span className="font-medium text-text">{gpu.driver_version}</span>
+          </div>
+        )}
+        {gpu.cuda_version && (
+          <div className="flex justify-between text-sm">
+            <span className="text-text-muted">CUDA</span>
+            <span className="font-medium text-text">{gpu.cuda_version}</span>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function utilizationColor(pct: number): string {
+  if (pct > 90) return "bg-danger text-white";
+  if (pct > 70) return "bg-warning text-black";
+  return "bg-success text-white";
+}
+
+function tempColor(temp: number | null): string {
+  if (temp === null) return "text-text-dim";
+  if (temp > 85) return "text-danger-light";
+  if (temp > 70) return "text-warning-light";
+  return "text-text";
+}
+
+function GpuAccordionCard({
+  gpu,
+  index,
+  expanded,
+  onToggle,
+}: {
+  gpu: GpuInfo;
+  index: number;
+  expanded: boolean;
+  onToggle: () => void;
+}): React.ReactElement {
+  const vramPercent =
+    gpu.vram_total_mb > 0
+      ? (gpu.vram_used_mb / gpu.vram_total_mb) * 100
+      : 0;
+  const barColor =
+    vramPercent > 90
+      ? "bg-danger"
+      : vramPercent > 70
+        ? "bg-warning"
+        : "bg-success";
+
+  return (
+    <div className="rounded-lg border border-border overflow-hidden">
+      {/* Collapsed summary row — always visible */}
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
+      >
+        {expanded ? (
+          <ChevronDown className="h-4 w-4 shrink-0 text-text-dim" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0 text-text-dim" />
+        )}
+        <Cpu className="h-4 w-4 shrink-0 text-text-muted" />
+        <span className="text-xs font-medium text-text-dim w-6">#{index}</span>
+        <span className="text-sm font-semibold text-text truncate min-w-0 flex-1">
+          {gpu.name}
+        </span>
+        {/* Thin inline VRAM bar */}
+        <div className="hidden sm:flex items-center gap-2 w-28">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+            <div
+              className={cn("h-full rounded-full transition-all duration-500", barColor)}
+              style={{ width: `${Math.min(vramPercent, 100)}%` }}
+            />
+          </div>
+          <span className="text-[10px] text-text-dim w-8 text-right">
+            {vramPercent.toFixed(0)}%
+          </span>
+        </div>
+        {/* Utilization badge */}
+        <span className={cn(
+          "rounded-full px-2 py-0.5 text-[10px] font-medium",
+          utilizationColor(gpu.utilization_percent)
+        )}>
+          {gpu.utilization_percent}%
+        </span>
+        {/* Temperature badge */}
+        {gpu.temperature_c !== null && (
+          <span className={cn("text-xs font-medium", tempColor(gpu.temperature_c))}>
+            {gpu.temperature_c}°C
+          </span>
+        )}
+      </button>
+
+      {/* Expanded detail */}
+      {expanded && <GpuDetailMetrics gpu={gpu} />}
     </div>
   );
 }
@@ -177,7 +255,34 @@ export function GpuGauge(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [noGpu, setNoGpu] = useState(false);
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [expandedGpus, setExpandedGpus] = useState<Set<number>>(new Set([0]));
   const lastRefreshRef = useRef<Date>(new Date());
+
+  const toggleGpu = useCallback((index: number) => {
+    setExpandedGpus(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  }, []);
+
+  // Auto-expand critical GPUs (utilization > 90% or temperature > 85C)
+  useEffect(() => {
+    const critical = new Set<number>();
+    gpus.forEach((gpu, i) => {
+      if (gpu.utilization_percent > 90 || (gpu.temperature_c !== null && gpu.temperature_c > 85)) {
+        critical.add(i);
+      }
+    });
+    if (critical.size > 0) {
+      setExpandedGpus(prev => {
+        const next = new Set(prev);
+        critical.forEach(i => next.add(i));
+        return next;
+      });
+    }
+  }, [gpus]);
 
   const fetchGpuInfo = useCallback(async (): Promise<void> => {
     if (DEMO_MODE) {
@@ -285,12 +390,31 @@ export function GpuGauge(): React.ReactElement {
           </p>
         </div>
       ) : gpus.length > 0 ? (
-        <div className={cn(
-          "flex-1 grid gap-4",
-          gpus.length === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
-        )}>
+        <div className="flex-1 space-y-3">
+          {/* Multi-GPU summary */}
+          {gpus.length > 1 && (
+            <div className="flex items-center gap-3 rounded-md bg-surface-elevated px-3 py-2 text-xs text-text-muted">
+              <span className="font-medium text-text">
+                {gpus.length} GPUs detected
+              </span>
+              <span className="text-text-dim">|</span>
+              <span>
+                Avg Load: {Math.round(gpus.reduce((s, g) => s + g.utilization_percent, 0) / gpus.length)}%
+              </span>
+              <span className="text-text-dim">|</span>
+              <span>
+                Total VRAM: {(gpus.reduce((s, g) => s + g.vram_used_mb, 0) / 1024).toFixed(1)} / {(gpus.reduce((s, g) => s + g.vram_total_mb, 0) / 1024).toFixed(1)} GB
+              </span>
+            </div>
+          )}
           {gpus.map((gpu, i) => (
-            <GpuCard key={`${gpu.name}-${i}`} gpu={gpu} />
+            <GpuAccordionCard
+              key={`${gpu.name}-${i}`}
+              gpu={gpu}
+              index={i}
+              expanded={expandedGpus.has(i)}
+              onToggle={() => toggleGpu(i)}
+            />
           ))}
         </div>
       ) : null}

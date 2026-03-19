@@ -25,9 +25,11 @@ interface SystemInfoData {
   disk_usage: number;
   uptime: string;
   uptime_seconds: number;
+  is_wsl?: boolean;
+  metrics_source?: string;
 }
 
-const REFRESH_INTERVAL = 2_000;
+const REFRESH_INTERVAL = 1_000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2_000;
 
@@ -77,6 +79,7 @@ export function SystemInfo(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [useHostMetrics, setUseHostMetrics] = useState(true);
   const lastRefreshRef = useRef<Date>(new Date());
 
   const fetchInfo = useCallback(async (retries = 0): Promise<void> => {
@@ -88,7 +91,8 @@ export function SystemInfo(): React.ReactElement {
       setSecondsAgo(0);
       return;
     }
-    const url = `${GATEWAY_URL}/api/v1/system/info`;
+    const hostParam = useHostMetrics ? "true" : "false";
+    const url = `${GATEWAY_URL}/api/v1/system/info?host=${hostParam}`;
     try {
       const response = await fetch(url, {
         cache: "no-store",
@@ -117,7 +121,7 @@ export function SystemInfo(): React.ReactElement {
       lastRefreshRef.current = new Date();
       setSecondsAgo(0);
     }
-  }, []);
+  }, [useHostMetrics]);
 
   useEffect(() => {
     fetchInfo();
@@ -142,6 +146,16 @@ export function SystemInfo(): React.ReactElement {
             <Server className="h-5 w-5" />
             System Overview
           </h2>
+          {info?.metrics_source && (
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-[10px] font-medium",
+              info.metrics_source === "windows_host"
+                ? "bg-blue-500/10 text-blue-400"
+                : "bg-emerald-500/10 text-emerald-400"
+            )}>
+              {info.metrics_source === "windows_host" ? "Windows Host" : "WSL"}
+            </span>
+          )}
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
@@ -151,6 +165,17 @@ export function SystemInfo(): React.ReactElement {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {info?.is_wsl && (
+            <label className="flex items-center gap-2 text-xs text-text-dim cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useHostMetrics}
+                onChange={(e) => setUseHostMetrics(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary"
+              />
+              Windows host metrics
+            </label>
+          )}
           <span className="text-xs text-text-dim">
             Updated {secondsAgo}s ago
           </span>

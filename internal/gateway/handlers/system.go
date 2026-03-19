@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -35,12 +38,129 @@ type SystemInfo struct {
 	DiskUsage     float64   `json:"disk_usage"`
 	Uptime        string    `json:"uptime"`
 	UptimeSeconds float64   `json:"uptime_seconds"`
+	IsWSL         bool      `json:"is_wsl"`
+	MetricsSource string    `json:"metrics_source"`
+}
+
+// ---- WSL2 detection (cached) ------------------------------------------------
+
+var (
+	wsl2Once   sync.Once
+	wsl2Result bool
+)
+
+// isWSL2 returns true when the gateway is running inside WSL2.
+// The result is cached on first call because it cannot change at runtime.
+func isWSL2() bool {
+	wsl2Once.Do(func() {
+		data, err := os.ReadFile("/proc/version")
+		if err != nil {
+			return
+		}
+		lower := strings.ToLower(string(data))
+		wsl2Result = strings.Contains(lower, "wsl2") || strings.Contains(lower, "microsoft-standard-wsl2")
+	})
+	return wsl2Result
+}
+
+// ---- Cached Windows host metrics via PowerShell -----------------------------
+
+type windowsMetricsCache struct {
+	mu        sync.Mutex
+	memTotal  uint64
+	memUsed   uint64
+	memFree   uint64
+	diskTotal uint64
+	diskUsed  uint64
+	diskFree  uint64
+	updatedAt time.Time
+	ttl       time.Duration
+}
+
+var winCache = &windowsMetricsCache{ttl: 5 * time.Second}
+
+// refreshIfStale refreshes memory and disk metrics from PowerShell if the cache
+// has expired. It is safe for concurrent use.
+func (c *windowsMetricsCache) refreshIfStale(ctx context.Context) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if time.Since(c.updatedAt) < c.ttl {
+		return
+	}
+	// Fetch memory and disk in a single PowerShell invocation to save startup cost.
+	psScript := `
+$os = Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize, FreePhysicalMemory
+$dk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" | Select-Object Size, FreeSpace
+@{ mem = $os; disk = $dk } | ConvertTo-Json -Compress
+`
+	cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(cmdCtx, "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", psScript).Output()
+	if err != nil {
+		return
+	}
+
+	var result struct {
+		Mem struct {
+			TotalVisibleMemorySize json.Number `json:"TotalVisibleMemorySize"`
+			FreePhysicalMemory     json.Number `json:"FreePhysicalMemory"`
+		} `json:"mem"`
+		Disk struct {
+			Size      json.Number `json:"Size"`
+			FreeSpace json.Number `json:"FreeSpace"`
+		} `json:"disk"`
+	}
+	if err := json.Unmarshal(out, &result); err != nil {
+		return
+	}
+
+	// Memory values from WMI are in KB.
+	totalKB, _ := result.Mem.TotalVisibleMemorySize.Int64()
+	freeKB, _ := result.Mem.FreePhysicalMemory.Int64()
+	c.memTotal = uint64(totalKB) * 1024
+	c.memFree = uint64(freeKB) * 1024
+	c.memUsed = c.memTotal - c.memFree
+
+	// Disk values are in bytes.
+	diskSize, _ := result.Disk.Size.Int64()
+	diskFree, _ := result.Disk.FreeSpace.Int64()
+	c.diskTotal = uint64(diskSize)
+	c.diskFree = uint64(diskFree)
+	c.diskUsed = c.diskTotal - c.diskFree
+
+	c.updatedAt = time.Now()
+}
+
+func (c *windowsMetricsCache) getMemory(ctx context.Context) (total, used, free uint64) {
+	c.refreshIfStale(ctx)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.memTotal, c.memUsed, c.memFree
+}
+
+func (c *windowsMetricsCache) getDisk(ctx context.Context) (total, used, free uint64) {
+	c.refreshIfStale(ctx)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.diskTotal, c.diskUsed, c.diskFree
 }
 
 // SystemInfoHandler returns a handler that reports host system information.
+// It supports a ?host=true|false query parameter to toggle between Windows host
+// and Linux/WSL metrics when running under WSL2.
 func SystemInfoHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		info := gatherSystemInfo()
+		// Determine whether to use Windows host metrics.
+		useHost := isWSL2() // default: use host metrics when in WSL2
+		if q := r.URL.Query().Get("host"); q != "" {
+			switch strings.ToLower(q) {
+			case "true", "1":
+				useHost = true
+			case "false", "0":
+				useHost = false
+			}
+		}
+		info := gatherSystemInfo2(r.Context(), useHost)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -49,44 +169,74 @@ func SystemInfoHandler() http.HandlerFunc {
 }
 
 // gatherSystemInfo collects host system information using /proc and syscall.
+// Kept for backward compatibility with tests.
 func gatherSystemInfo() SystemInfo {
+	return gatherSystemInfo2(context.Background(), false)
+}
+
+// gatherSystemInfo2 collects system information, optionally pulling memory and
+// disk metrics from the Windows host when useHost is true (WSL2).
+func gatherSystemInfo2(ctx context.Context, useHost bool) SystemInfo {
 	hostname, _ := os.Hostname()
 
-	// CPU usage from /proc/stat (two samples with 100ms delay)
+	// CPU usage from /proc/stat (two samples with 100ms delay) — always Linux.
 	cpuUsage, cpuPerCore, cpuErr := getCPUUsage()
 	if cpuErr != nil {
 		cpuUsage = 0
 		cpuPerCore = nil
 	}
 
-	// Memory from /proc/meminfo for accurate values on WSL
-	memTotal, memUsed, memFree, memErr := getMemoryInfo()
-	var memUsage float64
-	if memErr != nil {
-		// Fallback to sysinfo
-		var sysInfo syscall.Sysinfo_t
-		_ = syscall.Sysinfo(&sysInfo)
-		memTotal = sysInfo.Totalram * uint64(sysInfo.Unit)
-		memFree = sysInfo.Freeram * uint64(sysInfo.Unit)
-		memUsed = memTotal - memFree
+	var memTotal, memUsed, memFree uint64
+	var diskTotal, diskUsed, diskFree uint64
+	metricsSource := "linux"
+
+	if useHost && isWSL2() {
+		// Windows host metrics via cached PowerShell calls.
+		memTotal, memUsed, memFree = winCache.getMemory(ctx)
+		diskTotal, diskUsed, diskFree = winCache.getDisk(ctx)
+		metricsSource = "windows_host"
+
+		// Fallback to Linux if PowerShell returned zeros (e.g. first-call failure).
+		if memTotal == 0 {
+			memTotal, memUsed, memFree, _ = getMemoryInfo()
+			metricsSource = "linux"
+		}
+		if diskTotal == 0 {
+			var stat syscall.Statfs_t
+			_ = syscall.Statfs("/", &stat)
+			diskTotal = stat.Blocks * uint64(stat.Bsize)
+			diskFree = stat.Bavail * uint64(stat.Bsize)
+			diskUsed = diskTotal - diskFree
+			metricsSource = "linux"
+		}
+	} else {
+		// Standard Linux / WSL metrics.
+		var memErr error
+		memTotal, memUsed, memFree, memErr = getMemoryInfo()
+		if memErr != nil {
+			var sysInfo syscall.Sysinfo_t
+			_ = syscall.Sysinfo(&sysInfo)
+			memTotal = sysInfo.Totalram * uint64(sysInfo.Unit)
+			memFree = sysInfo.Freeram * uint64(sysInfo.Unit)
+			memUsed = memTotal - memFree
+		}
+
+		var stat syscall.Statfs_t
+		_ = syscall.Statfs("/", &stat)
+		diskTotal = stat.Blocks * uint64(stat.Bsize)
+		diskFree = stat.Bavail * uint64(stat.Bsize)
+		diskUsed = diskTotal - diskFree
 	}
+
+	var memUsage float64
 	if memTotal > 0 {
 		memUsage = float64(memUsed) / float64(memTotal) * 100
 	}
-
-	// Disk usage via statfs on root
-	var stat syscall.Statfs_t
-	_ = syscall.Statfs("/", &stat)
-
-	diskTotal := stat.Blocks * uint64(stat.Bsize)
-	diskFree := stat.Bavail * uint64(stat.Bsize)
-	diskUsed := diskTotal - diskFree
 	var diskUsage float64
 	if diskTotal > 0 {
 		diskUsage = float64(diskUsed) / float64(diskTotal) * 100
 	}
 
-	// Uptime
 	uptime := time.Since(startTime)
 
 	return SystemInfo{
@@ -108,6 +258,8 @@ func gatherSystemInfo() SystemInfo {
 		DiskUsage:     diskUsage,
 		Uptime:        formatUptime(uptime),
 		UptimeSeconds: uptime.Seconds(),
+		IsWSL:         isWSL2(),
+		MetricsSource: metricsSource,
 	}
 }
 
