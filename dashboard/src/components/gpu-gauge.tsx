@@ -235,7 +235,7 @@ export function GpuGauge(): React.ReactElement {
   }, []);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
+    <div className="flex h-full flex-col rounded-xl border border-border bg-surface p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text">
@@ -265,7 +265,7 @@ export function GpuGauge(): React.ReactElement {
       </div>
 
       {error ? (
-        <div className="flex flex-col items-center py-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
           <Cpu className="mb-2 h-10 w-10 text-text-dim" />
           <p className="text-sm text-text-muted">{error}</p>
           <p className="mt-1 text-xs text-text-dim">
@@ -273,11 +273,11 @@ export function GpuGauge(): React.ReactElement {
           </p>
         </div>
       ) : loading ? (
-        <div className="flex items-center justify-center py-8">
+        <div className="flex flex-1 items-center justify-center py-8">
           <RefreshCw className="h-6 w-6 animate-spin text-text-dim" />
         </div>
       ) : noGpu ? (
-        <div className="flex flex-col items-center py-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
           <Cpu className="mb-2 h-10 w-10 text-text-dim" />
           <p className="text-sm font-medium text-text-muted">No GPU detected</p>
           <p className="mt-1 text-xs text-text-dim">
@@ -286,7 +286,7 @@ export function GpuGauge(): React.ReactElement {
         </div>
       ) : gpus.length > 0 ? (
         <div className={cn(
-          "grid gap-4",
+          "flex-1 grid gap-4",
           gpus.length === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
         )}>
           {gpus.map((gpu, i) => (

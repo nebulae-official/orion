@@ -134,7 +134,7 @@ export function SystemInfo(): React.ReactElement {
   }, []);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
+    <div className="flex h-full flex-col rounded-xl border border-border bg-surface p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text">
@@ -164,7 +164,7 @@ export function SystemInfo(): React.ReactElement {
       </div>
 
       {error ? (
-        <div className="flex flex-col items-center py-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
           <Server className="mb-2 h-10 w-10 text-text-dim" />
           <p className="text-sm text-text-muted">{error}</p>
           <p className="mt-1 text-xs text-text-dim">
@@ -172,15 +172,15 @@ export function SystemInfo(): React.ReactElement {
           </p>
         </div>
       ) : loading ? (
-        <div className="flex items-center justify-center py-8">
+        <div className="flex flex-1 items-center justify-center py-8">
           <RefreshCw className="h-6 w-6 animate-spin text-text-dim" />
         </div>
       ) : info ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="flex flex-1 flex-col gap-6 md:flex-row">
           {/* Host Information */}
-          <div className="space-y-3">
+          <div className="flex flex-1 flex-col space-y-3">
             <h3 className="text-sm font-semibold text-text-secondary">Host Information</h3>
-            <div className="space-y-2">
+            <div className="flex flex-1 flex-col justify-between space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Hostname</span>
                 <span className="font-medium text-text">{info.hostname}</span>
@@ -209,26 +209,28 @@ export function SystemInfo(): React.ReactElement {
           </div>
 
           {/* Resource Usage */}
-          <div className="space-y-4">
+          <div className="flex flex-1 flex-col space-y-4">
             <h3 className="text-sm font-semibold text-text-secondary">Resource Usage</h3>
 
-            <ProgressBar
-              value={info.cpu_usage}
-              label="CPU"
-              detail={`${info.num_cpu} cores`}
-            />
+            <div className="flex flex-1 flex-col justify-between">
+              <ProgressBar
+                value={info.cpu_usage}
+                label="CPU"
+                detail={`${info.num_cpu} cores`}
+              />
 
-            <ProgressBar
-              value={info.memory_usage}
-              label="Memory"
-              detail={`${formatBytes(info.memory_used)} / ${formatBytes(info.memory_total)}`}
-            />
+              <ProgressBar
+                value={info.memory_usage}
+                label="Memory"
+                detail={`${formatBytes(info.memory_used)} / ${formatBytes(info.memory_total)}`}
+              />
 
-            <ProgressBar
-              value={info.disk_usage}
-              label="Disk"
-              detail={`${formatBytes(info.disk_used)} / ${formatBytes(info.disk_total)}`}
-            />
+              <ProgressBar
+                value={info.disk_usage}
+                label="Disk"
+                detail={`${formatBytes(info.disk_used)} / ${formatBytes(info.disk_total)}`}
+              />
+            </div>
           </div>
         </div>
       ) : null}
