@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { DEMO_MODE } from "@/lib/config";
 import {
   useWebSocket,
   type WebSocketMessage,
@@ -122,9 +123,34 @@ function StageRow({ stage }: { stage: StageProgress }): React.ReactElement {
   );
 }
 
+function createDemoPipelines(): Map<string, PipelineProgress> {
+  const map = new Map<string, PipelineProgress>();
+  const stages = createDefaultStages();
+  // A completed pipeline
+  map.set("demo-001", {
+    contentId: "demo-001",
+    title: "GTA VI: Why This Trailer Broke the Internet",
+    stages: stages.map((s) => ({ ...s, status: "completed" as const, progress: 100 })),
+    estimatedTimeRemaining: null,
+  });
+  // A running pipeline
+  const runningStages = createDefaultStages();
+  runningStages[0] = { ...runningStages[0], status: "completed", progress: 100 };
+  runningStages[1] = { ...runningStages[1], status: "completed", progress: 100 };
+  runningStages[2] = { ...runningStages[2], status: "completed", progress: 100 };
+  runningStages[3] = { ...runningStages[3], status: "running", progress: 65 };
+  map.set("demo-002", {
+    contentId: "demo-002",
+    title: "The Apple Vision Pro 2 — Everything We Know",
+    stages: runningStages,
+    estimatedTimeRemaining: 47,
+  });
+  return map;
+}
+
 export function GenerationProgress(): React.ReactElement {
   const [pipelines, setPipelines] = useState<Map<string, PipelineProgress>>(
-    new Map()
+    () => (DEMO_MODE ? createDemoPipelines() : new Map())
   );
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -192,8 +218,9 @@ export function GenerationProgress(): React.ReactElement {
   }, []);
 
   const { isConnected } = useWebSocket({
-    url: gatewayWsUrl,
+    url: DEMO_MODE ? "" : gatewayWsUrl,
     onMessage: handleMessage,
+    enabled: !DEMO_MODE,
   });
 
   const pipelineList = Array.from(pipelines.values());
@@ -204,11 +231,11 @@ export function GenerationProgress(): React.ReactElement {
         <div
           className={cn(
             "h-2 w-2 rounded-full",
-            isConnected ? "bg-success" : "animate-pulse bg-danger"
+            (isConnected || DEMO_MODE) ? "bg-success" : "animate-pulse bg-danger"
           )}
         />
         <span className="text-sm text-text-muted">
-          {isConnected ? "Live" : "Reconnecting..."}
+          {DEMO_MODE ? "Live (Demo)" : isConnected ? "Live" : "Reconnecting..."}
         </span>
       </div>
 

@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/sidebar";
+import { TopNav } from "@/components/top-nav";
 import { ToastProvider } from "@/components/toast";
 
 export default function DashboardLayout({
@@ -8,7 +9,7 @@ export default function DashboardLayout({
 }): React.ReactElement {
   return (
     <ToastProvider>
-      <div className="flex h-screen">
+      <div className="min-h-screen">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-surface focus:text-primary"
@@ -16,7 +17,8 @@ export default function DashboardLayout({
           Skip to content
         </a>
         <Sidebar />
-        <main id="main-content" className="flex-1 overflow-y-auto bg-bg">
+        <TopNav />
+        <main id="main-content" className="ml-0 md:ml-20 lg:ml-72 pt-16 min-h-screen">
           {children}
         </main>
       </div>

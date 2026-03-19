@@ -4,7 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { saveProviderConfig } from "@/lib/actions";
 import { apiClient } from "@/lib/api-client";
-import { Check, Loader2, AlertCircle } from "lucide-react";
+import { DEMO_MODE } from "@/lib/config";
+import {
+  Check,
+  Loader2,
+  AlertCircle,
+  RotateCcw,
+  Wifi,
+  WifiOff,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface ProviderOption {
   value: string;
@@ -17,13 +31,26 @@ interface ModelOption {
   provider: string;
 }
 
+interface ModelParams {
+  temperature?: number;
+  maxTokens?: number;
+  width?: number;
+  height?: number;
+  quality?: "standard" | "hd";
+}
+
 interface ServiceConfig {
   service: string;
   label: string;
   provider: string;
   model: string;
   status: "connected" | "disconnected" | "checking";
+  params: ModelParams;
 }
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 const PROVIDER_OPTIONS: ProviderOption[] = [
   { value: "LOCAL", label: "Local (Ollama / ComfyUI)" },
@@ -55,12 +82,23 @@ const MODEL_OPTIONS: Record<string, ModelOption[]> = {
   ],
 };
 
+const DEFAULT_PARAMS: Record<string, ModelParams> = {
+  llm: { temperature: 0.7, maxTokens: 4096 },
+  image: { width: 1920, height: 1080, quality: "standard" },
+  video: { width: 1920, height: 1080 },
+  tts: {},
+};
+
 const DEFAULT_CONFIGS: ServiceConfig[] = [
-  { service: "llm", label: "LLM (Text Generation)", provider: "LOCAL", model: "llama3.2", status: "checking" },
-  { service: "image", label: "Image Generation", provider: "LOCAL", model: "sdxl", status: "checking" },
-  { service: "video", label: "Video Generation", provider: "LOCAL", model: "animatediff", status: "checking" },
-  { service: "tts", label: "Text-to-Speech", provider: "LOCAL", model: "piper", status: "checking" },
+  { service: "llm", label: "LLM (Text Generation)", provider: "LOCAL", model: "llama3.2", status: "checking", params: { ...DEFAULT_PARAMS.llm } },
+  { service: "image", label: "Image Generation", provider: "LOCAL", model: "sdxl", status: "checking", params: { ...DEFAULT_PARAMS.image } },
+  { service: "video", label: "Video Generation", provider: "LOCAL", model: "animatediff", status: "checking", params: { ...DEFAULT_PARAMS.video } },
+  { service: "tts", label: "Text-to-Speech", provider: "LOCAL", model: "piper", status: "checking", params: { ...DEFAULT_PARAMS.tts } },
 ];
+
+// ---------------------------------------------------------------------------
+// StatusDot
+// ---------------------------------------------------------------------------
 
 function StatusDot({ status }: { status: ServiceConfig["status"] }): React.ReactElement {
   return (
@@ -76,12 +114,21 @@ function StatusDot({ status }: { status: ServiceConfig["status"] }): React.React
   );
 }
 
+// ---------------------------------------------------------------------------
+// ProviderConfig
+// ---------------------------------------------------------------------------
+
 export function ProviderConfig(): React.ReactElement {
   const [configs, setConfigs] = useState<ServiceConfig[]>(DEFAULT_CONFIGS);
   const [saving, setSaving] = useState<string | null>(null);
+  const [testing, setTesting] = useState<string | null>(null);
+  const [expandedParams, setExpandedParams] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const checkStatus = useCallback(async (service: string): Promise<"connected" | "disconnected"> => {
+    if (DEMO_MODE) {
+      return "connected";
+    }
     try {
       await apiClient.get(`/api/v1/providers/${service}/status`);
       return "connected";
@@ -121,6 +168,16 @@ export function ProviderConfig(): React.ReactElement {
     );
   }
 
+  function handleParamChange(service: string, key: keyof ModelParams, value: number | string): void {
+    setConfigs((prev) =>
+      prev.map((c) =>
+        c.service === service
+          ? { ...c, params: { ...c.params, [key]: value } }
+          : c
+      )
+    );
+  }
+
   async function handleSave(service: string): Promise<void> {
     const config = configs.find((c) => c.service === service);
     if (!config) return;
@@ -141,6 +198,55 @@ export function ProviderConfig(): React.ReactElement {
     }
 
     setSaving(null);
+  }
+
+  async function handleTestConnection(service: string): Promise<void> {
+    const config = configs.find((c) => c.service === service);
+    if (!config) return;
+
+    setTesting(service);
+    setMessage(null);
+
+    if (DEMO_MODE) {
+      // Simulate a connection test
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setConfigs((prev) =>
+        prev.map((c) => (c.service === service ? { ...c, status: "connected" } : c))
+      );
+      setMessage({ type: "success", text: `${config.label} connection successful.` });
+      setTesting(null);
+      return;
+    }
+
+    try {
+      await apiClient.get(`/api/v1/providers/${service}/status`);
+      setConfigs((prev) =>
+        prev.map((c) => (c.service === service ? { ...c, status: "connected" } : c))
+      );
+      setMessage({ type: "success", text: `${config.label} connection successful.` });
+    } catch {
+      setConfigs((prev) =>
+        prev.map((c) => (c.service === service ? { ...c, status: "disconnected" } : c))
+      );
+      setMessage({ type: "error", text: `${config.label} connection failed. Check provider is running.` });
+    }
+    setTesting(null);
+  }
+
+  function handleResetAll(): void {
+    setConfigs(DEFAULT_CONFIGS.map((c) => ({ ...c, status: "checking" })));
+    setMessage({ type: "success", text: "All provider configurations reset to defaults." });
+    // Re-check statuses
+    Promise.all(
+      DEFAULT_CONFIGS.map(async (c) => ({
+        ...c,
+        status: await checkStatus(c.service),
+      }))
+    ).then(setConfigs);
+  }
+
+  function toggleParams(service: string): void {
+    setExpandedParams((prev) => ({ ...prev, [service]: !prev[service] }));
   }
 
   return (
@@ -167,6 +273,8 @@ export function ProviderConfig(): React.ReactElement {
         {configs.map((config) => {
           const availableModels =
             MODEL_OPTIONS[config.service]?.filter((m) => m.provider === config.provider) ?? [];
+          const isParamsExpanded = expandedParams[config.service] ?? false;
+          const hasParams = config.service === "llm" || config.service === "image" || config.service === "video";
 
           return (
             <div
@@ -223,29 +331,172 @@ export function ProviderConfig(): React.ReactElement {
                   </select>
                 </div>
 
-                <button
-                  onClick={() => handleSave(config.service)}
-                  disabled={saving === config.service}
-                  className={cn(
-                    "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
-                    saving === config.service
-                      ? "cursor-not-allowed bg-primary-muted"
-                      : "bg-primary hover:bg-primary-muted"
-                  )}
-                >
-                  {saving === config.service ? (
-                    <>
+                {/* Model Parameters (collapsible) */}
+                {hasParams && (
+                  <div>
+                    <button
+                      onClick={() => toggleParams(config.service)}
+                      className="flex w-full items-center justify-between rounded-lg bg-surface-elevated px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-text"
+                    >
+                      <span>Model Parameters</span>
+                      {isParamsExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
+
+                    {isParamsExpanded && (
+                      <div className="mt-2 space-y-3 rounded-lg border border-border bg-surface-elevated p-3">
+                        {config.service === "llm" && (
+                          <>
+                            <div>
+                              <div className="mb-1 flex items-center justify-between">
+                                <label className="text-xs font-medium text-text-muted">Temperature</label>
+                                <span className="font-mono text-xs text-text-muted">
+                                  {(config.params.temperature ?? 0.7).toFixed(2)}
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min={0}
+                                max={2}
+                                step={0.05}
+                                value={config.params.temperature ?? 0.7}
+                                onChange={(e) =>
+                                  handleParamChange(config.service, "temperature", parseFloat(e.target.value))
+                                }
+                                className="w-full accent-primary"
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1 block text-xs font-medium text-text-muted">
+                                Max Tokens
+                              </label>
+                              <input
+                                type="number"
+                                min={256}
+                                max={128000}
+                                step={256}
+                                value={config.params.maxTokens ?? 4096}
+                                onChange={(e) =>
+                                  handleParamChange(config.service, "maxTokens", parseInt(e.target.value, 10))
+                                }
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                              />
+                            </div>
+                          </>
+                        )}
+                        {(config.service === "image" || config.service === "video") && (
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="mb-1 block text-xs font-medium text-text-muted">Width</label>
+                                <input
+                                  type="number"
+                                  min={256}
+                                  max={4096}
+                                  step={64}
+                                  value={config.params.width ?? 1920}
+                                  onChange={(e) =>
+                                    handleParamChange(config.service, "width", parseInt(e.target.value, 10))
+                                  }
+                                  className="w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </div>
+                              <div>
+                                <label className="mb-1 block text-xs font-medium text-text-muted">Height</label>
+                                <input
+                                  type="number"
+                                  min={256}
+                                  max={4096}
+                                  step={64}
+                                  value={config.params.height ?? 1080}
+                                  onChange={(e) =>
+                                    handleParamChange(config.service, "height", parseInt(e.target.value, 10))
+                                  }
+                                  className="w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </div>
+                            </div>
+                            {config.service === "image" && (
+                              <div>
+                                <label className="mb-1 block text-xs font-medium text-text-muted">Quality</label>
+                                <select
+                                  value={config.params.quality ?? "standard"}
+                                  onChange={(e) =>
+                                    handleParamChange(config.service, "quality", e.target.value)
+                                  }
+                                  className="w-full rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                >
+                                  <option value="standard">Standard</option>
+                                  <option value="hd">HD</option>
+                                </select>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleSave(config.service)}
+                    disabled={saving === config.service}
+                    className={cn(
+                      "flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+                      saving === config.service
+                        ? "cursor-not-allowed bg-primary-muted"
+                        : "bg-primary hover:bg-primary-muted"
+                    )}
+                  >
+                    {saving === config.service ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save"
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleTestConnection(config.service)}
+                    disabled={testing === config.service}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                      testing === config.service
+                        ? "cursor-not-allowed border-border text-text-dim"
+                        : "border-border text-text-secondary hover:bg-surface-elevated hover:text-text"
+                    )}
+                  >
+                    {testing === config.service ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Configuration"
-                  )}
-                </button>
+                    ) : config.status === "connected" ? (
+                      <Wifi className="h-4 w-4" />
+                    ) : (
+                      <WifiOff className="h-4 w-4" />
+                    )}
+                    Test
+                  </button>
+                </div>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Reset to Defaults */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleResetAll}
+          className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Reset to Defaults
+        </button>
       </div>
     </div>
   );

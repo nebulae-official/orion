@@ -12,10 +12,9 @@ import {
   TrendingUp,
   Settings,
   Activity,
-  Play,
+  Sparkles,
   LogOut,
   Send,
-  Sparkles,
   Menu,
   X,
 } from "lucide-react";
@@ -26,13 +25,16 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "Content Queue", href: "/queue", icon: <ListVideo className="h-5 w-5" /> },
   { label: "Trends", href: "/trends", icon: <TrendingUp className="h-5 w-5" /> },
   { label: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Publishing", href: "/publishing", icon: <Send className="h-5 w-5" /> },
-  { label: "Generation", href: "/generation", icon: <Play className="h-5 w-5" /> },
+  { label: "Generation", href: "/generation", icon: <Sparkles className="h-5 w-5" /> },
+];
+
+const FOOTER_NAV_ITEMS: NavItem[] = [
   { label: "System Health", href: "/system", icon: <Activity className="h-5 w-5" /> },
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
 ];
@@ -45,11 +47,35 @@ export function MobileSidebarToggle({
   return (
     <button
       onClick={onClick}
-      className="fixed left-4 top-4 z-40 rounded-lg border border-border bg-surface p-2 text-text-secondary shadow-md transition-colors hover:bg-surface-hover md:hidden"
+      className="fixed left-4 top-4 z-40 rounded-lg border border-violet-500/10 bg-slate-950/40 backdrop-blur-xl p-2 text-slate-400 shadow-md transition-colors hover:text-slate-200 md:hidden"
       aria-label="Open navigation menu"
     >
       <Menu className="h-5 w-5" />
     </button>
+  );
+}
+
+function NavLink({
+  item,
+  active,
+}: {
+  item: NavItem;
+  active: boolean;
+}): React.ReactElement {
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center gap-3 py-3 font-[family-name:var(--font-display)] text-sm tracking-tight transition-all duration-300",
+        "px-4 md:px-2 md:justify-center lg:px-4 lg:justify-start",
+        active
+          ? "text-violet-300 bg-violet-500/10 rounded-lg border-l-2 border-violet-400"
+          : "text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg"
+      )}
+    >
+      <span className="shrink-0">{item.icon}</span>
+      <span className="md:hidden lg:inline">{item.label}</span>
+    </Link>
   );
 }
 
@@ -69,60 +95,57 @@ export function Sidebar(): React.ReactElement {
 
   const sidebarContent = (
     <>
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-[family-name:var(--font-display)] text-lg font-bold text-text">
-            Orion
-          </span>
-          <span className="rounded-full bg-primary-surface px-2 py-0.5 text-xs font-medium text-primary-light">
-            v1.0
-          </span>
+      {/* Brand Header */}
+      <div className="mb-12 px-4 md:px-0 md:text-center lg:px-4 lg:text-left">
+        <Link href="/" className="block">
+          <h1 className="text-2xl md:text-lg lg:text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-violet-300 to-cyan-400 font-[family-name:var(--font-display)]">
+            <span className="md:hidden lg:inline">ORION</span>
+            <span className="hidden md:inline lg:hidden">O</span>
+          </h1>
+          <p className="font-[family-name:var(--font-display)] uppercase tracking-widest text-[10px] text-slate-400 mt-1 md:hidden lg:block">
+            Digital Twin Systems
+          </p>
         </Link>
         {/* Close button for mobile */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="text-text-dim hover:text-text-secondary md:hidden"
+          className="absolute right-4 top-6 text-slate-400 hover:text-slate-200 md:hidden"
           aria-label="Close navigation menu"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {NAV_ITEMS.map((item) => (
-          <Link
+      {/* Main Navigation */}
+      <nav className="flex-1 space-y-1">
+        {MAIN_NAV_ITEMS.map((item) => (
+          <NavLink
             key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-              isActive(item.href)
-                ? "bg-primary-surface text-primary-light shadow-[inset_0_0_0_1px_rgba(124,58,237,0.2)]"
-                : "text-text-secondary hover:bg-surface-hover hover:text-text"
-            )}
-          >
-            <span className={cn(
-              isActive(item.href) ? "text-primary-light" : "text-text-muted"
-            )}>
-              {item.icon}
-            </span>
-            {item.label}
-          </Link>
+            item={item}
+            active={isActive(item.href)}
+          />
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-border p-3">
+      {/* Footer Navigation */}
+      <div className="pt-6 border-t border-white/5 space-y-1">
+        {FOOTER_NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.href}
+            item={item}
+            active={isActive(item.href)}
+          />
+        ))}
+      </div>
+
+      {/* Sign Out */}
+      <div className="pt-4">
         <button
           onClick={() => logout()}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-all duration-200 hover:bg-danger-surface hover:text-danger-light"
+          className="flex w-full items-center gap-3 py-3 font-[family-name:var(--font-display)] text-sm tracking-tight text-slate-400 transition-all duration-300 hover:text-slate-200 hover:bg-white/5 rounded-lg px-4 md:px-2 md:justify-center lg:px-4 lg:justify-start"
         >
-          <LogOut className="h-5 w-5" />
-          Sign out
+          <LogOut className="h-5 w-5 shrink-0" />
+          <span className="md:hidden lg:inline">Sign out</span>
         </button>
       </div>
     </>
@@ -142,13 +165,18 @@ export function Sidebar(): React.ReactElement {
         />
       )}
 
-      {/* Sidebar - desktop: always visible, mobile: overlay */}
+      {/* Sidebar */}
       <aside
         className={cn(
-          "flex h-screen w-64 flex-col border-r border-border bg-surface",
-          // Mobile: fixed overlay with transition
-          "fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 md:relative md:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+          "flex h-screen flex-col z-50",
+          "w-72 md:w-20 lg:w-72",
+          "p-6 md:p-3 lg:p-6",
+          "bg-slate-950/40 backdrop-blur-xl",
+          "border-r border-violet-500/10",
+          "shadow-[20px_0_50px_rgba(124,58,237,0.06)]",
+          // Mobile: hidden off-screen; tablet+: always visible
+          "fixed inset-y-0 left-0 transform transition-all duration-300 md:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
         {sidebarContent}

@@ -21,10 +21,11 @@ interface CostChartProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  llm_tokens: "var(--color-primary-light)",
+  inference: "var(--color-primary-light)",
   image_generation: "var(--color-success)",
-  tts_characters: "var(--color-gold)",
-  video_clips: "var(--color-cyan)",
+  tts: "var(--color-gold)",
+  video_generation: "var(--color-cyan)",
+  embedding: "var(--color-chart-6)",
 };
 
 export function CostChart({ data }: CostChartProps): React.ReactElement {

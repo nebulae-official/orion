@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { formatRelativeTime } from "@/lib/utils";
 import { RefreshCw } from "lucide-react";
 import { fetchSystemStatus, fetchGatewayHealth } from "@/lib/actions";
+
+interface DependencyChecks {
+  redis: boolean;
+  postgres: boolean;
+}
 
 interface ServiceStatus {
   name: string;
@@ -13,6 +17,7 @@ interface ServiceStatus {
   uptime: string | null;
   queueSize: number | null;
   lastChecked: string | null;
+  checks: DependencyChecks | null;
 }
 
 const SERVICES: { name: string; displayName: string }[] = [
@@ -20,11 +25,12 @@ const SERVICES: { name: string; displayName: string }[] = [
   { name: "scout", displayName: "Scout (Trends)" },
   { name: "director", displayName: "Director (Scripts)" },
   { name: "media", displayName: "Media (Assets)" },
-  { name: "editor", displayName: "Editor (Publish)" },
+  { name: "editor", displayName: "Editor (Video)" },
   { name: "pulse", displayName: "Pulse (Analytics)" },
+  { name: "publisher", displayName: "Publisher (Social)" },
 ];
 
-const REFRESH_INTERVAL = 30_000;
+const REFRESH_INTERVAL = 5_000;
 
 export function ServiceHealth(): React.ReactElement {
   const [services, setServices] = useState<ServiceStatus[]>(
@@ -35,15 +41,17 @@ export function ServiceHealth(): React.ReactElement {
       uptime: null,
       queueSize: null,
       lastChecked: null,
+      checks: null,
     }))
   );
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [secondsAgo, setSecondsAgo] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const lastRefreshRef = useRef<Date>(new Date());
 
   const checkServices = useCallback(async (): Promise<void> => {
     setRefreshing(true);
 
-    // Check gateway health + aggregated status via server actions
     const [statusData, gatewayData] = await Promise.all([
       fetchSystemStatus(),
       fetchGatewayHealth(),
@@ -58,6 +66,7 @@ export function ServiceHealth(): React.ReactElement {
           uptime: null,
           queueSize: null,
           lastChecked: new Date().toISOString(),
+          checks: null,
         };
       }
 
@@ -67,9 +76,10 @@ export function ServiceHealth(): React.ReactElement {
           name: svc.name,
           displayName: svc.displayName,
           status: svcData.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
-          uptime: null,
-          queueSize: null,
+          uptime: svcData.uptime ?? null,
+          queueSize: svcData.queue_size ?? null,
           lastChecked: new Date().toISOString(),
+          checks: svcData.checks ?? null,
         };
       }
 
@@ -80,11 +90,15 @@ export function ServiceHealth(): React.ReactElement {
         uptime: null,
         queueSize: null,
         lastChecked: new Date().toISOString(),
+        checks: null,
       };
     });
 
     setServices(updated);
-    setLastRefresh(new Date());
+    const now = new Date();
+    setLastRefresh(now);
+    lastRefreshRef.current = now;
+    setSecondsAgo(0);
     setRefreshing(false);
   }, []);
 
@@ -94,13 +108,31 @@ export function ServiceHealth(): React.ReactElement {
     return () => clearInterval(interval);
   }, [checkServices]);
 
+  // Tick the "Xs ago" counter every second
+  useEffect(() => {
+    const ticker = setInterval(() => {
+      const diff = Math.floor((Date.now() - lastRefreshRef.current.getTime()) / 1000);
+      setSecondsAgo(diff);
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, []);
+
   return (
     <div className="rounded-xl border border-border bg-surface p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Service Status</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-text">Service Status</h2>
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            </span>
+            <span className="text-xs font-medium text-success">Live</span>
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-dim">
-            Updated {formatRelativeTime(lastRefresh)}
+            Updated {secondsAgo}s ago
           </span>
           <button
             onClick={checkServices}
@@ -172,8 +204,115 @@ export function ServiceHealth(): React.ReactElement {
       </div>
 
       <p className="mt-4 text-xs text-text-dim">
-        Auto-refreshes every 30 seconds
+        Auto-refreshes every 5 seconds
       </p>
+    </div>
+  );
+}
+
+/** InfrastructureStatus shows Redis/Postgres connectivity per service. */
+export function InfrastructureStatus(): React.ReactElement {
+  const [services, setServices] = useState<ServiceStatus[]>([]);
+
+  const fetchStatus = useCallback(async (): Promise<void> => {
+    const statusData = await fetchSystemStatus();
+    if (!statusData?.services) return;
+
+    const updated = statusData.services.map((svcData) => ({
+      name: svcData.service,
+      displayName: svcData.service.charAt(0).toUpperCase() + svcData.service.slice(1),
+      status: svcData.status === "ok" ? ("healthy" as const) : ("unhealthy" as const),
+      uptime: svcData.uptime ?? null,
+      queueSize: svcData.queue_size ?? null,
+      lastChecked: new Date().toISOString(),
+      checks: svcData.checks ?? null,
+    }));
+
+    setServices(updated);
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [fetchStatus]);
+
+  // Aggregate infrastructure status
+  const redisOk = services.length > 0 && services.every((s) => s.checks?.redis !== false);
+  const postgresOk = services.length > 0 && services.every((s) => s.checks?.postgres !== false);
+
+  return (
+    <div className="rounded-xl border border-border bg-surface p-6">
+      <h2 className="mb-4 text-lg font-semibold text-text">Infrastructure</h2>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "inline-block h-3 w-3 rounded-full",
+                redisOk ? "bg-success" : "bg-danger"
+              )}
+            />
+            <span className="text-sm font-medium text-text">Redis</span>
+          </div>
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-xs font-medium",
+              redisOk
+                ? "bg-success-surface text-success-light"
+                : "bg-danger-surface text-danger-light"
+            )}
+          >
+            {redisOk ? "Connected" : "Disconnected"}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "inline-block h-3 w-3 rounded-full",
+                postgresOk ? "bg-success" : "bg-danger"
+              )}
+            />
+            <span className="text-sm font-medium text-text">PostgreSQL</span>
+          </div>
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-xs font-medium",
+              postgresOk
+                ? "bg-success-surface text-success-light"
+                : "bg-danger-surface text-danger-light"
+            )}
+          >
+            {postgresOk ? "Connected" : "Disconnected"}
+          </span>
+        </div>
+
+        {/* Per-service dependency breakdown */}
+        <div className="mt-2 space-y-2">
+          <p className="text-xs font-medium text-text-muted">Per-service checks</p>
+          {services
+            .filter((s) => s.checks !== null)
+            .map((svc) => (
+              <div
+                key={svc.name}
+                className="flex items-center justify-between text-xs text-text-dim"
+              >
+                <span className="capitalize">{svc.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className={cn(svc.checks?.redis ? "text-success" : "text-danger")}>
+                    R
+                  </span>
+                  <span className={cn(svc.checks?.postgres ? "text-success" : "text-danger")}>
+                    P
+                  </span>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
     </div>
   );
 }
