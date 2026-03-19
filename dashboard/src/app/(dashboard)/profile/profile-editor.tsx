@@ -11,9 +11,17 @@ import {
   Shield,
   Calendar,
   Globe,
+  Camera,
+  Youtube,
+  Twitter,
+  Instagram,
+  ExternalLink,
+  Unplug,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
+import { GATEWAY_URL } from "@/lib/config";
 import type { User } from "@/types/api";
 import { updateProfile, changePassword } from "./actions";
 
@@ -41,6 +49,16 @@ const TIMEZONES = [
   "UTC",
 ];
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 export function ProfileEditor({
   profile,
   readOnly = false,
@@ -59,6 +77,10 @@ export function ProfileEditor({
     text: string;
   } | null>(null);
 
+  // Avatar editing state
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [avatarInput, setAvatarInput] = useState(profile.avatar_url ?? "");
+
   // Password form state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -68,6 +90,9 @@ export function ProfileEditor({
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // Publishing account toast
+  const [publishToast, setPublishToast] = useState<string | null>(null);
 
   async function handleProfileSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
@@ -127,29 +152,87 @@ export function ProfileEditor({
     setPasswordSaving(false);
   }
 
+  function handleAvatarSave(): void {
+    setAvatarUrl(avatarInput);
+    setEditingAvatar(false);
+  }
+
+  function handlePublishConnect(platform: string): void {
+    setPublishToast(`${platform} connection coming soon`);
+    setTimeout(() => setPublishToast(null), 3000);
+  }
+
   const oauthProviders = profile.oauth_providers ?? [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       {/* Profile Summary Card */}
-      <div className="lg:col-span-1">
+      <div className="lg:col-span-1 space-y-6">
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 border-2 border-primary/20">
-              {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.name}
-                  className="h-full w-full rounded-full object-cover"
-                />
-              ) : (
-                <CircleUser className="h-10 w-10 text-primary" />
+            {/* Large Avatar */}
+            <div className="relative mb-4">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary/30 bg-primary/10 shadow-lg shadow-primary/10 overflow-hidden">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={name}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-primary">
+                    {getInitials(name)}
+                  </span>
+                )}
+              </div>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => setEditingAvatar(!editingAvatar)}
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-primary text-white shadow-md transition-colors hover:bg-primary-muted"
+                  title="Change avatar"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                </button>
               )}
             </div>
-            <h2 className="text-lg font-semibold text-text">{profile.name}</h2>
+
+            {/* Avatar URL Input */}
+            {editingAvatar && (
+              <div className="mb-4 w-full space-y-2">
+                <input
+                  type="url"
+                  value={avatarInput}
+                  onChange={(e) => setAvatarInput(e.target.value)}
+                  placeholder="Paste avatar URL..."
+                  className="block w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAvatarSave}
+                    className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatarInput(avatarUrl);
+                      setEditingAvatar(false);
+                    }}
+                    className="flex-1 rounded-lg border border-border bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <h2 className="text-lg font-semibold text-text">{name}</h2>
             <p className="text-sm text-text-secondary">{profile.email}</p>
-            {profile.bio && (
-              <p className="mt-2 text-sm text-text-muted">{profile.bio}</p>
+            {bio && (
+              <p className="mt-2 text-sm text-text-muted">{bio}</p>
             )}
 
             <div className="mt-4 w-full space-y-3 border-t border-border pt-4">
@@ -173,6 +256,80 @@ export function ProfileEditor({
                     {formatDate(profile.created_at)}
                   </span>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Connected Accounts (sidebar) */}
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
+            <Link2 className="h-5 w-5 text-primary" />
+            Connected Accounts
+          </h3>
+
+          <div className="space-y-3">
+            {/* GitHub */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
+              <div className="flex items-center gap-3">
+                <Github className="h-5 w-5 text-text" />
+                <div>
+                  <p className="text-sm font-medium text-text">GitHub</p>
+                  <p className="text-xs text-text-secondary">
+                    {oauthProviders.includes("github")
+                      ? "Connected as @admin"
+                      : "Not connected"}
+                  </p>
+                </div>
+              </div>
+              {oauthProviders.includes("github") ? (
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger-surface px-3 py-1.5 text-xs font-medium text-danger-light transition-colors hover:bg-danger/20"
+                >
+                  <Unplug className="h-3.5 w-3.5" />
+                  Disconnect
+                </button>
+              ) : (
+                <a
+                  href={`${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=/profile`}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Connect
+                </a>
+              )}
+            </div>
+
+            {/* Google */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
+              <div className="flex items-center gap-3">
+                <Chrome className="h-5 w-5 text-text" />
+                <div>
+                  <p className="text-sm font-medium text-text">Google</p>
+                  <p className="text-xs text-text-secondary">
+                    {oauthProviders.includes("google")
+                      ? "Connected"
+                      : "Not connected"}
+                  </p>
+                </div>
+              </div>
+              {oauthProviders.includes("google") ? (
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger-surface px-3 py-1.5 text-xs font-medium text-danger-light transition-colors hover:bg-danger/20"
+                >
+                  <Unplug className="h-3.5 w-3.5" />
+                  Disconnect
+                </button>
+              ) : (
+                <a
+                  href={`${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=/profile`}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Connect
+                </a>
               )}
             </div>
           </div>
@@ -382,60 +539,103 @@ export function ProfileEditor({
           </form>
         </div>
 
-        {/* Connected Accounts */}
+        {/* Publishing Accounts */}
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg shadow-black/10">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text">
-            <Link2 className="h-5 w-5 text-primary" />
-            Connected Accounts
+            <Video className="h-5 w-5 text-primary" />
+            Publishing Accounts
           </h3>
+          <p className="mb-4 text-sm text-text-muted">
+            Connect your social media accounts to publish content directly from Orion.
+          </p>
 
-          <div className="space-y-3">
+          {publishToast && (
+            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
+              {publishToast}
+            </div>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {/* YouTube */}
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
               <div className="flex items-center gap-3">
-                <Github className="h-5 w-5 text-text" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+                  <Youtube className="h-5 w-5 text-red-500" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-text">GitHub</p>
-                  <p className="text-xs text-text-secondary">
-                    {oauthProviders.includes("github")
-                      ? "Connected"
-                      : "Not connected"}
-                  </p>
+                  <p className="text-sm font-medium text-text">YouTube</p>
+                  <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <span
-                className={cn(
-                  "rounded-full px-3 py-1 text-xs font-medium",
-                  oauthProviders.includes("github")
-                    ? "bg-success-surface text-success"
-                    : "bg-surface text-text-muted"
-                )}
+              <button
+                type="button"
+                onClick={() => handlePublishConnect("YouTube")}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
-                {oauthProviders.includes("github") ? "Linked" : "Not linked"}
-              </span>
+                Connect
+              </button>
             </div>
 
+            {/* TikTok */}
             <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
               <div className="flex items-center gap-3">
-                <Chrome className="h-5 w-5 text-text" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10">
+                  <svg className="h-5 w-5 text-cyan-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.71a8.21 8.21 0 0 0 4.76 1.52v-3.4a4.85 4.85 0 0 1-1-.14z" />
+                  </svg>
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-text">Google</p>
-                  <p className="text-xs text-text-secondary">
-                    {oauthProviders.includes("google")
-                      ? "Connected"
-                      : "Not connected"}
-                  </p>
+                  <p className="text-sm font-medium text-text">TikTok</p>
+                  <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <span
-                className={cn(
-                  "rounded-full px-3 py-1 text-xs font-medium",
-                  oauthProviders.includes("google")
-                    ? "bg-success-surface text-success"
-                    : "bg-surface text-text-muted"
-                )}
+              <button
+                type="button"
+                onClick={() => handlePublishConnect("TikTok")}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
-                {oauthProviders.includes("google") ? "Linked" : "Not linked"}
-              </span>
+                Connect
+              </button>
+            </div>
+
+            {/* Twitter/X */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                  <Twitter className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text">Twitter / X</p>
+                  <p className="text-xs text-text-secondary">Not connected</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handlePublishConnect("Twitter/X")}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
+              >
+                Connect
+              </button>
+            </div>
+
+            {/* Instagram */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-500/10">
+                  <Instagram className="h-5 w-5 text-pink-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text">Instagram</p>
+                  <p className="text-xs text-text-secondary">Not connected</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handlePublishConnect("Instagram")}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
+              >
+                Connect
+              </button>
             </div>
           </div>
         </div>
