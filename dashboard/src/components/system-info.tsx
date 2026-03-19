@@ -14,6 +14,7 @@ interface SystemInfoData {
   num_cpu: number;
   go_version: string;
   cpu_usage: number;
+  cpu_per_core: number[];
   memory_total: number;
   memory_used: number;
   memory_free: number;
@@ -26,7 +27,7 @@ interface SystemInfoData {
   uptime_seconds: number;
 }
 
-const REFRESH_INTERVAL = 5_000;
+const REFRESH_INTERVAL = 2_000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2_000;
 
@@ -218,6 +219,26 @@ export function SystemInfo(): React.ReactElement {
                 label="CPU"
                 detail={`${info.num_cpu} cores`}
               />
+
+              {info.cpu_per_core && info.cpu_per_core.length > 0 && (
+                <div className="mt-1 space-y-0.5">
+                  {info.cpu_per_core.map((core, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-8 text-[10px] text-text-dim">C{i}</span>
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            core > 90 ? "bg-danger" : core > 70 ? "bg-warning" : "bg-success"
+                          )}
+                          style={{ width: `${Math.min(core, 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-10 text-right text-[10px] text-text-dim">{core.toFixed(0)}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <ProgressBar
                 value={info.memory_usage}

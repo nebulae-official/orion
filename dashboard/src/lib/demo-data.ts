@@ -273,6 +273,7 @@ export interface DemoSystemInfo {
   num_cpu: number;
   go_version: string;
   cpu_usage: number;
+  cpu_per_core: number[];
   memory_total: number;
   memory_used: number;
   memory_free: number;
@@ -293,6 +294,7 @@ export const demoSystemInfo: DemoSystemInfo = {
   num_cpu: 16,
   go_version: "go1.24.1",
   cpu_usage: 23.5,
+  cpu_per_core: [18.2, 31.5, 12.8, 45.1, 8.3, 22.7, 35.0, 19.4, 27.6, 14.2, 38.9, 10.5, 29.3, 16.8, 42.1, 20.0],
   memory_total: 68_719_476_736,
   memory_used: 34_359_738_368,
   memory_free: 34_359_738_368,
