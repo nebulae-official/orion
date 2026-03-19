@@ -1,5 +1,5 @@
 ---
-description: Go service development rules for gateway and CLI
+description: Go service development rules for the gateway
 globs: ["cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go"]
 ---
 
@@ -42,4 +42,3 @@ globs: ["cmd/**/*.go", "internal/**/*.go", "pkg/**/*.go"]
 - Chi 5.x for routing
 - pgx 5.x for PostgreSQL
 - go-redis 9.x for Redis
-- Cobra 1.9.x + Viper for CLI

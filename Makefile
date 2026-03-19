@@ -138,10 +138,10 @@ py-typecheck: ## Run mypy on all services
 	done
 
 .PHONY: py-format
-py-format: ## Format all Python code with black
+py-format: ## Format all Python code with ruff
 	@for svc in $(SERVICES); do \
 		echo "==> Formatting $$svc"; \
-		(cd services/$$svc && uv run black src/ tests/); \
+		(cd services/$$svc && uv run ruff format src/ tests/); \
 	done
 
 # ==============================================================================
@@ -159,6 +159,10 @@ dash-build: ## Build dashboard for production
 .PHONY: dash-test
 dash-test: ## Run dashboard tests
 	cd dashboard && npm test
+
+.PHONY: dash-e2e
+dash-e2e: ## Run Playwright E2E tests for dashboard
+	cd dashboard && npx playwright test
 
 .PHONY: dash-lint
 dash-lint: ## Run dashboard linter
@@ -230,6 +234,13 @@ setup: ## Run initial project setup
 .PHONY: seed
 seed: ## Seed the database with initial data
 	./scripts/seed-db.sh
+
+.PHONY: seed-demo
+seed-demo: ## Generate dummy data and print demo mode instructions
+	python3 scripts/generate_dummy_data.py
+	@echo ""
+	@echo "Fixtures generated in scripts/fixtures/"
+	@echo "Start dashboard with: NEXT_PUBLIC_DEMO_MODE=true make dash-dev"
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit hooks on all files

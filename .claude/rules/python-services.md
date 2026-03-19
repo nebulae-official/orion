@@ -38,7 +38,7 @@ globs: ["services/**/*.py", "libs/**/*.py"]
 
 ## Linting
 - ruff for linting and import sorting
-- black for formatting (line-length 88)
+- ruff format for formatting (line-length 88)
 - mypy for type checking (strict mode)
 
 ## FastAPI Patterns

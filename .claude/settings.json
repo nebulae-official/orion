@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; case \"$f\" in *.py) cd \"$(git rev-parse --show-toplevel)\" && uv run ruff check --fix \"$f\" 2>/dev/null; uv run ruff format \"$f\" 2>/dev/null;; esac; } || true",
+            "timeout": 15,
+            "statusMessage": "Auto-formatting Python..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | { read -r cmd; case \"$cmd\" in 'git commit'*) cd \"$(git rev-parse --show-toplevel)\" && uv run ruff check cli/src/ services/ libs/ 2>/dev/null;; esac; } || true",
+            "timeout": 30,
+            "statusMessage": "Lint checking before commit..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"Session complete. Remember to run make test-all before pushing.\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
