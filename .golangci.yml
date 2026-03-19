@@ -10,19 +10,26 @@ linters:
 
   settings:
     errcheck:
+      check-type-assertions: false
+      check-blank: false
       exclude-functions:
-        # HTTP response writing — errors indicate the client disconnected,
-        # which the server cannot meaningfully handle.
         - (net/http.ResponseWriter).Write
         - (*net/http.ResponseWriter).Write
         - fmt.Fprint
         - fmt.Fprintf
         - fmt.Fprintln
-
-        # Closing resources — errors on Close are rarely actionable.
         - (io.Closer).Close
         - (*os.File).Close
-
-        # JSON encoding to response writers — wrapped by the above but
-        # called through an intermediate encoder.
         - (*encoding/json.Encoder).Encode
+
+issues:
+  exclude-rules:
+    # Allow unchecked Close() on any type — rarely actionable
+    - linters: [errcheck]
+      source: "\\.(Close|close)\\("
+    # Allow deprecated proxy.Director — migration to Rewrite is a separate task
+    - linters: [staticcheck]
+      text: "SA1019.*Director"
+    # Allow De Morgan's law suggestion — style preference
+    - linters: [staticcheck]
+      text: "QF1001"
