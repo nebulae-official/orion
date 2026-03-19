@@ -270,6 +270,10 @@ seed-demo: ## Generate dummy data and print demo mode instructions
 	@echo "Fixtures generated in scripts/fixtures/"
 	@echo "Start dashboard with: NEXT_PUBLIC_DEMO_MODE=true make dash-dev"
 
+.PHONY: metrics-collector
+metrics-collector: ## Start WSL host metrics collector (for accurate Windows metrics)
+	python3 scripts/wsl-metrics-collector.py
+
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit hooks on all files
 	pre-commit run --all-files

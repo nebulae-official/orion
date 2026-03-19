@@ -59,6 +59,8 @@ services:
       - ../.env
     environment:
       - IDENTITY_URL=http://identity:8007
+    volumes:
+      - /tmp/orion-host-metrics.json:/tmp/orion-host-metrics.json:ro
     depends_on:
       migrations:
         condition: service_completed_successfully

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -63,86 +62,56 @@ func isWSL2() bool {
 	return wsl2Result
 }
 
-// ---- Cached Windows host metrics via PowerShell -----------------------------
+// ---- Windows host metrics via sidecar JSON file ----------------------------
+//
+// The WSL metrics collector (scripts/wsl-metrics-collector.py) runs on the WSL2
+// host and writes Windows metrics to /tmp/orion-host-metrics.json every 2s.
+// This file is volume-mounted into the gateway container as read-only.
+// We read this file instead of calling powershell.exe directly because Docker
+// containers inside WSL2 do not have access to Windows interop (powershell.exe).
 
-type windowsMetricsCache struct {
-	mu        sync.Mutex
-	memTotal  uint64
-	memUsed   uint64
-	memFree   uint64
-	diskTotal uint64
-	diskUsed  uint64
-	diskFree  uint64
-	updatedAt time.Time
-	ttl       time.Duration
+const hostMetricsFile = "/tmp/orion-host-metrics.json"
+
+// hostMetricsMaxAge is the maximum age before host metrics are considered stale.
+const hostMetricsMaxAge = 10 * time.Second
+
+// hostMetrics represents the JSON written by wsl-metrics-collector.py.
+type hostMetrics struct {
+	MemoryTotal uint64  `json:"memory_total"`
+	MemoryFree  uint64  `json:"memory_free"`
+	MemoryUsed  uint64  `json:"memory_used"`
+	DiskTotal   uint64  `json:"disk_total"`
+	DiskFree    uint64  `json:"disk_free"`
+	DiskUsed    uint64  `json:"disk_used"`
+	CPUUsage    float64 `json:"cpu_usage"`
+	Source      string  `json:"source"`
+	Timestamp   string  `json:"timestamp"`
 }
 
-var winCache = &windowsMetricsCache{ttl: 5 * time.Second}
-
-// refreshIfStale refreshes memory and disk metrics from PowerShell if the cache
-// has expired. It is safe for concurrent use.
-func (c *windowsMetricsCache) refreshIfStale(ctx context.Context) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if time.Since(c.updatedAt) < c.ttl {
-		return
-	}
-	// Fetch memory and disk in a single PowerShell invocation to save startup cost.
-	psScript := `
-$os = Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize, FreePhysicalMemory
-$dk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" | Select-Object Size, FreeSpace
-@{ mem = $os; disk = $dk } | ConvertTo-Json -Compress
-`
-	cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(cmdCtx, "powershell.exe", "-NoProfile", "-NonInteractive", "-Command", psScript).Output()
+// readHostMetrics reads the sidecar metrics file and returns the parsed metrics.
+// It returns an error if the file does not exist, cannot be parsed, or is stale.
+func readHostMetrics() (*hostMetrics, error) {
+	data, err := os.ReadFile(hostMetricsFile)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("host metrics file not found: %w (start the WSL metrics collector with 'make metrics-collector')", err)
 	}
 
-	var result struct {
-		Mem struct {
-			TotalVisibleMemorySize json.Number `json:"TotalVisibleMemorySize"`
-			FreePhysicalMemory     json.Number `json:"FreePhysicalMemory"`
-		} `json:"mem"`
-		Disk struct {
-			Size      json.Number `json:"Size"`
-			FreeSpace json.Number `json:"FreeSpace"`
-		} `json:"disk"`
-	}
-	if err := json.Unmarshal(out, &result); err != nil {
-		return
+	var m hostMetrics
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, fmt.Errorf("host metrics parse error: %w", err)
 	}
 
-	// Memory values from WMI are in KB.
-	totalKB, _ := result.Mem.TotalVisibleMemorySize.Int64()
-	freeKB, _ := result.Mem.FreePhysicalMemory.Int64()
-	c.memTotal = uint64(totalKB) * 1024
-	c.memFree = uint64(freeKB) * 1024
-	c.memUsed = c.memTotal - c.memFree
+	// Check freshness via the file's modification time (simpler than parsing
+	// the embedded timestamp and avoids timezone/format issues).
+	info, err := os.Stat(hostMetricsFile)
+	if err != nil {
+		return nil, err
+	}
+	if time.Since(info.ModTime()) > hostMetricsMaxAge {
+		return nil, fmt.Errorf("host metrics are stale (last updated %s ago)", time.Since(info.ModTime()).Round(time.Second))
+	}
 
-	// Disk values are in bytes.
-	diskSize, _ := result.Disk.Size.Int64()
-	diskFree, _ := result.Disk.FreeSpace.Int64()
-	c.diskTotal = uint64(diskSize)
-	c.diskFree = uint64(diskFree)
-	c.diskUsed = c.diskTotal - c.diskFree
-
-	c.updatedAt = time.Now()
-}
-
-func (c *windowsMetricsCache) getMemory(ctx context.Context) (total, used, free uint64) {
-	c.refreshIfStale(ctx)
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.memTotal, c.memUsed, c.memFree
-}
-
-func (c *windowsMetricsCache) getDisk(ctx context.Context) (total, used, free uint64) {
-	c.refreshIfStale(ctx)
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.diskTotal, c.diskUsed, c.diskFree
+	return &m, nil
 }
 
 // SystemInfoHandler returns a handler that reports host system information.
@@ -191,17 +160,18 @@ func gatherSystemInfo2(ctx context.Context, useHost bool) SystemInfo {
 	metricsSource := "linux"
 
 	if useHost && isWSL2() {
-		// Windows host metrics via cached PowerShell calls.
-		memTotal, memUsed, memFree = winCache.getMemory(ctx)
-		diskTotal, diskUsed, diskFree = winCache.getDisk(ctx)
-		metricsSource = "windows_host"
-
-		// Fallback to Linux if PowerShell returned zeros (e.g. first-call failure).
-		if memTotal == 0 {
+		// Windows host metrics via sidecar JSON file.
+		if hm, err := readHostMetrics(); err == nil {
+			memTotal = hm.MemoryTotal
+			memUsed = hm.MemoryUsed
+			memFree = hm.MemoryFree
+			diskTotal = hm.DiskTotal
+			diskUsed = hm.DiskUsed
+			diskFree = hm.DiskFree
+			metricsSource = "windows_host"
+		} else {
+			// Fallback to Linux /proc metrics when collector is not running.
 			memTotal, memUsed, memFree, _ = getMemoryInfo()
-			metricsSource = "linux"
-		}
-		if diskTotal == 0 {
 			var stat syscall.Statfs_t
 			_ = syscall.Statfs("/", &stat)
 			diskTotal = stat.Blocks * uint64(stat.Bsize)
