@@ -116,3 +116,8 @@ Scout supports niche-specific filtering with customizable keywords:
   "niche": "technology"
 }
 ```
+
+---
+
+!!! tip ":lucide-book-open: Visual Guide Available"
+    See the **[Trend Monitoring Guide](../guides/trend-monitoring.md)** for a visual walkthrough of how trends are displayed and managed in the dashboard.

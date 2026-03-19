@@ -15,9 +15,8 @@ Wait for all services to become healthy:
 # Watch container health status
 docker compose -f deploy/docker-compose.yml ps
 
-# Or check through the CLI (build it first)
-make build
-./bin/orion health --all
+# Or check through the CLI
+cd cli && uv run orion system health
 ```
 
 !!! info "Startup time"
@@ -30,7 +29,7 @@ You need a JWT token to interact with the API. The default development credentia
 === "CLI"
 
     ```bash
-    ./bin/orion auth login
+    orion auth login
     # Username: admin
     # Password: orion_dev
     ```
@@ -38,7 +37,7 @@ You need a JWT token to interact with the API. The default development credentia
     Verify your session:
 
     ```bash
-    ./bin/orion auth status
+    orion auth whoami
     ```
 
 === "curl"
@@ -73,7 +72,7 @@ Kick off the Scout service to detect trending topics from external sources.
 
     ```bash
     # Scan Google Trends and RSS feeds in the US region
-    ./bin/orion scout trigger --sources google,rss --regions US
+    orion scout trigger --sources google,rss --regions US
     ```
 
 === "curl"
@@ -105,13 +104,13 @@ After a scan completes, Scout publishes `orion.trend.detected` events to Redis. 
 
     ```bash
     # List the top 5 trends
-    ./bin/orion scout trends --limit 5
+    orion scout trends --limit 5
 
     # Filter by minimum score
-    ./bin/orion scout trends --limit 10 --min-score 0.7
+    orion scout trends --limit 10 --min-score 0.7
 
     # View current scout configuration
-    ./bin/orion scout config --show
+    orion scout config --show
     ```
 
 === "curl"
@@ -129,10 +128,10 @@ When Scout detects a trend, the Director service automatically picks it up via R
 
     ```bash
     # List content currently being generated
-    ./bin/orion content list --status generating
+    orion content list --status generating
 
     # List all content with any status
-    ./bin/orion content list --limit 20
+    orion content list --limit 20
     ```
 
 === "curl"
@@ -155,25 +154,25 @@ Content goes through a human-in-the-loop review stage before publishing.
 
 ```bash
 # View content awaiting review
-./bin/orion content list --status review
+orion content list --status review
 
 # View full details of a content item (script, assets, metadata)
-./bin/orion content view <content-id>
+orion content view <content-id>
 
 # Approve content for immediate publishing
-./bin/orion content approve <content-id>
+orion content approve <content-id>
 
 # Approve with scheduled publish time
-./bin/orion content approve <content-id> --schedule-at 2026-03-14T10:00:00Z
+orion content approve <content-id> --schedule-at 2026-03-14T10:00:00Z
 
 # Reject content with feedback
-./bin/orion content reject <content-id> --feedback "Tone is too casual" --action REGENERATE
+orion content reject <content-id> --feedback "Tone is too casual" --action REGENERATE
 
 # Request regeneration with guidance
-./bin/orion content regenerate <content-id> --feedback "Make it more technical"
+orion content regenerate <content-id> --feedback "Make it more technical"
 
 # Check final publish status
-./bin/orion content view <content-id>
+orion content view <content-id>
 ```
 
 ---
@@ -217,3 +216,10 @@ Each service communicates exclusively through Redis pub/sub — there are no dir
 - **[API Endpoints](../api/endpoints.md)** — REST API documentation for programmatic access
 - **[LangGraph Pipeline](../langgraph/index.md)** — Understand the content creation graph
 - **[Docker Deployment](../deployment/docker.md)** — Production deployment and scaling
+
+---
+
+!!! tip ":lucide-book-open: Explore Further"
+    - **[Demo Mode](../guides/demo-mode.md)** — Run the dashboard without backend services using demo data
+    - **[Full Pipeline Demo](../guides/demo-full-pipeline.md)** — Walk through the complete content pipeline end-to-end
+    - **[Dashboard Tour](../guides/dashboard-overview.md)** — Visual tour of every dashboard page

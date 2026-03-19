@@ -14,6 +14,7 @@ Orion combines a high-performance Go API gateway with Python FastAPI microservic
 [:material-rocket-launch: Getting Started](getting-started/index.md){ .md-button .md-button--primary }
 [:material-book-open-variant: API Reference](api/index.md){ .md-button }
 [:material-console: CLI Reference](services/cli.md){ .md-button }
+[:lucide-book-open: Guides & Tutorials](guides/index.md){ .md-button }
 
 </div>
 
@@ -60,7 +61,7 @@ graph TB
 
     subgraph Frontend["Frontend"]
         DB["Next.js Dashboard :3000"]
-        CLI["Go CLI"]
+        CLI["Python CLI"]
     end
 
     RSS --> SC
@@ -179,13 +180,57 @@ Next.js 15 admin dashboard on port `3000`. Built with React 19 Server Components
 
 ---
 
+## :lucide-book-open: Guides & Tutorials
+
+Visual walkthroughs with screenshots for every part of the platform.
+
+<div class="grid cards" markdown>
+
+-   :lucide-monitor:{ .lg .middle } __Dashboard Tour__
+
+    ---
+
+    Complete visual walkthrough of every dashboard page with screenshots.
+
+    [:material-arrow-right: Take the tour](guides/dashboard-overview.md)
+
+-   :lucide-play:{ .lg .middle } __Demo Mode__
+
+    ---
+
+    Explore the dashboard instantly using demo data — no backend needed.
+
+    [:material-arrow-right: Try demo mode](guides/demo-mode.md)
+
+-   :lucide-workflow:{ .lg .middle } __Full Pipeline Demo__
+
+    ---
+
+    Run the complete content pipeline from trend detection to publishing.
+
+    [:material-arrow-right: Run the pipeline](guides/demo-full-pipeline.md)
+
+-   :lucide-terminal:{ .lg .middle } __CLI Quickstart__
+
+    ---
+
+    Authenticate, trigger scans, manage content, and publish from the CLI.
+
+    [:material-arrow-right: Start with CLI](guides/cli-quickstart.md)
+
+</div>
+
+[:material-arrow-right: See all guides](guides/index.md){ .md-button }
+
+---
+
 ## :material-tools: Tech Stack
 
 | Layer         | Technology       | Version        |
 | ------------- | ---------------- | -------------- |
-| Gateway & CLI | Go               | 1.24           |
+| Gateway       | Go               | 1.24           |
 | Router        | Chi              | 5.x            |
-| CLI Framework | Cobra            | 1.9.x          |
+| CLI           | Python + Typer   | 3.13 / 0.15.x  |
 | AI Services   | Python + FastAPI | 3.13 / 0.115.x |
 | Validation    | Pydantic         | 2.10.x         |
 | ORM           | SQLAlchemy       | 2.0.x          |
@@ -205,7 +250,7 @@ Next.js 15 admin dashboard on port `3000`. Built with React 19 Server Components
 ### Build and run
 
 ```bash
-# Build the Go gateway and CLI binaries
+# Build the Go gateway binary
 make build
 
 # Run the gateway locally (port 8000)
@@ -239,30 +284,33 @@ cd dashboard && npm test
 
 ### CLI usage
 
+The CLI is a Python/Typer tool. Install via `cd cli && uv sync`.
+
 ```bash
 # Authenticate with the gateway
-./bin/orion auth login
+orion auth login
 
 # Check system health
-./bin/orion health --all
+orion system health
 
 # Show system status (mode, GPU, queue depth)
-./bin/orion status
+orion system status
 
 # Trigger a trend scan
-./bin/orion scout trigger --sources google,rss --regions US
+orion scout trigger --sources google,rss --regions US
 
 # List detected trends
-./bin/orion scout trends --limit 10 --min-score 0.5
+orion scout trends --limit 10 --min-score 0.5
 
 # List content by status
-./bin/orion content list --status review
+orion content list --status review
 
 # Approve content for publishing
-./bin/orion content approve <content-id>
+orion content approve <content-id>
 
-# View service logs
-./bin/orion system logs scout --tail 100
+# Run CLI tests and linting
+make cli-test
+make cli-lint
 ```
 
 ---
@@ -276,3 +324,5 @@ cd dashboard && npm test
 - [:material-graph: LangGraph Pipeline](langgraph/index.md) — Content creation graph with HITL gates
 - [:material-cog: Configuration](getting-started/configuration.md) — Environment variables and service settings
 - [:material-chart-bar: Monitoring](monitoring/index.md) — Prometheus, Grafana, and alerting
+- [:lucide-book-open: Guides & Tutorials](guides/index.md) — Visual walkthroughs with screenshots
+- [:lucide-monitor: Dashboard Tour](guides/dashboard-overview.md) — See every page of the admin dashboard

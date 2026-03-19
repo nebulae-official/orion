@@ -1,4 +1,4 @@
-# Monitoring
+# :lucide-activity: Monitoring
 
 Orion includes a built-in observability stack with Prometheus for metrics collection, Grafana for visualization, and structured logging via slog (Go) and structlog (Python).
 
@@ -42,7 +42,36 @@ graph TB
 
 ## :material-book-open-variant: Sections
 
-- [Prometheus](prometheus.md) -- Scrape configuration and metrics
-- [Grafana](grafana.md) -- Dashboards and datasources
-- [Alerts](alerts.md) -- Alert rules and notification
-- [Logging](logging.md) -- Structured logging setup
+<div class="grid cards" markdown>
+
+-   :lucide-gauge: **[Prometheus](prometheus.md)**
+
+    ---
+
+    Scrape configuration and metrics
+
+-   :lucide-bar-chart-3: **[Grafana](grafana.md)**
+
+    ---
+
+    Dashboards and datasources
+
+-   :lucide-bell: **[Alerts](alerts.md)**
+
+    ---
+
+    Alert rules and notification
+
+-   :lucide-scroll-text: **[Logging](logging.md)**
+
+    ---
+
+    Structured logging setup
+
+</div>
+
+---
+
+!!! tip ":lucide-book-open: Visual Guides"
+    - **[System Administration](../guides/system-admin.md)** — Monitor service health and GPU usage in the dashboard
+    - **[Monitoring Demo](../guides/demo-monitoring.md)** — Set up Prometheus, Grafana, and alerting

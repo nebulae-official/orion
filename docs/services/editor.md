@@ -162,3 +162,8 @@ flowchart LR
 | Direction  | Channel                 | Description                   |
 | ---------- | ----------------------- | ----------------------------- |
 | Subscribed | `orion.media.generated` | Auto-triggers render pipeline |
+
+---
+
+!!! tip ":lucide-book-open: Visual Guide Available"
+    See the **[Provider Setup Guide](../guides/demo-provider-setup.md)** for configuring TTS and video generation providers.

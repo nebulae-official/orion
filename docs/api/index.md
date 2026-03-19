@@ -1,4 +1,4 @@
-# API Reference
+# :lucide-plug: API Reference
 
 The Orion API is accessed through the Go gateway on port `8000`. All service endpoints are proxied through the gateway with JWT authentication.
 
@@ -49,7 +49,30 @@ All service endpoints follow the pattern:
 
 ## :material-book-open-variant: Sections
 
-- [Authentication](authentication.md) -- JWT login, refresh, and token usage
-- [Endpoints](endpoints.md) -- Full endpoint reference by service
-- [WebSocket](websocket.md) -- Real-time event streaming
-- [Errors](errors.md) -- Error codes and response formats
+<div class="grid cards" markdown>
+
+-   :lucide-key: **[Authentication](authentication.md)**
+
+    ---
+
+    JWT login, refresh, and token usage
+
+-   :lucide-route: **[Endpoints](endpoints.md)**
+
+    ---
+
+    Full endpoint reference by service
+
+-   :lucide-radio-tower: **[WebSocket](websocket.md)**
+
+    ---
+
+    Real-time event streaming
+
+-   :lucide-alert-circle: **[Errors](errors.md)**
+
+    ---
+
+    Error codes and response formats
+
+</div>

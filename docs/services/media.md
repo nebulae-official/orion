@@ -139,3 +139,8 @@ flowchart LR
 | Published  | `orion.media.generated` | Images generated successfully  |
 | Published  | `orion.media.failed`    | Image generation failed        |
 | Subscribed | `orion.content.created` | Auto-triggers batch generation |
+
+---
+
+!!! tip ":lucide-book-open: Visual Guide Available"
+    See the **[Provider Setup Guide](../guides/demo-provider-setup.md)** for configuring local and cloud image generation providers.

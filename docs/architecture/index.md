@@ -1,4 +1,4 @@
-# Architecture
+# :lucide-boxes: Architecture
 
 Orion follows a microservices architecture with an event-driven communication model. A Go gateway acts as the single entry point, routing HTTP requests to six Python FastAPI services that communicate through Redis pub/sub.
 
@@ -7,7 +7,7 @@ Orion follows a microservices architecture with an event-driven communication mo
 ```mermaid
 graph LR
     subgraph Clients["Client Layer"]
-        CLI["Go CLI"]
+        CLI["Python CLI"]
         Dash["Next.js Dashboard"]
         WS["WebSocket Clients"]
     end
@@ -70,7 +70,30 @@ graph LR
 
 ## :material-book-open-variant: Further Reading
 
-- [Data Flow](data-flow.md) -- How data moves through the pipeline
-- [Communication](communication.md) -- Redis pub/sub event system
-- [Database](database.md) -- Schema and relationships
-- [Security](security.md) -- Authentication and authorization model
+<div class="grid cards" markdown>
+
+-   :lucide-workflow: **[Data Flow](data-flow.md)**
+
+    ---
+
+    How data moves through the pipeline
+
+-   :lucide-radio: **[Communication](communication.md)**
+
+    ---
+
+    Redis pub/sub event system
+
+-   :lucide-database: **[Database](database.md)**
+
+    ---
+
+    Schema and relationships
+
+-   :lucide-shield: **[Security](security.md)**
+
+    ---
+
+    Authentication and authorization model
+
+</div>

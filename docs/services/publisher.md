@@ -83,3 +83,8 @@ Get publishing history.
 | Direction | Channel                   | Description                    |
 | --------- | ------------------------- | ------------------------------ |
 | Published | `orion.content.published` | Content successfully published |
+
+---
+
+!!! tip ":lucide-book-open: Visual Guide Available"
+    See the **[Content Workflow Guide](../guides/content-workflow.md)** for a step-by-step walkthrough of managing content through the publishing pipeline.

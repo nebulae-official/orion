@@ -1,6 +1,6 @@
-# Services
+# :lucide-server: Services
 
-Orion is composed of nine distinct components: a Go HTTP gateway that serves as the single entry point, six Python FastAPI microservices that handle the AI content pipeline, a Next.js admin dashboard, and a Go CLI for terminal-based control.
+Orion is composed of nine distinct components: a Go HTTP gateway that serves as the single entry point, six Python FastAPI microservices that handle the AI content pipeline, a Next.js admin dashboard, and a Python CLI for terminal-based control.
 
 All external traffic enters through the Gateway, which handles authentication, rate limiting, and request proxying. The Python services communicate with each other exclusively through Redis pub/sub events — there are no direct HTTP calls between them. This decoupled architecture allows each service to be developed, tested, deployed, and scaled independently.
 
@@ -26,7 +26,7 @@ graph TB
     end
 
     subgraph Clients["Clients"]
-        CLI["Go CLI"]
+        CLI["Python CLI"]
         DASH["Dashboard :3000"]
     end
 
@@ -37,17 +37,63 @@ graph TB
 
 ## :material-table: Port Assignments
 
-| Service                   | Port | Language    | Framework           | Description                                        |
-| ------------------------- | ---- | ----------- | ------------------- | -------------------------------------------------- |
-| [Gateway](gateway.md)     | 8000 | Go 1.24     | Chi 5.x             | HTTP gateway, auth, rate limiting, WebSocket       |
-| [Scout](scout.md)         | 8001 | Python 3.13 | FastAPI             | Trend detection from external sources              |
-| [Director](director.md)   | 8002 | Python 3.13 | FastAPI + LangGraph | Pipeline orchestration with HITL gates             |
-| [Media](media.md)         | 8003 | Python 3.13 | FastAPI             | Image generation (ComfyUI / Fal.ai)                |
-| [Editor](editor.md)       | 8004 | Python 3.13 | FastAPI             | Video rendering (TTS, stitching, subtitles)        |
-| [Pulse](pulse.md)         | 8005 | Python 3.13 | FastAPI             | Analytics, cost tracking, pipeline history         |
-| [Publisher](publisher.md) | 8006 | Python 3.13 | FastAPI             | Social media publishing (Twitter, YouTube, TikTok) |
-| [Dashboard](dashboard.md) | 3000 | TypeScript  | Next.js 15.2        | Admin UI with real-time monitoring                 |
-| [CLI](cli.md)             | —    | Go 1.24     | Cobra 1.9.x         | Terminal interface for the gateway API             |
+<div class="grid cards" markdown>
+
+-   :lucide-router: **[Gateway](gateway.md)** — Port 8000
+
+    ---
+
+    Go 1.24 / Chi 5.x — HTTP gateway, auth, rate limiting, WebSocket
+
+-   :lucide-radar: **[Scout](scout.md)** — Port 8001
+
+    ---
+
+    Python 3.13 / FastAPI — Trend detection from external sources
+
+-   :lucide-clapperboard: **[Director](director.md)** — Port 8002
+
+    ---
+
+    Python 3.13 / FastAPI + LangGraph — Pipeline orchestration with HITL gates
+
+-   :lucide-image: **[Media](media.md)** — Port 8003
+
+    ---
+
+    Python 3.13 / FastAPI — Image generation (ComfyUI / Fal.ai)
+
+-   :lucide-film: **[Editor](editor.md)** — Port 8004
+
+    ---
+
+    Python 3.13 / FastAPI — Video rendering (TTS, stitching, subtitles)
+
+-   :lucide-bar-chart: **[Pulse](pulse.md)** — Port 8005
+
+    ---
+
+    Python 3.13 / FastAPI — Analytics, cost tracking, pipeline history
+
+-   :lucide-send: **[Publisher](publisher.md)** — Port 8006
+
+    ---
+
+    Python 3.13 / FastAPI — Social media publishing (Twitter, YouTube, TikTok)
+
+-   :lucide-monitor: **[Dashboard](dashboard.md)** — Port 3000
+
+    ---
+
+    TypeScript / Next.js 15.2 — Admin UI with real-time monitoring
+
+-   :lucide-terminal: **[CLI](cli.md)**
+
+    ---
+
+    Python 3.13 / Typer 0.15.x — Terminal interface for the gateway API
+
+</div>
 
 ## :material-check-circle: Health Endpoints
 
@@ -62,7 +108,7 @@ Every service exposes standardized health endpoints for container orchestration 
 Check all services at once through the CLI:
 
 ```bash
-./bin/orion health --all
+orion system health
 ```
 
 Or use Docker Compose to inspect container health:

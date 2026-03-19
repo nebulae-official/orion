@@ -1,4 +1,4 @@
-# Deployment
+# :lucide-cloud-upload: Deployment
 
 Orion is designed for containerized deployment using Docker Compose, with support for development, staging, and production environments.
 
@@ -45,7 +45,30 @@ graph TB
 
 ## :material-book-open-variant: Sections
 
-- [Docker](docker.md) -- Docker Compose configuration and service details
-- [Production](production.md) -- Production deployment checklist
-- [Monitoring](monitoring.md) -- Prometheus, Grafana, and alerting setup
-- [CI/CD](ci-cd.md) -- GitHub Actions workflows
+<div class="grid cards" markdown>
+
+-   :lucide-container: **[Docker](docker.md)**
+
+    ---
+
+    Docker Compose configuration and service details
+
+-   :lucide-server: **[Production](production.md)**
+
+    ---
+
+    Production deployment checklist
+
+-   :lucide-activity: **[Monitoring](monitoring.md)**
+
+    ---
+
+    Prometheus, Grafana, and alerting setup
+
+-   :lucide-git-merge: **[CI/CD](ci-cd.md)**
+
+    ---
+
+    GitHub Actions workflows
+
+</div>

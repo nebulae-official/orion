@@ -27,6 +27,20 @@ nav = [
     { "Configuration" = "getting-started/configuration.md" },
     { "Troubleshooting" = "getting-started/troubleshooting.md" },
   ]},
+  { "Guides" = [
+    { "Overview" = "guides/index.md" },
+    { "Dashboard Tour" = "guides/dashboard-overview.md" },
+    { "Content Workflow" = "guides/content-workflow.md" },
+    { "Trend Monitoring" = "guides/trend-monitoring.md" },
+    { "Analytics Guide" = "guides/analytics-guide.md" },
+    { "System Administration" = "guides/system-admin.md" },
+    { "CLI Quickstart" = "guides/cli-quickstart.md" },
+    { "Demo Mode" = "guides/demo-mode.md" },
+    { "Demo Pipeline" = "guides/demo-full-pipeline.md" },
+    { "Provider Setup" = "guides/demo-provider-setup.md" },
+    { "CLI Workflow Demo" = "guides/demo-cli-workflow.md" },
+    { "Monitoring Demo" = "guides/demo-monitoring.md" },
+  ]},
   { "Architecture" = [
     { "Overview" = "architecture/index.md" },
     { "Data Flow" = "architecture/data-flow.md" },
@@ -105,17 +119,34 @@ features = [
     "navigation.instant.prefetch",
     "navigation.path",
     "navigation.sections",
+    "navigation.tabs",
+    "navigation.tabs.sticky",
     "navigation.top",
     "navigation.tracking",
     "search.highlight",
+    "search.suggest",
 ]
 
 [project.theme.icon]
 logo = "lucide/orbit"
 
-#[project.theme.font]
-#text = "Inter"
-#code = "Jetbrains Mono"
+[project.theme.icon.admonition]
+note = "lucide/sticky-note"
+abstract = "lucide/file-text"
+info = "lucide/info"
+tip = "lucide/lightbulb"
+success = "lucide/check-circle"
+question = "lucide/help-circle"
+warning = "lucide/alert-triangle"
+failure = "lucide/x-circle"
+danger = "lucide/zap"
+bug = "lucide/bug"
+example = "lucide/flask-conical"
+quote = "lucide/quote"
+
+[project.theme.font]
+text = "Inter"
+code = "JetBrains Mono"
 
 [[project.theme.palette]]
 scheme = "default"
@@ -160,3 +191,27 @@ extensions = [
     "pymdownx.tabbed",
     "pymdownx.tasklist",
 ]
+
+# Mermaid diagram support
+[[project.markdown.extensions_configs."pymdownx.superfences".custom_fences]]
+name = "mermaid"
+class = "mermaid"
+format = "pymdownx.superfences.fence_code_format"
+
+# Tabbed content with alternate style
+[project.markdown.extensions_configs."pymdownx.tabbed"]
+alternate_style = true
+
+# Task list with clickable checkboxes
+[project.markdown.extensions_configs."pymdownx.tasklist"]
+custom_checkbox = true
+
+# Emoji/icon provider
+[project.markdown.extensions_configs."pymdownx.emoji"]
+emoji_index = "pymdownx.emoji.twemoji"
+emoji_generator = "pymdownx.emoji.to_svg"
+
+# Table of contents settings
+[project.markdown.extensions_configs.toc]
+permalink = true
+toc_depth = 3

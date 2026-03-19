@@ -45,6 +45,11 @@ dashboard/
 - **`cn()` helper** -- Combines `clsx` + `tailwind-merge` for conditional classes
 - **Strict TypeScript** -- No `any` types
 
+### Key Pages
+
+- **System Health** -- System overview (host info, resource bars), service status with uptime/queue sizes for all 7 services, infrastructure panel (Redis/PostgreSQL), and multi-GPU monitoring with 1-second polling
+- **Settings** -- Tabbed interface with four tabs: Providers (provider/model config with Test Connection and Model Parameters), API Keys (manage cloud provider keys), Pipeline (generation, trend detection, and publishing settings), and System (dashboard preferences, data management, environment info)
+
 ## :material-cog: Configuration
 
 | Variable                  | Default                 | Description          |
@@ -66,3 +71,8 @@ cd dashboard && npm run start
 # Lint
 cd dashboard && npm run lint
 ```
+
+---
+
+!!! tip ":lucide-book-open: Visual Guide Available"
+    See the **[Dashboard Tour](../guides/dashboard-overview.md)** for a complete walkthrough of every page with screenshots, or try **[Demo Mode](../guides/demo-mode.md)** to explore without a backend.

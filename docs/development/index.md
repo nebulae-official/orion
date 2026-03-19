@@ -1,17 +1,48 @@
-# Development
+# :lucide-code: Development
 
 Guide for developing and contributing to the Orion platform.
 
 ## :material-book-open-variant: Sections
 
-| Guide                                     | Description                                       |
-| ----------------------------------------- | ------------------------------------------------- |
-| [Project Structure](project-structure.md) | Repository layout and conventions                 |
-| [Adding Services](adding-services.md)     | How to create a new Python microservice           |
-| [Testing](testing.md)                     | Testing strategies for Go, Python, and TypeScript |
-| [Code Style](code-style.md)               | Linting, formatting, and code conventions         |
-| [Migrations](migrations.md)               | Database schema migrations with Alembic           |
-| [Git Workflow](git-workflow.md)           | Branch strategy and commit conventions            |
+<div class="grid cards" markdown>
+
+-   :lucide-folder-tree: **[Project Structure](project-structure.md)**
+
+    ---
+
+    Repository layout and conventions
+
+-   :lucide-plus-circle: **[Adding Services](adding-services.md)**
+
+    ---
+
+    How to create a new Python microservice
+
+-   :lucide-test-tube: **[Testing](testing.md)**
+
+    ---
+
+    Testing strategies for Go, Python, and TypeScript
+
+-   :lucide-palette: **[Code Style](code-style.md)**
+
+    ---
+
+    Linting, formatting, and code conventions
+
+-   :lucide-database: **[Migrations](migrations.md)**
+
+    ---
+
+    Database schema migrations with Alembic
+
+-   :lucide-git-branch: **[Git Workflow](git-workflow.md)**
+
+    ---
+
+    Branch strategy and commit conventions
+
+</div>
 
 ## :material-tools: Quick Reference
 
