@@ -120,7 +120,7 @@ docker compose -f deploy/docker-compose.yml logs director
 ### Enable verbose CLI output
 
 ```bash
-./bin/orion --verbose content list
+orion content list
 ```
 
 ### Check request ID

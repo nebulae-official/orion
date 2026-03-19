@@ -8,6 +8,7 @@ All Orion services are containerized and orchestrated via Docker Compose.
 | ------------------------------- | ----------------------------------------------- |
 | `deploy/docker-compose.yml`     | Main compose file with all services             |
 | `deploy/docker-compose.dev.yml` | Development overrides (hot reload, debug ports) |
+| `deploy/docker-compose.e2e.yml` | E2E test environment with mock servers          |
 
 ## :material-play: Starting Services
 

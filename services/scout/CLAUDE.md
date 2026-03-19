@@ -5,8 +5,8 @@ Monitors external sources (RSS, social media, news APIs) to detect trending topi
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8001
+uv sync
+uv run uvicorn src.main:app --reload --port 8001
 ```
 
 ## Responsibilities

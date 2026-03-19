@@ -1,0 +1,308 @@
+[
+  {
+    "id": "926a9bfa-63bf-4189-8638-de99931aa843",
+    "topic": "AI Agents Replace Junior Devs \u2014 Hype or Reality?",
+    "niche": "tech",
+    "virality_score": 0.813,
+    "score": 0.813,
+    "source": "google_trends",
+    "keywords": [
+      "ai",
+      "agents",
+      "replace",
+      "junior"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-15T01:01:37.776400+00:00",
+    "created_at": "2026-03-15T18:26:17.531034+00:00"
+  },
+  {
+    "id": "f450c57c-88e0-4452-b3b2-aa896d6954f3",
+    "topic": "Rust Adoption Surges in Enterprise Backend Systems",
+    "niche": "tech",
+    "virality_score": 0.861,
+    "score": 0.861,
+    "source": "rss",
+    "keywords": [
+      "rust",
+      "adoption",
+      "surges",
+      "in"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-06T09:39:52.834803+00:00",
+    "created_at": "2026-03-17T16:13:32.027950+00:00"
+  },
+  {
+    "id": "58471368-f3b1-4d8c-bf2e-de595605edf7",
+    "topic": "Apple Vision Pro 2 Leak Sparks AR/VR Debate",
+    "niche": "tech",
+    "virality_score": 0.707,
+    "score": 0.707,
+    "source": "twitter",
+    "keywords": [
+      "apple",
+      "vision",
+      "pro",
+      "2"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-15T19:58:28.745577+00:00",
+    "created_at": "2026-03-11T19:38:15.483409+00:00"
+  },
+  {
+    "id": "77cf4a1a-edfa-4f3d-82f8-0de6cd83a2ed",
+    "topic": "Open-Source LLMs Close the Gap on GPT-5",
+    "niche": "tech",
+    "virality_score": 0.513,
+    "score": 0.513,
+    "source": "google_trends",
+    "keywords": [
+      "open-source",
+      "llms",
+      "close",
+      "the"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-09T19:04:33.023961+00:00",
+    "created_at": "2026-03-11T06:20:12.024961+00:00"
+  },
+  {
+    "id": "d2973737-37ee-460a-8c6b-528f0d1a1300",
+    "topic": "Kubernetes 1.32 Drops Docker Support Entirely",
+    "niche": "tech",
+    "virality_score": 0.608,
+    "score": 0.608,
+    "source": "rss",
+    "keywords": [
+      "kubernetes",
+      "1.32",
+      "drops",
+      "docker"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-07T13:28:06.159502+00:00",
+    "created_at": "2026-03-18T19:15:12.340192+00:00"
+  },
+  {
+    "id": "760dc66f-8039-4dd0-aeff-6c56c4eb7b7c",
+    "topic": "WebAssembly Enters the Server-Side Mainstream",
+    "niche": "tech",
+    "virality_score": 0.895,
+    "score": 0.895,
+    "source": "twitter",
+    "keywords": [
+      "webassembly",
+      "enters",
+      "the",
+      "server-side"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-14T03:06:46.215119+00:00",
+    "created_at": "2026-03-16T17:11:45.236927+00:00"
+  },
+  {
+    "id": "e6fc1d27-a51b-479e-a3dc-1f577c6d93b5",
+    "topic": "GTA VI Trailer Breaks YouTube Record in 4 Hours",
+    "niche": "gaming",
+    "virality_score": 0.969,
+    "score": 0.969,
+    "source": "twitter",
+    "keywords": [
+      "gta",
+      "vi",
+      "trailer",
+      "breaks"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-17T14:16:27.867746+00:00",
+    "created_at": "2026-03-17T12:56:25.110481+00:00"
+  },
+  {
+    "id": "7fbed1ad-b033-4846-a690-7aa2f4ad095f",
+    "topic": "Nintendo Switch 2 Specs Confirmed by FCC Filing",
+    "niche": "gaming",
+    "virality_score": 0.915,
+    "score": 0.915,
+    "source": "rss",
+    "keywords": [
+      "nintendo",
+      "switch",
+      "2",
+      "specs"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-07T14:14:30.880546+00:00",
+    "created_at": "2026-03-08T16:14:49.670714+00:00"
+  },
+  {
+    "id": "ce0b391b-6b34-45eb-87a7-c74cae0a8563",
+    "topic": "Indie Roguelike Tops Steam Charts for Third Week",
+    "niche": "gaming",
+    "virality_score": 0.763,
+    "score": 0.763,
+    "source": "google_trends",
+    "keywords": [
+      "indie",
+      "roguelike",
+      "tops",
+      "steam"
+    ],
+    "status": "DISCARDED",
+    "detected_at": "2026-03-13T14:14:58.057228+00:00",
+    "created_at": "2026-03-11T03:57:04.892311+00:00"
+  },
+  {
+    "id": "8ec03e39-8398-40f3-ab83-bb715304ad50",
+    "topic": "Cloud Gaming Latency Finally Under 20ms on 5G",
+    "niche": "gaming",
+    "virality_score": 0.906,
+    "score": 0.906,
+    "source": "twitter",
+    "keywords": [
+      "cloud",
+      "gaming",
+      "latency",
+      "finally"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-06T19:54:12.573283+00:00",
+    "created_at": "2026-03-10T19:26:48.084996+00:00"
+  },
+  {
+    "id": "e3607f4d-a2b6-4d9e-b1fb-52b04436be62",
+    "topic": "Unreal Engine 6 Preview Stuns at GDC 2026",
+    "niche": "gaming",
+    "virality_score": 0.845,
+    "score": 0.845,
+    "source": "rss",
+    "keywords": [
+      "unreal",
+      "engine",
+      "6",
+      "preview"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-15T16:51:47.485671+00:00",
+    "created_at": "2026-03-14T20:12:09.559126+00:00"
+  },
+  {
+    "id": "6fe13834-bb69-4947-b697-433cb9b4cfa9",
+    "topic": "Fed Signals Rate Cut \u2014 Crypto Markets Rally",
+    "niche": "finance",
+    "virality_score": 0.539,
+    "score": 0.539,
+    "source": "google_trends",
+    "keywords": [
+      "fed",
+      "signals",
+      "rate",
+      "cut"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-17T11:30:01.910885+00:00",
+    "created_at": "2026-03-15T00:02:16.369577+00:00"
+  },
+  {
+    "id": "090a4924-55d8-4533-832d-e614e9aa5206",
+    "topic": "Stripe Launches AI-Powered Fraud Detection Suite",
+    "niche": "finance",
+    "virality_score": 0.811,
+    "score": 0.811,
+    "source": "rss",
+    "keywords": [
+      "stripe",
+      "launches",
+      "ai-powered",
+      "fraud"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-13T17:03:22.342074+00:00",
+    "created_at": "2026-03-15T23:02:33.535478+00:00"
+  },
+  {
+    "id": "0600957f-43f0-4608-bbc9-1ed24b69d708",
+    "topic": "DeFi TVL Crosses $200B for First Time Since 2022",
+    "niche": "finance",
+    "virality_score": 0.631,
+    "score": 0.631,
+    "source": "twitter",
+    "keywords": [
+      "defi",
+      "tvl",
+      "crosses",
+      "$200b"
+    ],
+    "status": "DISCARDED",
+    "detected_at": "2026-03-09T19:41:49.637905+00:00",
+    "created_at": "2026-03-10T08:46:08.375444+00:00"
+  },
+  {
+    "id": "17a80887-c962-404f-ac93-dd3561358bde",
+    "topic": "EU Digital Euro Pilot Begins in Five Countries",
+    "niche": "finance",
+    "virality_score": 0.584,
+    "score": 0.584,
+    "source": "google_trends",
+    "keywords": [
+      "eu",
+      "digital",
+      "euro",
+      "pilot"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-16T14:32:01.583445+00:00",
+    "created_at": "2026-03-13T13:56:23.937549+00:00"
+  },
+  {
+    "id": "b52b57cf-f0f5-4929-9471-8907eecfd389",
+    "topic": "Robinhood Adds Options Trading for Commodities",
+    "niche": "finance",
+    "virality_score": 0.985,
+    "score": 0.985,
+    "source": "rss",
+    "keywords": [
+      "robinhood",
+      "adds",
+      "options",
+      "trading"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-11T02:18:06.829829+00:00",
+    "created_at": "2026-03-09T07:24:23.841902+00:00"
+  },
+  {
+    "id": "2a227db1-2ba4-4df0-bdfb-8d1bc4d4b803",
+    "topic": "BRICS Payment Network Gains Momentum",
+    "niche": "finance",
+    "virality_score": 0.913,
+    "score": 0.913,
+    "source": "twitter",
+    "keywords": [
+      "brics",
+      "payment",
+      "network",
+      "gains"
+    ],
+    "status": "USED",
+    "detected_at": "2026-03-15T16:28:36.692051+00:00",
+    "created_at": "2026-03-18T10:39:04.784873+00:00"
+  },
+  {
+    "id": "7a6d736b-5839-482d-8ae1-5d8d57792618",
+    "topic": "SEC Approves Spot Ethereum ETF Options",
+    "niche": "finance",
+    "virality_score": 0.655,
+    "score": 0.655,
+    "source": "google_trends",
+    "keywords": [
+      "sec",
+      "approves",
+      "spot",
+      "ethereum"
+    ],
+    "status": "NEW",
+    "detected_at": "2026-03-15T22:32:48.392297+00:00",
+    "created_at": "2026-03-05T16:37:09.649439+00:00"
+  }
+]

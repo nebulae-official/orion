@@ -106,13 +106,13 @@ curl http://localhost:8188/system_stats
 
 ```bash
 # Switch Media to Fal.ai cloud
-./bin/orion provider switch media --mode CLOUD --provider fal_ai
+orion provider switch media --mode CLOUD --provider fal_ai
 
 # Switch back to local ComfyUI
-./bin/orion provider switch media --mode LOCAL --provider comfyui
+orion provider switch media --mode LOCAL --provider comfyui
 
 # View all active providers and their status
-./bin/orion provider status
+orion provider status
 ```
 
 ## :material-monitor-dashboard: Dashboard

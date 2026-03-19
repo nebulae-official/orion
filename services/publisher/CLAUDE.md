@@ -5,8 +5,8 @@ Social media publishing service — posts approved content to connected platform
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8006
+uv sync
+uv run uvicorn src.main:app --reload --port 8006
 ```
 
 ## Responsibilities

@@ -5,8 +5,8 @@ Generates images and other media assets using ComfyUI and local diffusion models
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8003
+uv sync
+uv run uvicorn src.main:app --reload --port 8003
 ```
 
 ## Responsibilities

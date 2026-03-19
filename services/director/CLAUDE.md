@@ -5,8 +5,8 @@ Orchestrates the content creation pipeline — receives trend signals and coordi
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8002
+uv sync
+uv run uvicorn src.main:app --reload --port 8002
 ```
 
 ## Responsibilities

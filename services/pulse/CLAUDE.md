@@ -5,8 +5,8 @@ Tracks analytics and performance metrics for published content — views, engage
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8005
+uv sync
+uv run uvicorn src.main:app --reload --port 8005
 ```
 
 ## Responsibilities

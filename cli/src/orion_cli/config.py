@@ -6,7 +6,6 @@ from pathlib import Path
 
 import structlog
 import tomli
-import tomli_w
 
 logger = structlog.get_logger()
 

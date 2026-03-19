@@ -9,8 +9,6 @@ orion/
   cmd/
     gateway/              # Go HTTP gateway entry point
       main.go
-    cli/                  # Go CLI entry point
-      main.go
   internal/
     gateway/              # Gateway internals (not importable externally)
       router/             # Chi router setup, route definitions
@@ -19,6 +17,23 @@ orion/
       proxy/              # Reverse proxy to Python services
   pkg/
     config/               # Shared Go configuration
+  cli/                    # Python/Typer CLI
+    src/
+      orion_cli/
+        main.py           # Typer app entry point
+        client.py         # HTTP client for gateway
+        config.py         # Config management (~/.orion/config.toml)
+        output.py         # Output formatting (table, JSON, plain)
+        commands/          # Command modules
+          auth.py          # Authentication (login, logout, whoami)
+          system.py        # System health and status
+          scout.py         # Trend management
+          content.py       # Content lifecycle
+          pipeline.py      # Pipeline runs
+          publish.py       # Publishing and social accounts
+          admin.py         # Admin operations
+    tests/
+    pyproject.toml
   services/
     scout/                # Trend detection service (:8001)
       src/
@@ -90,9 +105,24 @@ orion/
       lib/                # Utilities, API client
     package.json
     tsconfig.json
+  tests/
+    e2e/                  # End-to-end tests
+      mocks/              # Mock servers for E2E
+      test_golden_path.py
+      test_auth_flow.py
+      test_event_flow.py
+      test_error_recovery.py
+    benchmark/            # Performance benchmarks
+      test_gateway_throughput.py
+      test_event_bus_latency.py
+      test_db_query_perf.py
+      test_pipeline_latency.py
+      locustfile.py       # Locust load test
+      baselines.json      # Benchmark baselines
   deploy/
     docker-compose.yml    # Main compose file
     docker-compose.dev.yml # Dev overrides
+    docker-compose.e2e.yml # E2E test environment
     prometheus.yml        # Prometheus config
     grafana/              # Grafana provisioning
   migrations/             # Alembic migrations
@@ -105,7 +135,7 @@ orion/
     workflows/
       ci.yml              # CI pipeline
       build.yml           # Build pipeline
-  Makefile                # Go build targets
+  Makefile                # Build, test, lint, and deploy targets
   .env.example            # Environment template
 ```
 

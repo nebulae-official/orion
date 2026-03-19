@@ -1,0 +1,72 @@
+[
+  {
+    "id": "b56f6f77-823e-4091-88c1-0b78b370f9ec",
+    "content_id": "02cf01da-331b-40c3-b26c-a3ea367f5b28",
+    "platform": "youtube",
+    "platform_post_id": null,
+    "status": "pending",
+    "error_message": null,
+    "published_at": null,
+    "created_at": "2026-03-13T19:35:52.509870+00:00"
+  },
+  {
+    "id": "2f25ac79-4edc-4a6e-98af-cb7fff814caa",
+    "content_id": "02cf01da-331b-40c3-b26c-a3ea367f5b28",
+    "platform": "twitter",
+    "platform_post_id": "c7465800-a29",
+    "status": "published",
+    "error_message": null,
+    "published_at": "2026-03-18T08:28:53.729478+00:00",
+    "created_at": "2026-03-13T19:35:52.509870+00:00"
+  },
+  {
+    "id": "81a18c50-65df-4498-ae74-05bf1388253e",
+    "content_id": "02cf01da-331b-40c3-b26c-a3ea367f5b28",
+    "platform": "tiktok",
+    "platform_post_id": null,
+    "status": "pending",
+    "error_message": null,
+    "published_at": null,
+    "created_at": "2026-03-13T19:35:52.509870+00:00"
+  },
+  {
+    "id": "25fa9ed4-d947-4b1e-9b51-31de20a2fac0",
+    "content_id": "b8883edf-fa17-490e-af12-f5b2eb13a581",
+    "platform": "youtube",
+    "platform_post_id": "35d43ee0-8ee",
+    "status": "published",
+    "error_message": null,
+    "published_at": "2026-03-18T03:38:13.027214+00:00",
+    "created_at": "2026-03-13T14:09:07.667122+00:00"
+  },
+  {
+    "id": "0ec50b5c-b4f0-4737-aab8-7efa40e0069c",
+    "content_id": "b8883edf-fa17-490e-af12-f5b2eb13a581",
+    "platform": "twitter",
+    "platform_post_id": "782fe256-b47",
+    "status": "published",
+    "error_message": null,
+    "published_at": "2026-03-15T18:31:08.082370+00:00",
+    "created_at": "2026-03-13T14:09:07.667122+00:00"
+  },
+  {
+    "id": "d35aa094-5162-411c-82ea-2c7e3fd7d8a5",
+    "content_id": "48adb310-f315-42f6-b450-dea3ed76bdfe",
+    "platform": "instagram",
+    "platform_post_id": null,
+    "status": "pending",
+    "error_message": null,
+    "published_at": null,
+    "created_at": "2026-03-13T08:39:46.065569+00:00"
+  },
+  {
+    "id": "b19c17ae-ddde-42f8-89f7-fa519611a7ca",
+    "content_id": "e2b83cbb-4bfe-45b4-8c6f-589fd61e58b6",
+    "platform": "twitter",
+    "platform_post_id": null,
+    "status": "pending",
+    "error_message": null,
+    "published_at": null,
+    "created_at": "2026-03-13T12:33:50.874426+00:00"
+  }
+]

@@ -17,8 +17,8 @@ This section walks you through setting up a local development environment, launc
 | -------------- | --------------- | ---------------------------------------- |
 | Docker         | 24.x            | Container runtime for all services       |
 | Docker Compose | 2.20+           | Multi-container orchestration            |
-| Go             | 1.24            | Gateway and CLI development              |
-| Python         | 3.13            | AI microservices                         |
+| Go             | 1.24            | Gateway development                      |
+| Python         | 3.13            | AI microservices and CLI                 |
 | Node.js        | 22 LTS          | Dashboard frontend                       |
 | uv             | latest          | Python package management (replaces pip) |
 | Make           | any             | Build automation                         |

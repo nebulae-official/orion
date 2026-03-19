@@ -5,8 +5,8 @@ Generates and refines written content using local LLMs via Ollama.
 ## Dev
 
 ```bash
-pip install -e .
-uvicorn src.main:app --reload --port 8004
+uv sync
+uv run uvicorn src.main:app --reload --port 8004
 ```
 
 ## Responsibilities

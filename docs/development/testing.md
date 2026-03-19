@@ -120,31 +120,71 @@ cd dashboard && npm run test:watch
 
 ---
 
-## :material-docker: Integration Tests
-
-Docker Compose integration tests validate the full service stack:
+## :material-test-tube: CLI Tests
 
 ```bash
-# Start services
-docker compose -f deploy/docker-compose.yml up -d
+# Run CLI tests
+make cli-test
 
-# Wait for health
-./bin/orion health --all
+# Or directly
+cd cli && uv run pytest
+```
 
-# Run integration tests
-go test -tags=integration ./tests/integration/...
+---
 
-# Tear down
-docker compose -f deploy/docker-compose.yml down
+## :material-docker: E2E Tests
+
+End-to-end tests validate the full service stack using mock servers and Docker Compose:
+
+```bash
+# Run E2E test suite
+make test-e2e
+```
+
+This uses `deploy/docker-compose.e2e.yml` with mock servers in `tests/e2e/mocks/`. Tests cover:
+
+- **Golden path** — Full pipeline from trend detection to publishing
+- **Auth flow** — Login, token refresh, and authorization
+- **Event flow** — Redis pub/sub event propagation between services
+- **Error recovery** — Service failure handling and retry logic
+
+---
+
+## :material-speedometer: Performance Benchmarks
+
+### pytest-benchmark
+
+```bash
+# Run benchmark suite
+make bench
+```
+
+Benchmarks in `tests/benchmark/` measure:
+
+- Gateway throughput (`test_gateway_throughput.py`)
+- Event bus latency (`test_event_bus_latency.py`)
+- Database query performance (`test_db_query_perf.py`)
+- Pipeline end-to-end latency (`test_pipeline_latency.py`)
+
+Baselines are stored in `tests/benchmark/baselines.json`.
+
+### Locust load testing
+
+```bash
+# Start Locust web UI at :8089
+make load-test
 ```
 
 ---
 
 ## :material-format-list-checks: Testing Checklist
 
-| Component       | Tool        | Command                     | Coverage Target |
-| --------------- | ----------- | --------------------------- | --------------- |
-| Go gateway      | `go test`   | `make test`                 | --              |
-| Python services | pytest      | `pytest` per service        | 80%+            |
-| Dashboard       | Jest/Vitest | `npm test`                  | --              |
-| Integration     | Docker + Go | `go test -tags=integration` | --              |
+| Component       | Tool             | Command          | Coverage Target |
+| --------------- | ---------------- | ---------------- | --------------- |
+| Go gateway      | `go test`        | `make test`      | --              |
+| Python services | pytest           | `make py-test`   | 80%+            |
+| CLI             | pytest           | `make cli-test`  | --              |
+| Dashboard       | Jest/Vitest      | `make dash-test` | --              |
+| E2E             | pytest + Docker  | `make test-e2e`  | --              |
+| Benchmarks      | pytest-benchmark | `make bench`     | --              |
+| Load testing    | Locust           | `make load-test` | --              |

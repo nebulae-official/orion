@@ -85,7 +85,7 @@ Expected response:
 docker compose -f deploy/docker-compose.yml ps
 
 # Check health of all services through the gateway
-docker compose -f deploy/docker-compose.yml exec gateway ./bin/orion health --all
+orion system health
 
 # View logs for a specific service
 docker compose -f deploy/docker-compose.yml logs scout --tail 50
@@ -104,27 +104,17 @@ docker compose -f deploy/docker-compose.yml down -v
 
 ## :material-language-go: Go Development Setup
 
-Required for working on the Gateway or CLI.
+Required for working on the Gateway.
 
-### Build binaries
+### Build the gateway
 
 ```bash
-# Build both gateway and CLI
+# Build gateway binary
 make build
 
-# Build just the gateway
+# Or build directly
 go build -o bin/gateway ./cmd/gateway
-
-# Build just the CLI with version info
-make build
 ```
-
-The `make build` command produces two binaries:
-
-| Binary    | Path          | Purpose             |
-| --------- | ------------- | ------------------- |
-| `gateway` | `bin/gateway` | HTTP gateway server |
-| `orion`   | `bin/orion`   | CLI tool            |
 
 ### Run and test
 
@@ -149,10 +139,34 @@ make lint
 
 # Clean build artifacts
 make clean
-
-# Check CLI version
-./bin/orion version
 ```
+
+---
+
+## :material-console: CLI Setup
+
+The CLI is a Python/Typer application and a uv workspace member.
+
+```bash
+cd cli
+uv sync
+uv run orion --help
+```
+
+Or use the Makefile:
+
+```bash
+# Run a CLI command
+make cli-dev ARGS="system health"
+
+# Run CLI tests
+make cli-test
+
+# Lint CLI code
+make cli-lint
+```
+
+Configuration is stored in `~/.orion/config.toml`. Authentication tokens are stored in `~/.orion/token`.
 
 ---
 

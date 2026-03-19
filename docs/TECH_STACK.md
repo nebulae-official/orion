@@ -27,10 +27,10 @@ Full version inventory for the Orion platform.
 
 | System     | Purpose                  | Version |
 | ---------- | ------------------------ | ------- |
-| PostgreSQL | Primary relational store | 16      |
+| PostgreSQL | Primary relational store | 17      |
 | SQLAlchemy | Python ORM               | ≥2.0.0  |
-| Redis      | Cache & message queue    | ≥7.0    |
-| Milvus     | Vector database          | 2.x     |
+| Redis      | Cache & message queue    | 7.4     |
+| Milvus     | Vector database          | 2.4     |
 
 ## AI / ML
 
@@ -53,3 +53,11 @@ Full version inventory for the Orion platform.
 | ------------ | ------------ | ------- |
 | Tailwind CSS | Utility CSS  | ≥4.0.0  |
 | TypeScript   | Type-safe JS | ≥5.x    |
+
+## Testing & Benchmarks
+
+| Library          | Purpose              | Version  |
+| ---------------- | -------------------- | -------- |
+| pytest           | Python test runner   | ≥8.3.0   |
+| pytest-benchmark | Performance benchmarks | ≥5.0.0 |
+| Locust           | Load testing         | ≥2.29.0  |

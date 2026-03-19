@@ -141,12 +141,11 @@ graph TB
 ```
 orion/
 ├── cmd/
-│   ├── gateway/          # Go HTTP gateway
-│   └── cli/              # Go CLI tool
+│   └── gateway/          # Go HTTP gateway
 ├── internal/
-│   ├── gateway/          # Handlers, middleware, proxy
-│   └── cli/              # Commands, client, output
+│   └── gateway/          # Handlers, middleware, proxy
 ├── pkg/                  # Shared Go packages
+├── cli/                  # Python/Typer CLI tool
 ├── services/
 │   ├── scout/            # Trend detection
 │   ├── director/         # Pipeline orchestration
@@ -160,7 +159,7 @@ orion/
 ├── deploy/               # Docker Compose + configs
 ├── migrations/           # Database migrations
 ├── docs/                 # Documentation site
-└── tests/                # Integration tests
+└── tests/                # E2E, benchmark, integration tests
 ```
 
 </td>
@@ -306,8 +305,8 @@ Built with the **Orion Nebula** design system — a space-inspired dark theme us
 
 | Tool                                               | Version | Purpose                |
 | -------------------------------------------------- | ------- | ---------------------- |
-| [Go](https://go.dev/dl/)                           | 1.24+   | Gateway and CLI        |
-| [Python](https://python.org)                       | 3.13+   | AI microservices       |
+| [Go](https://go.dev/dl/)                           | 1.24+   | Gateway                |
+| [Python](https://python.org)                       | 3.13+   | AI microservices + CLI |
 | [uv](https://docs.astral.sh/uv/)                   | latest  | Python package manager |
 | [Node.js](https://nodejs.org)                      | 22 LTS  | Dashboard              |
 | [Docker](https://docker.com)                       | latest  | Infrastructure         |
@@ -356,6 +355,9 @@ uv run uvicorn src.main:app --reload --port 8001
 # Terminal 4 — Run the dashboard
 cd dashboard
 npm install && npm run dev
+
+# Terminal 5 — Use the CLI
+cd cli && uv run orion --help
 ```
 
 <br />
@@ -364,15 +366,16 @@ npm install && npm run dev
 
 <table>
 <tr>
-<th width="33%">Go (Gateway + CLI)</th>
-<th width="33%">Python (Services)</th>
-<th width="34%">TypeScript (Dashboard)</th>
+<th width="25%">Go (Gateway)</th>
+<th width="25%">Python (Services)</th>
+<th width="25%">Python (CLI)</th>
+<th width="25%">TypeScript (Dashboard)</th>
 </tr>
 <tr>
 <td>
 
 ```bash
-make build       # Compile binaries
+make build       # Compile binary
 make run         # Run gateway
 make test        # Run tests
 make lint        # golangci-lint
@@ -393,6 +396,16 @@ make py-format    # Black formatting
 <td>
 
 ```bash
+make cli-dev     # Run CLI
+make cli-test    # Run CLI tests
+make cli-lint    # Ruff + mypy
+make cli-build   # Build wheel
+```
+
+</td>
+<td>
+
+```bash
 make dash-dev    # Dev server
 make dash-build  # Production build
 make dash-test   # Run tests
@@ -406,8 +419,11 @@ make dash-lint   # ESLint
 ### Run Everything
 
 ```bash
-make check       # All linters + type checkers (Go, Python, TypeScript)
-make test-all    # All tests across all languages
+make check       # All linters + type checkers (Go, Python, CLI, TypeScript)
+make test-all    # All tests across all languages (Go + Python + CLI + Dashboard)
+make test-e2e    # End-to-end tests against Docker stack
+make bench       # Performance benchmarks (pytest-benchmark)
+make load-test   # Locust load testing (opens web UI at :8089)
 ```
 
 ### Code Quality
@@ -432,6 +448,7 @@ Pre-commit hooks enforce quality gates on every commit:
 | `make down-clean` | Stop and remove all volumes (fresh start)                        |
 | `make logs`       | Follow container logs                                            |
 | `make ps`         | Show running services                                            |
+| `make test-e2e`   | Run E2E tests (uses `docker-compose.e2e.yml`)                    |
 
 ### Infrastructure
 
@@ -561,9 +578,10 @@ Copy `.env.example` to `.env` and customize for your environment.
 <th>Technology</th>
 <th>Version</th>
 </tr>
-<tr><td rowspan="3"><strong>Gateway</strong></td><td>Go</td><td>1.24</td></tr>
+<tr><td rowspan="2"><strong>Gateway</strong></td><td>Go</td><td>1.24</td></tr>
 <tr><td>Chi (router)</td><td>5.x</td></tr>
-<tr><td>Cobra (CLI)</td><td>1.9.x</td></tr>
+<tr><td rowspan="2"><strong>CLI</strong></td><td>Python</td><td>3.13</td></tr>
+<tr><td>Typer</td><td>0.15.x</td></tr>
 <tr><td rowspan="5"><strong>Services</strong></td><td>Python</td><td>3.13</td></tr>
 <tr><td>FastAPI</td><td>0.115.x</td></tr>
 <tr><td>Pydantic</td><td>2.10.x</td></tr>

@@ -184,7 +184,7 @@ Tokens expire after 24 hours by default. Re-authenticate:
 === "CLI"
 
     ```bash
-    ./bin/orion auth login
+    orion auth login
     ```
 
 === "curl"
@@ -214,7 +214,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
 ### Check current auth status
 
 ```bash
-./bin/orion auth status
+orion auth whoami
 # Shows: user, server URL, token expiry, and connection status
 ```
 

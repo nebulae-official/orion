@@ -45,3 +45,5 @@ site/
 # Test artifacts
 screenshots/
 .playwright-mcp/
+test-screenshots/
+.playwright-mcp/

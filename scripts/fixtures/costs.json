@@ -1,0 +1,812 @@
+[
+  {
+    "id": "3ec8253c-fc68-4741-868b-da6d67a45c21",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0057,
+    "currency": "USD",
+    "timestamp": "2026-03-18T21:26:13.239899+00:00",
+    "content_id": "a222cf02-631b-4049-adcb-1c4d73c49dcb"
+  },
+  {
+    "id": "7e3baeb9-38af-42ff-a3d4-17d8e318781b",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0433,
+    "currency": "USD",
+    "timestamp": "2026-03-17T21:26:13.239899+00:00",
+    "content_id": "7d16005d-a349-4ad6-8f55-e72f435caaab"
+  },
+  {
+    "id": "e5af1ffe-5a1c-4c9c-8109-ff1c8ec9877c",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0367,
+    "currency": "USD",
+    "timestamp": "2026-03-15T21:26:13.239899+00:00",
+    "content_id": "bce40f15-037e-4f4a-abb8-64c08fb6781a"
+  },
+  {
+    "id": "63bee4bd-cf58-4460-9c4f-60123a36732b",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0103,
+    "currency": "USD",
+    "timestamp": "2026-03-14T21:26:13.239899+00:00",
+    "content_id": "f82a1d86-dd7c-4110-b448-416b807d8e59"
+  },
+  {
+    "id": "59b9c826-a536-4436-9fcb-5fe4397614af",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0237,
+    "currency": "USD",
+    "timestamp": "2026-03-13T21:26:13.239899+00:00",
+    "content_id": "fb5e8dfb-95e8-4542-a6a8-7bcb101d8296"
+  },
+  {
+    "id": "6532ee80-70b4-4cc0-86aa-edb66a2b6768",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0432,
+    "currency": "USD",
+    "timestamp": "2026-03-12T21:26:13.239899+00:00",
+    "content_id": "b752b240-2a87-4712-8987-9e094e05eb8b"
+  },
+  {
+    "id": "7f3ea5ac-c95a-4a9a-9372-738e21e82f1a",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0275,
+    "currency": "USD",
+    "timestamp": "2026-03-11T21:26:13.239899+00:00",
+    "content_id": "d21ba52e-424e-4d5d-8ed2-7b53de67beef"
+  },
+  {
+    "id": "667c2a95-22df-4fa1-b457-2c153164f92a",
+    "provider": "ollama",
+    "category": "image_generation",
+    "amount": 0.0248,
+    "currency": "USD",
+    "timestamp": "2026-03-08T21:26:13.239899+00:00",
+    "content_id": "8cd144b9-a52c-4b95-93f9-c81d81b4fce0"
+  },
+  {
+    "id": "67a5cfcc-0cf3-463c-b8f8-e0261c4e5680",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0011,
+    "currency": "USD",
+    "timestamp": "2026-03-06T21:26:13.239899+00:00",
+    "content_id": "da0897e9-c72d-4e53-9a94-ee4c41f8f817"
+  },
+  {
+    "id": "d85e9e16-d34f-423f-805e-bb4b01b241f4",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0351,
+    "currency": "USD",
+    "timestamp": "2026-03-05T21:26:13.239899+00:00",
+    "content_id": "9fb871d1-1058-41eb-bfd9-220c49a80e20"
+  },
+  {
+    "id": "ccd27f4e-c9a5-4363-b198-420423fe45c4",
+    "provider": "ollama",
+    "category": "embedding",
+    "amount": 0.0248,
+    "currency": "USD",
+    "timestamp": "2026-03-04T21:26:13.239899+00:00",
+    "content_id": "de27af89-6923-47aa-a8aa-c0c3c8a07571"
+  },
+  {
+    "id": "66af47e0-d2a2-4814-a1f2-e0ac08c30090",
+    "provider": "ollama",
+    "category": "inference",
+    "amount": 0.0038,
+    "currency": "USD",
+    "timestamp": "2026-02-28T21:26:13.239899+00:00",
+    "content_id": "c528533d-5971-47ad-a25a-404ad4bd96ff"
+  },
+  {
+    "id": "492d98c6-de60-4b75-bb0b-7dcc31e2c84c",
+    "provider": "ollama",
+    "category": "embedding",
+    "amount": 0.027,
+    "currency": "USD",
+    "timestamp": "2026-02-27T21:26:13.239899+00:00",
+    "content_id": "309400e1-46fc-4fb5-aaf0-d212a218fa16"
+  },
+  {
+    "id": "950bac64-bdfa-4551-9c47-f4f9cac6007b",
+    "provider": "ollama",
+    "category": "image_generation",
+    "amount": 0.0043,
+    "currency": "USD",
+    "timestamp": "2026-02-25T21:26:13.239899+00:00",
+    "content_id": "3c323bdd-26b4-44f9-a366-b96c123a67b5"
+  },
+  {
+    "id": "2bc0ce8a-4998-4858-b018-45f314cd680a",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0446,
+    "currency": "USD",
+    "timestamp": "2026-02-24T21:26:13.239899+00:00",
+    "content_id": "51b8b93e-fa0b-416b-8d3a-24748a29dd0f"
+  },
+  {
+    "id": "5ddd1c29-997d-4b8c-abaa-173bc2cb2c84",
+    "provider": "ollama",
+    "category": "embedding",
+    "amount": 0.0332,
+    "currency": "USD",
+    "timestamp": "2026-02-22T21:26:13.239899+00:00",
+    "content_id": "58317dc7-5b3d-482c-a351-e3213d6aa134"
+  },
+  {
+    "id": "802b60b6-e5b2-4990-b001-151de4670bb1",
+    "provider": "ollama",
+    "category": "video_generation",
+    "amount": 0.011,
+    "currency": "USD",
+    "timestamp": "2026-02-21T21:26:13.239899+00:00",
+    "content_id": "f48888f7-947c-4327-9b0b-b35c32de94b8"
+  },
+  {
+    "id": "09780b47-ce4d-4de3-8779-b40706104221",
+    "provider": "ollama",
+    "category": "image_generation",
+    "amount": 0.0074,
+    "currency": "USD",
+    "timestamp": "2026-02-20T21:26:13.239899+00:00",
+    "content_id": "55ee4f76-bdd2-47b7-8ff6-025dba992925"
+  },
+  {
+    "id": "1f3f9e2c-d875-4a8a-b691-0b986092958b",
+    "provider": "ollama",
+    "category": "tts",
+    "amount": 0.0378,
+    "currency": "USD",
+    "timestamp": "2026-02-19T21:26:13.239899+00:00",
+    "content_id": "13c7ba19-34fa-4da2-b3cc-4f576a71ac62"
+  },
+  {
+    "id": "0f733eaf-4b2a-4e18-9431-6e2888abd5bc",
+    "provider": "ollama",
+    "category": "embedding",
+    "amount": 0.0046,
+    "currency": "USD",
+    "timestamp": "2026-02-17T21:26:13.239899+00:00",
+    "content_id": "0f0230b1-4b9e-4ea3-88b3-bddbf5e1b6f3"
+  },
+  {
+    "id": "14d42f19-d598-4fac-93dd-a041c654e9a8",
+    "provider": "comfyui",
+    "category": "inference",
+    "amount": 7.475,
+    "currency": "USD",
+    "timestamp": "2026-03-16T21:26:13.239899+00:00",
+    "content_id": "e11efac7-ad5d-40d1-8289-41ba5443c531"
+  },
+  {
+    "id": "b1df0d08-54ba-4306-ab3a-00c02fcbd30a",
+    "provider": "comfyui",
+    "category": "image_generation",
+    "amount": 3.7302,
+    "currency": "USD",
+    "timestamp": "2026-03-15T21:26:13.239899+00:00",
+    "content_id": "e8048c26-6a05-4ddb-988f-0ff466929764"
+  },
+  {
+    "id": "c15486f9-7237-4801-8d9b-82a7237853c0",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 5.2031,
+    "currency": "USD",
+    "timestamp": "2026-03-14T21:26:13.239899+00:00",
+    "content_id": "2d1f145a-c0e3-4921-b2f9-d3bd67b38b99"
+  },
+  {
+    "id": "2cf17884-8b30-4423-afce-bed3f711ade8",
+    "provider": "comfyui",
+    "category": "embedding",
+    "amount": 0.0764,
+    "currency": "USD",
+    "timestamp": "2026-03-13T21:26:13.239899+00:00",
+    "content_id": "e6bab21a-5069-4e0f-9515-e81ae237f058"
+  },
+  {
+    "id": "a8502a77-3b5e-4f1e-b94f-b4d77008714e",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 7.9206,
+    "currency": "USD",
+    "timestamp": "2026-03-12T21:26:13.239899+00:00",
+    "content_id": "f7affa6f-d525-4cea-bc26-54742c38c0eb"
+  },
+  {
+    "id": "b27c33a8-7ab7-4998-8212-505d7ea8d13b",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 0.99,
+    "currency": "USD",
+    "timestamp": "2026-03-10T21:26:13.239899+00:00",
+    "content_id": "2cb37f54-216b-40d3-a2e8-4d056d89fa53"
+  },
+  {
+    "id": "38e121f8-a8e8-4c1d-9ede-cfa69e58b57d",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 2.4021,
+    "currency": "USD",
+    "timestamp": "2026-03-08T21:26:13.239899+00:00",
+    "content_id": "809dac7a-2d89-4788-9798-559c9403b6a8"
+  },
+  {
+    "id": "7c79bec3-e59d-4be3-a5ed-6461116841fe",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 4.3009,
+    "currency": "USD",
+    "timestamp": "2026-03-06T21:26:13.239899+00:00",
+    "content_id": "64ea92b2-db4d-4e40-84d5-8a7f011bde0b"
+  },
+  {
+    "id": "a0b83a88-1b75-487b-b246-373f62e700dd",
+    "provider": "comfyui",
+    "category": "inference",
+    "amount": 0.7936,
+    "currency": "USD",
+    "timestamp": "2026-03-04T21:26:13.239899+00:00",
+    "content_id": "88bccc38-da06-41e8-90e8-e8c8c2bf703a"
+  },
+  {
+    "id": "4f1eedb3-36e9-47f8-ac81-be89431c615a",
+    "provider": "comfyui",
+    "category": "video_generation",
+    "amount": 0.3843,
+    "currency": "USD",
+    "timestamp": "2026-03-03T21:26:13.239899+00:00",
+    "content_id": "6c6da987-708a-4cb3-9cee-d20e3dbf64a5"
+  },
+  {
+    "id": "48269f47-8993-4c3e-9d6a-3da6d2bca70c",
+    "provider": "comfyui",
+    "category": "image_generation",
+    "amount": 5.4191,
+    "currency": "USD",
+    "timestamp": "2026-03-02T21:26:13.239899+00:00",
+    "content_id": "13c0d6ac-016e-4200-bd17-51a9604b25a5"
+  },
+  {
+    "id": "aec8a1cf-fe56-4caf-baa2-8a73064834eb",
+    "provider": "comfyui",
+    "category": "embedding",
+    "amount": 6.0011,
+    "currency": "USD",
+    "timestamp": "2026-02-28T21:26:13.239899+00:00",
+    "content_id": "7fe1aebe-5da9-4974-b966-1f463cc72b71"
+  },
+  {
+    "id": "0323a7b5-a32a-47f2-847a-404ab198da08",
+    "provider": "comfyui",
+    "category": "inference",
+    "amount": 0.6488,
+    "currency": "USD",
+    "timestamp": "2026-02-27T21:26:13.239899+00:00",
+    "content_id": "4efc0d09-5ca1-4adf-9b59-31ede2c93311"
+  },
+  {
+    "id": "6b713d08-7987-4038-ab67-53039257aa6b",
+    "provider": "comfyui",
+    "category": "image_generation",
+    "amount": 4.6421,
+    "currency": "USD",
+    "timestamp": "2026-02-26T21:26:13.239899+00:00",
+    "content_id": "66fbbc9e-ca18-499f-ba6e-b45bd032c0a2"
+  },
+  {
+    "id": "92666286-27a8-4c30-ac16-8523580f4131",
+    "provider": "comfyui",
+    "category": "embedding",
+    "amount": 4.7009,
+    "currency": "USD",
+    "timestamp": "2026-02-25T21:26:13.239899+00:00",
+    "content_id": "d91efa96-b813-44e9-9ed2-6b354f6c942b"
+  },
+  {
+    "id": "bf7280e7-b2ff-4ef3-a45e-e15ebfc10030",
+    "provider": "comfyui",
+    "category": "inference",
+    "amount": 2.6271,
+    "currency": "USD",
+    "timestamp": "2026-02-24T21:26:13.239899+00:00",
+    "content_id": "640b0a9b-95de-45b1-9eb3-af41e76599bc"
+  },
+  {
+    "id": "8ed41f49-d943-4c2c-9578-e9ea975458de",
+    "provider": "comfyui",
+    "category": "inference",
+    "amount": 7.6419,
+    "currency": "USD",
+    "timestamp": "2026-02-23T21:26:13.239899+00:00",
+    "content_id": "fe08e053-9e49-4403-bfb9-357dcb889875"
+  },
+  {
+    "id": "a89094f9-4245-41b7-822b-ba77c486f9a5",
+    "provider": "comfyui",
+    "category": "tts",
+    "amount": 8.2779,
+    "currency": "USD",
+    "timestamp": "2026-02-19T21:26:13.239899+00:00",
+    "content_id": "1f4a7fb6-18a0-4958-bf3d-f719eea90dff"
+  },
+  {
+    "id": "ee5aae0e-1d28-4201-9bbc-7847d8649db0",
+    "provider": "comfyui",
+    "category": "image_generation",
+    "amount": 7.3505,
+    "currency": "USD",
+    "timestamp": "2026-02-18T21:26:13.239899+00:00",
+    "content_id": "c62f0d67-1d2a-41a7-b5d8-6d5de2c2bbf0"
+  },
+  {
+    "id": "3e9314aa-6692-4e4a-8e89-7444db4c2f25",
+    "provider": "comfyui",
+    "category": "image_generation",
+    "amount": 7.4932,
+    "currency": "USD",
+    "timestamp": "2026-02-17T21:26:13.239899+00:00",
+    "content_id": "c6512b27-ba5b-47dc-8759-2ea28ba2f2f4"
+  },
+  {
+    "id": "178aff79-0c4e-4f7f-8bcd-9f404983d4be",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 6.6525,
+    "currency": "USD",
+    "timestamp": "2026-03-17T21:26:13.239899+00:00",
+    "content_id": "359aedd5-49ce-4dbb-9be0-c3365e9cb34d"
+  },
+  {
+    "id": "a4a94b05-0874-4f26-8f07-63705be09e2d",
+    "provider": "fal",
+    "category": "image_generation",
+    "amount": 2.2752,
+    "currency": "USD",
+    "timestamp": "2026-03-16T21:26:13.239899+00:00",
+    "content_id": "91e52d48-ba74-4da9-bf62-1cd9b2e6dd53"
+  },
+  {
+    "id": "e219c8c9-8a96-4525-9780-98a921bba786",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 3.2578,
+    "currency": "USD",
+    "timestamp": "2026-03-15T21:26:13.239899+00:00",
+    "content_id": "368bdb0d-4f0c-4c9e-a7cf-c4b9819cce63"
+  },
+  {
+    "id": "345fea93-3cca-43d5-b661-c13ea4835f33",
+    "provider": "fal",
+    "category": "image_generation",
+    "amount": 6.9428,
+    "currency": "USD",
+    "timestamp": "2026-03-13T21:26:13.239899+00:00",
+    "content_id": "7e8d683d-e4a5-45b3-a958-8995639d3eb9"
+  },
+  {
+    "id": "e0ff800a-207e-48b2-8604-c6def0e606ea",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 6.9764,
+    "currency": "USD",
+    "timestamp": "2026-03-12T21:26:13.239899+00:00",
+    "content_id": "2fad456e-b7f0-41b9-8c7c-12a38942f59a"
+  },
+  {
+    "id": "221f8731-2406-4c9e-8833-d872081ede59",
+    "provider": "fal",
+    "category": "image_generation",
+    "amount": 0.2109,
+    "currency": "USD",
+    "timestamp": "2026-03-11T21:26:13.239899+00:00",
+    "content_id": "b03d07f4-f7e3-420f-bbeb-000a60a252cd"
+  },
+  {
+    "id": "f1267aef-5a86-4257-a243-232f66e6a83b",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 8.2189,
+    "currency": "USD",
+    "timestamp": "2026-03-09T21:26:13.239899+00:00",
+    "content_id": "ef97df46-60c1-4350-8d71-89c9d154eda1"
+  },
+  {
+    "id": "f332ac72-62c8-4ef0-9caf-d147b44db153",
+    "provider": "fal",
+    "category": "tts",
+    "amount": 5.7791,
+    "currency": "USD",
+    "timestamp": "2026-03-07T21:26:13.239899+00:00",
+    "content_id": "0c6ceb9d-86e6-4d7b-bc35-7d9ae5946910"
+  },
+  {
+    "id": "f3e27b41-3fdb-4ae7-8cf4-ae870e82088a",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 7.9841,
+    "currency": "USD",
+    "timestamp": "2026-03-06T21:26:13.239899+00:00",
+    "content_id": "f0b0a040-839b-4d25-8dfb-13ad48688092"
+  },
+  {
+    "id": "fc92c069-0d9f-42ed-a406-ddb81748af24",
+    "provider": "fal",
+    "category": "image_generation",
+    "amount": 4.9392,
+    "currency": "USD",
+    "timestamp": "2026-03-04T21:26:13.239899+00:00",
+    "content_id": "d465b377-2a1d-49b3-9bed-290466ab4ea6"
+  },
+  {
+    "id": "de676766-3a82-466c-8547-4181c1180727",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 0.9303,
+    "currency": "USD",
+    "timestamp": "2026-03-03T21:26:13.239899+00:00",
+    "content_id": "c32792e4-3140-40d8-a11b-2de4aaaab989"
+  },
+  {
+    "id": "1d0f50d4-0615-4757-acbd-66c8fffd8058",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 3.715,
+    "currency": "USD",
+    "timestamp": "2026-03-02T21:26:13.239899+00:00",
+    "content_id": "18b2531a-9fb2-44d8-9c80-a09937d2fdae"
+  },
+  {
+    "id": "dd8f38f3-4a21-404e-a13f-3780f32f46ad",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 3.2803,
+    "currency": "USD",
+    "timestamp": "2026-03-01T21:26:13.239899+00:00",
+    "content_id": "d8bd6f31-ac2e-41d1-9006-99f7cae1ea3d"
+  },
+  {
+    "id": "05387225-483d-437b-a978-93244d8cc50b",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 0.3868,
+    "currency": "USD",
+    "timestamp": "2026-02-28T21:26:13.239899+00:00",
+    "content_id": "d59d6bce-3930-4bb0-bafd-86abcf7dbfe4"
+  },
+  {
+    "id": "93d05c12-feea-44dc-bac0-34dca1d6b661",
+    "provider": "fal",
+    "category": "embedding",
+    "amount": 7.8681,
+    "currency": "USD",
+    "timestamp": "2026-02-27T21:26:13.239899+00:00",
+    "content_id": "ff4a4f7f-e5f7-4827-a674-943ff39f57d5"
+  },
+  {
+    "id": "e381dafe-91fe-40da-b6dc-abdc56e02255",
+    "provider": "fal",
+    "category": "image_generation",
+    "amount": 3.1022,
+    "currency": "USD",
+    "timestamp": "2026-02-26T21:26:13.239899+00:00",
+    "content_id": "ab3eb2d4-23f3-45da-b61a-a64a20735665"
+  },
+  {
+    "id": "39727be4-d1c3-44a1-b97a-f5f5b40954c0",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 5.3006,
+    "currency": "USD",
+    "timestamp": "2026-02-24T21:26:13.239899+00:00",
+    "content_id": "79a137ac-4fc3-4547-8eb0-25a56fac25df"
+  },
+  {
+    "id": "3cd97104-a00f-411c-b50f-4b7a1fc0d1ae",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 6.1207,
+    "currency": "USD",
+    "timestamp": "2026-02-23T21:26:13.239899+00:00",
+    "content_id": "0044a16d-ade2-4291-9b19-8627ba57e1b5"
+  },
+  {
+    "id": "979c0807-7b96-47a0-aaf4-0a68eedc059f",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 5.6719,
+    "currency": "USD",
+    "timestamp": "2026-02-22T21:26:13.239899+00:00",
+    "content_id": "72091324-379a-4271-a65c-71465ea5a269"
+  },
+  {
+    "id": "b0de733e-4bc0-47ce-877e-b0bb03b0fcc8",
+    "provider": "fal",
+    "category": "video_generation",
+    "amount": 4.717,
+    "currency": "USD",
+    "timestamp": "2026-02-21T21:26:13.239899+00:00",
+    "content_id": "c6e53200-8eb2-4338-86e4-16c94658f02a"
+  },
+  {
+    "id": "f214bde2-eec1-483b-ab0c-ddc2815d70ec",
+    "provider": "fal",
+    "category": "tts",
+    "amount": 5.7604,
+    "currency": "USD",
+    "timestamp": "2026-02-19T21:26:13.239899+00:00",
+    "content_id": "ad3a5d2f-9bb4-47a7-9b44-c3e1994d3617"
+  },
+  {
+    "id": "0d785575-2163-4c62-8613-7f1c000baab3",
+    "provider": "fal",
+    "category": "embedding",
+    "amount": 4.8417,
+    "currency": "USD",
+    "timestamp": "2026-02-18T21:26:13.239899+00:00",
+    "content_id": "50f1dd45-c57f-46aa-a69a-629dc29d6221"
+  },
+  {
+    "id": "842a939e-16c6-4cec-8a4d-6e2bfa0dde40",
+    "provider": "fal",
+    "category": "inference",
+    "amount": 2.5899,
+    "currency": "USD",
+    "timestamp": "2026-02-17T21:26:13.239899+00:00",
+    "content_id": "e48c05c7-ea60-4eb1-8dc9-9ecbebc5538f"
+  },
+  {
+    "id": "e7d5be82-fd0c-459e-b467-55746949510f",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 0.9835,
+    "currency": "USD",
+    "timestamp": "2026-03-17T21:26:13.239899+00:00",
+    "content_id": "00142aef-04e9-4d2b-a40a-4dcd3475e7f0"
+  },
+  {
+    "id": "f4bb0f9a-cfa8-449e-8824-71b3f0c05dc0",
+    "provider": "elevenlabs",
+    "category": "image_generation",
+    "amount": 1.6081,
+    "currency": "USD",
+    "timestamp": "2026-03-16T21:26:13.239899+00:00",
+    "content_id": "c128a7d7-4909-48c4-aac2-f545f70f2952"
+  },
+  {
+    "id": "9c4983f6-97e3-448e-bd72-7d9680af1941",
+    "provider": "elevenlabs",
+    "category": "image_generation",
+    "amount": 0.6392,
+    "currency": "USD",
+    "timestamp": "2026-03-15T21:26:13.239899+00:00",
+    "content_id": "4de63cdc-4eb8-488f-9822-c5088cc0edd8"
+  },
+  {
+    "id": "102d7620-d033-4832-bd87-573ea70828fa",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 1.655,
+    "currency": "USD",
+    "timestamp": "2026-03-14T21:26:13.239899+00:00",
+    "content_id": "520405b9-a3a8-4b08-93aa-a94b5f5e7ae7"
+  },
+  {
+    "id": "a52b0cfc-46e5-4d94-871f-a632e4ac3e61",
+    "provider": "elevenlabs",
+    "category": "video_generation",
+    "amount": 0.4783,
+    "currency": "USD",
+    "timestamp": "2026-03-13T21:26:13.239899+00:00",
+    "content_id": "f5d1ca6e-a63d-427f-a740-be803626f5bb"
+  },
+  {
+    "id": "a97d3150-97ab-464e-81d5-518051f21dc6",
+    "provider": "elevenlabs",
+    "category": "inference",
+    "amount": 1.7837,
+    "currency": "USD",
+    "timestamp": "2026-03-10T21:26:13.239899+00:00",
+    "content_id": "968ce714-73e4-4ef4-b496-63c2eb218efb"
+  },
+  {
+    "id": "20c81348-827f-4947-897a-3ae9505c9382",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 0.5636,
+    "currency": "USD",
+    "timestamp": "2026-03-09T21:26:13.239899+00:00",
+    "content_id": "36ef2395-05be-4d8e-ad73-4fb57f8fa93c"
+  },
+  {
+    "id": "07cce4b6-6fb3-43c6-aaeb-67164f4579fb",
+    "provider": "elevenlabs",
+    "category": "inference",
+    "amount": 1.7348,
+    "currency": "USD",
+    "timestamp": "2026-03-08T21:26:13.239899+00:00",
+    "content_id": "fc707da8-df26-41f1-a596-3fd9e44bc509"
+  },
+  {
+    "id": "f919f1fd-69f4-4c83-9608-8fdc63c1c08d",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 1.6278,
+    "currency": "USD",
+    "timestamp": "2026-03-07T21:26:13.239899+00:00",
+    "content_id": "869a0aa2-4fdd-42a9-ba55-a6672c61f985"
+  },
+  {
+    "id": "f1ec70c4-e940-40bc-ab59-1af79df9f8ec",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 0.5735,
+    "currency": "USD",
+    "timestamp": "2026-03-06T21:26:13.239899+00:00",
+    "content_id": "724edb40-af39-4729-a960-17f010ceaadb"
+  },
+  {
+    "id": "6ac491fc-5235-427d-84e1-047377c4b9b8",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 0.9828,
+    "currency": "USD",
+    "timestamp": "2026-03-05T21:26:13.239899+00:00",
+    "content_id": "89d6f4ba-d2c1-4a0f-9c47-eca45393b482"
+  },
+  {
+    "id": "e2b306e3-8d09-4edd-bf13-cc3914d65805",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 1.9051,
+    "currency": "USD",
+    "timestamp": "2026-03-04T21:26:13.239899+00:00",
+    "content_id": "1ecbae5b-f113-4f21-9f00-4efcc366d602"
+  },
+  {
+    "id": "ded5a6ad-e63c-4865-a6b0-07298da20c6b",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 1.7948,
+    "currency": "USD",
+    "timestamp": "2026-03-03T21:26:13.239899+00:00",
+    "content_id": "bcc8a9e3-5b5d-4ba7-955f-621e6a5aa38b"
+  },
+  {
+    "id": "fb756303-7af4-4c2f-859f-ba0a43946e1f",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 0.4024,
+    "currency": "USD",
+    "timestamp": "2026-03-02T21:26:13.239899+00:00",
+    "content_id": "1b0fde38-1ad5-4c1c-be0b-fedceee03299"
+  },
+  {
+    "id": "e744c231-de42-48c1-ba7c-c111ea8ec1f1",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 0.5698,
+    "currency": "USD",
+    "timestamp": "2026-03-01T21:26:13.239899+00:00",
+    "content_id": "70b17f38-8424-4fe7-aa3a-a61012ff85c7"
+  },
+  {
+    "id": "46f0e143-5f10-420d-932d-1b21bb5d8bb6",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 0.5546,
+    "currency": "USD",
+    "timestamp": "2026-02-28T21:26:13.239899+00:00",
+    "content_id": "0d12f213-eaf8-4720-a7df-d46b68b7789b"
+  },
+  {
+    "id": "e67e23b6-f12f-4c33-8316-bbb38fddc257",
+    "provider": "elevenlabs",
+    "category": "video_generation",
+    "amount": 0.7381,
+    "currency": "USD",
+    "timestamp": "2026-02-27T21:26:13.239899+00:00",
+    "content_id": "3bc64c91-affc-41f5-8605-123a1cd43438"
+  },
+  {
+    "id": "1953df59-d6ae-4c33-8aa9-fb7040ccc713",
+    "provider": "elevenlabs",
+    "category": "inference",
+    "amount": 0.5394,
+    "currency": "USD",
+    "timestamp": "2026-02-26T21:26:13.239899+00:00",
+    "content_id": "6ec6b15c-f75b-42bc-bcc1-4a58ef78bb51"
+  },
+  {
+    "id": "583b0bc1-dbfe-4a13-be31-5a5a6457b55f",
+    "provider": "elevenlabs",
+    "category": "image_generation",
+    "amount": 0.8744,
+    "currency": "USD",
+    "timestamp": "2026-02-25T21:26:13.239899+00:00",
+    "content_id": "cd7fcd96-1f3c-4dc6-b020-0c2684315561"
+  },
+  {
+    "id": "4ae93a6c-263e-4993-bc94-597dc9d0e330",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 1.6825,
+    "currency": "USD",
+    "timestamp": "2026-02-24T21:26:13.239899+00:00",
+    "content_id": "1136a139-61e8-4d21-8ad0-d26ab9efac33"
+  },
+  {
+    "id": "4c285dca-a22b-4405-a54c-5808ef0a3e71",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 0.1371,
+    "currency": "USD",
+    "timestamp": "2026-02-23T21:26:13.239899+00:00",
+    "content_id": "484082e5-1a01-416a-a37e-4c6687cc4a94"
+  },
+  {
+    "id": "7a60af32-6564-446b-a014-8a7cab52a761",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 0.1112,
+    "currency": "USD",
+    "timestamp": "2026-02-22T21:26:13.239899+00:00",
+    "content_id": "be334b84-2b8f-4fae-b823-f7fbace018c5"
+  },
+  {
+    "id": "2f7d4657-7ff5-4ab5-bac5-3de2fc30953d",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 1.9115,
+    "currency": "USD",
+    "timestamp": "2026-02-21T21:26:13.239899+00:00",
+    "content_id": "7473fda2-a7e4-4dea-be2e-139307546933"
+  },
+  {
+    "id": "9d195e98-d96d-48b6-9adb-3a629017f3ac",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 1.8058,
+    "currency": "USD",
+    "timestamp": "2026-02-20T21:26:13.239899+00:00",
+    "content_id": "fa0a7872-5f2f-4038-9bca-816d58312522"
+  },
+  {
+    "id": "2aaab764-8f47-4ed2-90b5-cdf90e381a6a",
+    "provider": "elevenlabs",
+    "category": "video_generation",
+    "amount": 0.1551,
+    "currency": "USD",
+    "timestamp": "2026-02-19T21:26:13.239899+00:00",
+    "content_id": "3448fad9-f0d7-4481-a8a5-dd72cb2ca3ea"
+  },
+  {
+    "id": "cb414d54-6f42-40bc-97df-d2a6c40a6ab9",
+    "provider": "elevenlabs",
+    "category": "tts",
+    "amount": 1.697,
+    "currency": "USD",
+    "timestamp": "2026-02-18T21:26:13.239899+00:00",
+    "content_id": "0af4e2e7-5444-45a7-9b12-4cb13804993c"
+  },
+  {
+    "id": "56647142-9bb7-41de-9291-70bf190cb2a0",
+    "provider": "elevenlabs",
+    "category": "embedding",
+    "amount": 1.8232,
+    "currency": "USD",
+    "timestamp": "2026-02-17T21:26:13.239899+00:00",
+    "content_id": "88f3d7aa-f7a0-47a7-8924-baf2594c7dc2"
+  }
+]

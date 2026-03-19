@@ -1,0 +1,90 @@
+[
+  {
+    "id": "630ae40c-ba81-44ab-8332-6dfade2a8131",
+    "content_id": "6718c6e9-0393-407f-8299-1b3291503a18",
+    "status": "completed",
+    "started_at": "2026-03-18T15:53:28.220798+00:00",
+    "completed_at": "2026-03-18T15:54:19.220798+00:00",
+    "duration_seconds": 51,
+    "stages_completed": 5,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "cb78809a-e6fb-4f26-93b3-2636aae6a13a",
+    "content_id": "a555d528-6006-4dd7-937d-831b801c43aa",
+    "status": "completed",
+    "started_at": "2026-03-17T05:06:30.898767+00:00",
+    "completed_at": "2026-03-17T05:10:45.898767+00:00",
+    "duration_seconds": 255,
+    "stages_completed": 1,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "e56d239c-9b4b-4c37-b5ce-6721d0f8c101",
+    "content_id": "168b6764-af2d-4ef0-8c98-9157bbc8ef2b",
+    "status": "completed",
+    "started_at": "2026-03-18T15:23:47.407115+00:00",
+    "completed_at": "2026-03-18T15:25:17.407115+00:00",
+    "duration_seconds": 90,
+    "stages_completed": 2,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "52d2c0e4-65b5-49de-9120-36fdeec016f1",
+    "content_id": "6725b3ad-7ca2-4477-bbfb-998cd3928299",
+    "status": "running",
+    "started_at": "2026-03-18T15:39:05.716034+00:00",
+    "completed_at": null,
+    "duration_seconds": null,
+    "stages_completed": 1,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "94c355e1-d791-4716-a05d-b09392626316",
+    "content_id": "50ac02eb-f9cd-405e-a435-f30b3789c81b",
+    "status": "failed",
+    "started_at": "2026-03-16T07:24:10.431594+00:00",
+    "completed_at": "2026-03-16T07:25:52.431594+00:00",
+    "duration_seconds": 102,
+    "stages_completed": 5,
+    "stages_total": 6,
+    "error": "Timeout waiting for image generation model"
+  },
+  {
+    "id": "eafb3174-5f5e-4e9e-8692-5e88ebecdde8",
+    "content_id": "63905bf9-e38b-4723-b7bf-77c90e1c16ee",
+    "status": "queued",
+    "started_at": "2026-03-18T03:32:19.255354+00:00",
+    "completed_at": null,
+    "duration_seconds": null,
+    "stages_completed": 0,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "7e23d461-0e73-45c0-adf4-75830054397c",
+    "content_id": "68517aa0-c0e3-4452-814d-c2145c899a8d",
+    "status": "completed",
+    "started_at": "2026-03-16T20:56:22.519766+00:00",
+    "completed_at": "2026-03-16T21:00:31.519766+00:00",
+    "duration_seconds": 249,
+    "stages_completed": 5,
+    "stages_total": 6,
+    "error": null
+  },
+  {
+    "id": "580b25f4-82ea-4a79-a605-033ff304ff30",
+    "content_id": "48adb310-f315-42f6-b450-dea3ed76bdfe",
+    "status": "completed",
+    "started_at": "2026-03-18T11:02:34.331365+00:00",
+    "completed_at": "2026-03-18T11:11:08.331365+00:00",
+    "duration_seconds": 514,
+    "stages_completed": 2,
+    "stages_total": 6,
+    "error": null
+  }
+]
