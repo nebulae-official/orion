@@ -54,6 +54,8 @@ services:
       - "127.0.0.1:8000:8000"
     env_file:
       - ../.env
+    environment:
+      - IDENTITY_URL=http://identity:8007
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -228,6 +230,33 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
+  identity:
+    build:
+      context: ..
+      dockerfile: services/identity/Dockerfile
+    ports:
+      - "127.0.0.1:8007:8007"
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://orion:orion@postgres:5432/orion
+      - REDIS_URL=redis://redis:6379/0
+      - ORION_INTERNAL_TOKEN=${ORION_INTERNAL_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - orion-net
+    restart: unless-stopped
+    mem_limit: 512m
 
   dashboard:
     build:

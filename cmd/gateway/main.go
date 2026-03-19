@@ -25,6 +25,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	cfg.WarnDeprecated()
+
 	slog.Info("starting gateway",
 		"port", cfg.GatewayPort,
 		"env", cfg.AppEnv,

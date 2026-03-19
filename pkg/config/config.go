@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -29,7 +30,10 @@ type Config struct {
 	PublisherURL  string
 
 	// Authentication
-	JWTSecret     string
+	JWTSecret string
+
+	// Deprecated: users are now managed in the database via the Identity service.
+	// These fields will be removed in a future release.
 	AdminUsername string
 	AdminPassword string
 	AdminEmail    string
@@ -111,7 +115,6 @@ type insecureDefault struct {
 func (c Config) InsecureDefaults() []string {
 	checks := []insecureDefault{
 		{"JWTSecret", "dev-secret-change-in-production"},
-		{"AdminPassword", "orion_dev"},
 		{"PostgresPass", "orion_dev"},
 	}
 
@@ -121,8 +124,6 @@ func (c Config) InsecureDefaults() []string {
 		switch chk.Field {
 		case "JWTSecret":
 			current = c.JWTSecret
-		case "AdminPassword":
-			current = c.AdminPassword
 		case "PostgresPass":
 			current = c.PostgresPass
 		}
@@ -134,6 +135,13 @@ func (c Config) InsecureDefaults() []string {
 		insecure = append(insecure, "AllowedOrigins (CORS will allow all origins)")
 	}
 	return insecure
+}
+
+// WarnDeprecated logs a warning if deprecated admin config fields are still set.
+func (c Config) WarnDeprecated() {
+	if c.AdminUsername != "" || c.AdminPassword != "" {
+		slog.Warn("ORION_ADMIN_USER/ORION_ADMIN_PASS are deprecated; users are now managed in the database")
+	}
 }
 
 // EnforceProduction returns an error when the application is not in

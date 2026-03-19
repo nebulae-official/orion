@@ -261,10 +261,10 @@ class Content(Base):
         nullable=False,
         default=ContentStatus.draft,
     )
-    created_by: Mapped[uuid.UUID | None] = mapped_column(
+    created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
-        nullable=True,
+        nullable=False,
         index=True,
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -279,7 +279,7 @@ class Content(Base):
 
     # Relationships
     trend: Mapped["Trend"] = relationship(back_populates="contents")
-    created_by_user: Mapped["User | None"] = relationship(
+    created_by_user: Mapped["User"] = relationship(
         back_populates="contents", foreign_keys=[created_by]
     )
     media_assets: Mapped[list["MediaAsset"]] = relationship(
@@ -369,10 +369,10 @@ class SocialAccount(Base):
     display_name: Mapped[str] = mapped_column(String(256), nullable=False)
     credentials: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    user_id: Mapped[uuid.UUID | None] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
-        nullable=True,
+        nullable=False,
         index=True,
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -380,9 +380,7 @@ class SocialAccount(Base):
     )
 
     # Relationships
-    user: Mapped["User | None"] = relationship(
-        back_populates="social_accounts", foreign_keys=[user_id]
-    )
+    user: Mapped["User"] = relationship(back_populates="social_accounts", foreign_keys=[user_id])
     publish_records: Mapped[list["PublishRecord"]] = relationship(
         back_populates="social_account", cascade="all, delete-orphan"
     )
