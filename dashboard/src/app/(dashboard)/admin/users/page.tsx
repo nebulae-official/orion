@@ -13,7 +13,7 @@ interface AdminUser extends User {
 }
 
 interface UsersResponse {
-  items: AdminUser[];
+  users: AdminUser[];
   total: number;
 }
 
@@ -52,7 +52,7 @@ export default async function AdminUsersPage(): Promise<React.ReactElement> {
         {},
         token
       );
-      users = response.items;
+      users = response.users;
       total = response.total;
     } catch {
       fetchError = true;

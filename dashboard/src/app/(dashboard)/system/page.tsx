@@ -18,24 +18,20 @@ export default function SystemPage(): React.ReactElement {
         </div>
       </div>
 
-      {/* Section 1: System Overview — full width */}
-      <div className="mb-6">
+      {/* Section 1: System Overview + GPU Status — side by side */}
+      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <SystemInfo />
+        <GpuGauge />
       </div>
 
       {/* Section 2: Services (2/3) + Infrastructure (1/3) */}
-      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <ServiceHealth />
         </div>
         <div>
           <InfrastructureStatus />
         </div>
-      </div>
-
-      {/* Section 3: GPU — full width */}
-      <div>
-        <GpuGauge />
       </div>
     </div>
   );
