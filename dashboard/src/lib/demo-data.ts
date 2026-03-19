@@ -342,6 +342,41 @@ export const demoGpuInfo: DemoGpuInfo[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Analytics — Earnings
+// ---------------------------------------------------------------------------
+
+export const demoEarnings = {
+  total_earnings: 4287.50,
+  earnings_this_month: 1245.80,
+  avg_per_post: 178.65,
+  by_platform: [
+    { platform: "youtube", earnings: 2150.00 },
+    { platform: "tiktok", earnings: 1280.00 },
+    { platform: "instagram", earnings: 580.50 },
+    { platform: "twitter", earnings: 277.00 },
+  ],
+  trend: [
+    { date: "2026-03-01", earnings: 45.20 },
+    { date: "2026-03-03", earnings: 62.80 },
+    { date: "2026-03-05", earnings: 38.50 },
+    { date: "2026-03-07", earnings: 91.20 },
+    { date: "2026-03-09", earnings: 120.40 },
+    { date: "2026-03-11", earnings: 85.60 },
+    { date: "2026-03-13", earnings: 156.30 },
+    { date: "2026-03-15", earnings: 142.80 },
+    { date: "2026-03-17", earnings: 198.50 },
+    { date: "2026-03-19", earnings: 304.50 },
+  ],
+  top_content: [
+    { content_id: "c-012", title: "Indie Games Are Dominating Steam", platform: "youtube", earnings: 450.00 },
+    { content_id: "c-008", title: "Stripe's AI Fraud Detection", platform: "youtube", earnings: 380.00 },
+    { content_id: "c-010", title: "DeFi's Comeback", platform: "tiktok", earnings: 320.00 },
+    { content_id: "c-009", title: "Cloud Gaming in 2026", platform: "tiktok", earnings: 285.00 },
+    { content_id: "c-011", title: "WebAssembly on the Server", platform: "instagram", earnings: 210.00 },
+  ],
+};
+
+// ---------------------------------------------------------------------------
 // Paginated helpers
 // ---------------------------------------------------------------------------
 

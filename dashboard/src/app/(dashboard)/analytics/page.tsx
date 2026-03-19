@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, DollarSign, TrendingUp } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
 import {
@@ -8,12 +8,16 @@ import {
   demoCostSummary,
   demoProviderCosts,
   demoErrorTrend,
+  demoEarnings,
 } from "@/lib/demo-data";
+import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/charts/stat-card";
 import { FunnelChart } from "@/components/charts/funnel-chart";
 import { CostChart } from "@/components/charts/cost-chart";
 import { ProviderPie } from "@/components/charts/provider-pie";
 import { ErrorTrend } from "@/components/charts/error-trend";
+import { EarningsChart } from "@/components/charts/earnings-chart";
+import { EarningsTrend } from "@/components/charts/earnings-trend";
 
 interface FunnelMetrics {
   generated: number;
@@ -156,6 +160,105 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
       <div className="mt-6">
         <ErrorTrend data={errors} />
+      </div>
+
+      {/* Earnings Section */}
+      <div className="mt-10">
+        <div className="mb-6 flex items-center gap-3">
+          <DollarSign className="h-7 w-7 text-emerald-400" />
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
+            Earnings
+          </h2>
+        </div>
+
+        {DEMO_MODE ? (
+          <>
+            <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-emerald-400" />
+                  <p className="text-sm font-medium text-text-muted">Total Earnings</p>
+                </div>
+                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
+                  ${demoEarnings.total_earnings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                  <p className="text-sm font-medium text-text-muted">Earnings This Month</p>
+                </div>
+                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
+                  ${demoEarnings.earnings_this_month.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div className="rounded-xl border border-border bg-surface p-6">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-emerald-400" />
+                  <p className="text-sm font-medium text-text-muted">Avg Per Post</p>
+                </div>
+                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
+                  ${demoEarnings.avg_per_post.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <EarningsChart data={demoEarnings.by_platform} />
+              <EarningsTrend data={demoEarnings.trend} />
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-6">
+              <h3 className="mb-4 text-lg font-semibold text-text">Top Earning Content</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-text-muted">
+                      <th className="pb-3 pr-4 font-medium">Rank</th>
+                      <th className="pb-3 pr-4 font-medium">Title</th>
+                      <th className="pb-3 pr-4 font-medium">Platform</th>
+                      <th className="pb-3 text-right font-medium">Earnings</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {demoEarnings.top_content.map((item, index) => (
+                      <tr key={item.content_id} className="border-b border-border/50 last:border-0">
+                        <td className="py-3 pr-4 text-text-muted">#{index + 1}</td>
+                        <td className="py-3 pr-4 text-text">{item.title}</td>
+                        <td className="py-3 pr-4">
+                          <span
+                            className={cn(
+                              "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium",
+                              item.platform === "youtube" && "bg-red-500/15 text-red-400",
+                              item.platform === "tiktok" && "bg-cyan-500/15 text-cyan-400",
+                              item.platform === "instagram" && "bg-pink-500/15 text-pink-400",
+                              item.platform === "twitter" && "bg-blue-500/15 text-blue-400",
+                            )}
+                          >
+                            {item.platform === "youtube" && "YouTube"}
+                            {item.platform === "tiktok" && "TikTok"}
+                            {item.platform === "instagram" && "Instagram"}
+                            {item.platform === "twitter" && "Twitter"}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right font-medium text-emerald-400">
+                          ${item.earnings.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-xl border border-border bg-surface p-12 text-center">
+            <DollarSign className="mx-auto mb-3 h-10 w-10 text-text-dim" />
+            <p className="text-text-muted">
+              Earnings data will appear once platform integrations are connected.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
