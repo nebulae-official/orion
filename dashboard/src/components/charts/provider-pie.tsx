@@ -1,6 +1,7 @@
 "use client";
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { tooltipStyle } from "@/lib/chart-theme";
 
 interface ProviderCostData {
   provider: string;
@@ -46,23 +47,19 @@ export function ProviderPie({ data }: ProviderPieProps): React.ReactElement {
               dataKey="value"
               label={({ name }) => name}
               stroke="var(--color-bg)"
-              strokeWidth={2}
+              strokeWidth={1}
             >
               {chartData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
+                  fillOpacity={0.88}
                 />
               ))}
             </Pie>
             <Tooltip
               formatter={(v) => `$${Number(v).toFixed(4)}`}
-              contentStyle={{
-                backgroundColor: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "0.5rem",
-                color: "var(--color-text)",
-              }}
+              contentStyle={tooltipStyle}
             />
           </PieChart>
         </ResponsiveContainer>

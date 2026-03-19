@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { tooltipStyle, axisTick, axisStroke } from "@/lib/chart-theme";
 
 interface ProviderCostData {
   provider: string;
@@ -51,16 +52,12 @@ export function CostChart({ data }: CostChartProps): React.ReactElement {
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData}>
-            <XAxis dataKey="name" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
-            <YAxis tickFormatter={(v: number) => `$${v.toFixed(2)}`} stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <XAxis dataKey="name" stroke={axisStroke} tick={axisTick} />
+            <YAxis tickFormatter={(v: number) => `$${v.toFixed(2)}`} stroke={axisStroke} tick={axisTick} />
             <Tooltip
               formatter={(v) => `$${Number(v).toFixed(4)}`}
-              contentStyle={{
-                backgroundColor: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "0.5rem",
-                color: "var(--color-text)",
-              }}
+              contentStyle={tooltipStyle}
+              cursor={{ fill: "var(--color-surface-hover)", opacity: 0.5 }}
             />
             <Legend wrapperStyle={{ color: "var(--color-text-secondary)" }} />
             {Array.from(categories).map((cat) => (
@@ -69,6 +66,8 @@ export function CostChart({ data }: CostChartProps): React.ReactElement {
                 dataKey={cat}
                 stackId="cost"
                 fill={CATEGORY_COLORS[cat] ?? "var(--color-text-muted)"}
+                fillOpacity={0.85}
+                radius={cat === Array.from(categories).at(-1) ? [4, 4, 0, 0] : undefined}
               />
             ))}
           </BarChart>

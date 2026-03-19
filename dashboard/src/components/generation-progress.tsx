@@ -107,7 +107,7 @@ function StageRow({ stage }: { stage: StageProgress }): React.ReactElement {
         </div>
 
         {stage.status === "running" && (
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full glass-track">
             <div
               className="h-full rounded-full bg-primary transition-all duration-500"
               style={{ width: `${stage.progress}%` }}

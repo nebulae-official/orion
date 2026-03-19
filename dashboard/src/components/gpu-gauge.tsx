@@ -218,7 +218,7 @@ function GpuAccordionCard({
         </span>
         {/* Thin inline VRAM bar */}
         <div className="hidden sm:flex items-center gap-2 w-28">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full glass-track">
             <div
               className={cn("h-full rounded-full transition-all duration-500", barColor)}
               style={{ width: `${Math.min(vramPercent, 100)}%` }}
@@ -340,7 +340,7 @@ export function GpuGauge(): React.ReactElement {
   }, []);
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-border bg-surface p-6">
+    <div className="flex h-full flex-col glass-card luminous-border rounded-xl p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text">

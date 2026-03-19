@@ -30,11 +30,11 @@ interface NavItem {
 
 const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "Content Queue", href: "/queue", icon: <ListVideo className="h-5 w-5" /> },
   { label: "Trends", href: "/trends", icon: <TrendingUp className="h-5 w-5" /> },
-  { label: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
-  { label: "Publishing", href: "/publishing", icon: <Send className="h-5 w-5" /> },
+  { label: "Content Queue", href: "/queue", icon: <ListVideo className="h-5 w-5" /> },
   { label: "Generation", href: "/generation", icon: <Sparkles className="h-5 w-5" /> },
+  { label: "Publishing", href: "/publishing", icon: <Send className="h-5 w-5" /> },
+  { label: "Analytics", href: "/analytics", icon: <BarChart3 className="h-5 w-5" /> },
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
@@ -68,7 +68,7 @@ export function MobileSidebarToggle({
   return (
     <button
       onClick={onClick}
-      className="fixed left-4 top-4 z-40 rounded-lg border border-violet-500/10 bg-slate-950/40 backdrop-blur-xl p-2 text-slate-400 shadow-md transition-colors hover:text-slate-200 md:hidden"
+      className="fixed left-4 top-4 z-40 rounded-lg border border-border bg-surface/80 backdrop-blur-xl p-2 text-text-muted shadow-md transition-colors hover:text-text md:hidden"
       aria-label="Open navigation menu"
     >
       <Menu className="h-5 w-5" />
@@ -219,8 +219,8 @@ export function Sidebar(): React.ReactElement {
           "flex h-screen flex-col z-50",
           "w-72 md:w-20 lg:w-72",
           "p-6 md:p-3 lg:p-6",
-          "bg-slate-950/40 backdrop-blur-xl",
-          "border-r border-violet-500/10",
+          "bg-surface/80 backdrop-blur-xl",
+          "border-r border-border",
           "shadow-[20px_0_50px_rgba(124,58,237,0.06)]",
           // Mobile: hidden off-screen; tablet+: always visible
           "fixed inset-y-0 left-0 transform transition-all duration-300 md:translate-x-0",

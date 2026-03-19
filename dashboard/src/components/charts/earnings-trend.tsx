@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { tooltipStyle, axisTick, axisStroke } from "@/lib/chart-theme";
 
 interface EarningsTrendData {
   date: string;
@@ -40,16 +41,11 @@ export function EarningsTrend({ data }: EarningsTrendProps): React.ReactElement 
                 <stop offset="95%" stopColor="var(--color-primary-light)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="date" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
-            <YAxis tickFormatter={(v: number) => `$${v}`} stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <XAxis dataKey="date" stroke={axisStroke} tick={axisTick} />
+            <YAxis tickFormatter={(v: number) => `$${v}`} stroke={axisStroke} tick={axisTick} />
             <Tooltip
               formatter={(v) => `$${Number(v).toFixed(2)}`}
-              contentStyle={{
-                backgroundColor: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "0.5rem",
-                color: "var(--color-text)",
-              }}
+              contentStyle={tooltipStyle}
             />
             <Area
               type="monotone"

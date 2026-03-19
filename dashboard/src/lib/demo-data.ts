@@ -456,3 +456,244 @@ export const demoAdminUsers: AdminUser[] = [
   { id: "00000000-0000-0000-0000-000000000004", email: "viewer@orion.local", name: "Bob Viewer", role: "viewer", avatar_url: null, email_verified: true, is_active: true, created_at: daysAgo(30) },
   { id: "00000000-0000-0000-0000-000000000005", email: "inactive@orion.local", name: "Inactive User", role: "viewer", avatar_url: null, email_verified: false, is_active: false, created_at: daysAgo(120) },
 ];
+
+// ---------------------------------------------------------------------------
+// Generation — Pipeline Stages (Director orchestration)
+// ---------------------------------------------------------------------------
+
+export type PipelineStageStatus = "completed" | "running" | "pending" | "failed";
+
+export interface PipelineStageDetail {
+  name: string;
+  label: string;
+  status: PipelineStageStatus;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface PipelineContentItem {
+  content_id: string;
+  content_title: string;
+  status: "queued" | "running" | "completed" | "failed" | "awaiting_review";
+  stages: PipelineStageDetail[];
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+}
+
+export const demoPipelineStages: PipelineContentItem[] = [
+  {
+    content_id: "c-003", content_title: "The Apple Vision Pro 2 — Everything We Know",
+    status: "running",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(1), completed_at: hoursAgo(0.9) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(0.9), completed_at: hoursAgo(0.8) },
+      { name: "script", label: "Script", status: "running", started_at: hoursAgo(0.8), completed_at: null },
+      { name: "visual_prompts", label: "Visual Prompts", status: "pending", started_at: null, completed_at: null },
+    ],
+    started_at: hoursAgo(1), completed_at: null, error: null,
+  },
+  {
+    content_id: "c-004", content_title: "Open-Source LLMs Are Catching Up Fast",
+    status: "queued",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "pending", started_at: null, completed_at: null },
+      { name: "critique", label: "Critique", status: "pending", started_at: null, completed_at: null },
+      { name: "script", label: "Script", status: "pending", started_at: null, completed_at: null },
+      { name: "visual_prompts", label: "Visual Prompts", status: "pending", started_at: null, completed_at: null },
+    ],
+    started_at: hoursAgo(0.1), completed_at: null, error: null,
+  },
+  {
+    content_id: "c-005", content_title: "GTA VI: Why This Trailer Broke the Internet",
+    status: "completed",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(25), completed_at: hoursAgo(24.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(24.8), completed_at: hoursAgo(24.6) },
+      { name: "script", label: "Script", status: "completed", started_at: hoursAgo(24.6), completed_at: hoursAgo(24.3) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "completed", started_at: hoursAgo(24.3), completed_at: hoursAgo(24) },
+    ],
+    started_at: hoursAgo(25), completed_at: hoursAgo(24), error: null,
+  },
+  {
+    content_id: "c-007", content_title: "The Fed Just Changed Everything for Crypto",
+    status: "awaiting_review",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(8), completed_at: hoursAgo(7.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(7.8), completed_at: hoursAgo(7.6) },
+      { name: "script", label: "Script", status: "completed", started_at: hoursAgo(7.6), completed_at: hoursAgo(7.3) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "completed", started_at: hoursAgo(7.3), completed_at: hoursAgo(7) },
+    ],
+    started_at: hoursAgo(8), completed_at: hoursAgo(7), error: null,
+  },
+  {
+    content_id: "c-014", content_title: "Unreal Engine 6 Preview: Next-Gen Graphics",
+    status: "failed",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(37), completed_at: hoursAgo(36.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(36.8), completed_at: hoursAgo(36.6) },
+      { name: "script", label: "Script", status: "failed", started_at: hoursAgo(36.6), completed_at: hoursAgo(36.4) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "pending", started_at: null, completed_at: null },
+    ],
+    started_at: hoursAgo(37), completed_at: hoursAgo(36.4), error: "LLM timeout: script generation exceeded 120s limit",
+  },
+  {
+    content_id: "c-008", content_title: "Stripe's New AI Fraud Detection Explained",
+    status: "completed",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(73), completed_at: hoursAgo(72.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(72.8), completed_at: hoursAgo(72.5) },
+      { name: "script", label: "Script", status: "completed", started_at: hoursAgo(72.5), completed_at: hoursAgo(72.2) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "completed", started_at: hoursAgo(72.2), completed_at: hoursAgo(72) },
+    ],
+    started_at: hoursAgo(73), completed_at: hoursAgo(72), error: null,
+  },
+  {
+    content_id: "c-010", content_title: "DeFi's Comeback: $200 Billion and Counting",
+    status: "completed",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(56), completed_at: hoursAgo(55.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(55.8), completed_at: hoursAgo(55.5) },
+      { name: "script", label: "Script", status: "completed", started_at: hoursAgo(55.5), completed_at: hoursAgo(55.2) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "completed", started_at: hoursAgo(55.2), completed_at: hoursAgo(55) },
+    ],
+    started_at: hoursAgo(56), completed_at: hoursAgo(55), error: null,
+  },
+  {
+    content_id: "c-012", content_title: "Indie Games Are Dominating Steam Right Now",
+    status: "completed",
+    stages: [
+      { name: "analyst", label: "Analyst", status: "completed", started_at: hoursAgo(200), completed_at: hoursAgo(199.8) },
+      { name: "critique", label: "Critique", status: "completed", started_at: hoursAgo(199.8), completed_at: hoursAgo(199.5) },
+      { name: "script", label: "Script", status: "completed", started_at: hoursAgo(199.5), completed_at: hoursAgo(199.2) },
+      { name: "visual_prompts", label: "Visual Prompts", status: "completed", started_at: hoursAgo(199.2), completed_at: hoursAgo(199) },
+    ],
+    started_at: hoursAgo(200), completed_at: hoursAgo(199), error: null,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Generation — Media Providers & Batches (Media service)
+// ---------------------------------------------------------------------------
+
+export interface DemoMediaProvider {
+  name: string;
+  type: "LOCAL" | "CLOUD";
+  status: "online" | "offline";
+  models: string[];
+}
+
+export const demoMediaProviders: DemoMediaProvider[] = [
+  { name: "ComfyUI", type: "LOCAL", status: "online", models: ["SDXL 1.0", "SD 1.5"] },
+  { name: "Fal.ai", type: "CLOUD", status: "online", models: ["FLUX.1", "SDXL Lightning"] },
+];
+
+export interface DemoMediaBatch {
+  id: string;
+  content_id: string;
+  content_title: string;
+  provider: string;
+  total_images: number;
+  completed_images: number;
+  status: "running" | "completed" | "queued" | "failed";
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+}
+
+export const demoMediaBatches: DemoMediaBatch[] = [
+  { id: "batch-001", content_id: "c-003", content_title: "The Apple Vision Pro 2", provider: "ComfyUI", total_images: 4, completed_images: 3, status: "running", started_at: hoursAgo(0.5), completed_at: null, error: null },
+  { id: "batch-002", content_id: "c-004", content_title: "Open-Source LLMs", provider: "Fal.ai", total_images: 4, completed_images: 4, status: "completed", started_at: hoursAgo(2), completed_at: hoursAgo(1.5), error: null },
+  { id: "batch-003", content_id: "c-007", content_title: "The Fed Changed Everything", provider: "ComfyUI", total_images: 3, completed_images: 0, status: "queued", started_at: hoursAgo(0.1), completed_at: null, error: null },
+  { id: "batch-004", content_id: "c-014", content_title: "Unreal Engine 6 Preview", provider: "Fal.ai", total_images: 4, completed_images: 2, status: "failed", started_at: hoursAgo(4), completed_at: hoursAgo(3.5), error: "Provider rate limit exceeded" },
+  { id: "batch-005", content_id: "c-005", content_title: "GTA VI Trailer", provider: "ComfyUI", total_images: 5, completed_images: 5, status: "completed", started_at: hoursAgo(24), completed_at: hoursAgo(23), error: null },
+  { id: "batch-006", content_id: "c-008", content_title: "Stripe AI Fraud Detection", provider: "Fal.ai", total_images: 3, completed_images: 3, status: "completed", started_at: hoursAgo(72), completed_at: hoursAgo(71), error: null },
+];
+
+// ---------------------------------------------------------------------------
+// Generation — Video Renders (Editor service)
+// ---------------------------------------------------------------------------
+
+export interface DemoRenderStage {
+  name: string;
+  label: string;
+  status: "pending" | "running" | "completed" | "failed";
+  duration_seconds: number | null;
+}
+
+export interface DemoRenderJob {
+  id: string;
+  content_id: string;
+  content_title: string;
+  status: "queued" | "rendering" | "completed" | "failed";
+  stages: DemoRenderStage[];
+  total_duration_seconds: number | null;
+  output_format: string;
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+}
+
+export const demoRenderJobs: DemoRenderJob[] = [
+  {
+    id: "render-001", content_id: "c-012", content_title: "Indie Games Are Dominating Steam",
+    status: "completed", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "completed", duration_seconds: 45 },
+      { name: "captions", label: "Captions", status: "completed", duration_seconds: 12 },
+      { name: "stitching", label: "Stitching", status: "completed", duration_seconds: 89 },
+    ],
+    total_duration_seconds: 146, started_at: hoursAgo(48), completed_at: hoursAgo(47.5), error: null,
+  },
+  {
+    id: "render-002", content_id: "c-013", content_title: "Kubernetes Without Docker",
+    status: "completed", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "completed", duration_seconds: 38 },
+      { name: "captions", label: "Captions", status: "completed", duration_seconds: 10 },
+      { name: "stitching", label: "Stitching", status: "completed", duration_seconds: 72 },
+    ],
+    total_duration_seconds: 120, started_at: hoursAgo(60), completed_at: hoursAgo(59), error: null,
+  },
+  {
+    id: "render-003", content_id: "c-003", content_title: "The Apple Vision Pro 2",
+    status: "rendering", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "completed", duration_seconds: 42 },
+      { name: "captions", label: "Captions", status: "running", duration_seconds: null },
+      { name: "stitching", label: "Stitching", status: "pending", duration_seconds: null },
+    ],
+    total_duration_seconds: null, started_at: hoursAgo(0.15), completed_at: null, error: null,
+  },
+  {
+    id: "render-004", content_id: "c-005", content_title: "GTA VI: Why This Trailer Broke the Internet",
+    status: "completed", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "completed", duration_seconds: 55 },
+      { name: "captions", label: "Captions", status: "completed", duration_seconds: 15 },
+      { name: "stitching", label: "Stitching", status: "completed", duration_seconds: 110 },
+    ],
+    total_duration_seconds: 180, started_at: hoursAgo(24), completed_at: hoursAgo(23.5), error: null,
+  },
+  {
+    id: "render-005", content_id: "c-014", content_title: "Unreal Engine 6 Preview",
+    status: "failed", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "completed", duration_seconds: 40 },
+      { name: "captions", label: "Captions", status: "completed", duration_seconds: 11 },
+      { name: "stitching", label: "Stitching", status: "failed", duration_seconds: null },
+    ],
+    total_duration_seconds: null, started_at: hoursAgo(36), completed_at: hoursAgo(35.5),
+    error: "FFmpeg stitching failed: missing audio track",
+  },
+  {
+    id: "render-006", content_id: "c-004", content_title: "Open-Source LLMs Are Catching Up",
+    status: "queued", output_format: "mp4",
+    stages: [
+      { name: "tts", label: "TTS", status: "pending", duration_seconds: null },
+      { name: "captions", label: "Captions", status: "pending", duration_seconds: null },
+      { name: "stitching", label: "Stitching", status: "pending", duration_seconds: null },
+    ],
+    total_duration_seconds: null, started_at: hoursAgo(0.03), completed_at: null, error: null,
+  },
+];

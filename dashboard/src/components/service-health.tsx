@@ -136,7 +136,7 @@ export function ServiceHealth(): React.ReactElement {
   }, []);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
+    <div className="glass-card luminous-border rounded-xl p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold text-text">Service Status</h2>
@@ -290,7 +290,7 @@ export function InfrastructureStatus(): React.ReactElement {
   const pgStatus = infraStatus(postgresOk);
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-6">
+    <div className="glass-card luminous-border rounded-xl p-6">
       <h2 className="mb-4 text-lg font-semibold text-text">Infrastructure</h2>
 
       <div className="space-y-4">

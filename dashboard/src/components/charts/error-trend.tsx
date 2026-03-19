@@ -1,14 +1,15 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { tooltipStyle, axisTick, axisStroke, gridStroke, gridDash } from "@/lib/chart-theme";
 
 interface ErrorTrendData {
   timestamp: string;
@@ -40,26 +41,26 @@ export function ErrorTrend({ data }: ErrorTrendProps): React.ReactElement {
         <p className="py-12 text-center text-text-muted">No error data yet</p>
       ) : (
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="time" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
-            <YAxis stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "0.5rem",
-                color: "var(--color-text)",
-              }}
-            />
-            <Line
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id="gradErrors" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-danger)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--color-danger)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray={gridDash} stroke={gridStroke} />
+            <XAxis dataKey="time" stroke={axisStroke} tick={axisTick} />
+            <YAxis stroke={axisStroke} tick={axisTick} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Area
               type="monotone"
               dataKey="errors"
               stroke="var(--color-danger)"
               strokeWidth={2}
+              fill="url(#gradErrors)"
               dot={false}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       )}
     </div>

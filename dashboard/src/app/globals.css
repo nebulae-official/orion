@@ -6,8 +6,9 @@
  * with nebula violet accents and starlight cyan highlights.
  *
  * Palette references:
- *   colorhunt.co/palette/0b0f1911182731394d6366f1
- *   colorhunt.co/palette/1a1a2e16213e0f3460e94560
+ *   colorhunt.co/palette/0206170f172aa855f722d3ee  (Cyberpunk Noir — primary)
+ *   colorhunt.co/palette/2d033b810ca8c147e92de1fc  (Deep Nebula — glow orbs)
+ *   colorhunt.co/palette/1a1a2e16213e0f3460e94560  (Midnight Aurora — base)
  */
 
 @theme {
@@ -163,15 +164,159 @@
   --radius-os-full: 0.75rem;
 }
 
+/* ═══════════════════════════════════════════════
+   LIGHT THEME — Apple-inspired warm-gray palette
+   Override CSS custom properties when .dark is absent.
+   @theme defines dark values in :root; this block
+   overrides them for light mode.
+   ═══════════════════════════════════════════════ */
+html:not(.dark) {
+  /* ── Base Palette (Apple warm grays) ───────── */
+  --color-bg: #F5F5F7;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F0F0F5;
+  --color-surface-hover: #E8E8ED;
+  --color-border: #D2D2D7;
+  --color-border-light: #C7C7CC;
+
+  /* ── Primary — deeper for light bg contrast ── */
+  --color-primary: #6D28D9;
+  --color-primary-light: #7C3AED;
+  --color-primary-muted: #5B21B6;
+  --color-primary-surface: rgba(109, 40, 217, 0.08);
+  --color-primary-surface-hover: rgba(109, 40, 217, 0.14);
+
+  /* ── Secondary — Cyan ─────────────────────── */
+  --color-cyan: #0891B2;
+  --color-cyan-light: #06B6D4;
+  --color-cyan-muted: #0E7490;
+  --color-cyan-surface: rgba(8, 145, 178, 0.08);
+
+  /* ── Accent — Gold ────────────────────────── */
+  --color-gold: #D97706;
+  --color-gold-light: #F59E0B;
+  --color-gold-surface: rgba(217, 119, 6, 0.08);
+
+  /* ── Semantic (slightly deeper for light bg) ─ */
+  --color-success: #059669;
+  --color-success-light: #10B981;
+  --color-success-surface: rgba(5, 150, 105, 0.08);
+
+  --color-warning: #D97706;
+  --color-warning-light: #F59E0B;
+  --color-warning-surface: rgba(217, 119, 6, 0.08);
+
+  --color-danger: #DC2626;
+  --color-danger-light: #EF4444;
+  --color-danger-surface: rgba(220, 38, 38, 0.06);
+
+  --color-info: #2563EB;
+  --color-info-light: #3B82F6;
+  --color-info-surface: rgba(37, 99, 235, 0.06);
+
+  /* ── Text (dark on light) ─────────────────── */
+  --color-text: #1D1D1F;
+  --color-text-secondary: #6E6E73;
+  --color-text-muted: #86868B;
+  --color-text-dim: #AEAEB2;
+
+  /* ── Surface Hierarchy (M3 light) ──────────── */
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F8F8FA;
+  --color-surface-container: #F2F2F7;
+  --color-surface-container-high: #ECECF1;
+  --color-surface-container-highest: #E5E5EA;
+  --color-surface-dim: #EBEBF0;
+  --color-surface-bright: #FFFFFF;
+  --color-surface-variant: #E5E5EA;
+  --color-surface-tint: #6D28D9;
+  --color-background: #F5F5F7;
+
+  /* ── On-Surface Text (light) ───────────────── */
+  --color-on-surface: #1D1D1F;
+  --color-on-surface-variant: #48484A;
+  --color-on-background: #1D1D1F;
+
+  /* ── Outline (light) ───────────────────────── */
+  --color-outline: #8E8E93;
+  --color-outline-variant: #C7C7CC;
+
+  /* ── Gradients (light) ─────────────────────── */
+  --gradient-sidebar: linear-gradient(180deg, #F8F8FA 0%, #FFFFFF 100%);
+}
+
 /* ── Global Styles ──────────────────────────── */
 body {
   color: var(--color-text);
   background-color: var(--color-bg);
-  background-image:
-    radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(0, 218, 243, 0.05) 0px, transparent 50%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Nebula Mesh Background ─────────────────── */
+/* Rich multi-orb mesh gradient — gives glass cards something to blur against.
+   Inspired by visionOS/macOS Sonoma mesh gradient backgrounds. */
+.nebula-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #080b14;
+  background-image:
+    radial-gradient(at 15% 15%, rgba(168, 85, 247, 0.28) 0px, transparent 50%),
+    radial-gradient(at 82% 12%, rgba(34, 211, 238, 0.22) 0px, transparent 45%),
+    radial-gradient(at 50% 75%, rgba(30, 58, 138, 0.22) 0px, transparent 55%),
+    radial-gradient(at 5% 80%, rgba(139, 92, 246, 0.16) 0px, transparent 40%),
+    radial-gradient(at 90% 85%, rgba(8, 145, 178, 0.18) 0px, transparent 45%),
+    radial-gradient(at 60% 35%, rgba(193, 71, 233, 0.12) 0px, transparent 35%),
+    radial-gradient(at 30% 55%, rgba(55, 48, 163, 0.10) 0px, transparent 30%);
+}
+
+/* Animated orbs layered on top for depth and life */
+.nebula-bg::before,
+.nebula-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+/* Primary violet orb — top-left */
+.nebula-bg::before {
+  width: 55vw;
+  height: 55vw;
+  top: -15%;
+  left: -15%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.5) 0%, rgba(109, 40, 217, 0.2) 40%, transparent 70%);
+  filter: blur(80px);
+  animation: orb-drift-a 28s ease-in-out infinite alternate;
+}
+
+/* Cyan orb — bottom-right */
+.nebula-bg::after {
+  width: 45vw;
+  height: 45vw;
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.45) 0%, rgba(8, 145, 178, 0.15) 45%, transparent 70%);
+  filter: blur(80px);
+  animation: orb-drift-b 22s ease-in-out infinite alternate;
+  animation-delay: -8s;
+}
+
+@keyframes orb-drift-a {
+  0%   { transform: translate(0, 0) scale(1);    opacity: 0.5; }
+  33%  { transform: translate(4%, 8%) scale(1.08); opacity: 0.6; }
+  66%  { transform: translate(-3%, 5%) scale(0.95); opacity: 0.45; }
+  100% { transform: translate(6%, -4%) scale(1.05); opacity: 0.55; }
+}
+
+@keyframes orb-drift-b {
+  0%   { transform: translate(0, 0) scale(1);    opacity: 0.45; }
+  50%  { transform: translate(-5%, -8%) scale(1.1); opacity: 0.55; }
+  100% { transform: translate(3%, 6%) scale(0.92); opacity: 0.5; }
 }
 
 /* Custom scrollbar for dark theme */
@@ -207,12 +352,18 @@ body {
 
 /* ═══ Orion OS Design System — Utility Classes ═══ */
 
-/* ── Glass Card ──────────────────────────── */
+/* ── Glass Card (Apple visionOS-grade material) ──────── */
+/* saturate() pulls background nebula colors through the glass;
+   inset box-shadow creates the specular top-edge highlight. */
 .glass-card {
-  background: rgba(53, 53, 52, 0.2);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(149, 141, 161, 0.15);
+  background: rgba(13, 18, 32, 0.48);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ── Luminous Border ─────────────────────── */
@@ -234,6 +385,21 @@ body {
   pointer-events: none;
 }
 
+/* ── Glass Progress Bar Track ────────────── */
+/* Semi-transparent track that harmonizes with glass cards.
+   Use instead of bg-surface-elevated inside glass containers. */
+.glass-track {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Glass Progress Bar Fill ─────────────── */
+/* Glowing fill bars — the fill color adds a subtle shadow glow. */
+.glass-fill-success { box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.glass-fill-warning { box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+.glass-fill-danger  { box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+.glass-fill-primary { box-shadow: 0 0 8px rgba(124, 58, 237, 0.4); }
+
 /* ── Glow Shadows (status dots) ──────────── */
 .glow-emerald { box-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
 .glow-violet  { box-shadow: 0 0 10px rgba(167, 139, 250, 0.5); }
@@ -245,12 +411,74 @@ body {
   box-shadow: 20px 0 50px rgba(124, 58, 237, 0.06);
 }
 
+/* ═══════════════════════════════════════════════
+   LIGHT THEME — Utility Class Overrides
+   ═══════════════════════════════════════════════ */
+html:not(.dark) body {
+  background-color: var(--color-bg);
+}
+
+html:not(.dark) .nebula-bg {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(at 15% 15%, rgba(109, 40, 217, 0.06) 0px, transparent 50%),
+    radial-gradient(at 82% 12%, rgba(8, 145, 178, 0.05) 0px, transparent 45%),
+    radial-gradient(at 50% 75%, rgba(37, 99, 235, 0.04) 0px, transparent 55%),
+    radial-gradient(at 90% 85%, rgba(8, 145, 178, 0.04) 0px, transparent 45%);
+}
+
+html:not(.dark) .nebula-bg::before {
+  background: radial-gradient(circle, rgba(109, 40, 217, 0.12) 0%, rgba(109, 40, 217, 0.04) 40%, transparent 70%);
+  opacity: 0.6;
+}
+
+html:not(.dark) .nebula-bg::after {
+  background: radial-gradient(circle, rgba(8, 145, 178, 0.10) 0%, rgba(6, 182, 212, 0.03) 45%, transparent 70%);
+  opacity: 0.5;
+}
+
+html:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+html:not(.dark) .luminous-border::before {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.12) 0%, transparent 40%);
+}
+
+html:not(.dark) .glass-track {
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+html:not(.dark) ::selection {
+  background: rgba(109, 40, 217, 0.2);
+  color: var(--color-text);
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
 /* ── Reduced Motion ──────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .glass-card {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(53, 53, 52, 0.6);
+    background: rgba(13, 18, 32, 0.75);
+  }
+
+  .nebula-bg::before,
+  .nebula-bg::after {
+    animation: none !important;
   }
 
   *,

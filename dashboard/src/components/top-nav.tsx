@@ -38,16 +38,16 @@ export function TopNav(): React.ReactElement {
       <div className="flex items-center gap-6">
         {/* Search input */}
         <div className="relative group hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
           <input
             type="text"
             placeholder="SEARCH SYSTEM..."
-            className="bg-[var(--ds-surface-container-lowest)] border-none rounded-full pl-10 pr-4 py-1.5 text-[10px] font-[family-name:var(--font-display)] tracking-wider text-[var(--ds-on-surface)] placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[var(--ds-primary-container)] w-64 transition-all"
+            className="bg-[var(--ds-surface-container-lowest)] border-none rounded-full pl-10 pr-4 py-1.5 text-[10px] font-[family-name:var(--font-display)] tracking-wider text-[var(--ds-on-surface)] placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-[var(--ds-primary-container)] w-64 transition-all"
           />
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-4 text-slate-400">
+        <div className="flex items-center gap-4 text-text-muted">
           <button
             className="hover:text-violet-300 transition-colors"
             aria-label="Notifications"

@@ -7,10 +7,10 @@ vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="responsive-container">{children}</div>
   ),
-  LineChart: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="line-chart">{children}</div>
+  AreaChart: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="area-chart">{children}</div>
   ),
-  Line: () => <div data-testid="line" />,
+  Area: () => <div data-testid="area" />,
   XAxis: () => <div data-testid="x-axis" />,
   YAxis: () => <div data-testid="y-axis" />,
   Tooltip: () => <div data-testid="tooltip" />,
@@ -41,11 +41,11 @@ describe("ErrorTrend", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the line chart when data is provided", () => {
+  it("renders the area chart when data is provided", () => {
     render(<ErrorTrend data={mockData} />);
 
     expect(screen.getByTestId("responsive-container")).toBeInTheDocument();
-    expect(screen.getByTestId("line-chart")).toBeInTheDocument();
+    expect(screen.getByTestId("area-chart")).toBeInTheDocument();
   });
 
   it("renders empty state when no data", () => {
@@ -57,6 +57,6 @@ describe("ErrorTrend", () => {
   it("does not render chart when data is empty", () => {
     render(<ErrorTrend data={[]} />);
 
-    expect(screen.queryByTestId("line-chart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("area-chart")).not.toBeInTheDocument();
   });
 });

@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Activity } from "lucide-react";
+import { tooltipStyle, axisTick, axisStroke, gridStroke, gridDash } from "@/lib/chart-theme";
 
 export interface PipelineActivityData {
   day: string;
@@ -53,30 +54,22 @@ export function PipelineActivity({
             <stop offset="95%" stopColor="var(--color-chart-3)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+        <CartesianGrid strokeDasharray={gridDash} stroke={gridStroke} />
         <XAxis
           dataKey="day"
-          stroke="rgba(255,255,255,0.15)"
-          tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 12 }}
+          stroke={axisStroke}
+          tick={axisTick}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke="rgba(255,255,255,0.15)"
-          tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 12 }}
+          stroke={axisStroke}
+          tick={axisTick}
           tickLine={false}
           axisLine={false}
           allowDecimals={false}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "rgba(15, 15, 20, 0.95)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "0.5rem",
-            color: "rgba(255,255,255,0.9)",
-            fontSize: "0.8rem",
-          }}
-        />
+        <Tooltip contentStyle={tooltipStyle} />
         <Area
           type="monotone"
           dataKey="trends"

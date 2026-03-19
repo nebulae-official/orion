@@ -22,8 +22,8 @@ describe("Button", () => {
   it("applies secondary variant classes", () => {
     render(<Button variant="secondary">Secondary</Button>);
     const button = screen.getByRole("button", { name: "Secondary" });
-    expect(button.className).toContain("bg-surface");
-    expect(button.className).toContain("border");
+    expect(button.className).toContain("glass-card");
+    expect(button.className).toContain("text-text-secondary");
   });
 
   it("applies danger variant classes", () => {
@@ -35,7 +35,7 @@ describe("Button", () => {
   it("applies ghost variant classes", () => {
     render(<Button variant="ghost">Ghost</Button>);
     const button = screen.getByRole("button", { name: "Ghost" });
-    expect(button.className).toContain("hover:bg-surface-hover");
+    expect(button.className).toContain("text-text-secondary");
     expect(button.className).not.toContain("bg-primary");
   });
 

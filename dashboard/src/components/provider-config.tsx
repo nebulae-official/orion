@@ -468,10 +468,10 @@ export function ProviderConfig(): React.ReactElement {
                     onClick={() => handleSave(config.service)}
                     disabled={saving === config.service}
                     className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+                      "flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all",
                       saving === config.service
-                        ? "cursor-not-allowed bg-primary-muted"
-                        : "bg-primary hover:bg-primary-muted"
+                        ? "cursor-not-allowed opacity-60 bg-primary-muted"
+                        : "bg-primary shadow-lg shadow-primary/25 hover:bg-primary-muted hover:shadow-primary/30"
                     )}
                   >
                     {saving === config.service ? (
@@ -487,10 +487,10 @@ export function ProviderConfig(): React.ReactElement {
                     onClick={() => handleTestConnection(config.service)}
                     disabled={testing === config.service}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                       testing === config.service
-                        ? "cursor-not-allowed border-border text-text-dim"
-                        : "border-border text-text-secondary hover:bg-surface-elevated hover:text-text"
+                        ? "cursor-not-allowed opacity-60 text-text-dim"
+                        : "glass-card text-text-secondary hover:bg-white/[0.08] hover:text-text"
                     )}
                   >
                     {testing === config.service ? (
@@ -527,7 +527,7 @@ export function ProviderConfig(): React.ReactElement {
       <div className="flex justify-end">
         <button
           onClick={handleResetAll}
-          className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
+          className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-text-secondary transition-all glass-card hover:bg-white/[0.08] hover:text-text"
         >
           <RotateCcw className="h-4 w-4" />
           Reset to Defaults

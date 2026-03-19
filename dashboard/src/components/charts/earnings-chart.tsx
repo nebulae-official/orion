@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { tooltipStyle, axisTick, axisStroke } from "@/lib/chart-theme";
 
 interface PlatformEarnings {
   platform: string;
@@ -20,10 +21,10 @@ interface EarningsChartProps {
 }
 
 const PLATFORM_COLORS: Record<string, string> = {
-  youtube: "#FF0000",
-  tiktok: "#00F2EA",
-  instagram: "#E1306C",
-  twitter: "#1DA1F2",
+  youtube: "#E04040",
+  tiktok: "#25D0C8",
+  instagram: "#D44A7A",
+  twitter: "#4A9FE6",
 };
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -50,22 +51,29 @@ export function EarningsChart({ data }: EarningsChartProps): React.ReactElement 
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData}>
-            <XAxis dataKey="name" stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
-            <YAxis tickFormatter={(v: number) => `$${v}`} stroke="var(--color-text-dim)" tick={{ fill: "var(--color-text-muted)" }} />
+            <defs>
+              {chartData.map((entry) => {
+                const color = PLATFORM_COLORS[entry.platform] ?? "#94A3B8";
+                return (
+                  <linearGradient key={entry.platform} id={`grad-earn-${entry.platform}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0.6} />
+                  </linearGradient>
+                );
+              })}
+            </defs>
+            <XAxis dataKey="name" stroke={axisStroke} tick={axisTick} />
+            <YAxis tickFormatter={(v: number) => `$${v}`} stroke={axisStroke} tick={axisTick} />
             <Tooltip
               formatter={(v) => `$${Number(v).toFixed(2)}`}
-              contentStyle={{
-                backgroundColor: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "0.5rem",
-                color: "var(--color-text)",
-              }}
+              contentStyle={tooltipStyle}
+              cursor={{ fill: "var(--color-surface-hover)", opacity: 0.5 }}
             />
-            <Bar dataKey="earnings" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="earnings" radius={[6, 6, 0, 0]}>
               {chartData.map((entry) => (
                 <Cell
                   key={entry.platform}
-                  fill={PLATFORM_COLORS[entry.platform] ?? "var(--color-text-muted)"}
+                  fill={`url(#grad-earn-${entry.platform})`}
                 />
               ))}
             </Bar>

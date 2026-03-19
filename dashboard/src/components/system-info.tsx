@@ -63,9 +63,13 @@ function ProgressBar({
         <span className="text-text-muted">{label}</span>
         <span className="font-medium text-text">{detail}</span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
+      <div className="h-2 w-full overflow-hidden rounded-full glass-track">
         <div
-          className={cn("h-full rounded-full transition-all duration-500", color)}
+          className={cn(
+            "h-full rounded-full transition-all duration-500",
+            color,
+            value > 90 ? "glass-fill-danger" : value > 70 ? "glass-fill-warning" : "glass-fill-success"
+          )}
           style={{ width: `${Math.min(value, 100)}%` }}
         />
       </div>
@@ -139,7 +143,7 @@ export function SystemInfo(): React.ReactElement {
   }, []);
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-border bg-surface p-6">
+    <div className="flex h-full flex-col glass-card luminous-border rounded-xl p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text">
@@ -267,7 +271,7 @@ export function SystemInfo(): React.ReactElement {
                   {info.cpu_per_core.map((core, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <span className="w-8 text-[10px] text-text-dim">C{i}</span>
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full glass-track">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
