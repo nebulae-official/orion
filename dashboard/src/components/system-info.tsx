@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Server, RefreshCw } from "lucide-react";
+import { Server, RefreshCw, Monitor } from "lucide-react";
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
 import { demoSystemInfo } from "@/lib/demo-data";
 
@@ -165,17 +165,6 @@ export function SystemInfo(): React.ReactElement {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {info?.is_wsl && (
-            <label className="flex items-center gap-2 text-xs text-text-dim cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useHostMetrics}
-                onChange={(e) => setUseHostMetrics(e.target.checked)}
-                className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary"
-              />
-              Windows host metrics
-            </label>
-          )}
           <span className="text-xs text-text-dim">
             Updated {secondsAgo}s ago
           </span>
@@ -202,6 +191,34 @@ export function SystemInfo(): React.ReactElement {
           <RefreshCw className="h-6 w-6 animate-spin text-text-dim" />
         </div>
       ) : info ? (
+        <>
+        {info.is_wsl && (
+          <div className="mb-4 flex items-center justify-between rounded-lg bg-surface-elevated px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <Monitor className="h-4 w-4 text-text-muted" />
+              <span className="text-xs text-text-secondary">
+                {useHostMetrics ? "Showing Windows host metrics" : "Showing WSL metrics"}
+              </span>
+            </div>
+            <button
+              onClick={() => setUseHostMetrics(!useHostMetrics)}
+              className={cn(
+                "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200",
+                useHostMetrics ? "bg-primary" : "bg-border"
+              )}
+              role="switch"
+              aria-checked={useHostMetrics}
+              aria-label="Toggle Windows host metrics"
+            >
+              <span
+                className={cn(
+                  "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-200",
+                  useHostMetrics ? "translate-x-4 mt-0.5 ml-0.5" : "translate-x-0.5 mt-0.5"
+                )}
+              />
+            </button>
+          </div>
+        )}
         <div className="flex flex-1 flex-col gap-6 md:flex-row">
           {/* Host Information */}
           <div className="flex-1 space-y-3">
@@ -279,6 +296,7 @@ export function SystemInfo(): React.ReactElement {
             </div>
           </div>
         </div>
+        </>
       ) : null}
     </div>
   );
