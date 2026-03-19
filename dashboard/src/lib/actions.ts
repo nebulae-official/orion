@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { getAuthToken } from "@/lib/auth";
 import type { Content, ContentFeedback } from "@/types/api";
-import { SERVER_GATEWAY_URL } from "@/lib/config";
+import { DEMO_MODE, SERVER_GATEWAY_URL } from "@/lib/config";
+import { demoSystemStatus, demoGatewayHealth } from "@/lib/demo-data";
 
 async function authenticatedFetch(
   path: string,
@@ -151,10 +152,18 @@ export async function saveProviderConfig(
   }
 }
 
+export interface DependencyChecks {
+  redis: boolean;
+  postgres: boolean;
+}
+
 export interface SystemStatusService {
   service: string;
   status: string;
   error?: string;
+  uptime: string;
+  queue_size: number;
+  checks?: DependencyChecks;
 }
 
 export interface SystemStatusResponse {
@@ -163,6 +172,9 @@ export interface SystemStatusResponse {
 }
 
 export async function fetchSystemStatus(): Promise<SystemStatusResponse | null> {
+  if (DEMO_MODE) {
+    return demoSystemStatus;
+  }
   try {
     const response = await authenticatedFetch("/status");
     if (!response.ok) return null;
@@ -173,6 +185,9 @@ export async function fetchSystemStatus(): Promise<SystemStatusResponse | null> 
 }
 
 export async function fetchGatewayHealth(): Promise<{ status: string } | null> {
+  if (DEMO_MODE) {
+    return demoGatewayHealth;
+  }
   try {
     const { SERVER_GATEWAY_URL } = await import("@/lib/config");
     const response = await fetch(`${SERVER_GATEWAY_URL}/health`, {

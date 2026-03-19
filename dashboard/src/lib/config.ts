@@ -9,3 +9,6 @@ export const GATEWAY_URL =
  */
 export const SERVER_GATEWAY_URL =
   process.env.GATEWAY_INTERNAL_URL ?? GATEWAY_URL;
+
+/** When true, the dashboard serves fixture data instead of calling the Gateway. */
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";

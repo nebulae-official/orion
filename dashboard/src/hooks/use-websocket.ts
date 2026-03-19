@@ -16,6 +16,8 @@ export interface UseWebSocketOptions {
   onClose?: () => void;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
+  /** Set to false to skip connecting (e.g. in demo mode). Defaults to true. */
+  enabled?: boolean;
 }
 
 export interface UseWebSocketReturn {
@@ -34,6 +36,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
     onClose,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,
+    enabled = true,
   } = options;
 
   const [isConnected, setIsConnected] = useState(false);
@@ -58,7 +61,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
   }, [onMessage, onError, onOpen, onClose]);
 
   const connect = useCallback(() => {
-    if (!mountedRef.current) return;
+    if (!mountedRef.current || !enabled) return;
 
     try {
       const ws = new WebSocket(url);
@@ -115,7 +118,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         reconnectTimerRef.current = setTimeout(connect, delay);
       }
     }
-  }, [url, reconnectInterval, maxReconnectAttempts]);
+  }, [url, reconnectInterval, maxReconnectAttempts, enabled]);
 
   const send = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
