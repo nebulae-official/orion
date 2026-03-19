@@ -137,15 +137,9 @@ func SystemInfoHandler() http.HandlerFunc {
 	}
 }
 
-// gatherSystemInfo collects host system information using /proc and syscall.
-// Kept for backward compatibility with tests.
-func gatherSystemInfo() SystemInfo {
-	return gatherSystemInfo2(context.Background(), false)
-}
-
 // gatherSystemInfo2 collects system information, optionally pulling memory and
 // disk metrics from the Windows host when useHost is true (WSL2).
-func gatherSystemInfo2(ctx context.Context, useHost bool) SystemInfo {
+func gatherSystemInfo2(_ context.Context, useHost bool) SystemInfo {
 	hostname, _ := os.Hostname()
 
 	// CPU usage from /proc/stat (two samples with 100ms delay) — always Linux.

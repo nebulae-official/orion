@@ -132,15 +132,9 @@ func queryGPUs() ([]GpuInfo, error) {
 
 // queryCUDAVersion extracts the CUDA version from nvidia-smi output.
 func queryCUDAVersion() string {
-	out, err := exec.Command("nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader").Output()
-	if err != nil {
-		return ""
-	}
-
-	// nvidia-smi header line contains CUDA version; try parsing from the main command
+	// nvidia-smi header line contains CUDA version; parse from the main command
 	headerOut, err := exec.Command("nvidia-smi").Output()
 	if err != nil {
-		_ = out // suppress unused
 		return ""
 	}
 

@@ -1,0 +1,28 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+
+  settings:
+    errcheck:
+      exclude-functions:
+        # HTTP response writing — errors indicate the client disconnected,
+        # which the server cannot meaningfully handle.
+        - (net/http.ResponseWriter).Write
+        - (*net/http.ResponseWriter).Write
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+
+        # Closing resources — errors on Close are rarely actionable.
+        - (io.Closer).Close
+        - (*os.File).Close
+
+        # JSON encoding to response writers — wrapped by the above but
+        # called through an intermediate encoder.
+        - (*encoding/json.Encoder).Encode

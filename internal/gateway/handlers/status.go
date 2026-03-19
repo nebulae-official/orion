@@ -96,7 +96,7 @@ func Status(serviceURLs map[string]string) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(StatusResponse{
+		_ = json.NewEncoder(w).Encode(StatusResponse{
 			Status:   overall,
 			Services: results,
 		})
