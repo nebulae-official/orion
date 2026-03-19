@@ -7,6 +7,7 @@ from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
+from orion_common.auth import CurrentUser, get_current_user
 from orion_common.db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +26,7 @@ router = APIRouter(prefix="/api/v1/costs", tags=["costs"])
 @router.get("", response_model=CostSummary)
 async def get_costs(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     days: int = Query(default=30, ge=1, le=365, description="Cost window in days"),
 ) -> CostSummary:
     """Get total cost summary for the specified period."""
@@ -37,6 +39,7 @@ async def get_costs(
 @router.get("/daily", response_model=list[DailyCostSummary])
 async def get_daily_costs(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     days: int = Query(default=30, ge=1, le=90, description="Number of days"),
 ) -> list[DailyCostSummary]:
     """Get daily cost breakdown."""
@@ -48,6 +51,7 @@ async def get_daily_costs(
 @router.get("/by-provider", response_model=list[ProviderCostSummary])
 async def get_costs_by_provider(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     days: int = Query(default=30, ge=1, le=365, description="Cost window in days"),
 ) -> list[ProviderCostSummary]:
     """Get costs grouped by provider."""

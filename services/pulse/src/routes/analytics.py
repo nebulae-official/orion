@@ -7,6 +7,7 @@ from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
+from orion_common.auth import CurrentUser, get_current_user
 from orion_common.db.session import get_session
 from orion_common.events import Channels
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,6 +38,7 @@ def set_aggregator(aggregator: EventAggregator) -> None:
 @router.get("/events", response_model=AnalyticsEventsListResponse)
 async def list_events(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=50, ge=1, le=200, description="Items per page"),
     channel: str | None = Query(default=None, description="Filter by channel"),
@@ -50,12 +52,15 @@ async def list_events(
     if hours:
         since = datetime.now(UTC) - timedelta(hours=hours)
 
+    scope_user_id = None if user.is_admin else user.user_id
+
     events, total = await repo.list_events(
         page=page,
         limit=limit,
         channel=channel,
         service=service,
         since=since,
+        user_id=scope_user_id,
     )
 
     return AnalyticsEventsListResponse(
@@ -78,6 +83,7 @@ async def list_events(
 @router.get("/metrics", response_model=PipelineMetrics)
 async def get_metrics(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     hours: int = Query(default=24, ge=1, le=168, description="Metrics window in hours"),
 ) -> PipelineMetrics:
     """Get aggregated pipeline metrics (throughput, latency, error rates)."""
@@ -90,6 +96,7 @@ async def get_metrics(
 @router.get("/trends", response_model=TrendAnalytics)
 async def get_trend_analytics(
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser = Depends(get_current_user),
     hours: int = Query(default=168, ge=1, le=720, description="Hours of history"),
 ) -> TrendAnalytics:
     """Trend discovery analytics: counts by source, conversion rate."""

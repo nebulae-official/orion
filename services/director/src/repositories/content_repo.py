@@ -37,6 +37,7 @@ class ContentRepository:
         hook: str | None = None,
         visual_prompts: dict | None = None,
         status: ContentStatus = ContentStatus.draft,
+        created_by: uuid.UUID | None = None,
     ) -> Content:
         """Insert a new Content row and return it."""
         content = Content(
@@ -46,6 +47,7 @@ class ContentRepository:
             hook=hook,
             visual_prompts=visual_prompts,
             status=status,
+            created_by=created_by,
         )
         self._session.add(content)
         await self._session.flush()
@@ -100,11 +102,14 @@ class ContentRepository:
         status: ContentStatus | None = None,
         limit: int = 50,
         offset: int = 0,
+        user_id: uuid.UUID | None = None,
     ) -> list[Content]:
-        """Return content rows, optionally filtered by status."""
+        """Return content rows, optionally filtered by status and owner."""
         stmt = select(Content).order_by(Content.created_at.desc())
         if status is not None:
             stmt = stmt.where(Content.status == status)
+        if user_id is not None:
+            stmt = stmt.where(Content.created_by == user_id)
         stmt = stmt.limit(limit).offset(offset)
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
@@ -161,7 +166,5 @@ class ContentRepository:
             status_str = status_val.value if status_val else "all"
             for limit in (50, 100, 200):
                 for offset in (0, 50, 100):
-                    key = CONTENT_LIST_CACHE_KEY.format(
-                        status=status_str, limit=limit, offset=offset
-                    )
+                    key = CONTENT_LIST_CACHE_KEY.format(status=status_str, limit=limit, offset=offset)
                     await self._cache.delete(key)

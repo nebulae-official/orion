@@ -40,14 +40,21 @@ class PublishingService:
         self,
         content_id: UUID,
         platforms: list[str],
+        user_id: str | None = None,
     ) -> PublishResponse:
-        """Publish approved content to the specified platforms."""
+        """Publish approved content to the specified platforms.
+
+        When *user_id* is provided the service verifies that the content
+        and social accounts belong to that user.  Pass ``None`` to skip
+        ownership checks (admin callers).
+        """
         content = await self._get_content(content_id)
 
+        if user_id is not None and content.created_by is not None and str(content.created_by) != user_id:
+            raise ContentNotFoundError(f"Content {content_id} not found")
+
         if content.status.value != "approved":
-            raise ContentNotApprovedError(
-                f"Content must be in 'approved' status, got '{content.status.value}'"
-            )
+            raise ContentNotApprovedError(f"Content must be in 'approved' status, got '{content.status.value}'")
 
         text = content.script_body or content.title
         has_media = len(content.media_assets) > 0
@@ -63,7 +70,7 @@ class PublishingService:
         any_published = False
 
         for platform in platforms:
-            provider = await self._get_provider(platform)
+            provider = await self._get_provider(platform, user_id=user_id)
             if provider is None:
                 results.append(
                     PublishResult(
@@ -76,9 +83,7 @@ class PublishingService:
 
             hashtags = []
             if content.trend and content.trend.raw_data:
-                hashtags = [
-                    f"#{kw}" for kw in content.trend.raw_data.get("keywords", [])[:3]
-                ]
+                hashtags = [f"#{kw}" for kw in content.trend.raw_data.get("keywords", [])[:3]]
 
             publish_content = PublishContent(
                 text=text,
@@ -139,12 +144,11 @@ class PublishingService:
             raise ContentNotFoundError(f"Content {content_id} not found")
         return content
 
-    async def _get_provider(self, platform: str) -> SocialProvider | None:
-        stmt = (
-            select(SocialAccount)
-            .where(SocialAccount.platform == platform, SocialAccount.is_active.is_(True))
-            .limit(1)
-        )
+    async def _get_provider(self, platform: str, user_id: str | None = None) -> SocialProvider | None:
+        stmt = select(SocialAccount).where(SocialAccount.platform == platform, SocialAccount.is_active.is_(True))
+        if user_id is not None:
+            stmt = stmt.where(SocialAccount.user_id == UUID(user_id))
+        stmt = stmt.limit(1)
         result = await self.session.execute(stmt)
         account = result.scalar_one_or_none()
         if account is None:

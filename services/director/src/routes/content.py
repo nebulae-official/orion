@@ -6,6 +6,7 @@ import uuid
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from orion_common.auth import CurrentUser, get_current_user
 from orion_common.db.models import ContentStatus
 from orion_common.db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,6 +38,7 @@ def _get_pipeline(request: Request):
 async def generate_content(
     request_body: GenerateContentRequest,
     request: Request,
+    user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """Trigger content generation from a trend."""
@@ -46,6 +48,7 @@ async def generate_content(
         "content_generation_requested",
         trend_id=str(request_body.trend_id),
         trend_topic=request_body.trend_topic,
+        user_id=user.user_id,
     )
 
     result = await pipeline.run(
@@ -56,6 +59,7 @@ async def generate_content(
         target_platform=request_body.target_platform.value,
         tone=request_body.tone,
         visual_style=request_body.visual_style,
+        created_by=user.user_id,
     )
 
     script = result["script"]
@@ -82,6 +86,7 @@ async def generate_content(
 async def resume_pipeline(
     request_body: HITLResumeRequest,
     request: Request,
+    user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """Resume a paused HITL pipeline with human decision."""
@@ -119,7 +124,9 @@ async def resume_pipeline(
         visual_prompts=VisualPromptsResponse(
             style_guide=visual_prompts.style_guide,
             prompts=visual_prompts.prompts,
-        ) if visual_prompts else None,
+        )
+        if visual_prompts
+        else None,
         created_at=content.created_at,
     )
 
@@ -129,6 +136,7 @@ async def list_content(
     status: str | None = Query(None, description="Filter by content status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """List content items, optionally filtered by status."""
@@ -143,7 +151,8 @@ async def list_content(
             )
 
     repo = ContentRepository(session)
-    items = await repo.list_by_status(status=content_status, limit=limit, offset=offset)
+    scope_user_id = None if user.is_admin else uuid.UUID(user.user_id)
+    items = await repo.list_by_status(status=content_status, limit=limit, offset=offset, user_id=scope_user_id)
 
     return [
         ContentListItem(
@@ -162,6 +171,7 @@ async def list_content(
 @router.get("/{content_id}", response_model=GenerateContentResponse)
 async def get_content(
     content_id: uuid.UUID,
+    user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """Get a single content item by ID."""
@@ -170,6 +180,9 @@ async def get_content(
 
     if content is None:
         raise HTTPException(status_code=404, detail="Content not found")
+
+    if not user.is_admin and content.created_by is not None and str(content.created_by) != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorised to access this content")
 
     script_resp = None
     visual_resp = None
@@ -199,6 +212,7 @@ async def get_content(
 @router.get("/{content_id}/visual-prompts", response_model=VisualPromptsResponse)
 async def get_visual_prompts(
     content_id: uuid.UUID,
+    user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """Get the visual prompts for a content item."""
@@ -207,6 +221,9 @@ async def get_visual_prompts(
 
     if content is None:
         raise HTTPException(status_code=404, detail="Content not found")
+
+    if not user.is_admin and content.created_by is not None and str(content.created_by) != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorised to access this content")
 
     if content.visual_prompts is None:
         raise HTTPException(status_code=404, detail="No visual prompts for this content")

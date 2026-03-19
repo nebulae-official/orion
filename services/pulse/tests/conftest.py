@@ -31,9 +31,7 @@ def mock_session_factory() -> MagicMock:
 
 
 @pytest.fixture
-def mock_aggregator(
-    mock_event_bus: AsyncMock, mock_session_factory: MagicMock
-) -> EventAggregator:
+def mock_aggregator(mock_event_bus: AsyncMock, mock_session_factory: MagicMock) -> EventAggregator:
     return EventAggregator(mock_event_bus, mock_session_factory)
 
 
@@ -51,5 +49,10 @@ def pulse_app(mock_aggregator: EventAggregator) -> FastAPI:
 @pytest_asyncio.fixture
 async def client(pulse_app: FastAPI) -> AsyncClient:
     transport = ASGITransport(app=pulse_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as c:
+    headers = {
+        "X-User-ID": "00000000-0000-0000-0000-000000000001",
+        "X-User-Role": "admin",
+        "X-User-Email": "admin@test.com",
+    }
+    async with AsyncClient(transport=transport, base_url="http://test", headers=headers) as c:
         yield c

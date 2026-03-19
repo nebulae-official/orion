@@ -51,6 +51,7 @@ class ContentPipeline:
         tone: str = "informative and engaging",
         visual_style: str = "cinematic",
         thread_id: str | None = None,
+        created_by: str | None = None,
     ) -> dict[str, Any]:
         """Execute the content creation pipeline via LangGraph."""
         repo = ContentRepository(session)
@@ -60,6 +61,7 @@ class ContentPipeline:
             trend_id=trend_id,
             title=f"Content for: {trend_topic}",
             status=ContentStatus.generating,
+            created_by=uuid.UUID(created_by) if created_by else None,
         )
         content_id = content.id
 
@@ -93,9 +95,7 @@ class ContentPipeline:
         try:
             final_state = await self._graph.ainvoke(initial_state, config=config)
         except Exception as exc:
-            await repo.update_pipeline_run(
-                pipeline_run.id, PipelineStatus.failed, error_message=str(exc)
-            )
+            await repo.update_pipeline_run(pipeline_run.id, PipelineStatus.failed, error_message=str(exc))
             await repo.update_status(content_id, ContentStatus.draft)
             CONTENT_TOTAL.labels(status="failed").inc()
             await session.commit()
@@ -105,9 +105,7 @@ class ContentPipeline:
         # 5. Check for graph-level failure
         if final_state.get("current_stage") == PipelineStage.FAILED:
             error_msg = final_state.get("error", "Unknown graph error")
-            await repo.update_pipeline_run(
-                pipeline_run.id, PipelineStatus.failed, error_message=error_msg
-            )
+            await repo.update_pipeline_run(pipeline_run.id, PipelineStatus.failed, error_message=error_msg)
             await repo.update_status(content_id, ContentStatus.draft)
             CONTENT_TOTAL.labels(status="failed").inc()
             await session.commit()
@@ -124,11 +122,7 @@ class ContentPipeline:
         )
 
         visual_prompts_dict = final_state.get("visual_prompts", {})
-        prompt_set = (
-            VisualPromptSet.model_validate(visual_prompts_dict)
-            if visual_prompts_dict
-            else None
-        )
+        prompt_set = VisualPromptSet.model_validate(visual_prompts_dict) if visual_prompts_dict else None
 
         critique_score = final_state.get("critique_score", 0.0)
 
@@ -209,7 +203,8 @@ class ContentPipeline:
         config = {"configurable": {"thread_id": thread_id}}
 
         final_state = await self._graph.ainvoke(
-            Command(resume=decision), config=config,
+            Command(resume=decision),
+            config=config,
         )
 
         if final_state.get("current_stage") == PipelineStage.FAILED:
@@ -223,11 +218,7 @@ class ContentPipeline:
         )
 
         visual_prompts_dict = final_state.get("visual_prompts", {})
-        prompt_set = (
-            VisualPromptSet.model_validate(visual_prompts_dict)
-            if visual_prompts_dict
-            else None
-        )
+        prompt_set = VisualPromptSet.model_validate(visual_prompts_dict) if visual_prompts_dict else None
 
         # Persist if not already persisted
         repo = ContentRepository(session)
@@ -262,12 +253,8 @@ class ContentPipeline:
         try:
             async with self._checkpointer.conn.connection() as conn:
                 async with conn.cursor() as cur:
-                    await cur.execute(
-                        "DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,)
-                    )
-                    await cur.execute(
-                        "DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,)
-                    )
+                    await cur.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,))
+                    await cur.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
                 await conn.commit()
             await logger.ainfo("checkpoints_cleaned", thread_id=thread_id)
         except Exception:

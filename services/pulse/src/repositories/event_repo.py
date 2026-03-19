@@ -26,9 +26,7 @@ class AnalyticsEvent(Base):
 
     __tablename__ = "analytics_events"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     channel: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     service: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
@@ -75,8 +73,14 @@ class EventRepository:
         channel: str | None = None,
         service: str | None = None,
         since: datetime | None = None,
+        user_id: str | None = None,
     ) -> tuple[list[AnalyticsEvent], int]:
-        """Return paginated events with optional filters."""
+        """Return paginated events with optional filters.
+
+        When *user_id* is provided, only events whose payload contains a
+        matching ``content_id`` belonging to the user are returned.  This
+        is a best-effort filter based on the JSON payload.
+        """
         query = select(AnalyticsEvent).order_by(AnalyticsEvent.timestamp.desc())
 
         if channel:
@@ -85,6 +89,15 @@ class EventRepository:
             query = query.where(AnalyticsEvent.service == service)
         if since:
             query = query.where(AnalyticsEvent.timestamp >= since)
+        if user_id is not None:
+            # Filter events that reference content owned by this user
+            from orion_common.db.models import Content
+
+            query = query.join(
+                Content,
+                AnalyticsEvent.payload["content_id"].astext == func.cast(Content.id, String),
+                isouter=False,
+            ).where(Content.created_by == user_id)
 
         # Total count
         count_query = select(func.count()).select_from(query.subquery())
@@ -168,11 +181,13 @@ class EventRepository:
         for ts, total in all_rows.items():
             errors = error_rows.get(ts, 0)
             rate = errors / total if total > 0 else 0.0
-            trends.append({
-                "timestamp": ts,
-                "error_count": errors,
-                "total_count": total,
-                "error_rate": round(rate, 4),
-            })
+            trends.append(
+                {
+                    "timestamp": ts,
+                    "error_count": errors,
+                    "total_count": total,
+                    "error_rate": round(rate, 4),
+                }
+            )
 
         return trends

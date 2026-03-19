@@ -5,7 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 import structlog
-from orion_common.db.models import PublishRecord, SocialAccount
+from orion_common.db.models import Content, PublishRecord, SocialAccount
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,22 +25,31 @@ class PublishRepository:
         await self.session.flush()
         return account
 
-    async def list_accounts(self, active_only: bool = True) -> list[SocialAccount]:
+    async def list_accounts(
+        self,
+        active_only: bool = True,
+        user_id: UUID | None = None,
+    ) -> list[SocialAccount]:
         stmt = select(SocialAccount)
         if active_only:
             stmt = stmt.where(SocialAccount.is_active.is_(True))
+        if user_id is not None:
+            stmt = stmt.where(SocialAccount.user_id == user_id)
         result = await self.session.execute(stmt.order_by(SocialAccount.created_at.desc()))
         return list(result.scalars().all())
 
     async def get_account(self, account_id: UUID) -> SocialAccount | None:
         return await self.session.get(SocialAccount, account_id)
 
-    async def get_account_for_platform(self, platform: str) -> SocialAccount | None:
-        stmt = (
-            select(SocialAccount)
-            .where(SocialAccount.platform == platform, SocialAccount.is_active.is_(True))
-            .limit(1)
-        )
+    async def get_account_for_platform(
+        self,
+        platform: str,
+        user_id: UUID | None = None,
+    ) -> SocialAccount | None:
+        stmt = select(SocialAccount).where(SocialAccount.platform == platform, SocialAccount.is_active.is_(True))
+        if user_id is not None:
+            stmt = stmt.where(SocialAccount.user_id == user_id)
+        stmt = stmt.limit(1)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -63,9 +72,12 @@ class PublishRepository:
         self,
         content_id: UUID | None = None,
         limit: int = 50,
+        user_id: UUID | None = None,
     ) -> list[PublishRecord]:
         stmt = select(PublishRecord).order_by(PublishRecord.created_at.desc()).limit(limit)
         if content_id:
             stmt = stmt.where(PublishRecord.content_id == content_id)
+        if user_id is not None:
+            stmt = stmt.join(Content, PublishRecord.content_id == Content.id).where(Content.created_by == user_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
