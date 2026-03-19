@@ -83,6 +83,27 @@ updates:
           - "minor"
           - "patch"
 
+  - package-ecosystem: "pip"
+    directory: "/services/identity"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # CLI
+  - package-ecosystem: "pip"
+    directory: "/cli"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
   # Dashboard (npm)
   - package-ecosystem: "npm"
     directory: "/dashboard"
@@ -158,6 +179,16 @@ updates:
 
   - package-ecosystem: "docker"
     directory: "/services/publisher"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "docker"
+    directory: "/services/identity"
     schedule:
       interval: "weekly"
     groups:
