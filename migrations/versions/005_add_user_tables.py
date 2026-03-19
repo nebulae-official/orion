@@ -133,7 +133,7 @@ def upgrade() -> None:
             """
             INSERT INTO users (id, email, name, role, email_verified, is_active)
             VALUES (
-                :id,
+                CAST(:id AS uuid),
                 'system@orion.internal',
                 'System',
                 'admin',
@@ -150,16 +150,18 @@ def upgrade() -> None:
 
     password_hash = None
     if admin_pass:
-        from passlib.hash import bcrypt as bcrypt_hash
+        import bcrypt
 
-        password_hash = bcrypt_hash.using(rounds=12).hash(admin_pass)
+        password_hash = bcrypt.hashpw(admin_pass.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode(
+            "utf-8"
+        )
 
     op.execute(
         sa.text(
             """
             INSERT INTO users (id, email, password_hash, name, role, email_verified, is_active)
             VALUES (
-                :id,
+                CAST(:id AS uuid),
                 :email,
                 :password_hash,
                 'Admin',

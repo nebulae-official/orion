@@ -7,8 +7,9 @@ WORKDIR /app
 
 COPY libs/orion-common/ /app/libs/orion-common/
 COPY services/publisher/pyproject.toml .
-RUN sed -i 's|file:../../libs/orion-common|file:///app/libs/orion-common|' pyproject.toml
-RUN uv pip install --system -e .
+RUN sed -i 's|file:../../libs/orion-common|file:///app/libs/orion-common|' pyproject.toml && \
+    sed -i '/\[tool\.uv\.sources\]/,/^$/d' pyproject.toml
+RUN uv pip install --system -e /app/libs/orion-common -e .
 COPY services/publisher/ .
 
 # --- dev stage (hot-reload with uvicorn --reload) ---
@@ -25,7 +26,7 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
-COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/ /app/
 
