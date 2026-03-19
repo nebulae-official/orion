@@ -49,17 +49,23 @@ async def authenticate_user(
     email: str,
     password: str,
 ) -> User:
-    """Verify email + password and return the user.
+    """Verify email/username + password and return the user.
+
+    Accepts either an email address or a username (name field). If the input
+    contains ``@`` it is treated as an email lookup; otherwise as a name lookup.
 
     Raises
     ------
     HTTPException(401)
-        If the email is not found, the account is inactive, or the password
+        If the user is not found, the account is inactive, or the password
         does not match.
     """
-    user = await user_repo.get_by_email(session, email)
+    if "@" in email:
+        user = await user_repo.get_by_email(session, email)
+    else:
+        user = await user_repo.get_by_name(session, email)
     if user is None:
-        logger.warning("auth_failed_unknown_email", email=email)
+        logger.warning("auth_failed_unknown_user", identifier=email)
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     if not user.is_active:

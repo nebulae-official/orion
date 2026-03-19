@@ -71,17 +71,17 @@ export default function LoginForm(): React.ReactElement {
                   htmlFor="email"
                   className="mb-1.5 block text-sm font-medium text-text-secondary"
                 >
-                  Email
+                  Email or Username
                 </label>
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email or username"
                 />
               </div>
 

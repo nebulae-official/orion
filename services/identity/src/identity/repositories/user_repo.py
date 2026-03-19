@@ -23,6 +23,13 @@ async def get_by_email(session: AsyncSession, email: str) -> User | None:
     return result.scalar_one_or_none()
 
 
+async def get_by_name(session: AsyncSession, name: str) -> User | None:
+    """Fetch a user by name (case-insensitive)."""
+    stmt = select(User).where(User.name.ilike(name))
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
 async def create_user(
     session: AsyncSession,
     email: str,
