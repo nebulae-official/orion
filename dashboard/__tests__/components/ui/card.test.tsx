@@ -16,8 +16,8 @@ describe("Card", () => {
     render(<Card data-testid="card">Content</Card>);
     const card = screen.getByTestId("card");
     expect(card.className).toContain("rounded-xl");
-    expect(card.className).toContain("border");
-    expect(card.className).toContain("bg-surface");
+    expect(card.className).toContain("glass-card");
+    expect(card.className).toContain("luminous-border");
     expect(card.className).toContain("p-6");
   });
 

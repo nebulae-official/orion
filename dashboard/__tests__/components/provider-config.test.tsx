@@ -1,11 +1,24 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ProviderConfig } from "@/components/provider-config";
+
+// Mock config
+vi.mock("@/lib/config", () => ({
+  DEMO_MODE: false,
+  GATEWAY_URL: "http://localhost:8000",
+}));
 
 // Mock api-client
 vi.mock("@/lib/api-client", () => ({
   apiClient: {
     get: vi.fn().mockResolvedValue({}),
+  },
+  ApiError: class ApiError extends Error {
+    status: number;
+    constructor(message: string, status: number) {
+      super(message);
+      this.status = status;
+    }
   },
 }));
 
@@ -42,10 +55,10 @@ describe("ProviderConfig", () => {
     expect(modelSelects.length).toBe(4);
   });
 
-  it("renders Save Configuration buttons for each service", () => {
+  it("renders Save buttons for each service", () => {
     render(<ProviderConfig />);
 
-    const saveButtons = screen.getAllByText("Save Configuration");
+    const saveButtons = screen.getAllByText("Save");
     expect(saveButtons.length).toBe(4);
   });
 
@@ -82,16 +95,18 @@ describe("ProviderConfig", () => {
     const { saveProviderConfig } = await import("@/lib/actions");
     render(<ProviderConfig />);
 
-    const saveButtons = screen.getAllByText("Save Configuration");
+    const saveButtons = screen.getAllByText("Save");
     fireEvent.click(saveButtons[0]);
 
-    expect(saveProviderConfig).toHaveBeenCalledWith("llm", "LOCAL", "llama3.2");
+    await waitFor(() => {
+      expect(saveProviderConfig).toHaveBeenCalledWith("llm", "LOCAL", "llama3.2");
+    });
   });
 
   it("shows success message after successful save", async () => {
     render(<ProviderConfig />);
 
-    const saveButtons = screen.getAllByText("Save Configuration");
+    const saveButtons = screen.getAllByText("Save");
     fireEvent.click(saveButtons[0]);
 
     await waitFor(() => {
@@ -110,7 +125,7 @@ describe("ProviderConfig", () => {
 
     render(<ProviderConfig />);
 
-    const saveButtons = screen.getAllByText("Save Configuration");
+    const saveButtons = screen.getAllByText("Save");
     fireEvent.click(saveButtons[0]);
 
     await waitFor(() => {

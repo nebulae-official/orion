@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LoginForm from "@/app/(auth)/login/login-form";
 
 // Mock next/navigation
@@ -13,9 +13,31 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+// Mock next/link
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 // Mock auth
 vi.mock("@/lib/auth", () => ({
   login: vi.fn(),
+}));
+
+// Mock config
+vi.mock("@/lib/config", () => ({
+  GATEWAY_URL: "http://localhost:8000",
 }));
 
 describe("LoginForm", () => {
@@ -35,10 +57,10 @@ describe("LoginForm", () => {
   it("renders username input", () => {
     render(<LoginForm />);
 
-    const usernameInput = screen.getByLabelText("Username");
-    expect(usernameInput).toBeInTheDocument();
-    expect(usernameInput).toHaveAttribute("type", "text");
-    expect(usernameInput).toBeRequired();
+    const emailInput = screen.getByLabelText("Email or Username");
+    expect(emailInput).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute("type", "text");
+    expect(emailInput).toBeRequired();
   });
 
   it("renders password input", () => {
@@ -67,9 +89,9 @@ describe("LoginForm", () => {
   it("updates username on input change", () => {
     render(<LoginForm />);
 
-    const usernameInput = screen.getByLabelText("Username");
-    fireEvent.change(usernameInput, { target: { value: "testuser" } });
-    expect(usernameInput).toHaveValue("testuser");
+    const emailInput = screen.getByLabelText("Email or Username");
+    fireEvent.change(emailInput, { target: { value: "testuser" } });
+    expect(emailInput).toHaveValue("testuser");
   });
 
   it("updates password on input change", () => {
@@ -86,7 +108,7 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByLabelText("Username"), {
+    fireEvent.change(screen.getByLabelText("Email or Username"), {
       target: { value: "admin" },
     });
     fireEvent.change(screen.getByLabelText("Password"), {
@@ -95,7 +117,9 @@ describe("LoginForm", () => {
 
     fireEvent.submit(screen.getByText("Sign in").closest("form")!);
 
-    expect(login).toHaveBeenCalledWith("admin", "pass");
+    await waitFor(() => {
+      expect(login).toHaveBeenCalledWith("admin", "pass");
+    });
   });
 
   it("shows error message on failed login", async () => {
@@ -107,7 +131,7 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByLabelText("Username"), {
+    fireEvent.change(screen.getByLabelText("Email or Username"), {
       target: { value: "bad" },
     });
     fireEvent.change(screen.getByLabelText("Password"), {
@@ -116,7 +140,6 @@ describe("LoginForm", () => {
 
     fireEvent.click(screen.getByText("Sign in"));
 
-    const { waitFor } = await import("@testing-library/react");
     await waitFor(() => {
       expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
     });
@@ -128,7 +151,7 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByLabelText("Username"), {
+    fireEvent.change(screen.getByLabelText("Email or Username"), {
       target: { value: "admin" },
     });
     fireEvent.change(screen.getByLabelText("Password"), {
@@ -137,17 +160,16 @@ describe("LoginForm", () => {
 
     fireEvent.click(screen.getByText("Sign in"));
 
-    const { waitFor } = await import("@testing-library/react");
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/");
     });
   });
 
-  it("has placeholder text for username", () => {
+  it("has placeholder text for email", () => {
     render(<LoginForm />);
 
     expect(
-      screen.getByPlaceholderText("Enter your username")
+      screen.getByPlaceholderText("Enter your email or username")
     ).toBeInTheDocument();
   });
 

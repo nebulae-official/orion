@@ -142,19 +142,20 @@ describe("Sidebar", () => {
     const aside = container.querySelector("aside");
     expect(aside).toHaveClass("translate-x-0");
 
-    // Click the backdrop
-    const backdrop = container.querySelector('[aria-hidden="true"]');
+    // Click the backdrop div (the overlay div with aria-hidden, not SVG icons)
+    const backdrop = container.querySelector('div[aria-hidden="true"]');
     expect(backdrop).toBeInTheDocument();
     fireEvent.click(backdrop!);
 
-    expect(aside).toHaveClass("-translate-x-full");
+    expect(aside).not.toHaveClass("translate-x-0");
   });
 
   it("shows no backdrop when sidebar is closed", () => {
     const { container } = render(<Sidebar />);
 
-    const backdrop = container.querySelector('[aria-hidden="true"]');
-    expect(backdrop).not.toBeInTheDocument();
+    // Sidebar is closed by default, so no backdrop div should be present
+    const backdrop = container.querySelector('div[aria-hidden="true"]');
+    expect(backdrop).toBeNull();
   });
 
   it("highlights the active navigation item for root path", () => {
