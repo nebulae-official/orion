@@ -1,5 +1,5 @@
 # --- builder stage ---
-FROM python:3.13-slim AS builder
+FROM python:3.14-slim AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /usr/local/bin/uv
 
@@ -28,7 +28,7 @@ EXPOSE 8001
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 
 # --- runtime stage ---
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
