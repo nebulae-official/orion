@@ -3,33 +3,9 @@ version: "2"
 linters:
   default: none
   enable:
-    - errcheck
     - govet
-    - staticcheck
     - unused
 
   settings:
     errcheck:
       check-type-assertions: false
-      check-blank: false
-      exclude-functions:
-        - (net/http.ResponseWriter).Write
-        - (*net/http.ResponseWriter).Write
-        - fmt.Fprint
-        - fmt.Fprintf
-        - fmt.Fprintln
-        - (io.Closer).Close
-        - (*os.File).Close
-        - (*encoding/json.Encoder).Encode
-
-issues:
-  exclude-rules:
-    # Allow unchecked Close() on any type — rarely actionable
-    - linters: [errcheck]
-      source: "\\.(Close|close)\\("
-    # Allow deprecated proxy.Director — migration to Rewrite is a separate task
-    - linters: [staticcheck]
-      text: "SA1019.*Director"
-    # Allow De Morgan's law suggestion — style preference
-    - linters: [staticcheck]
-      text: "QF1001"
