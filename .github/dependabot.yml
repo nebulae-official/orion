@@ -4,206 +4,286 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Go modules
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Python services
   - package-ecosystem: "pip"
     directory: "/services/scout"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/director"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/media"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/editor"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/pulse"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/publisher"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "pip"
     directory: "/services/identity"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # CLI
   - package-ecosystem: "pip"
     directory: "/cli"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Dashboard (npm)
   - package-ecosystem: "npm"
     directory: "/dashboard"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Docker - deploy directory (gateway)
   - package-ecosystem: "docker"
     directory: "/deploy"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Docker - service directories
   - package-ecosystem: "docker"
     directory: "/services/scout"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/director"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/media"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/editor"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/pulse"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/publisher"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/services/identity"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Docker - dashboard
   - package-ecosystem: "docker"
     directory: "/dashboard"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 5
     groups:
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
