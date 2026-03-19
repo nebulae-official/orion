@@ -2,6 +2,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { BarChart3 } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
+import { DEMO_MODE } from "@/lib/config";
+import {
+  demoFunnel,
+  demoCostSummary,
+  demoProviderCosts,
+  demoErrorTrend,
+} from "@/lib/demo-data";
 import { StatCard } from "@/components/charts/stat-card";
 import { FunnelChart } from "@/components/charts/funnel-chart";
 import { CostChart } from "@/components/charts/cost-chart";
@@ -39,7 +46,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
   const cookieStore = await cookies();
   const token = cookieStore.get("orion_token")?.value;
 
-  if (!token) {
+  if (!token && !DEMO_MODE) {
     redirect("/login");
   }
 
@@ -56,36 +63,43 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
   let fetchErrors: string[] = [];
 
-  const [funnelResult, costsResult, providerCostsResult, errorsResult] =
-    await Promise.allSettled([
-      serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", {}, token),
-      serverFetch<CostSummary>("/api/v1/pulse/costs", {}, token),
-      serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", {}, token),
-      serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", {}, token),
-    ]);
-
-  if (funnelResult.status === "fulfilled") {
-    funnel = funnelResult.value;
+  if (DEMO_MODE) {
+    funnel = demoFunnel;
+    costs = demoCostSummary;
+    providerCosts = demoProviderCosts;
+    errors = demoErrorTrend;
   } else {
-    fetchErrors.push("pipeline funnel");
-  }
+    const [funnelResult, costsResult, providerCostsResult, errorsResult] =
+      await Promise.allSettled([
+        serverFetch<FunnelMetrics>("/api/v1/pulse/pipeline/funnel", {}, token),
+        serverFetch<CostSummary>("/api/v1/pulse/costs", {}, token),
+        serverFetch<ProviderCostSummary[]>("/api/v1/pulse/costs/by-provider", {}, token),
+        serverFetch<ErrorTrendData[]>("/api/v1/pulse/pipeline/errors?hours=168", {}, token),
+      ]);
 
-  if (costsResult.status === "fulfilled") {
-    costs = costsResult.value;
-  } else {
-    fetchErrors.push("cost summary");
-  }
+    if (funnelResult.status === "fulfilled") {
+      funnel = funnelResult.value;
+    } else {
+      fetchErrors.push("pipeline funnel");
+    }
 
-  if (providerCostsResult.status === "fulfilled") {
-    providerCosts = providerCostsResult.value;
-  } else {
-    fetchErrors.push("provider costs");
-  }
+    if (costsResult.status === "fulfilled") {
+      costs = costsResult.value;
+    } else {
+      fetchErrors.push("cost summary");
+    }
 
-  if (errorsResult.status === "fulfilled") {
-    errors = errorsResult.value;
-  } else {
-    fetchErrors.push("error trends");
+    if (providerCostsResult.status === "fulfilled") {
+      providerCosts = providerCostsResult.value;
+    } else {
+      fetchErrors.push("provider costs");
+    }
+
+    if (errorsResult.status === "fulfilled") {
+      errors = errorsResult.value;
+    } else {
+      fetchErrors.push("error trends");
+    }
   }
 
   const approvalRate =

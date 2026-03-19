@@ -1,5 +1,5 @@
 import { Settings } from "lucide-react";
-import { ProviderConfig } from "@/components/provider-config";
+import { SettingsContent } from "@/components/settings/settings-content";
 
 export default function SettingsPage(): React.ReactElement {
   return (
@@ -10,12 +10,12 @@ export default function SettingsPage(): React.ReactElement {
           <div>
             <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Settings</h1>
             <p className="mt-1 text-text-secondary">
-              Configure AI providers and model selections for each service.
+              Configure AI providers, API keys, pipeline behavior, and system preferences.
             </p>
           </div>
         </div>
       </div>
-      <ProviderConfig />
+      <SettingsContent />
     </div>
   );
 }

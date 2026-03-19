@@ -56,8 +56,8 @@ describe("Sidebar", () => {
   it("renders the Orion logo and brand", () => {
     render(<Sidebar />);
 
-    expect(screen.getByText("Orion")).toBeInTheDocument();
-    expect(screen.getByText("v1.0")).toBeInTheDocument();
+    expect(screen.getByText("ORION")).toBeInTheDocument();
+    expect(screen.getByText("Digital Twin Systems")).toBeInTheDocument();
   });
 
   it("renders all navigation items", () => {
@@ -162,7 +162,7 @@ describe("Sidebar", () => {
     render(<Sidebar />);
 
     const dashboardLink = screen.getByText("Dashboard").closest("a");
-    expect(dashboardLink).toHaveClass("bg-primary-surface");
+    expect(dashboardLink).toHaveClass("bg-violet-500/10");
   });
 
   it("highlights the active navigation item for sub-path", () => {
@@ -170,7 +170,7 @@ describe("Sidebar", () => {
     render(<Sidebar />);
 
     const queueLink = screen.getByText("Content Queue").closest("a");
-    expect(queueLink).toHaveClass("bg-primary-surface");
+    expect(queueLink).toHaveClass("bg-violet-500/10");
   });
 
   it("calls logout when sign out is clicked", async () => {

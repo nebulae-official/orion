@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { TrendingUp } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
+import { DEMO_MODE } from "@/lib/config";
+import { demoTrends } from "@/lib/demo-data";
 import { StatCard } from "@/components/charts/stat-card";
 import { TrendTable } from "@/components/trend-table";
 import type { Trend } from "@/types/api";
@@ -15,7 +17,7 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
   const cookieStore = await cookies();
   const token = cookieStore.get("orion_token")?.value;
 
-  if (!token) {
+  if (!token && !DEMO_MODE) {
     redirect("/login");
   }
 
@@ -23,16 +25,21 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
   let total = 0;
   let fetchError = false;
 
-  try {
-    const response = await serverFetch<TrendListResponse>(
-      "/api/v1/scout/trends",
-      {},
-      token
-    );
-    trends = response.items;
-    total = response.total;
-  } catch {
-    fetchError = true;
+  if (DEMO_MODE) {
+    trends = demoTrends;
+    total = demoTrends.length;
+  } else {
+    try {
+      const response = await serverFetch<TrendListResponse>(
+        "/api/v1/scout/trends",
+        {},
+        token
+      );
+      trends = response.items;
+      total = response.total;
+    } catch {
+      fetchError = true;
+    }
   }
 
   const used = trends.filter((t) => t.status === "USED").length;

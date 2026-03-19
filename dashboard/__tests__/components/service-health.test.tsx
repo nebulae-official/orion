@@ -28,7 +28,7 @@ describe("ServiceHealth", () => {
     expect(screen.getByText("Service Status")).toBeInTheDocument();
   });
 
-  it("renders all six services in initial checking state", () => {
+  it("renders all seven services in initial checking state", () => {
     mockFetchSystemStatus.mockImplementation(() => new Promise(() => {}));
     mockFetchGatewayHealth.mockImplementation(() => new Promise(() => {}));
 
@@ -38,8 +38,9 @@ describe("ServiceHealth", () => {
     expect(screen.getByText("Scout (Trends)")).toBeInTheDocument();
     expect(screen.getByText("Director (Scripts)")).toBeInTheDocument();
     expect(screen.getByText("Media (Assets)")).toBeInTheDocument();
-    expect(screen.getByText("Editor (Publish)")).toBeInTheDocument();
+    expect(screen.getByText("Editor (Video)")).toBeInTheDocument();
     expect(screen.getByText("Pulse (Analytics)")).toBeInTheDocument();
+    expect(screen.getByText("Publisher (Social)")).toBeInTheDocument();
   });
 
   it("shows Checking badges initially", () => {
@@ -49,7 +50,7 @@ describe("ServiceHealth", () => {
     render(<ServiceHealth />);
 
     const checkingBadges = screen.getAllByText("Checking");
-    expect(checkingBadges.length).toBe(6);
+    expect(checkingBadges.length).toBe(7);
   });
 
   it("shows Healthy status for healthy services", async () => {
@@ -57,11 +58,12 @@ describe("ServiceHealth", () => {
     mockFetchSystemStatus.mockResolvedValue({
       status: "ok",
       services: [
-        { service: "scout", status: "ok" },
-        { service: "director", status: "ok" },
-        { service: "media", status: "ok" },
-        { service: "editor", status: "ok" },
-        { service: "pulse", status: "ok" },
+        { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
       ],
     });
 
@@ -69,7 +71,7 @@ describe("ServiceHealth", () => {
 
     await waitFor(() => {
       const healthyBadges = screen.getAllByText("Healthy");
-      expect(healthyBadges.length).toBe(6);
+      expect(healthyBadges.length).toBe(7);
     });
   });
 
@@ -81,7 +83,7 @@ describe("ServiceHealth", () => {
 
     await waitFor(() => {
       const unhealthyBadges = screen.getAllByText("Unhealthy");
-      expect(unhealthyBadges.length).toBe(6);
+      expect(unhealthyBadges.length).toBe(7);
     });
   });
 
@@ -90,11 +92,12 @@ describe("ServiceHealth", () => {
     mockFetchSystemStatus.mockResolvedValue({
       status: "ok",
       services: [
-        { service: "scout", status: "ok" },
-        { service: "director", status: "ok" },
-        { service: "media", status: "ok" },
-        { service: "editor", status: "ok" },
-        { service: "pulse", status: "ok" },
+        { service: "scout", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "director", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "media", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "editor", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "pulse", status: "ok", uptime: "1h", queue_size: 0 },
+        { service: "publisher", status: "ok", uptime: "1h", queue_size: 0 },
       ],
     });
 
@@ -102,7 +105,7 @@ describe("ServiceHealth", () => {
 
     await waitFor(() => {
       const healthyBadges = screen.getAllByText("Healthy");
-      expect(healthyBadges.length).toBe(5);
+      expect(healthyBadges.length).toBe(6);
       expect(screen.getAllByText("Unhealthy").length).toBe(1);
     });
   });
@@ -114,7 +117,7 @@ describe("ServiceHealth", () => {
     render(<ServiceHealth />);
 
     expect(
-      screen.getByText("Auto-refreshes every 30 seconds")
+      screen.getByText("Auto-refreshes every 5 seconds")
     ).toBeInTheDocument();
   });
 

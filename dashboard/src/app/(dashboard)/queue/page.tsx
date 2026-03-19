@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
-import { GATEWAY_URL } from "@/lib/config";
+import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
+import { getDemoContentPage } from "@/lib/demo-data";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
 
 interface QueuePageProps {
@@ -54,7 +55,7 @@ export default async function QueuePage({
   const cookieStore = await cookies();
   const token = cookieStore.get("orion_token")?.value;
 
-  if (!token) {
+  if (!token && !DEMO_MODE) {
     redirect("/login");
   }
 
@@ -67,11 +68,15 @@ export default async function QueuePage({
   let fetchError = false;
   let data: PaginatedResponse<Content>;
 
-  try {
-    data = await fetchContentList(token, { status, sort, page, limit });
-  } catch {
-    fetchError = true;
-    data = { items: [], page, limit, total: 0 };
+  if (DEMO_MODE) {
+    data = getDemoContentPage(status, page, limit);
+  } else {
+    try {
+      data = await fetchContentList(token!, { status, sort, page, limit });
+    } catch {
+      fetchError = true;
+      data = { items: [], page, limit, total: 0 };
+    }
   }
 
   const totalPages = Math.ceil(data.total / limit);
