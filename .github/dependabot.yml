@@ -173,6 +173,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   # Docker - service directories
   - package-ecosystem: "docker"
@@ -188,6 +190,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/director"
@@ -202,6 +206,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/media"
@@ -216,6 +222,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/editor"
@@ -230,6 +238,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/pulse"
@@ -244,6 +254,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/publisher"
@@ -258,6 +270,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   - package-ecosystem: "docker"
     directory: "/services/identity"
@@ -272,6 +286,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
 
   # Docker - dashboard
   - package-ecosystem: "docker"
@@ -287,3 +303,5 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "python"
+        versions: [">=3.14"]
