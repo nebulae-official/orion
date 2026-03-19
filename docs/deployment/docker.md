@@ -37,6 +37,12 @@ All Orion services are containerized and orchestrated via Docker Compose.
       -f deploy/docker-compose.dev.yml up
     ```
 
+=== "Database tools"
+
+    ```bash
+    docker compose -f deploy/docker-compose.yml --profile tools up -d
+    ```
+
 ## :material-view-grid: Service Configuration
 
 ### Application Services
@@ -62,6 +68,18 @@ All Orion services are containerized and orchestrated via Docker Compose.
 | milvus   | milvusdb/milvus:v2.4 | 19530, 9091 | `milvusdata` |
 | ollama   | ollama/ollama        | 11434       | `ollamadata` |
 | comfyui  | --                   | 8188        | --           |
+
+### Database Tools (profile: `tools`)
+
+| Service   | Image                   | Port | Purpose                          |
+| --------- | ----------------------- | ---- | -------------------------------- |
+| pgadmin   | dpage/pgadmin4          | 5050 | PostgreSQL management UI         |
+| databasus | databasus/databasus     | 4005 | Automated backup dashboard       |
+
+Start these with `make up-tools` or `docker compose -f deploy/docker-compose.yml --profile tools up -d`.
+
+- **pgAdmin 4** — Browse tables, run queries, inspect indexes, export data. Access at http://localhost:5050.
+- **Databasus** — Configure scheduled pg_dump backups with retention policies and restore wizard. Access at http://localhost:4005.
 
 ## :material-harddisk: Volumes
 

@@ -46,6 +46,7 @@ nav = [
     { "Data Flow" = "architecture/data-flow.md" },
     { "Communication" = "architecture/communication.md" },
     { "Database" = "architecture/database.md" },
+    { "Port Map" = "architecture/port-map.md" },
     { "Security" = "architecture/security.md" },
   ]},
   { "Services" = [

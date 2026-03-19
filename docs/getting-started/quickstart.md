@@ -20,7 +20,13 @@ cd cli && uv run orion system health
 ```
 
 !!! info "Startup time"
-Allow up to 90 seconds for all health checks to pass. PostgreSQL and Milvus initialize their data directories on first run.
+    Allow up to 90 seconds for all health checks to pass. PostgreSQL and Milvus initialize their data directories on first run.
+
+!!! tip "Database Management"
+    Start pgAdmin and Databasus with `make up-tools`:
+
+    - **pgAdmin:** http://localhost:5050 — browse tables, run queries
+    - **Databasus:** http://localhost:4005 — configure automated backups
 
 ## :material-numeric-2-circle: Authenticate
 
