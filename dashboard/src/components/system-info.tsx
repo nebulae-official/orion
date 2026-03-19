@@ -178,9 +178,9 @@ export function SystemInfo(): React.ReactElement {
       ) : info ? (
         <div className="flex flex-1 flex-col gap-6 md:flex-row">
           {/* Host Information */}
-          <div className="flex flex-1 flex-col space-y-3">
+          <div className="flex-1 space-y-3">
             <h3 className="text-sm font-semibold text-text-secondary">Host Information</h3>
-            <div className="flex flex-1 flex-col justify-between space-y-2">
+            <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">Hostname</span>
                 <span className="font-medium text-text">{info.hostname}</span>
@@ -209,10 +209,10 @@ export function SystemInfo(): React.ReactElement {
           </div>
 
           {/* Resource Usage */}
-          <div className="flex flex-1 flex-col space-y-4">
+          <div className="flex-1 space-y-4">
             <h3 className="text-sm font-semibold text-text-secondary">Resource Usage</h3>
 
-            <div className="flex flex-1 flex-col justify-between">
+            <div className="space-y-4">
               <ProgressBar
                 value={info.cpu_usage}
                 label="CPU"

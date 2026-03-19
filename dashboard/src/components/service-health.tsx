@@ -242,10 +242,12 @@ export function ServiceHealth(): React.ReactElement {
 /** InfrastructureStatus shows Redis/Postgres connectivity per service. */
 export function InfrastructureStatus(): React.ReactElement {
   const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [authFailed, setAuthFailed] = useState(false);
 
   const fetchStatus = useCallback(async (): Promise<void> => {
     const statusResult = await fetchSystemStatus();
     const statusData = statusResult.data;
+    setAuthFailed(statusResult.authFailed);
     if (!statusData?.services) return;
 
     const updated = statusData.services.map((svcData) => ({
@@ -271,6 +273,22 @@ export function InfrastructureStatus(): React.ReactElement {
   const redisOk = services.length > 0 && services.every((s) => s.checks?.redis !== false);
   const postgresOk = services.length > 0 && services.every((s) => s.checks?.postgres !== false);
 
+  const infraStatus = (ok: boolean): { label: string; dotClass: string; badgeClass: string } => {
+    if (authFailed) {
+      return {
+        label: "Unknown — sign in for status",
+        dotClass: "bg-text-dim",
+        badgeClass: "bg-surface-elevated text-text-dim",
+      };
+    }
+    return ok
+      ? { label: "Connected", dotClass: "bg-success", badgeClass: "bg-success-surface text-success-light" }
+      : { label: "Disconnected", dotClass: "bg-danger", badgeClass: "bg-danger-surface text-danger-light" };
+  };
+
+  const redisStatus = infraStatus(redisOk);
+  const pgStatus = infraStatus(postgresOk);
+
   return (
     <div className="rounded-xl border border-border bg-surface p-6">
       <h2 className="mb-4 text-lg font-semibold text-text">Infrastructure</h2>
@@ -281,7 +299,7 @@ export function InfrastructureStatus(): React.ReactElement {
             <span
               className={cn(
                 "inline-block h-3 w-3 rounded-full",
-                redisOk ? "bg-success" : "bg-danger"
+                redisStatus.dotClass
               )}
             />
             <span className="text-sm font-medium text-text">Redis</span>
@@ -289,12 +307,10 @@ export function InfrastructureStatus(): React.ReactElement {
           <span
             className={cn(
               "rounded-full px-2.5 py-0.5 text-xs font-medium",
-              redisOk
-                ? "bg-success-surface text-success-light"
-                : "bg-danger-surface text-danger-light"
+              redisStatus.badgeClass
             )}
           >
-            {redisOk ? "Connected" : "Disconnected"}
+            {redisStatus.label}
           </span>
         </div>
 
@@ -303,7 +319,7 @@ export function InfrastructureStatus(): React.ReactElement {
             <span
               className={cn(
                 "inline-block h-3 w-3 rounded-full",
-                postgresOk ? "bg-success" : "bg-danger"
+                pgStatus.dotClass
               )}
             />
             <span className="text-sm font-medium text-text">PostgreSQL</span>
@@ -311,12 +327,10 @@ export function InfrastructureStatus(): React.ReactElement {
           <span
             className={cn(
               "rounded-full px-2.5 py-0.5 text-xs font-medium",
-              postgresOk
-                ? "bg-success-surface text-success-light"
-                : "bg-danger-surface text-danger-light"
+              pgStatus.badgeClass
             )}
           >
-            {postgresOk ? "Connected" : "Disconnected"}
+            {pgStatus.label}
           </span>
         </div>
 
@@ -333,10 +347,10 @@ export function InfrastructureStatus(): React.ReactElement {
                 <span className="capitalize">{svc.name}</span>
                 <div className="flex items-center gap-2">
                   <span className={cn(svc.checks?.redis ? "text-success" : "text-danger")}>
-                    R
+                    Redis
                   </span>
                   <span className={cn(svc.checks?.postgres ? "text-success" : "text-danger")}>
-                    P
+                    Postgres
                   </span>
                 </div>
               </div>

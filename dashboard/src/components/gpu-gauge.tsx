@@ -94,12 +94,12 @@ function GpuCard({ gpu }: { gpu: GpuInfo }): React.ReactElement {
         <h3 className="text-sm font-semibold text-text truncate">{gpu.name}</h3>
       </div>
 
-      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-        <div className="flex-shrink-0">
-          <GaugeRing percent={vramPercent} size={100} strokeWidth={8} />
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex flex-1 items-center justify-center">
+          <GaugeRing percent={vramPercent} size={120} strokeWidth={10} />
         </div>
 
-        <div className="w-full space-y-1.5">
+        <div className="flex-1 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-text-muted">VRAM Used</span>
             <span className="font-medium text-text">
