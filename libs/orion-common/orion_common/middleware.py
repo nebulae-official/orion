@@ -12,11 +12,24 @@ Behaviour:
   2. A valid ``Authorization: Bearer <token>`` header whose value equals
      the internal token (fallback for direct access during development).
 - ``/health`` and ``/ready`` endpoints are always exempt.
+
+User Context
+~~~~~~~~~~~~
+After JWT validation, the Go gateway forwards authenticated user identity
+via the following headers:
+
+- ``X-User-ID`` — the user's UUID (from JWT ``sub`` claim)
+- ``X-User-Role`` — the user's role (``admin``, ``editor``, ``viewer``)
+- ``X-User-Email`` — the user's email address
+
+Python services should use :func:`orion_common.auth.get_current_user` (a
+FastAPI dependency) to extract a :class:`~orion_common.auth.CurrentUser`
+from these headers rather than reading them directly.
 """
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 import structlog
 from fastapi import Request, Response

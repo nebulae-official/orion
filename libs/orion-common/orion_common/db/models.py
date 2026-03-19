@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Enum,
     Float,
@@ -13,7 +14,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    Boolean,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSON, UUID
@@ -67,8 +68,152 @@ class PipelineStatus(str, enum.Enum):
     failed = "failed"
 
 
+class UserRole(str, enum.Enum):
+    """User role for authorization."""
+
+    admin = "admin"
+    editor = "editor"
+    viewer = "viewer"
+
+
 # ---------------------------------------------------------------------------
-# Models
+# User & Auth Models
+# ---------------------------------------------------------------------------
+
+
+class User(Base):
+    """An Orion platform user."""
+
+    __tablename__ = "users"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False, server_default="UTC")
+    role: Mapped[str] = mapped_column(String(32), nullable=False, server_default="viewer")
+    email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    settings: Mapped["UserSettings | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
+    contents: Mapped[list["Content"]] = relationship(
+        back_populates="created_by_user", foreign_keys="Content.created_by"
+    )
+    social_accounts: Mapped[list["SocialAccount"]] = relationship(
+        back_populates="user", foreign_keys="SocialAccount.user_id"
+    )
+
+
+class OAuthAccount(Base):
+    """An OAuth provider linked to a user."""
+
+    __tablename__ = "oauth_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    provider_user_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    provider_email: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    access_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    token_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="oauth_accounts")
+
+    __table_args__ = (
+        UniqueConstraint("provider", "provider_user_id", name="uq_oauth_provider_user"),
+    )
+
+
+class UserSettings(Base):
+    """Per-user preferences and configuration."""
+
+    __tablename__ = "user_settings"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
+    settings: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, server_default="{}")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="settings")
+
+
+class RefreshToken(Base):
+    """A server-side refresh token."""
+
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    token_hash: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="refresh_tokens")
+
+
+# ---------------------------------------------------------------------------
+# Data Models
 # ---------------------------------------------------------------------------
 
 
@@ -77,9 +222,7 @@ class Trend(Base):
 
     __tablename__ = "trends"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     topic: Mapped[str] = mapped_column(String(512), nullable=False)
     source: Mapped[str] = mapped_column(String(256), nullable=False)
     score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
@@ -87,9 +230,7 @@ class Trend(Base):
     detected_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    expired_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    expired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[TrendStatus] = mapped_column(
         Enum(TrendStatus, name="trend_status"),
         nullable=False,
@@ -107,22 +248,24 @@ class Content(Base):
 
     __tablename__ = "contents"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trend_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("trends.id"), nullable=False
     )
     title: Mapped[str] = mapped_column(String(512), nullable=False)
     script_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     hook: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    visual_prompts: Mapped[dict[str, Any] | None] = mapped_column(
-        JSON, nullable=True
-    )
+    visual_prompts: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     status: Mapped[ContentStatus] = mapped_column(
         Enum(ContentStatus, name="content_status"),
         nullable=False,
         default=ContentStatus.draft,
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -136,6 +279,9 @@ class Content(Base):
 
     # Relationships
     trend: Mapped["Trend"] = relationship(back_populates="contents")
+    created_by_user: Mapped["User | None"] = relationship(
+        back_populates="contents", foreign_keys=[created_by]
+    )
     media_assets: Mapped[list["MediaAsset"]] = relationship(
         back_populates="content", cascade="all, delete-orphan"
     )
@@ -152,9 +298,7 @@ class MediaAsset(Base):
 
     __tablename__ = "media_assets"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     content_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("contents.id"), nullable=False
     )
@@ -163,9 +307,7 @@ class MediaAsset(Base):
     )
     provider: Mapped[str] = mapped_column(String(256), nullable=False)
     file_path: Mapped[str] = mapped_column(String(1024), nullable=False)
-    metadata_: Mapped[dict[str, Any] | None] = mapped_column(
-        "metadata", JSON, nullable=True
-    )
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -179,9 +321,7 @@ class Provider(Base):
 
     __tablename__ = "providers"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(256), unique=True, nullable=False)
     provider_type: Mapped[str] = mapped_column(String(128), nullable=False)
     config: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
@@ -194,9 +334,7 @@ class PipelineRun(Base):
 
     __tablename__ = "pipeline_runs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     content_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("contents.id"), nullable=False
     )
@@ -206,12 +344,8 @@ class PipelineRun(Base):
         nullable=False,
         default=PipelineStatus.pending,
     )
-    started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
@@ -230,18 +364,25 @@ class SocialAccount(Base):
 
     __tablename__ = "social_accounts"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     platform: Mapped[str] = mapped_column(String(128), nullable=False)
     display_name: Mapped[str] = mapped_column(String(256), nullable=False)
     credentials: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     # Relationships
+    user: Mapped["User | None"] = relationship(
+        back_populates="social_accounts", foreign_keys=[user_id]
+    )
     publish_records: Mapped[list["PublishRecord"]] = relationship(
         back_populates="social_account", cascade="all, delete-orphan"
     )
@@ -252,9 +393,7 @@ class PublishRecord(Base):
 
     __tablename__ = "publish_records"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     content_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("contents.id"), nullable=False
     )
@@ -269,15 +408,11 @@ class PublishRecord(Base):
         default=PublishStatus.failed,
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
     # Relationships
     content: Mapped["Content"] = relationship(back_populates="publish_records")
-    social_account: Mapped["SocialAccount | None"] = relationship(
-        back_populates="publish_records"
-    )
+    social_account: Mapped["SocialAccount | None"] = relationship(back_populates="publish_records")
