@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Bell, CircleUser } from "lucide-react";
+import { Search, CircleUser } from "lucide-react";
 import type { User } from "@/types/api";
+import { NotificationBell } from "./notification-bell";
+import { GATEWAY_URL } from "@/lib/config";
 
 function getUserFromCookie(): User | null {
   if (typeof document === "undefined") return null;
@@ -48,12 +50,10 @@ export function TopNav(): React.ReactElement {
 
         {/* Action buttons */}
         <div className="flex items-center gap-4 text-text-muted">
-          <button
-            className="hover:text-violet-300 transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-          </button>
+          <NotificationBell
+            initialCount={0}
+            wsUrl={`${GATEWAY_URL.replace(/^http/, "ws")}/ws`}
+          />
           <Link
             href="/profile"
             className="flex items-center gap-2 hover:text-violet-300 transition-colors"
