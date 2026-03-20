@@ -197,7 +197,7 @@ Tokens expire after 24 hours by default. Re-authenticate:
     # Or get a new token
     TOKEN=$(curl -s http://localhost:8000/api/v1/auth/login \
       -H "Content-Type: application/json" \
-      -d '{"username": "admin", "password": "orion_dev"}' \
+      -d '{"email": "admin@orion.local", "password": "orion_dev"}' \
       | jq -r '.access_token')
     ```
 

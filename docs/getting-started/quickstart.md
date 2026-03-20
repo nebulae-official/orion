@@ -36,7 +36,7 @@ You need a JWT token to interact with the API. The default development credentia
 
     ```bash
     orion auth login
-    # Username: admin
+    # Email: admin@orion.local
     # Password: orion_dev
     ```
 
@@ -51,7 +51,7 @@ You need a JWT token to interact with the API. The default development credentia
     ```bash
     TOKEN=$(curl -s http://localhost:8000/api/v1/auth/login \
       -H "Content-Type: application/json" \
-      -d '{"username": "admin", "password": "orion_dev"}' \
+      -d '{"email": "admin@orion.local", "password": "orion_dev"}' \
       | jq -r '.access_token')
 
     echo $TOKEN
@@ -64,7 +64,7 @@ You need a JWT token to interact with the API. The default development credentia
 
     resp = httpx.post(
         "http://localhost:8000/api/v1/auth/login",
-        json={"username": "admin", "password": "orion_dev"},
+        json={"email": "admin@orion.local", "password": "orion_dev"},
     )
     token = resp.json()["access_token"]
     print(f"Token: {token[:20]}...")
@@ -77,8 +77,8 @@ Kick off the Scout service to detect trending topics from external sources.
 === "CLI"
 
     ```bash
-    # Scan Google Trends and RSS feeds in the US region
-    orion scout trigger --sources google,rss --regions US
+    # Trigger a trend scan
+    orion scout trigger
     ```
 
 === "curl"
@@ -109,14 +109,11 @@ After a scan completes, Scout publishes `orion.trend.detected` events to Redis. 
 === "CLI"
 
     ```bash
-    # List the top 5 trends
-    orion scout trends --limit 5
+    # List detected trends
+    orion scout list-trends
 
-    # Filter by minimum score
-    orion scout trends --limit 10 --min-score 0.7
-
-    # View current scout configuration
-    orion scout config --show
+    # List trends in JSON format
+    orion scout list-trends --format json
     ```
 
 === "curl"
@@ -133,11 +130,11 @@ When Scout detects a trend, the Director service automatically picks it up via R
 === "CLI"
 
     ```bash
-    # List content currently being generated
-    orion content list --status generating
+    # List all content items
+    orion content list
 
-    # List all content with any status
-    orion content list --limit 20
+    # List content in JSON format
+    orion content list --format json
     ```
 
 === "curl"
@@ -159,23 +156,20 @@ When Scout detects a trend, the Director service automatically picks it up via R
 Content goes through a human-in-the-loop review stage before publishing.
 
 ```bash
-# View content awaiting review
-orion content list --status review
+# List all content items
+orion content list
 
 # View full details of a content item (script, assets, metadata)
 orion content view <content-id>
 
-# Approve content for immediate publishing
+# Approve content for publishing
 orion content approve <content-id>
 
-# Approve with scheduled publish time
-orion content approve <content-id> --schedule-at 2026-03-14T10:00:00Z
+# Reject content
+orion content reject <content-id>
 
-# Reject content with feedback
-orion content reject <content-id> --feedback "Tone is too casual" --action REGENERATE
-
-# Request regeneration with guidance
-orion content regenerate <content-id> --feedback "Make it more technical"
+# Request regeneration
+orion content regenerate <content-id>
 
 # Check final publish status
 orion content view <content-id>

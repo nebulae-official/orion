@@ -297,13 +297,13 @@ orion system health
 orion system status
 
 # Trigger a trend scan
-orion scout trigger --sources google,rss --regions US
+orion scout trigger
 
 # List detected trends
-orion scout trends --limit 10 --min-score 0.5
+orion scout list-trends
 
-# List content by status
-orion content list --status review
+# List content items
+orion content list
 
 # Approve content for publishing
 orion content approve <content-id>

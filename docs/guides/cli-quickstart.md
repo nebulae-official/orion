@@ -30,9 +30,9 @@ orion auth login
 ```
 
 ```
-Username: admin
+Email: admin@orion.local
 Password: ****
-Logged in successfully. Token stored in ~/.orion/token
+Logged in successfully. Token: eyJhbGciOi...
 ```
 
 Verify your session:
@@ -58,42 +58,42 @@ Role:  admin
 
     | Command | Description |
     | --- | --- |
-    | `orion scout trigger --sources google,rss --regions US` | Trigger a trend scan |
-    | `orion trends list` | List all detected trends |
-    | `orion trends list --status new` | List only new (unused) trends |
+    | `orion scout trigger` | Trigger a trend scan |
+    | `orion scout list-trends` | List all detected trends |
+    | `orion scout configure <niche>` | Configure active niche (tech, gaming, finance) |
 
 === "Content Management"
 
     | Command | Description |
     | --- | --- |
     | `orion content list` | List all content items |
-    | `orion content list --status review` | Filter by status |
-    | `orion content show <id>` | View content details |
+    | `orion content view <id>` | View content details |
     | `orion content approve <id>` | Approve content for publishing |
     | `orion content reject <id>` | Reject content |
+    | `orion content regenerate <id>` | Regenerate content |
 
 === "Publishing"
 
     | Command | Description |
     | --- | --- |
-    | `orion publish <id> --platforms youtube,twitter` | Publish to platforms |
+    | `orion publish send <id> --platform twitter` | Publish to a platform |
+    | `orion publish accounts` | List connected social accounts |
     | `orion publish history` | View publishing history |
 
 === "System"
 
     | Command | Description |
     | --- | --- |
-    | `orion health` | Check service health |
-    | `orion gpu status` | View GPU utilization |
-    | `orion config show` | Show current provider configuration |
-    | `orion config set llm --provider cloud --model gpt-4` | Change a provider |
+    | `orion system health` | Check service health |
+    | `orion system status` | Show status of all services |
 
 === "Administration"
 
     | Command | Description |
     | --- | --- |
-    | `orion admin seed` | Seed the database with initial data |
-    | `orion admin reset` | Reset the database (destructive) |
+    | `orion admin seed` | Seed the database with sample data |
+    | `orion admin cleanup` | Run data cleanup |
+    | `orion admin seed-demo` | Generate demo fixtures |
 
 ---
 
@@ -102,13 +102,13 @@ Role:  admin
 Most commands support multiple output formats via the `--format` flag:
 
 ```bash
-orion trends list --format table   # Default: human-readable table
-orion trends list --format json    # Machine-readable JSON
-orion trends list --format plain   # Plain text, one item per line
+orion scout list-trends --format table   # Default: human-readable table
+orion scout list-trends --format json    # Machine-readable JSON
+orion scout list-trends --format plain   # Plain text, one item per line
 ```
 
 !!! tip "Scripting with JSON Output"
-    Use `--format json` combined with `jq` for powerful scripting. For example: `orion content list --status review --format json | jq '.[].id'` to extract content IDs awaiting review.
+    Use `--format json` combined with `jq` for powerful scripting. For example: `orion content list --format json | jq '.[].id'` to extract content IDs.
 
 ---
 
@@ -125,10 +125,9 @@ The CLI reads configuration from these sources (in order of priority):
 ```bash
 # Via environment variable
 export ORION_GATEWAY_URL=http://localhost:8000
-
-# Via config file
-orion config set gateway-url http://localhost:8000
 ```
+
+The gateway URL can also be set in the config file at `~/.orion/config.toml`.
 
 ---
 

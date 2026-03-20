@@ -38,19 +38,20 @@ class GatewayClient:
     async def health(self) -> dict[str, Any]:
         return await self.get("/health")
 
-    async def login(self, username: str, password: str) -> dict[str, Any]:
+    async def login(self, email: str, password: str) -> dict[str, Any]:
         return await self.post(
             "/api/v1/auth/login",
-            json={"username": username, "password": password},
+            json={"email": email, "password": password},
         )
+
+    async def whoami(self) -> dict[str, Any]:
+        return await self.get("/api/v1/identity/users/me")
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         url = f"{self._base_url}{path}"
         try:
             async with httpx.AsyncClient() as http:
-                resp = await http.request(
-                    method, url, headers=self._headers(), **kwargs
-                )
+                resp = await http.request(method, url, headers=self._headers(), **kwargs)
                 resp.raise_for_status()
                 return resp.json()
         except httpx.ConnectError:

@@ -27,9 +27,9 @@ orion auth login
 ```
 
 ```
-Username: admin
+Email: admin@orion.local
 Password: ****
-Logged in successfully. Token stored in ~/.orion/token
+Logged in successfully. Token: eyJhbGciOi...
 ```
 
 Verify your session:
@@ -39,9 +39,7 @@ orion auth whoami
 ```
 
 ```
-User:  admin
-Email: admin@orion.local
-Role:  admin
+Authenticated. Token: eyJhbGciOi...
 ```
 
 !!! tip "Quick Re-Authentication"
@@ -52,19 +50,17 @@ Role:  admin
 ## :lucide-search: 2. Trigger a Trend Scan
 
 ```bash
-orion scout trigger --sources google,rss --regions US
+orion scout trigger
 ```
 
 ```
 Scan triggered successfully.
-Sources: google, rss
-Region:  US
 ```
 
 Wait a few seconds for the scan to complete, then list results:
 
 ```bash
-orion scout trends --limit 5 --format table
+orion scout list-trends --format table
 ```
 
 ```
@@ -79,10 +75,10 @@ orion scout trends --limit 5 --format table
 └────────┴──────────────────────────────────────────────┴───────┴────────────────┴────────┘
 ```
 
-Filter by minimum virality score:
+View trends in JSON format:
 
 ```bash
-orion scout trends --min-score 0.9
+orion scout list-trends --format json
 ```
 
 ```
@@ -94,37 +90,8 @@ orion scout trends --min-score 0.9
 └────────┴──────────────────────────────────────────────┴───────┴────────────────┴────────┘
 ```
 
-!!! tip "Power User: Combine Filters"
-    Chain multiple filters for precise results: `orion scout trends --min-score 0.8 --source google_trends --status new --format json`. This is especially useful for scripting automated content pipelines.
-
-Get JSON output for scripting:
-
-```bash
-orion scout trends --limit 2 --format json
-```
-
-```json
-[
-  {
-    "id": "t-001",
-    "topic": "AI Agents Replace Junior Devs — Hype or Reality?",
-    "score": 0.94,
-    "source": "google_trends",
-    "keywords": ["ai", "agents", "devs", "hype"],
-    "status": "NEW",
-    "detected_at": "2026-03-17T09:15:00Z"
-  },
-  {
-    "id": "t-003",
-    "topic": "Apple Vision Pro 2 Leak Sparks AR/VR Debate",
-    "score": 0.91,
-    "source": "twitter",
-    "keywords": ["apple", "vision", "ar", "vr"],
-    "status": "NEW",
-    "detected_at": "2026-03-17T21:30:00Z"
-  }
-]
-```
+!!! tip "Power User: JSON for Scripting"
+    Use `orion scout list-trends --format json` combined with `jq` for scripting automated content pipelines.
 
 ---
 
@@ -146,10 +113,10 @@ orion content list
 └────────────┴────────────────────────────────────────────┴────────────┴──────────────────┴──────────┘
 ```
 
-Filter by status:
+View content in JSON format:
 
 ```bash
-orion content list --status review
+orion content list --format json
 ```
 
 ```
@@ -202,39 +169,20 @@ Content c-a1b2c3d4 approved.
 Status: review -> approved
 ```
 
-Approve with a scheduled publish time:
+Reject content:
 
 ```bash
-orion content approve c-a1b2c3d4 --schedule-at 2026-03-19T10:00:00Z
+orion content reject c-a1b2c3d4
 ```
 
-```
-Content c-a1b2c3d4 approved.
-Status:    review -> scheduled
-Scheduled: 2026-03-19T10:00:00Z
-```
-
-Reject with feedback:
+Request regeneration:
 
 ```bash
-orion content reject c-a1b2c3d4 --feedback "Tone is too casual" --action REGENERATE
-```
-
-```
-Content c-a1b2c3d4 rejected.
-Status:   review -> regenerating
-Feedback: Tone is too casual
-Action:   REGENERATE
-```
-
-Request manual regeneration with guidance:
-
-```bash
-orion content regenerate c-a1b2c3d4 --feedback "Make it more technical"
+orion content regenerate c-a1b2c3d4
 ```
 
 !!! tip "Batch Operations"
-    Approve multiple items at once by piping IDs: `orion content list --status review --format json | jq -r '.[].id' | xargs -I{} orion content approve {}`.
+    Approve multiple items at once by piping IDs: `orion content list --format json | jq -r '.[].id' | xargs -I{} orion content approve {}`.
 
 ---
 
@@ -351,11 +299,11 @@ orion system health --format json
 | ------------------- | -------------------------------------------------------- |
 | Login               | `orion auth login`                                       |
 | Trigger scan        | `orion scout trigger`                                    |
-| List trends         | `orion scout trends --limit 10`                          |
+| List trends         | `orion scout list-trends`                                |
 | List content        | `orion content list`                                     |
 | View content        | `orion content view <id>`                                |
 | Approve             | `orion content approve <id>`                             |
-| Reject              | `orion content reject <id> --feedback "reason"`          |
+| Reject              | `orion content reject <id>`                              |
 | Publish             | `orion publish send <id> --platform twitter`             |
 | System status       | `orion system status`                                    |
 | Health check        | `orion system health`                                    |

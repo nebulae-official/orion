@@ -384,7 +384,7 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@orion.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@orion.dev}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-orion_dev}
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:

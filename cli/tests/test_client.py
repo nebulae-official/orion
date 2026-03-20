@@ -24,7 +24,7 @@ async def test_login() -> None:
         return_value=httpx.Response(200, json={"access_token": "jwt-123", "token_type": "bearer"})
     )
     client = GatewayClient(base_url="http://localhost:8000")
-    result = await client.login(username="admin", password="secret")
+    result = await client.login(email="admin@orion.dev", password="secret")
     assert result["access_token"] == "jwt-123"
 
 
@@ -37,6 +37,27 @@ async def test_authenticated_request() -> None:
     client = GatewayClient(base_url="http://localhost:8000", token="jwt-123")
     result = await client.get("/status")
     assert "services" in result
+    assert respx.calls[0].request.headers["Authorization"] == "Bearer jwt-123"
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_whoami() -> None:
+    respx.get("http://localhost:8000/api/v1/identity/users/me").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": "u1",
+                "email": "admin@orion.dev",
+                "name": "Admin User",
+                "role": "admin",
+            },
+        )
+    )
+    client = GatewayClient(base_url="http://localhost:8000", token="jwt-123")
+    result = await client.whoami()
+    assert result["email"] == "admin@orion.dev"
+    assert result["name"] == "Admin User"
     assert respx.calls[0].request.headers["Authorization"] == "Bearer jwt-123"
 
 

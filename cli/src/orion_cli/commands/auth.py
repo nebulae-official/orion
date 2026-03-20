@@ -15,16 +15,21 @@ app = typer.Typer()
 
 @app.command()
 def login(
-    username: Annotated[str, typer.Option(prompt=True)],
+    email: Annotated[str, typer.Option(prompt=True)],
     password: Annotated[str, typer.Option(prompt=True, hide_input=True)],
 ) -> None:
     """Authenticate with the gateway and store token."""
     cfg = CLIConfig()
     client = GatewayClient(base_url=cfg.gateway_url)
-    data = asyncio.run(client.login(username=username, password=password))
+    data = asyncio.run(client.login(email=email, password=password))
     token = data["access_token"]
     cfg.save_token(token)
-    typer.echo(f"Logged in successfully. Token: {token[:12]}...")
+    user = data.get("user", {})
+    user_email = user.get("email")
+    if user_email:
+        typer.echo(f"Logged in as {user_email}.")
+    else:
+        typer.echo("Logged in successfully.")
 
 
 @app.command()
@@ -45,7 +50,22 @@ def logout() -> None:
 def whoami() -> None:
     """Show current authentication status."""
     cfg = CLIConfig()
-    if cfg.token:
-        typer.echo(f"Authenticated. Token: {cfg.token[:12]}...")
-    else:
+    if not cfg.token:
         typer.echo("Not logged in. Run 'orion auth login' to authenticate.")
+        return
+    client = GatewayClient(base_url=cfg.gateway_url, token=cfg.token)
+    try:
+        profile = asyncio.run(client.whoami())
+        name = profile.get("name", "")
+        email = profile.get("email", "")
+        role = profile.get("role", "")
+        parts = []
+        if name:
+            parts.append(name)
+        if email:
+            parts.append(f"<{email}>")
+        if role:
+            parts.append(f"({role})")
+        typer.echo(f"Logged in as {' '.join(parts)}")
+    except SystemExit:
+        typer.echo("Authenticated, but could not fetch profile.")

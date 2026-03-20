@@ -47,13 +47,13 @@ gateway_url = "http://localhost:8000"
 
 ```bash
 # Default table output (human readable, uses Rich)
-orion scout trends
+orion scout list-trends
 
 # JSON output (for scripting and piping to jq)
-orion scout trends --format json
+orion scout list-trends --format json
 
 # Plain output (tab-separated values)
-orion scout trends --format plain
+orion scout list-trends --format plain
 ```
 
 ---
@@ -64,11 +64,11 @@ Manage your session with the Orion gateway. The CLI stores JWT tokens in `~/.ori
 
 ### `orion auth login`
 
-Interactive login. Prompts for username and password, obtains a JWT token from the gateway, and stores it locally.
+Interactive login. Prompts for email and password, obtains a JWT token from the gateway, and stores it locally.
 
 ```bash
 orion auth login
-# Username: admin
+# Email: admin@orion.local
 # Password: ****
 # Logged in successfully
 ```
@@ -120,29 +120,29 @@ Trigger scans, query detected trends, and manage Scout service configuration.
 
 ### `orion scout trigger`
 
-Initiate a new trend scan.
+Trigger an immediate trend scan.
 
 ```bash
-# Scan all sources in the US
 orion scout trigger
-
-# Scan only Google Trends and RSS
-orion scout trigger --sources google,rss --regions US,GB
+orion scout trigger --format json
 ```
 
-### `orion scout trends`
+### `orion scout list-trends`
 
 List trends detected by previous scans.
 
 ```bash
-# List the top 5 trends
-orion scout trends --limit 5
+orion scout list-trends
+orion scout list-trends --format json
+```
 
-# Filter by minimum score
-orion scout trends --min-score 0.7
+### `orion scout configure`
 
-# JSON output
-orion scout trends --format json
+Configure the active niche for trend scanning.
+
+```bash
+orion scout configure tech
+orion scout configure gaming --format json
 ```
 
 ---
@@ -155,8 +155,7 @@ Manage the full content lifecycle — list, inspect, approve, reject, regenerate
 
 ```bash
 orion content list
-orion content list --status review
-orion content list --status published --limit 10
+orion content list --format json
 ```
 
 ### `orion content view <id>`
@@ -175,7 +174,7 @@ orion content approve abc-123
 ### `orion content reject <id>`
 
 ```bash
-orion content reject abc-123 --feedback "Too casual"
+orion content reject abc-123
 ```
 
 ---
@@ -185,8 +184,9 @@ orion content reject abc-123 --feedback "Too casual"
 View and manage content pipeline executions.
 
 ```bash
-orion pipeline list
-orion pipeline logs <run-id>
+orion pipeline status
+orion pipeline run <trend-id>
+orion pipeline logs
 ```
 
 ---
@@ -209,6 +209,8 @@ Administrative operations like seeding and cleanup.
 ```bash
 orion admin seed
 orion admin cleanup
+orion admin cleanup --days 30
+orion admin seed-demo
 ```
 
 ---

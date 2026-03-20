@@ -64,7 +64,7 @@ The Scout service monitors multiple sources for trending topics:
 You can configure which sources the Scout service monitors and which regions to focus on via the CLI:
 
 ```bash
-orion scout trigger --sources google,rss,twitter --regions US
+orion scout trigger
 ```
 
 ---

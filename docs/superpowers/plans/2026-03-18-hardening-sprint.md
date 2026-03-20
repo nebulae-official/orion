@@ -376,10 +376,10 @@ class GatewayClient:
     async def health(self) -> dict[str, Any]:
         return await self.get("/health")
 
-    async def login(self, username: str, password: str) -> dict[str, Any]:
+    async def login(self, email: str, password: str) -> dict[str, Any]:
         return await self.post(
             "/api/v1/auth/login",
-            json={"username": username, "password": password},
+            json={"email": email, "password": password},
         )
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
@@ -762,7 +762,7 @@ def test_login_command(tmp_path, monkeypatch) -> None:
     respx.post("http://localhost:8000/api/v1/auth/login").mock(
         return_value=httpx.Response(200, json={"access_token": "jwt-new", "token_type": "bearer"})
     )
-    result = runner.invoke(app, ["auth", "login", "--username", "admin", "--password", "secret"])
+    result = runner.invoke(app, ["auth", "login", "--email", "admin@orion.local", "--password", "secret"])
     assert result.exit_code == 0
     assert "jwt-new" in result.stdout or "Logged in" in result.stdout
 
@@ -2105,7 +2105,7 @@ def auth_token(gateway_url: str) -> str:
     """Authenticate and return a JWT token for the test session."""
     resp = httpx.post(
         f"{gateway_url}/api/v1/auth/login",
-        json={"username": "admin", "password": "admin"},
+        json={"email": "admin@orion.local", "password": "admin"},
     )
     resp.raise_for_status()
     return resp.json()["access_token"]
@@ -2341,7 +2341,7 @@ class TestAuthFlow:
     def test_login_returns_token(self, gateway_url: str) -> None:
         resp = httpx.post(
             f"{gateway_url}/api/v1/auth/login",
-            json={"username": "admin", "password": "admin"},
+            json={"email": "admin@orion.local", "password": "admin"},
             timeout=10,
         )
         assert resp.status_code == 200
@@ -2366,7 +2366,7 @@ class TestAuthFlow:
         # Login
         resp = httpx.post(
             f"{gateway_url}/api/v1/auth/login",
-            json={"username": "admin", "password": "admin"},
+            json={"email": "admin@orion.local", "password": "admin"},
             timeout=10,
         )
         token = resp.json()["access_token"]
@@ -2552,7 +2552,7 @@ def gateway_url() -> str:
 def auth_token(gateway_url: str) -> str:
     resp = httpx.post(
         f"{gateway_url}/api/v1/auth/login",
-        json={"username": "admin", "password": "admin"},
+        json={"email": "admin@orion.local", "password": "admin"},
     )
     resp.raise_for_status()
     return resp.json()["access_token"]
@@ -2831,7 +2831,7 @@ class OrionUser(HttpUser):
         """Authenticate on session start."""
         resp = self.client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "admin"},
+            json={"email": "admin@orion.local", "password": "admin"},
         )
         if resp.status_code == 200:
             self.token = resp.json().get("access_token", "")

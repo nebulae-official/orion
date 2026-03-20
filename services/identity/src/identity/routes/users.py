@@ -28,6 +28,8 @@ class UserProfile(BaseModel):
     id: str
     email: str
     name: str
+    first_name: str | None = None
+    last_name: str | None = None
     avatar_url: str | None = None
     bio: str | None = None
     timezone: str
@@ -39,6 +41,8 @@ class UserProfile(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
     bio: str | None = None
     timezone: str | None = None
     avatar_url: str | None = None
@@ -110,6 +114,8 @@ def _user_to_profile(user) -> UserProfile:
         id=str(user.id),
         email=user.email,
         name=user.name,
+        first_name=user.first_name,
+        last_name=user.last_name,
         avatar_url=user.avatar_url,
         bio=user.bio,
         timezone=user.timezone,

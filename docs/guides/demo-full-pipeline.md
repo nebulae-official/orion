@@ -34,11 +34,11 @@ Trigger the Scout service to scan external sources for trending topics.
     ```bash
     # Authenticate first
     orion auth login
-    # Username: admin
+    # Email: admin@orion.local
     # Password: orion_dev
 
-    # Trigger a trend scan across Google Trends and RSS feeds
-    orion scout trigger --sources google,rss --regions US
+    # Trigger a trend scan
+    orion scout trigger
     ```
 
     Expected output:
@@ -52,7 +52,7 @@ Trigger the Scout service to scan external sources for trending topics.
     View detected trends:
 
     ```bash
-    orion scout trends --limit 5
+    orion scout list-trends
     ```
 
     Expected output:
@@ -85,11 +85,11 @@ Once Scout detects a trend, the Director service automatically picks it up via R
 === "CLI"
 
     ```bash
-    # List content currently being generated
-    orion content list --status generating
+    # List all content items
+    orion content list
 
-    # List all content including completed items
-    orion content list --limit 10
+    # List content in JSON format
+    orion content list --format json
     ```
 
     Expected output:
@@ -137,10 +137,10 @@ Content goes through a human-in-the-loop review stage before publishing.
     Status: approved -> publishing
     ```
 
-    You can also reject content with feedback:
+    You can also reject content:
 
     ```bash
-    orion content reject c-a1b2c3d4 --feedback "Tone is too casual" --action REGENERATE
+    orion content reject c-a1b2c3d4
     ```
 
 === "Dashboard"
