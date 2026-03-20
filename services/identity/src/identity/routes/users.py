@@ -7,7 +7,8 @@ import uuid
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from orion_common.db.session import get_session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..repositories import user_repo
@@ -82,6 +83,41 @@ class UserListResponse(BaseModel):
     page_size: int
 
 
+class CompleteOnboardingRequest(BaseModel):
+    username: str = Field(pattern=r"^[a-z0-9_]{3,30}$", min_length=3, max_length=30)
+    password: str = Field(min_length=8, max_length=128)
+    first_name: str | None = None
+    last_name: str | None = None
+    timezone: str = "UTC"
+
+
+class OnboardingResponse(BaseModel):
+    user_id: str
+    username: str
+    email: str
+    name: str
+    role: str
+    avatar_url: str | None = None
+
+
+class UsernameCheckResponse(BaseModel):
+    available: bool
+    username: str
+
+
+class RegisterRequest(BaseModel):
+    email: str = Field(max_length=512)
+    password: str = Field(min_length=8, max_length=128)
+    name: str = Field(max_length=256)
+
+
+class RegisterResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: str
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -127,6 +163,45 @@ def _user_to_profile(user) -> UserProfile:
 
 
 # ---------------------------------------------------------------------------
+# Endpoints — Registration
+# ---------------------------------------------------------------------------
+
+
+@router.post("/users", response_model=RegisterResponse, status_code=201)
+async def register_user(
+    body: RegisterRequest,
+    session: AsyncSession = Depends(get_session),
+) -> RegisterResponse:
+    """Create a new user account (called by gateway during registration)."""
+    existing = await user_repo.get_by_email(session, body.email)
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    password_hashed = hash_password(body.password)
+    try:
+        user = await user_repo.create_user(
+            session,
+            email=body.email,
+            password_hash=password_hashed,
+            name=body.name,
+            role="viewer",
+        )
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    logger.info("user_registered", user_id=str(user.id), email=user.email)
+
+    return RegisterResponse(
+        id=str(user.id),
+        email=user.email,
+        name=user.name,
+        role=user.role,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Endpoints — Current user
 # ---------------------------------------------------------------------------
 
@@ -159,6 +234,52 @@ async def update_me(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return _user_to_profile(user)
+
+
+@router.put("/users/me/onboarding", response_model=OnboardingResponse)
+async def complete_onboarding(
+    request: Request,
+    body: CompleteOnboardingRequest,
+    session: AsyncSession = Depends(get_session),
+) -> OnboardingResponse:
+    """Complete post-OAuth onboarding: set username, password, and profile fields."""
+    user_id = _get_user_id(request)
+    user = await user_repo.get_by_id(session, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.password_hash is not None:
+        raise HTTPException(status_code=409, detail="Onboarding already completed")
+
+    # Check username uniqueness
+    existing = await user_repo.get_by_username(session, body.username)
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="Username already taken")
+
+    user.username = body.username
+    user.password_hash = hash_password(body.password)
+    if body.first_name is not None:
+        user.first_name = body.first_name
+    if body.last_name is not None:
+        user.last_name = body.last_name
+    user.timezone = body.timezone
+
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=409, detail="Username already taken")
+
+    logger.info("onboarding_completed", user_id=str(user.id), username=body.username)
+
+    return OnboardingResponse(
+        user_id=str(user.id),
+        username=user.username,
+        email=user.email,
+        name=user.name,
+        role=user.role,
+        avatar_url=user.avatar_url,
+    )
 
 
 @router.get("/users/me/settings", response_model=UserSettingsResponse)
@@ -209,6 +330,23 @@ async def change_password(
 
     user.password_hash = hash_password(body.new_password)
     await session.flush()
+
+
+# ---------------------------------------------------------------------------
+# Endpoints — Username check
+# ---------------------------------------------------------------------------
+
+
+@router.get("/users/check-username", response_model=UsernameCheckResponse)
+async def check_username(
+    request: Request,
+    username: str = Query(min_length=3, max_length=30),
+    session: AsyncSession = Depends(get_session),
+) -> UsernameCheckResponse:
+    """Check whether a username is available."""
+    _get_user_id(request)  # require auth
+    existing = await user_repo.get_by_username(session, username)
+    return UsernameCheckResponse(available=existing is None, username=username)
 
 
 # ---------------------------------------------------------------------------

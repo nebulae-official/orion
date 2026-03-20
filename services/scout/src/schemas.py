@@ -31,6 +31,7 @@ class TrendListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+    sources: list[str] = []
 
 
 class TriggerScanRequest(BaseModel):
@@ -59,6 +60,14 @@ class NicheConfigResponse(BaseModel):
     active_niche: str | None
     available_niches: list[str]
     config: NicheConfigRequest | None = None
+
+
+class UpdateTrendStatusRequest(BaseModel):
+    """Request body for updating a trend's status."""
+
+    status: str = Field(
+        description="New status: active, used, discarded, expired",
+    )
 
 
 class ScanResultResponse(BaseModel):

@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
 import type { ContentStatus } from "@/types/api";
+import { Button } from "@/components/ui/button";
 
 const STATUSES: { value: ContentStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -50,18 +50,14 @@ export function QueueFilters({
           const isActive =
             s.value === "all" ? !currentStatus : currentStatus === s.value;
           return (
-            <button
+            <Button
               key={s.value}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
               onClick={() => updateParams("status", s.value)}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-white"
-                  : "bg-surface text-text-secondary hover:bg-surface-hover"
-              )}
             >
               {s.label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -70,18 +66,14 @@ export function QueueFilters({
       <div className="ml-auto flex items-center gap-2">
         <span className="text-sm text-text-muted">Sort by:</span>
         {SORT_OPTIONS.map((s) => (
-          <button
+          <Button
             key={s.value}
+            variant={currentSort === s.value ? "default" : "outline"}
+            size="sm"
             onClick={() => updateParams("sort", s.value)}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              currentSort === s.value
-                ? "bg-surface-elevated text-text"
-                : "bg-surface text-text-secondary hover:bg-surface-hover"
-            )}
           >
             {s.label}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

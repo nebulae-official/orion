@@ -113,4 +113,4 @@ Configure Grafana alert notifications for:
 - **PagerDuty** -- Severity-based escalation
 
 !!! tip "Grafana alerting"
-While Prometheus handles alert evaluation, Grafana provides a richer notification system. Configure alert contact points in Grafana's alerting UI at `http://localhost:3001/alerting`.
+While Prometheus handles alert evaluation, Grafana provides a richer notification system. Configure alert contact points in Grafana's alerting UI at `http://localhost:3003/alerting`.

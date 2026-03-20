@@ -27,14 +27,14 @@ func TestCORS(t *testing.T) {
 		{
 			name:         "regular GET with origin",
 			method:       http.MethodGet,
-			origin:       "http://localhost:3000",
+			origin:       "http://localhost:3001",
 			wantStatus:   http.StatusOK,
 			wantAllowAll: true,
 		},
 		{
 			name:          "OPTIONS preflight",
 			method:        http.MethodOptions,
-			origin:        "http://localhost:3000",
+			origin:        "http://localhost:3001",
 			wantStatus:    http.StatusNoContent,
 			wantAllowAll:  true,
 			wantBodyEmpty: true,
@@ -96,7 +96,7 @@ func TestCORS_PreflightHeaders(t *testing.T) {
 	handler := middleware.CORS([]string{"*"})(inner)
 
 	req := httptest.NewRequest(http.MethodOptions, "/api/v1/test", nil)
-	req.Header.Set("Origin", "http://localhost:3000")
+	req.Header.Set("Origin", "http://localhost:3001")
 	req.Header.Set("Access-Control-Request-Method", "POST")
 	req.Header.Set("Access-Control-Request-Headers", "Authorization, Content-Type")
 	rr := httptest.NewRecorder()
@@ -131,7 +131,7 @@ func TestCORS_WildcardAllowsAnyOrigin(t *testing.T) {
 	handler := middleware.CORS([]string{"*"})(inner)
 
 	origins := []string{
-		"http://localhost:3000",
+		"http://localhost:3001",
 		"https://orion.example.com",
 		"http://192.168.1.100:8080",
 		"https://evil-site.com",
@@ -166,7 +166,7 @@ func TestCORS_NonPreflightPassesThrough(t *testing.T) {
 	handler := middleware.CORS([]string{"*"})(inner)
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", nil)
-	req.Header.Set("Origin", "http://localhost:3000")
+	req.Header.Set("Origin", "http://localhost:3001")
 	rr := httptest.NewRecorder()
 
 	handler.ServeHTTP(rr, req)

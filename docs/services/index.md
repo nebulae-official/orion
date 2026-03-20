@@ -28,7 +28,7 @@ graph TB
 
     subgraph Clients["Clients"]
         CLI["Python CLI"]
-        DASH["Dashboard :3000"]
+        DASH["Dashboard :3001"]
     end
 
     CLI --> Gateway
@@ -86,9 +86,15 @@ graph TB
 
     ---
 
-    Python 3.13 / FastAPI — User management, authentication, OAuth linking
+    Python 3.13 / FastAPI — User management, authentication, OAuth linking, notifications
 
--   :lucide-monitor: **[Dashboard](dashboard.md)** — Port 3000
+-   :lucide-bell: **[Notifications](notifications.md)** — (Identity module)
+
+    ---
+
+    Real-time notification system — event-driven alerts via REST API and WebSocket
+
+-   :lucide-monitor: **[Dashboard](dashboard.md)** — Port 3001
 
     ---
 
@@ -152,5 +158,10 @@ Services communicate through Redis pub/sub channels. Each event type follows the
 | `orion.media.generated` | Media     | Editor           | Images are ready for video assembly   |
 | `orion.media.failed`    | Media     | Director         | Image generation failed (retry logic) |
 | `orion.video.rendered`  | Editor    | Pulse, Publisher | Video is ready for review/publishing  |
+| `orion.notification.created` | Identity | Gateway (WebSocket Hub) | New notification ready for real-time delivery |
+
+Six domain events (`orion.trend.detected`, `orion.content.published`, `orion.content.rejected`, `orion.media.failed`, `orion.pipeline.stage_changed`, `orion.content.created`) are consumed by the Identity service's notification consumer, which creates per-user notification records and publishes to `orion.notification.created` for real-time WebSocket delivery through the Gateway.
+
+See **[Notifications](notifications.md)** for the full notification API and event mapping.
 
 This architecture means you can restart or scale any individual service without affecting the rest of the pipeline — events are buffered in Redis until consumers are available.

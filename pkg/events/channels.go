@@ -12,4 +12,5 @@ const (
 	MediaGenerated  = "orion.media.generated"
 	MediaFailed            = "orion.media.failed"
 	PipelineStageChanged   = "orion.pipeline.stage_changed"
+	NotificationCreated    = "orion.notification.created"
 )

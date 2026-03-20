@@ -1,6 +1,6 @@
 # :lucide-shield: Identity
 
-User management and authentication service. Handles user CRUD, OAuth account linking, token lifecycle, and transactional emails.
+User management and authentication service. Handles user CRUD, OAuth account linking, token lifecycle, transactional emails, and the notification system.
 
 | Property         | Value                    |
 | ---------------- | ------------------------ |
@@ -18,9 +18,10 @@ The Identity service follows the standard repository pattern:
 routes → service → repository → database
 ```
 
-- **Routes** — FastAPI endpoints for user management and internal auth operations
-- **Service** — Business logic for password hashing, token rotation, email dispatch
-- **Repository** — SQLAlchemy 2.0 async queries against the `users`, `refresh_tokens`, and `oauth_accounts` tables
+- **Routes** — FastAPI endpoints for user management, internal auth operations, and notifications
+- **Service** — Business logic for password hashing, token rotation, email dispatch, and notification creation
+- **Repository** — SQLAlchemy 2.0 async queries against the `users`, `refresh_tokens`, `oauth_accounts`, and `notifications` tables
+- **Consumer** — Background `asyncio.Task` that subscribes to domain events and creates per-user notifications
 
 ## :material-api: Endpoints
 
@@ -53,6 +54,14 @@ These endpoints are not exposed through the gateway proxy. The gateway calls the
 | `POST` | `/api/v1/identity/users/invite`        | Admin   | Invite new user via email      |
 | `PUT`  | `/api/v1/identity/users/:id/role`      | Admin   | Change user role               |
 | `PUT`  | `/api/v1/identity/users/:id/status`    | Admin   | Activate/deactivate user       |
+| `GET`  | `/api/v1/identity/notifications`              | Bearer  | List notifications (paginated) |
+| `PATCH`| `/api/v1/identity/notifications/{id}/read`    | Bearer  | Mark notification as read      |
+| `POST` | `/api/v1/identity/notifications/read-all`     | Bearer  | Mark all as read               |
+| `GET`  | `/api/v1/identity/notifications/unread-count` | Bearer  | Get unread count               |
+| `GET`  | `/api/v1/identity/notifications/preferences`  | Bearer  | Get notification preferences   |
+| `PUT`  | `/api/v1/identity/notifications/preferences`  | Bearer  | Update notification preferences|
+
+See **[Notifications](notifications.md)** for full API reference and event mapping.
 
 ## :material-key: Auth Flows
 
@@ -161,6 +170,7 @@ sequenceDiagram
 | `users`           | User accounts (id, email, name, password_hash, role, status) |
 | `refresh_tokens`  | Opaque refresh tokens with family tracking for theft detection |
 | `oauth_accounts`  | OAuth provider links (provider, provider_user_id, user_id)   |
+| `notifications`   | Per-user notifications (type, title, body, metadata, read status) |
 
 ## :material-security: Security
 
@@ -175,3 +185,4 @@ sequenceDiagram
     - **[Authentication API](../api/authentication.md)** — Full auth endpoint reference
     - **[Security Architecture](../architecture/security.md)** — Security design and threat model
     - **[Gateway](gateway.md)** — OAuth endpoints and user header forwarding
+    - **[Notifications](notifications.md)** — Notification API reference and event mapping

@@ -180,11 +180,12 @@ Required for working on any of the six Python services: Scout, Director, Media, 
 # Navigate to a service
 cd services/scout
 
-# Install dependencies with uv
-uv sync
+# Create a virtual environment and install dependencies with uv
+uv venv && source .venv/bin/activate
+uv pip install -e ".[dev]"
 ```
 
-Repeat for each service you want to develop on: `scout`, `director`, `media`, `editor`, `pulse`, `publisher`, `identity`.
+Repeat for each service you want to develop on: `scout`, `director`, `media`, `editor`, `pulse`, `publisher`.
 
 !!! warning "Use uv, not pip"
 All Python package management uses [uv](https://docs.astral.sh/uv/) for faster, more reliable installs. Do not use `pip install` directly.
@@ -209,10 +210,10 @@ mypy src/
 ruff check src/
 
 # Run formatter
-ruff format src/ tests/
+black src/ tests/
 
 # Run all checks (lint + type check + format check)
-ruff check src/ && mypy src/ && ruff format --check src/ tests/
+ruff check src/ && mypy src/ && black --check src/ tests/
 ```
 
 ### Install the shared library
@@ -234,7 +235,7 @@ npm ci
 npm run dev
 ```
 
-The dashboard runs on `http://localhost:3001` in development and `http://localhost:3000` in production. It connects to the gateway at `NEXT_PUBLIC_GATEWAY_URL` (defaults to `http://localhost:8000`).
+The dashboard runs on `http://localhost:3001` and connects to the gateway at `NEXT_PUBLIC_GATEWAY_URL` (defaults to `http://localhost:8000`).
 
 ### Dashboard commands
 

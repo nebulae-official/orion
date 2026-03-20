@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/lib/auth";
-import { cn } from "@/lib/utils";
 import { GATEWAY_URL } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, Github, Chrome } from "lucide-react";
 
 export default function LoginForm(): React.ReactElement {
@@ -113,13 +113,11 @@ export default function LoginForm(): React.ReactElement {
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
+              className="w-full"
+              loading={loading}
               disabled={loading}
-              className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted hover:shadow-primary/30",
-                loading && "cursor-not-allowed opacity-60"
-              )}
             >
               {loading ? (
                 "Signing in..."
@@ -129,7 +127,7 @@ export default function LoginForm(): React.ReactElement {
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
           {/* Divider */}
@@ -141,20 +139,26 @@ export default function LoginForm(): React.ReactElement {
 
           {/* OAuth buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <a
-              href={`${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=${encodeURIComponent(redirect)}`}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-white/5 hover:border-primary/30"
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=${encodeURIComponent(redirect)}`;
+              }}
             >
               <Github className="h-4 w-4" />
               GitHub
-            </a>
-            <a
-              href={`${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(redirect)}`}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-white/5 hover:border-primary/30"
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(redirect)}`;
+              }}
             >
               <Chrome className="h-4 w-4" />
               Google
-            </a>
+            </Button>
           </div>
 
           {/* Create account link */}

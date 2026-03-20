@@ -33,11 +33,20 @@ class Base(DeclarativeBase):
 
 
 class TrendStatus(str, enum.Enum):
-    """Lifecycle status of a detected trend."""
+    """Lifecycle status of a detected trend.
+
+    Lifecycle:
+        active → used      (picked by content pipeline)
+               → discarded (manually rejected by user, soft-delete)
+               → expired   (auto-expired after N days)
+
+    Discarded trends can be reactivated back to "active".
+    """
 
     active = "active"
+    used = "used"
+    discarded = "discarded"
     expired = "expired"
-    archived = "archived"
 
 
 class ContentStatus(str, enum.Enum):
@@ -88,6 +97,7 @@ class User(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
+    username: Mapped[str | None] = mapped_column(String(30), unique=True, nullable=True)
     password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     first_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
@@ -124,6 +134,9 @@ class User(Base):
     )
     social_accounts: Mapped[list["SocialAccount"]] = relationship(
         back_populates="user", foreign_keys="SocialAccount.user_id"
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
     )
 
 
@@ -416,3 +429,29 @@ class PublishRecord(Base):
     # Relationships
     content: Mapped["Content"] = relationship(back_populates="publish_records")
     social_account: Mapped["SocialAccount | None"] = relationship(back_populates="publish_records")
+
+
+class Notification(Base):
+    """A user notification."""
+
+    __tablename__ = "notifications"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(512), nullable=False)
+    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="notifications")

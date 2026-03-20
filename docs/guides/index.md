@@ -80,6 +80,14 @@ Step-by-step walkthroughs with screenshots and real examples. Whether you're exp
 
     [:material-arrow-right: Administer the system](system-admin.md)
 
+-   :lucide-bell:{ .lg .middle } __Notifications__
+
+    ---
+
+    Configure and manage real-time notifications for pipeline events — trend alerts, content updates, and failure reports.
+
+    [:material-arrow-right: Set up notifications](notifications.md)
+
 </div>
 
 ---

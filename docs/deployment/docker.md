@@ -58,7 +58,7 @@ All Orion services are containerized and orchestrated via Docker Compose.
 | pulse     | python:3.13-slim        | 8005 | `GET /health` |
 | publisher | python:3.13-slim        | 8006 | `GET /health` |
 | identity  | python:3.13-slim        | 8007 | `GET /health` |
-| dashboard | node:22-alpine          | 3000 | `GET /`       |
+| dashboard | node:22-alpine          | 3001 | `GET /`       |
 
 ### Infrastructure Services
 
@@ -103,7 +103,7 @@ networks:
 ```
 
 - Services reference each other by container name (e.g., `http://scout:8001`)
-- Only the gateway (8000) and dashboard (3000) are exposed to the host
+- Only the gateway (8000) and dashboard (3001) are exposed to the host
 - Infrastructure ports (5432, 6379, 19530) are exposed for local development
 
 ## :material-heart-pulse: Health Checks

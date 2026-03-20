@@ -17,3 +17,4 @@ class Channels:
     MEDIA_GENERATED: str = "orion.media.generated"
     MEDIA_FAILED: str = "orion.media.failed"
     PIPELINE_STAGE_CHANGED: str = "orion.pipeline.stage_changed"
+    NOTIFICATION_CREATED: str = "orion.notification.created"

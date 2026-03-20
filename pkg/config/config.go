@@ -89,7 +89,7 @@ func Load() Config {
 		GitHubClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
 		GoogleClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
 		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
-		OAuthRedirectBase:  getEnv("OAUTH_REDIRECT_BASE", "http://localhost:3000"),
+		OAuthRedirectBase:  getEnv("OAUTH_REDIRECT_BASE", "http://localhost:3001"),
 
 		InternalToken:  getEnv("ORION_INTERNAL_TOKEN", ""),
 		AllowedOrigins: splitEnv("ORION_ALLOWED_ORIGINS", ""),

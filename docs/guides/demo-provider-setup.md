@@ -17,11 +17,11 @@ Orion uses four provider categories, each configurable independently:
 
 ## :lucide-layout-dashboard: Switching Providers via Dashboard
 
-1. Open **http://localhost:3001** (dev) or **http://localhost:3000** (prod) and log in
+1. Open **http://localhost:3001** and log in
 2. Navigate to **Settings** from the sidebar
 3. You will see four provider cards: LLM, Image, Video, and TTS
 
-![Settings Providers tab](../assets/screenshots/settings-page.png)
+![Settings Providers tab](../assets/guides/settings-page.png)
 
 ### :lucide-credit-card: Each Card Shows
 

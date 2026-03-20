@@ -54,7 +54,25 @@ graph LR
 - **External to Platform** -- All traffic enters through the Go gateway on port 8000
 - **Service to Service** -- Redis pub/sub events (never direct HTTP between services)
 - **Service to Data** -- Direct connections to PostgreSQL, Redis, and Milvus
-- **Real-time Updates** -- WebSocket hub in the gateway subscribes to Redis channels
+- **Real-time Updates** -- WebSocket hub in the gateway subscribes to Redis channels and delivers per-user targeted notifications
+
+## :material-bell-ring: Notification System
+
+Domain events are automatically converted into per-user notifications. The notification module lives inside the Identity service (no new service required) and follows a two-hop real-time delivery path:
+
+```
+Domain Event (e.g. orion.content.published)
+    ↓ Redis pub/sub
+Identity Service: notification_consumer
+    ↓ creates Notification row, publishes to orion.notification.created
+Gateway: notification_relay.go
+    ↓ per-user WebSocket push
+Dashboard / CLI
+```
+
+Six event types are mapped to notifications: `trend.detected`, `content.published`, `content.rejected`, `media.failed`, `pipeline.stage_changed`, and `content.created`. Users can configure per-type preferences (enabled/disabled, real-time push on/off).
+
+See **[Notifications](../services/notifications.md)** for full API reference and architecture details.
 
 ## :material-shield-lock: Authentication
 
@@ -92,7 +110,7 @@ See **[Security](security.md)** for full details on OAuth flows, token rotation,
 | Pulse     | 8005 | Python     | Analytics, cost tracking, pipeline history   |
 | Publisher | 8006 | Python     | Social media publishing                      |
 | Identity  | 8007 | Python     | User management, auth, OAuth linking         |
-| Dashboard | 3000 | TypeScript | Admin UI with OAuth login                    |
+| Dashboard | 3001 | TypeScript | Admin UI with OAuth login                    |
 
 ## :material-book-open-variant: Further Reading
 

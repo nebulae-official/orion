@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { fetchSystemStatus, fetchGatewayHealth } from "@/lib/actions";
 
@@ -152,16 +153,17 @@ export function ServiceHealth(): React.ReactElement {
           <span className="text-xs text-text-dim">
             Updated {secondsAgo}s ago
           </span>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={checkServices}
             disabled={refreshing}
-            className="rounded-md p-1 text-text-dim transition-colors hover:bg-surface-hover hover:text-text-secondary"
             title="Refresh now"
           >
             <RefreshCw
               className={cn("h-4 w-4", refreshing && "animate-spin")}
             />
-          </button>
+          </Button>
         </div>
       </div>
 

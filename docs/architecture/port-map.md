@@ -17,7 +17,7 @@ Complete port assignments for all Orion services, infrastructure, and tools.
 | 8005 | Pulse | HTTP | Analytics |
 | 8006 | Publisher | HTTP | Social publishing |
 | 8007 | Identity | HTTP | User auth & management |
-| 3000 | Dashboard | HTTP | Next.js admin UI |
+| 3001 | Dashboard | HTTP | Next.js admin UI |
 
 ## :lucide-database: Infrastructure
 
@@ -39,13 +39,11 @@ Complete port assignments for all Orion services, infrastructure, and tools.
 
 ## :lucide-activity: Monitoring
 
-Monitoring services run via a separate compose file (`deploy/docker-compose.monitoring.yml`).
-
 | Port | Service | Protocol | Description |
 |------|---------|----------|-------------|
 | 9090 | Prometheus | HTTP | Metrics collection |
 | 9093 | Alertmanager | HTTP | Alert routing |
-| 3001 | Grafana | HTTP | Monitoring dashboards (conflicts with dashboard dev port -- run one at a time) |
+| 3003 | Grafana | HTTP | Monitoring dashboards |
 
 ## :lucide-test-tube: E2E Test Mocks
 
@@ -81,8 +79,8 @@ block-beta
     end
 
     block:ui["User Interfaces"]:4
-        dash["Dashboard\n:3000"]
-        grafana["Grafana\n:3001"]
+        dash["Dashboard\n:3001"]
+        grafana["Grafana\n:3003"]
         pgadmin["pgAdmin\n:5050"]
         databasus["Databasus\n:4005"]
     end

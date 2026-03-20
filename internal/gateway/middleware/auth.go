@@ -13,10 +13,11 @@ const userContextKey contextKey = "user"
 
 // UserClaims holds the JWT claims extracted from the token.
 type UserClaims struct {
-	UserID string
-	Name   string
-	Email  string
-	Role   string
+	UserID          string
+	Name            string
+	Email           string
+	Role            string
+	NeedsOnboarding bool
 }
 
 // GetUser retrieves the authenticated user from the request context.
@@ -69,10 +70,11 @@ func Auth(secret string, bl *auth.TokenBlacklist) func(http.Handler) http.Handle
 			}
 
 			user := UserClaims{
-				UserID: claimStr(claims, "sub"),
-				Name:   claimStr(claims, "name"),
-				Email:  claimStr(claims, "email"),
-				Role:   claimStr(claims, "role"),
+				UserID:          claimStr(claims, "sub"),
+				Name:            claimStr(claims, "name"),
+				Email:           claimStr(claims, "email"),
+				Role:            claimStr(claims, "role"),
+				NeedsOnboarding: claimBool(claims, "onboarding"),
 			}
 
 			ctx := context.WithValue(r.Context(), userContextKey, user)
@@ -86,4 +88,11 @@ func claimStr(claims jwt.MapClaims, key string) string {
 		return v
 	}
 	return ""
+}
+
+func claimBool(claims jwt.MapClaims, key string) bool {
+	if v, ok := claims[key].(bool); ok {
+		return v
+	}
+	return false
 }

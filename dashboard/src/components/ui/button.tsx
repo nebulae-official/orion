@@ -1,8 +1,13 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant =
+  | "default"
+  | "secondary"
+  | "destructive"
+  | "outline"
+  | "ghost";
+type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -11,31 +16,28 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    "bg-primary text-white shadow-lg shadow-primary/25 hover:bg-primary-muted hover:shadow-primary/30 focus-visible:ring-primary",
+  default:
+    "bg-primary text-white hover:bg-primary/90 focus-visible:ring-primary",
   secondary:
-    "glass-card text-text-secondary border-white/[0.08] hover:bg-white/[0.08] hover:text-text focus-visible:ring-border",
-  danger:
-    "bg-danger text-white shadow-lg shadow-danger/25 hover:bg-danger/80 focus-visible:ring-danger",
+    "border border-border bg-surface-elevated text-text-secondary hover:bg-surface-hover hover:text-text focus-visible:ring-border",
+  destructive:
+    "bg-danger text-white hover:bg-danger/90 focus-visible:ring-danger",
+  outline:
+    "border border-border bg-transparent text-text-secondary hover:bg-primary-surface hover:text-primary focus-visible:ring-primary",
   ghost:
-    "text-text-secondary hover:bg-white/[0.06] hover:text-text focus-visible:ring-border",
+    "text-text-secondary hover:bg-surface-hover hover:text-text focus-visible:ring-border",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "rounded-lg px-3 py-1.5 text-xs",
   md: "rounded-lg px-4 py-2 text-sm",
   lg: "rounded-xl px-5 py-2.5 text-base",
+  icon: "rounded-lg h-9 w-9",
 };
 
-/**
- * Reusable Button component with variant, size, and loading support.
- *
- * Variants: `primary`, `secondary`, `danger`, `ghost`
- * Sizes: `sm`, `md`, `lg`
- */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
-    variant = "primary",
+    variant = "default",
     size = "md",
     loading = false,
     disabled,

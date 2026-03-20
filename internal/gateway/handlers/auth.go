@@ -132,7 +132,8 @@ func NewAuthHandlerWithClient(cfg config.Config, rdb *redis.Client, client HTTPC
 }
 
 // generateToken creates a signed JWT access token with the given user claims.
-func (h *AuthHandler) generateToken(userID, email, name, role string) (string, string, error) {
+// If extra is non-nil, its entries are merged into the JWT claims map before signing.
+func (h *AuthHandler) generateToken(userID, email, name, role string, extra map[string]interface{}) (string, string, error) {
 	jti := uuid.New().String()
 	now := time.Now()
 	claims := jwt.MapClaims{
@@ -143,6 +144,10 @@ func (h *AuthHandler) generateToken(userID, email, name, role string) (string, s
 		"role":  role,
 		"iat":   now.Unix(),
 		"exp":   now.Add(tokenExpiry).Unix(),
+	}
+
+	for k, v := range extra {
+		claims[k] = v
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -207,7 +212,7 @@ func (h *AuthHandler) Login() http.HandlerFunc {
 			return
 		}
 
-		tokenStr, _, err := h.generateToken(idUser.UserID, idUser.Email, idUser.Name, idUser.Role)
+		tokenStr, _, err := h.generateToken(idUser.UserID, idUser.Email, idUser.Name, idUser.Role, nil)
 		if err != nil {
 			slog.Error("token_generation_failed", "error", err)
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"message": "internal error"})
@@ -365,7 +370,7 @@ func (h *AuthHandler) RefreshToken(bl *auth.TokenBlacklist) http.HandlerFunc {
 			}
 		}
 
-		tokenStr, _, err := h.generateToken(refreshed.UserID, refreshed.Email, refreshed.Name, refreshed.Role)
+		tokenStr, _, err := h.generateToken(refreshed.UserID, refreshed.Email, refreshed.Name, refreshed.Role, nil)
 		if err != nil {
 			slog.Error("token_generation_failed", "error", err)
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"message": "internal error"})

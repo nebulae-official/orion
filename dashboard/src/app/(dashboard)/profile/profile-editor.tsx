@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
 import { GATEWAY_URL } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 import type { User } from "@/types/api";
 import { updateProfile, changePassword } from "./actions";
 
@@ -186,14 +187,15 @@ export function ProfileEditor({
                 )}
               </div>
               {!readOnly && (
-                <button
-                  type="button"
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full border-2 border-surface"
                   onClick={() => setEditingAvatar(!editingAvatar)}
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-primary text-white shadow-md transition-colors hover:bg-primary-muted"
                   title="Change avatar"
                 >
                   <Camera className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               )}
             </div>
 
@@ -208,23 +210,24 @@ export function ProfileEditor({
                   className="block w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <div className="flex gap-2">
-                  <button
-                    type="button"
+                  <Button
+                    size="sm"
+                    className="flex-1"
                     onClick={handleAvatarSave}
-                    className="flex-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
                   >
                     Save
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => {
                       setAvatarInput(avatarUrl);
                       setEditingAvatar(false);
                     }}
-                    className="flex-1 rounded-lg border border-border bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -283,17 +286,22 @@ export function ProfileEditor({
                 </div>
               </div>
               {oauthProviders.includes("github") ? (
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger-surface px-3 py-1.5 text-xs font-medium text-danger-light transition-colors hover:bg-danger/20"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-danger/20 text-danger-light hover:bg-danger-surface hover:text-danger-light"
                 >
                   <Unplug className="h-3.5 w-3.5" />
                   Disconnect
-                </button>
+                </Button>
               ) : (
                 <a
                   href={`${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=/profile`}
-                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 font-medium transition-colors",
+                    "bg-primary text-white hover:bg-primary/90",
+                    "rounded-lg px-3 py-1.5 text-xs"
+                  )}
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Connect
@@ -315,17 +323,22 @@ export function ProfileEditor({
                 </div>
               </div>
               {oauthProviders.includes("google") ? (
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 rounded-lg border border-danger/30 bg-danger-surface px-3 py-1.5 text-xs font-medium text-danger-light transition-colors hover:bg-danger/20"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-danger/20 text-danger-light hover:bg-danger-surface hover:text-danger-light"
                 >
                   <Unplug className="h-3.5 w-3.5" />
                   Disconnect
-                </button>
+                </Button>
               ) : (
                 <a
                   href={`${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=/profile`}
-                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-muted"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 font-medium transition-colors",
+                    "bg-primary text-white hover:bg-primary/90",
+                    "rounded-lg px-3 py-1.5 text-xs"
+                  )}
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Connect
@@ -433,17 +446,10 @@ export function ProfileEditor({
             </div>
 
             <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={profileSaving}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted",
-                  profileSaving && "cursor-not-allowed opacity-60"
-                )}
-              >
+              <Button type="submit" loading={profileSaving}>
                 <Save className="h-4 w-4" />
                 {profileSaving ? "Saving..." : "Save Changes"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -524,17 +530,10 @@ export function ProfileEditor({
             </div>
 
             <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={passwordSaving}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted",
-                  passwordSaving && "cursor-not-allowed opacity-60"
-                )}
-              >
+              <Button type="submit" loading={passwordSaving}>
                 <Key className="h-4 w-4" />
                 {passwordSaving ? "Updating..." : "Update Password"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -567,13 +566,13 @@ export function ProfileEditor({
                   <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePublishConnect("YouTube")}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
                 Connect
-              </button>
+              </Button>
             </div>
 
             {/* TikTok */}
@@ -589,13 +588,13 @@ export function ProfileEditor({
                   <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePublishConnect("TikTok")}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
                 Connect
-              </button>
+              </Button>
             </div>
 
             {/* Twitter/X */}
@@ -609,13 +608,13 @@ export function ProfileEditor({
                   <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePublishConnect("Twitter/X")}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
                 Connect
-              </button>
+              </Button>
             </div>
 
             {/* Instagram */}
@@ -629,13 +628,13 @@ export function ProfileEditor({
                   <p className="text-xs text-text-secondary">Not connected</p>
                 </div>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePublishConnect("Instagram")}
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
               >
                 Connect
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/components/toast";
 import { approveContent, rejectContent } from "@/lib/actions";
 import type { ContentStatus } from "@/types/api";
 import { CheckCircle, XCircle, RotateCcw, Send } from "lucide-react";
 import { PublishModal } from "@/components/publish-modal";
 import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 interface ContentActionsProps {
   contentId: string;
@@ -48,31 +48,25 @@ export function ContentActions({
     <>
       <div className="flex items-center gap-2">
         {canApprove && (
-          <button
+          <Button
             onClick={handleApprove}
             disabled={isPending}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-lg bg-success px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-success/80",
-              isPending && "cursor-not-allowed opacity-60"
-            )}
+            className="bg-success text-white hover:bg-success/90"
           >
             <CheckCircle className="h-4 w-4" />
             Approve
-          </button>
+          </Button>
         )}
 
         {canReject && (
-          <button
+          <Button
+            variant="destructive"
             onClick={() => setShowRejectModal(true)}
             disabled={isPending}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-danger/80",
-              isPending && "cursor-not-allowed opacity-60"
-            )}
           >
             <XCircle className="h-4 w-4" />
             Reject
-          </button>
+          </Button>
         )}
 
         {optimisticStatus === "approved" && (
@@ -83,13 +77,10 @@ export function ContentActions({
         )}
 
         {canPublish && (
-          <button
-            onClick={() => setShowPublishModal(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-muted"
-          >
+          <Button onClick={() => setShowPublishModal(true)}>
             <Send className="h-4 w-4" />
             Publish
-          </button>
+          </Button>
         )}
 
         {optimisticStatus === "rejected" && (
@@ -200,22 +191,16 @@ function RejectModal({
       </div>
 
       <div className="mt-6 flex justify-end gap-2">
-        <button
-          onClick={onClose}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover"
-        >
+        <Button variant="outline" onClick={onClose}>
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="destructive"
           onClick={handleSubmit}
-          disabled={isPending}
-          className={cn(
-            "rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-danger/80",
-            isPending && "cursor-not-allowed opacity-60"
-          )}
+          loading={isPending}
         >
           {isPending ? "Rejecting..." : "Reject"}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

@@ -30,6 +30,13 @@ async def get_by_name(session: AsyncSession, name: str) -> User | None:
     return result.scalar_one_or_none()
 
 
+async def get_by_username(session: AsyncSession, username: str) -> User | None:
+    """Fetch a user by username (exact match)."""
+    stmt = select(User).where(User.username == username)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
 async def create_user(
     session: AsyncSession,
     email: str,

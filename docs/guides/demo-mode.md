@@ -54,7 +54,7 @@ cd dashboard
 NEXT_PUBLIC_DEMO_MODE=true npm run dev
 ```
 
-The dashboard is available at `http://localhost:3001` (dev server port).
+The dashboard is available at `http://localhost:3001`.
 
 ---
 

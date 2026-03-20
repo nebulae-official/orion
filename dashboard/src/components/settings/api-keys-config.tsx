@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { DEMO_MODE } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 import {
   KeyRound,
   Eye,
@@ -264,27 +265,24 @@ export function ApiKeysConfig(): React.ReactElement {
                       autoFocus
                     />
                     <div className="flex gap-2">
-                      <button
+                      <Button
+                        size="sm"
                         onClick={() => handleSaveKey(entry.provider)}
                         disabled={!editValue.trim()}
-                        className={cn(
-                          "flex-1 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors",
-                          editValue.trim()
-                            ? "bg-primary hover:bg-primary-muted"
-                            : "cursor-not-allowed bg-primary-muted"
-                        )}
+                        className="flex-1"
                       >
                         Save Key
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => {
                           setEditingProvider(null);
                           setEditValue("");
                         }}
-                        className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-elevated"
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -294,9 +292,10 @@ export function ApiKeysConfig(): React.ReactElement {
                         <code className="flex-1 rounded-lg bg-surface-elevated px-3 py-2 text-xs text-text-secondary">
                           {isVisible ? entry.key : maskKey(entry.key)}
                         </code>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => toggleShowKey(entry.provider)}
-                          className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface-elevated hover:text-text"
                           title={isVisible ? "Hide key" : "Show key"}
                         >
                           {isVisible ? (
@@ -304,7 +303,7 @@ export function ApiKeysConfig(): React.ReactElement {
                           ) : (
                             <Eye className="h-4 w-4" />
                           )}
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <p className="rounded-lg bg-surface-elevated px-3 py-2 text-xs text-text-dim">
@@ -313,35 +312,50 @@ export function ApiKeysConfig(): React.ReactElement {
                     )}
 
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingProvider(entry.provider);
-                          setEditValue(entry.key);
-                        }}
-                        className="flex-1 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
-                      >
-                        {entry.key ? "Update Key" : "Add Key"}
-                      </button>
+                      {entry.key ? (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setEditingProvider(entry.provider);
+                            setEditValue(entry.key);
+                          }}
+                          className="flex-1"
+                        >
+                          Update Key
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setEditingProvider(entry.provider);
+                            setEditValue(entry.key);
+                          }}
+                          className="flex-1"
+                        >
+                          Add Key
+                        </Button>
+                      )}
                       {entry.key && (
                         <>
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleVerify(entry.provider)}
                             disabled={verifying === entry.provider}
-                            className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text"
                           >
                             {verifying === entry.provider ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               "Verify"
                             )}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
                             onClick={() => handleDeleteKey(entry.provider)}
-                            className="rounded-lg border border-danger/30 px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger-surface"
                             title="Delete key"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </>
                       )}
                     </div>

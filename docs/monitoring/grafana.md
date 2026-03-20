@@ -4,12 +4,8 @@ Grafana provides visualization dashboards and alerting for Orion metrics.
 
 ## :material-cog: Access
 
-- **URL:** `http://localhost:3001`
-- **Default credentials:** `admin` / `admin` (configurable via `GRAFANA_USER` and `GRAFANA_PASSWORD` env vars)
-- **Compose file:** `deploy/docker-compose.monitoring.yml`
-
-!!! warning "Port 3001 is shared with the dashboard dev server"
-    Run either `make dash-dev` or `make up-monitoring`, not both simultaneously.
+- **URL:** `http://localhost:3003`
+- **Default credentials:** `admin` / `admin`
 
 ## :material-database: Datasource
 

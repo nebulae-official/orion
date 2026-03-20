@@ -52,7 +52,7 @@ services:
       - "8000:8000" # Only service exposed externally
   dashboard:
     ports:
-      - "3000:3000"
+      - "3001:3000"
   # All other services: no port mapping
   scout:
     expose:

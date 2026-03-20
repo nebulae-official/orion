@@ -40,6 +40,7 @@ class AuthResponse(BaseModel):
     name: str
     avatar_url: str | None = None
     refresh_token: str | None = None
+    needs_onboarding: bool = False
 
 
 class OAuthLinkRequest(BaseModel):
@@ -128,9 +129,10 @@ async def oauth_link(
                 name=body.name,
                 role="editor",
             )
+            user.email_verified = True
             if body.avatar_url:
                 user.avatar_url = body.avatar_url
-                await session.flush()
+            await session.flush()
 
         # Link OAuth account
         await user_repo.create_oauth_account(
@@ -154,6 +156,8 @@ async def oauth_link(
         expires_at=refresh_token_expires_at(),
     )
 
+    needs_onboarding = user.password_hash is None
+
     return AuthResponse(
         user_id=str(user.id),
         email=user.email,
@@ -161,6 +165,7 @@ async def oauth_link(
         name=user.name,
         avatar_url=user.avatar_url,
         refresh_token=raw_token,
+        needs_onboarding=needs_onboarding,
     )
 
 

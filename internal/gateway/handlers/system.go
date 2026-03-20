@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -114,6 +116,44 @@ func readHostMetrics() (*hostMetrics, error) {
 	return &m, nil
 }
 
+// getWindowsMetricsDirect calls powershell.exe directly via WSL2 interop to
+// fetch Windows host memory and disk metrics. This avoids needing the sidecar
+// collector script and works whenever powershell.exe is available on PATH.
+func getWindowsMetricsDirect() (*hostMetrics, error) {
+	psPath, err := exec.LookPath("powershell.exe")
+	if err != nil {
+		return nil, fmt.Errorf("powershell.exe not found: %w", err)
+	}
+
+	script := `$os = Get-CimInstance Win32_OperatingSystem; ` +
+		`$disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'"; ` +
+		`@{ ` +
+		`memory_total = $os.TotalVisibleMemorySize * 1024; ` +
+		`memory_free = $os.FreePhysicalMemory * 1024; ` +
+		`memory_used = ($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) * 1024; ` +
+		`disk_total = $disk.Size; ` +
+		`disk_free = $disk.FreeSpace; ` +
+		`disk_used = $disk.Size - $disk.FreeSpace; ` +
+		`source = "windows_host"; ` +
+		`timestamp = (Get-Date -Format o) ` +
+		`} | ConvertTo-Json`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, psPath, "-NoProfile", "-NonInteractive", "-Command", script)
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("powershell.exe failed: %w", err)
+	}
+
+	var m hostMetrics
+	if err := json.Unmarshal(out, &m); err != nil {
+		return nil, fmt.Errorf("parse powershell output: %w", err)
+	}
+	return &m, nil
+}
+
 // SystemInfoHandler returns a handler that reports host system information.
 // It supports a ?host=true|false query parameter to toggle between Windows host
 // and Linux/WSL metrics when running under WSL2.
@@ -154,7 +194,7 @@ func gatherSystemInfo2(_ context.Context, useHost bool) SystemInfo {
 	metricsSource := "linux"
 
 	if useHost && isWSL2() {
-		// Windows host metrics via sidecar JSON file.
+		// Try Windows host metrics: sidecar file first, then direct PowerShell.
 		if hm, err := readHostMetrics(); err == nil {
 			memTotal = hm.MemoryTotal
 			memUsed = hm.MemoryUsed
@@ -163,15 +203,26 @@ func gatherSystemInfo2(_ context.Context, useHost bool) SystemInfo {
 			diskUsed = hm.DiskUsed
 			diskFree = hm.DiskFree
 			metricsSource = "windows_host"
+		} else if hm, psErr := getWindowsMetricsDirect(); psErr == nil {
+			memTotal = hm.MemoryTotal
+			memUsed = hm.MemoryUsed
+			memFree = hm.MemoryFree
+			diskTotal = hm.DiskTotal
+			diskUsed = hm.DiskUsed
+			diskFree = hm.DiskFree
+			metricsSource = "windows_host"
+			slog.Debug("using direct powershell for host metrics (sidecar unavailable)", "sidecar_err", err)
 		} else {
-			// Fallback to Linux /proc metrics when collector is not running.
+			// Both methods failed — fall back to Linux /proc metrics.
+			slog.Warn("windows host metrics unavailable, falling back to WSL",
+				"sidecar_err", err, "powershell_err", psErr)
 			memTotal, memUsed, memFree, _ = getMemoryInfo()
 			var stat syscall.Statfs_t
 			_ = syscall.Statfs("/", &stat)
 			diskTotal = stat.Blocks * uint64(stat.Bsize)
 			diskFree = stat.Bavail * uint64(stat.Bsize)
 			diskUsed = diskTotal - diskFree
-			metricsSource = "linux"
+			metricsSource = "wsl"
 		}
 	} else {
 		// Standard Linux / WSL metrics.

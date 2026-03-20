@@ -61,7 +61,7 @@ graph TB
     end
 
     subgraph Frontend["Frontend"]
-        DB["Next.js Dashboard :3000"]
+        DB["Next.js Dashboard :3001"]
         CLI["Python CLI"]
     end
 
@@ -181,7 +181,7 @@ User management service on port `8007`. Handles user CRUD, OAuth account linking
 
 ### :material-monitor-dashboard: Dashboard
 
-Next.js 15 admin dashboard on port `3000`. Built with React 19 Server Components, Tailwind CSS 4, and Recharts. Provides real-time pipeline monitoring, content approval workflows, trend visualization, and system administration.
+Next.js 15 admin dashboard on port `3001`. Built with React 19 Server Components, Tailwind CSS 4, and Recharts. Provides real-time pipeline monitoring, content approval workflows, trend visualization, and system administration.
 
 [:material-arrow-right: Learn more](services/dashboard.md)
 

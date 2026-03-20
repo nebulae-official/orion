@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Cpu, RefreshCw, ChevronRight, ChevronDown } from "lucide-react";
 
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
@@ -202,9 +203,10 @@ function GpuAccordionCard({
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       {/* Collapsed summary row — always visible */}
-      <button
+      <Button
+        variant="ghost"
         onClick={onToggle}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left rounded-none"
       >
         {expanded ? (
           <ChevronDown className="h-4 w-4 shrink-0 text-text-dim" />
@@ -241,7 +243,7 @@ function GpuAccordionCard({
             {gpu.temperature_c}°C
           </span>
         )}
-      </button>
+      </Button>
 
       {/* Expanded detail */}
       {expanded && <GpuDetailMetrics gpu={gpu} />}
@@ -359,13 +361,14 @@ export function GpuGauge(): React.ReactElement {
           <span className="text-xs text-text-dim">
             Updated {secondsAgo}s ago
           </span>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={fetchGpuInfo}
-            className="rounded-md p-1 text-text-dim transition-colors hover:bg-surface-hover hover:text-text-secondary"
             title="Refresh"
           >
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          </button>
+          </Button>
         </div>
       </div>
 

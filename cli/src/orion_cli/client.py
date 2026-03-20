@@ -35,6 +35,9 @@ class GatewayClient:
     async def delete(self, path: str, **kwargs: Any) -> dict[str, Any]:
         return await self._request("DELETE", path, **kwargs)
 
+    async def patch(self, path: str, **kwargs: Any) -> dict[str, Any]:
+        return await self._request("PATCH", path, **kwargs)
+
     async def health(self) -> dict[str, Any]:
         return await self.get("/health")
 
@@ -50,7 +53,7 @@ class GatewayClient:
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         url = f"{self._base_url}{path}"
         try:
-            async with httpx.AsyncClient() as http:
+            async with httpx.AsyncClient(timeout=60.0) as http:
                 resp = await http.request(method, url, headers=self._headers(), **kwargs)
                 resp.raise_for_status()
                 return resp.json()

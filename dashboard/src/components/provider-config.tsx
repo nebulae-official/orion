@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { saveProviderConfig } from "@/lib/actions";
 import { apiClient } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 import {
   Check,
   CheckCircle,
@@ -355,9 +356,11 @@ export function ProviderConfig(): React.ReactElement {
                 {/* Model Parameters (collapsible) */}
                 {hasParams && (
                   <div>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => toggleParams(config.service)}
-                      className="flex w-full items-center justify-between rounded-lg bg-surface-elevated px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-text"
+                      className="flex w-full items-center justify-between"
                     >
                       <span>Model Parameters</span>
                       {isParamsExpanded ? (
@@ -365,7 +368,7 @@ export function ProviderConfig(): React.ReactElement {
                       ) : (
                         <ChevronDown className="h-4 w-4" />
                       )}
-                    </button>
+                    </Button>
 
                     {isParamsExpanded && (
                       <div className="mt-2 space-y-3 rounded-lg border border-border bg-surface-elevated p-3">
@@ -464,34 +467,18 @@ export function ProviderConfig(): React.ReactElement {
 
                 {/* Action buttons */}
                 <div className="flex gap-2">
-                  <button
+                  <Button
                     onClick={() => handleSave(config.service)}
+                    loading={saving === config.service}
                     disabled={saving === config.service}
-                    className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all",
-                      saving === config.service
-                        ? "cursor-not-allowed opacity-60 bg-primary-muted"
-                        : "bg-primary shadow-lg shadow-primary/25 hover:bg-primary-muted hover:shadow-primary/30"
-                    )}
+                    className="flex-1"
                   >
-                    {saving === config.service ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save"
-                    )}
-                  </button>
-                  <button
+                    {saving === config.service ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    variant="outline"
                     onClick={() => handleTestConnection(config.service)}
                     disabled={testing === config.service}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                      testing === config.service
-                        ? "cursor-not-allowed opacity-60 text-text-dim"
-                        : "glass-card text-text-secondary hover:bg-white/[0.08] hover:text-text"
-                    )}
                   >
                     {testing === config.service ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -501,7 +488,7 @@ export function ProviderConfig(): React.ReactElement {
                       <WifiOff className="h-4 w-4" />
                     )}
                     Test
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Connection status message */}
@@ -525,13 +512,10 @@ export function ProviderConfig(): React.ReactElement {
 
       {/* Reset to Defaults */}
       <div className="flex justify-end">
-        <button
-          onClick={handleResetAll}
-          className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-text-secondary transition-all glass-card hover:bg-white/[0.08] hover:text-text"
-        >
+        <Button variant="outline" onClick={handleResetAll}>
           <RotateCcw className="h-4 w-4" />
           Reset to Defaults
-        </button>
+        </Button>
       </div>
     </div>
   );

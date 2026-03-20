@@ -5,6 +5,7 @@ from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from orion_common.db.models import TrendStatus
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,11 +21,19 @@ from src.schemas import (
     TrendListResponse,
     TrendResponse,
     TriggerScanRequest,
+    UpdateTrendStatusRequest,
 )
 
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1/trends", tags=["trends"])
+
+VALID_STATUS_TRANSITIONS: dict[TrendStatus, set[TrendStatus]] = {
+    TrendStatus.active: {TrendStatus.used, TrendStatus.discarded, TrendStatus.expired},
+    TrendStatus.used: {TrendStatus.active, TrendStatus.discarded},
+    TrendStatus.discarded: {TrendStatus.active},
+    TrendStatus.expired: {TrendStatus.active},
+}
 
 
 @router.get("", response_model=TrendListResponse)
@@ -32,16 +41,38 @@ async def list_trends(
     session: Annotated[AsyncSession, Depends(get_session)],
     page: int = Query(default=1, ge=1, description="Page number"),
     page_size: int = Query(default=20, ge=1, le=100, description="Items per page"),
+    source: str | None = Query(default=None, description="Comma-separated source filter"),
+    period: str | None = Query(default=None, description="Time period: 1d, 7d, 30d"),
+    status: str | None = Query(default=None, description="Comma-separated status filter"),
 ) -> TrendListResponse:
-    """List active trends with pagination."""
+    """List trends with optional filters and pagination."""
+    from datetime import UTC, datetime, timedelta
+
     repo = TrendRepository(session)
-    trends, total = await repo.get_active(page=page, page_size=page_size)
+
+    date_from = None
+    if period:
+        period_map = {"1d": 1, "7d": 7, "30d": 30}
+        days = period_map.get(period)
+        if days:
+            date_from = datetime.now(UTC) - timedelta(days=days)
+
+    trends, total = await repo.get_filtered(
+        page=page,
+        page_size=page_size,
+        source=source,
+        date_from=date_from,
+        status=status,
+    )
+
+    sources = await repo.get_distinct_sources()
 
     return TrendListResponse(
         items=[TrendResponse.model_validate(t) for t in trends],
         total=total,
         page=page,
         page_size=page_size,
+        sources=sources,
     )
 
 
@@ -70,6 +101,48 @@ async def get_trend(
         raise HTTPException(status_code=404, detail="Trend not found")
 
     return TrendResponse.model_validate(trend)
+
+
+@router.patch("/{trend_id}/status", response_model=TrendResponse)
+async def update_trend_status(
+    trend_id: uuid.UUID,
+    body: UpdateTrendStatusRequest,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> TrendResponse:
+    """Update the status of a trend (e.g. discard, reactivate, mark as used)."""
+    try:
+        new_status = TrendStatus(body.status)
+    except ValueError:
+        valid = [s.value for s in TrendStatus]
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status '{body.status}'. Valid: {valid}",
+        )
+
+    repo = TrendRepository(session)
+    trend = await repo.get_by_id(trend_id)
+    if trend is None:
+        raise HTTPException(status_code=404, detail="Trend not found")
+
+    allowed = VALID_STATUS_TRANSITIONS.get(trend.status, set())
+    if new_status not in allowed:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Cannot transition from '{trend.status.value}' to '{new_status.value}'. "
+            f"Allowed: {[s.value for s in allowed]}",
+        )
+
+    updated = await repo.update_status(trend_id, new_status)
+    await session.commit()
+
+    logger.info(
+        "trend_status_changed",
+        trend_id=str(trend_id),
+        old_status=trend.status.value,
+        new_status=new_status.value,
+    )
+
+    return TrendResponse.model_validate(updated)
 
 
 @router.post("/scan", response_model=ScanResultResponse)

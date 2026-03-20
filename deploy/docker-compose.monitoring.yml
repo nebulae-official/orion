@@ -2,7 +2,7 @@
 # Usage: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up
 #
 # Services: Prometheus, Alertmanager, Grafana
-# Ports: Prometheus :9090, Alertmanager :9093, Grafana :3001
+# Ports: Prometheus :9090, Alertmanager :9093, Grafana :3003
 
 networks:
   orion-net:
@@ -63,7 +63,7 @@ services:
   grafana:
     image: grafana/grafana:10.4.0
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:3003:3000"
     volumes:
       - grafanadata:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -71,7 +71,7 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_SERVER_ROOT_URL: http://localhost:3001
+      GF_SERVER_ROOT_URL: http://localhost:3003
       GF_INSTALL_PLUGINS: ""
     depends_on:
       prometheus:

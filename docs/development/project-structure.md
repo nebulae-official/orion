@@ -106,7 +106,7 @@ orion/
         events.py         # Event channel constants
         event_bus.py      # Redis pub/sub EventBus
         logging.py        # structlog configuration
-  dashboard/              # Next.js admin dashboard (:3000)
+  dashboard/              # Next.js admin dashboard (:3001)
     src/
       app/                # App Router pages
       components/         # React components

@@ -1,11 +1,14 @@
-"""Google Trends provider using the pytrends library."""
+"""Google Trends provider using the official Trending RSS feed."""
 
 from __future__ import annotations
 
 import asyncio
+import math
+import xml.etree.ElementTree as ET
+from typing import Any
 
+import httpx
 import structlog
-from pytrends.request import TrendReq
 
 from src.providers.base import TrendProvider, TrendResult
 
@@ -16,43 +19,59 @@ _INITIAL_BACKOFF_SECS = 2.0
 _MAX_RETRIES = 3
 _BACKOFF_FACTOR = 2.0
 
+_RSS_URL = "https://trends.google.com/trending/rss?geo={region}"
+_HT_NS = "https://trends.google.com/trending/rss"
+
+
+def _parse_traffic(raw: str) -> int:
+    """Parse an approximate traffic string like '200+', '5,000+', '500K+' into an int."""
+    text = raw.strip().rstrip("+").strip().replace(",", "")
+    multiplier = 1
+    if text.upper().endswith("K"):
+        text = text[:-1]
+        multiplier = 1_000
+    elif text.upper().endswith("M"):
+        text = text[:-1]
+        multiplier = 1_000_000
+    try:
+        return int(float(text) * multiplier)
+    except (ValueError, TypeError):
+        return 0
+
+
+def _traffic_to_score(traffic: int) -> float:
+    """Convert a traffic number to a 0-100 score using log scaling."""
+    return min(100.0, math.log10(max(traffic, 1)) * 20)
+
 
 class GoogleTrendsProvider(TrendProvider):
-    """Fetches trending searches from Google Trends via pytrends.
+    """Fetches trending searches from Google's official Trending RSS feed.
 
-    Uses ``trending_searches`` for daily trending topics and falls back
-    gracefully when the upstream API rate-limits or errors.
+    Uses ``https://trends.google.com/trending/rss?geo={region}`` which
+    returns XML with trending topics, traffic estimates, and news links.
     """
 
     def __init__(
         self,
-        hl: str = "en-US",
-        tz: int = 360,
         retries: int = _MAX_RETRIES,
         backoff_secs: float = _INITIAL_BACKOFF_SECS,
+        timeout: float = 15.0,
     ) -> None:
-        self._hl = hl
-        self._tz = tz
         self._retries = retries
         self._backoff_secs = backoff_secs
-
-    def _build_client(self) -> TrendReq:
-        """Create a fresh pytrends client (not thread-safe, so per-call)."""
-        return TrendReq(hl=self._hl, tz=self._tz)
+        self._timeout = timeout
 
     async def fetch_trends(self, region: str = "US", limit: int = 20) -> list[TrendResult]:
-        """Fetch daily trending searches from Google Trends.
+        """Fetch daily trending searches from Google Trends RSS feed.
 
-        Runs the synchronous pytrends calls in a thread-pool executor
-        to keep the event loop responsive.  Retries with exponential
-        backoff on transient failures.
+        Retries with exponential backoff on transient failures.
         """
-        loop = asyncio.get_running_loop()
+        url = _RSS_URL.format(region=region)
         backoff = self._backoff_secs
 
         for attempt in range(1, self._retries + 1):
             try:
-                results = await loop.run_in_executor(None, self._fetch_sync, region, limit)
+                results = await self._fetch_rss(url, region, limit)
                 logger.info(
                     "google_trends_fetched",
                     region=region,
@@ -78,72 +97,76 @@ class GoogleTrendsProvider(TrendProvider):
 
         return []  # pragma: no cover
 
-    # ------------------------------------------------------------------
-    # Synchronous helpers (executed in thread-pool)
-    # ------------------------------------------------------------------
+    async def _fetch_rss(self, url: str, region: str, limit: int) -> list[TrendResult]:
+        """Fetch and parse the Google Trends RSS feed."""
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            response = await client.get(url)
+            response.raise_for_status()
 
-    def _fetch_sync(self, region: str, limit: int) -> list[TrendResult]:
-        """Synchronous Google Trends fetch (runs in executor)."""
-        client = self._build_client()
+        root = ET.fromstring(response.text)
+        ns = {"ht": _HT_NS}
+
         results: list[TrendResult] = []
+        for item in root.iter("item"):
+            if len(results) >= limit:
+                break
 
-        # Daily trending searches
-        results.extend(self._fetch_daily_trends(client, region, limit))
+            title_el = item.find("title")
+            if title_el is None or not title_el.text:
+                continue
+            topic = title_el.text.strip()
 
-        # Real-time trending searches (supplementary)
-        if len(results) < limit:
-            remaining = limit - len(results)
-            results.extend(self._fetch_realtime_trends(client, region, remaining))
+            # Parse traffic estimate
+            traffic_el = item.find("ht:approx_traffic", ns)
+            traffic_raw = (
+                traffic_el.text.strip() if traffic_el is not None and traffic_el.text else "0"
+            )
+            traffic = _parse_traffic(traffic_raw)
+            score = round(_traffic_to_score(traffic), 2)
 
-        return results[:limit]
+            # Parse publication date
+            pub_date_el = item.find("pubDate")
+            pub_date = (
+                pub_date_el.text.strip() if pub_date_el is not None and pub_date_el.text else None
+            )
 
-    def _fetch_daily_trends(self, client: TrendReq, region: str, limit: int) -> list[TrendResult]:
-        """Fetch daily trending searches."""
-        try:
-            df = client.trending_searches(pn=region)
-            trends: list[TrendResult] = []
-            for idx, row in df.head(limit).iterrows():
-                topic = str(row.iloc[0]) if hasattr(row, "iloc") else str(row[0])
-                # Score is rank-based: top result gets 100, linearly decreasing
-                score = max(0.0, 100.0 - (float(idx) * (100.0 / max(limit, 1))))
-                trends.append(
-                    TrendResult(
-                        topic=topic,
-                        score=round(score, 2),
-                        source="google_trends_daily",
-                        raw_data={"rank": int(idx), "region": region},
-                    )
+            # Collect news items
+            news_items: list[dict[str, str]] = []
+            for news in item.findall("ht:news_item", ns):
+                news_title_el = news.find("ht:news_item_title", ns)
+                news_url_el = news.find("ht:news_item_url", ns)
+                entry: dict[str, str] = {}
+                if news_title_el is not None and news_title_el.text:
+                    entry["title"] = news_title_el.text.strip()
+                if news_url_el is not None and news_url_el.text:
+                    entry["url"] = news_url_el.text.strip()
+                if entry:
+                    news_items.append(entry)
+
+            # Picture URL
+            picture_el = item.find("ht:picture", ns)
+            picture = (
+                picture_el.text.strip() if picture_el is not None and picture_el.text else None
+            )
+
+            raw_data: dict[str, Any] = {
+                "region": region,
+                "traffic": traffic_raw,
+            }
+            if pub_date:
+                raw_data["pub_date"] = pub_date
+            if news_items:
+                raw_data["news_items"] = news_items
+            if picture:
+                raw_data["picture"] = picture
+
+            results.append(
+                TrendResult(
+                    topic=topic,
+                    score=score,
+                    source="google_trends_daily",
+                    raw_data=raw_data,
                 )
-            return trends
-        except Exception:
-            logger.exception("google_daily_trends_error", region=region)
-            return []
+            )
 
-    def _fetch_realtime_trends(
-        self, client: TrendReq, region: str, limit: int
-    ) -> list[TrendResult]:
-        """Fetch real-time trending searches (best-effort)."""
-        try:
-            df = client.realtime_trending_searches(pn=region)
-            trends: list[TrendResult] = []
-            # realtime_trending_searches returns a DataFrame with 'title' column
-            title_col = "title" if "title" in df.columns else df.columns[0]
-            for idx, row in df.head(limit).iterrows():
-                topic = str(row[title_col])
-                score = max(0.0, 80.0 - (float(idx) * (80.0 / max(limit, 1))))
-                trends.append(
-                    TrendResult(
-                        topic=topic,
-                        score=round(score, 2),
-                        source="google_trends_realtime",
-                        raw_data={
-                            "rank": int(idx),
-                            "region": region,
-                            "type": "realtime",
-                        },
-                    )
-                )
-            return trends
-        except Exception:
-            logger.warning("google_realtime_trends_unavailable", region=region)
-            return []
+        return results

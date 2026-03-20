@@ -70,7 +70,7 @@ func New(cfg config.Config, hub *handlers.Hub) (chi.Router, error) {
 	// Aggregated status endpoint — checks all downstream services concurrently.
 	r.Group(func(statusGroup chi.Router) {
 		statusGroup.Use(middleware.Auth(cfg.JWTSecret, blacklist))
-		statusGroup.Get("/status", handlers.Status(services))
+		statusGroup.Get("/status", handlers.Status(services, cfg))
 	})
 
 	// System info and GPU telemetry endpoints (public — no auth needed for monitoring).

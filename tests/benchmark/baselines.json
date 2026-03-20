@@ -1,9 +1,0 @@
-{
-  "_comment": "Baseline metrics — populated after first benchmark run. CI can compare against these.",
-  "gateway_health_p95_ms": null,
-  "gateway_status_p95_ms": null,
-  "redis_pubsub_round_trip_ms": null,
-  "trends_query_p95_ms": null,
-  "content_query_p95_ms": null,
-  "pipeline_e2e_seconds": null
-}

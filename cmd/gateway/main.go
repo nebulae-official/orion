@@ -44,6 +44,10 @@ func main() {
 		}
 		rdb := redis.NewClient(opt)
 		ctx := context.Background()
+
+		// Start per-user notification relay
+		handlers.StartNotificationRelay(ctx, rdb, hub)
+
 		pubsub := rdb.PSubscribe(ctx, "orion.*")
 		defer pubsub.Close()
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 import {
   Sun,
   Moon,
@@ -161,19 +162,18 @@ export function SystemConfig(): React.ReactElement {
             <label className="mb-2 block text-sm font-medium text-text-secondary">Theme</label>
             <div className="flex gap-2">
               {THEME_OPTIONS.map((opt) => (
-                <button
+                <Button
                   key={opt.value}
+                  variant="outline"
                   onClick={() => updatePref("theme", opt.value)}
                   className={cn(
-                    "flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                    prefs.theme === opt.value
-                      ? "border-primary bg-primary-surface text-primary"
-                      : "border-border text-text-secondary hover:bg-surface-elevated hover:text-text"
+                    prefs.theme === opt.value &&
+                      "border-primary bg-primary-surface text-primary"
                   )}
                 >
                   {opt.icon}
                   {opt.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -202,13 +202,12 @@ export function SystemConfig(): React.ReactElement {
               <p className="text-sm font-medium text-text-secondary">Notifications</p>
               <p className="text-xs text-text-muted">Receive alerts for pipeline events and errors</p>
             </div>
-            <button
+            <Button
+              variant="outline"
               onClick={() => updatePref("notificationsEnabled", !prefs.notificationsEnabled)}
               className={cn(
-                "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
-                prefs.notificationsEnabled
-                  ? "border-success/30 bg-success-surface text-success-light"
-                  : "border-border text-text-muted hover:bg-surface-elevated"
+                prefs.notificationsEnabled &&
+                  "border-success/30 bg-success-surface text-success-light"
               )}
             >
               {prefs.notificationsEnabled ? (
@@ -222,7 +221,7 @@ export function SystemConfig(): React.ReactElement {
                   Disabled
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           {/* Default Page */}

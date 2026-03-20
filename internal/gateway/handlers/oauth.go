@@ -62,11 +62,12 @@ type oauthLinkRequest struct {
 
 // oauthLinkResponse is the response from the identity service after linking.
 type oauthLinkResponse struct {
-	UserID       string `json:"user_id"`
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Role         string `json:"role"`
-	RefreshToken string `json:"refresh_token"`
+	UserID          string `json:"user_id"`
+	Email           string `json:"email"`
+	Name            string `json:"name"`
+	Role            string `json:"role"`
+	RefreshToken    string `json:"refresh_token"`
+	NeedsOnboarding bool   `json:"needs_onboarding"`
 }
 
 // githubAccessTokenResponse is what GitHub returns when exchanging a code.
@@ -455,7 +456,12 @@ func (h *OAuthHandler) linkOAuthAccount(r *http.Request, linkReq oauthLinkReques
 
 // completeOAuthLogin generates a JWT and redirects the user with cookies set.
 func (h *OAuthHandler) completeOAuthLogin(w http.ResponseWriter, r *http.Request, user *oauthLinkResponse, redirectURL string) {
-	tokenStr, _, err := (&AuthHandler{cfg: h.cfg}).generateToken(user.UserID, user.Email, user.Name, user.Role)
+	var extra map[string]interface{}
+	if user.NeedsOnboarding {
+		extra = map[string]interface{}{"onboarding": true}
+	}
+
+	tokenStr, _, err := (&AuthHandler{cfg: h.cfg}).generateToken(user.UserID, user.Email, user.Name, user.Role, extra)
 	if err != nil {
 		slog.Error("oauth token generation failed", "error", err)
 		redirectWithError(w, r, redirectURL, "token generation failed")
@@ -484,6 +490,18 @@ func (h *OAuthHandler) completeOAuthLogin(w http.ResponseWriter, r *http.Request
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   7 * 24 * 3600, // 7 days
 	})
+
+	// Redirect new users to onboarding instead of the normal redirect URL.
+	if user.NeedsOnboarding {
+		parsed, err := url.Parse(redirectURL)
+		if err != nil {
+			parsed, _ = url.Parse(h.cfg.OAuthRedirectBase)
+		}
+		parsed.Path = "/onboarding"
+		parsed.RawQuery = ""
+		http.Redirect(w, r, parsed.String(), http.StatusTemporaryRedirect)
+		return
+	}
 
 	// Redirect to the originally requested URL.
 	parsed, err := url.Parse(redirectURL)

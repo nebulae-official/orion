@@ -1,4 +1,13 @@
-"""X (Twitter) trend verification provider using tweepy AsyncClient."""
+"""X (Twitter) trend verification provider using tweepy AsyncClient.
+
+NOTE: This provider uses ``search_recent_tweets`` which requires a Twitter API
+v2 **Basic** tier subscription ($100/month).  The Free tier only allows tweet
+creation/deletion and GET /2/users/me — it does NOT include search endpoints.
+
+If ``TWITTER_BEARER_TOKEN`` is unset or empty the provider returns an empty list
+so Scout continues to function using its other trend sources (RSS, Google
+Trends, etc.).
+"""
 
 from __future__ import annotations
 
@@ -196,7 +205,8 @@ class TwitterProvider(TrendProvider):
         volumes: dict[str, int] = {}
 
         try:
-            # Use search_recent_tweets to gauge volume
+            # Uses search_recent_tweets — requires Twitter API v2 Basic tier ($100/month).
+            # The Free tier does NOT include search endpoints.
             response = await client.search_recent_tweets(
                 query=f'"{topic}" -is:retweet lang:en',
                 max_results=100,

@@ -56,6 +56,10 @@ orion scout list-trends --format json
 orion scout list-trends --format plain
 ```
 
+**Table output example:**
+
+![Table output](../assets/cli/scout-list-trends.svg)
+
 ---
 
 ## :material-key: `auth` — Authentication
@@ -118,15 +122,6 @@ orion system status
 
 Trigger scans, query detected trends, and manage Scout service configuration.
 
-### `orion scout trigger`
-
-Trigger an immediate trend scan.
-
-```bash
-orion scout trigger
-orion scout trigger --format json
-```
-
 ### `orion scout list-trends`
 
 List trends detected by previous scans.
@@ -136,6 +131,23 @@ orion scout list-trends
 orion scout list-trends --format json
 ```
 
+![orion scout list-trends](../assets/cli/scout-list-trends.svg)
+
+JSON output:
+
+![orion scout list-trends --format json](../assets/cli/scout-list-trends-json.svg)
+
+### `orion scout trigger`
+
+Trigger an immediate trend scan.
+
+```bash
+orion scout trigger
+orion scout trigger --format json
+```
+
+![orion scout trigger](../assets/cli/scout-trigger.svg)
+
 ### `orion scout configure`
 
 Configure the active niche for trend scanning.
@@ -144,6 +156,8 @@ Configure the active niche for trend scanning.
 orion scout configure tech
 orion scout configure gaming --format json
 ```
+
+![orion scout configure](../assets/cli/scout-configure.svg)
 
 ---
 

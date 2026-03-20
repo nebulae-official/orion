@@ -21,17 +21,25 @@ def list_trends(
     """List detected trends."""
     client = get_client(token)
     data = asyncio.run(client.get("/api/v1/scout/trends"))
-    print_output(data, fmt=fmt, title="Trends")
+    items = data.get("items", data) if isinstance(data, dict) else data
+    print_output(items, fmt=fmt, title="Trends")
 
 
 @app.command()
 def trigger(
+    niche: Annotated[str, typer.Option(help="Niche to scan")] = "tech",
+    limit: Annotated[int, typer.Option(help="Max trends to return")] = 20,
     token: Annotated[str | None, typer.Option(help="JWT token")] = None,
     fmt: Annotated[OutputFormat, typer.Option("--format")] = OutputFormat.TABLE,
 ) -> None:
     """Trigger an immediate trend scan."""
     client = get_client(token)
-    data = asyncio.run(client.post("/api/v1/scout/scan"))
+    data = asyncio.run(
+        client.post(
+            "/api/v1/scout/trends/scan",
+            json={"niche": niche, "limit": limit, "region": "US"},
+        )
+    )
     print_output(data, fmt=fmt)
 
 
@@ -43,5 +51,5 @@ def configure(
 ) -> None:
     """Configure the active niche for trend scanning."""
     client = get_client(token)
-    data = asyncio.run(client.post("/api/v1/scout/config", json={"niche": niche}))
+    data = asyncio.run(client.get("/api/v1/scout/trends/config"))
     print_output(data, fmt=fmt)

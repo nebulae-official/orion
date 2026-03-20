@@ -21,14 +21,14 @@ Orion — Digital Twin Content Agency. Autonomous AI agents detect trends, gener
 Gateway (Go, :8000) → OAuth + JWT auth → reverse proxy → Python services (:8001-8007)
                     ↕ Redis pub/sub (inter-service events)
                     → Identity (:8007) for user/auth management
-Dashboard (Next.js, :3000) → Gateway API
+Dashboard (Next.js, :3001) → Gateway API
 CLI (Python/Typer) → Gateway API
 ```
 
 - `cmd/gateway/` — Go HTTP gateway, single entry point for all external requests. DB-backed multi-user auth with OAuth (GitHub/Google), JWT access tokens (15-min), opaque refresh tokens (30-day). Forwards `X-User-ID`, `X-User-Role`, `X-User-Email` headers to downstream services.
 - `cli/` — Python CLI (UV workspace member), shares models with orion-common
 - `services/{scout,director,media,editor,pulse,publisher}` — FastAPI microservices
-- `services/identity/` — FastAPI user management service (CRUD, OAuth linking, token management)
+- `services/identity/` — FastAPI user management service (CRUD, OAuth linking, token management, notifications)
 - `libs/orion-common/` — Shared Python library (models, event bus, health, config, middleware)
 - `dashboard/` — Next.js admin dashboard (App Router, Server Components, OAuth login, profile, admin users)
 - `deploy/` — Docker Compose files (main, dev, monitoring, e2e)
@@ -36,6 +36,8 @@ CLI (Python/Typer) → Gateway API
 - `tests/benchmark/` — pytest-benchmark + Locust load tests
 
 **Data flow:** Scout detects trends → Director orchestrates LangGraph pipeline → Media generates images → Editor assembles video (TTS + captions + stitching) → Publisher pushes to social platforms → Pulse tracks metrics. All inter-service communication via Redis pub/sub events; services never call each other directly over HTTP.
+
+**Notification flow:** Domain events (e.g. `orion.content.published`) → Identity service notification consumer → creates DB record + publishes to `orion.notification.created` → Gateway `notification_relay.go` → per-user WebSocket push to Dashboard. CLI polls via REST API. Six event types mapped: `trend.detected`, `content.published`, `content.rejected`, `media.failed`, `pipeline.stage_changed`, `content.created`.
 
 ## Commands
 
@@ -93,13 +95,14 @@ make py-format          # ruff format on all services
 
 ## Key Patterns
 
-- **Event-driven:** Services communicate via Redis pub/sub channels (e.g., `orion.media.generated`). Event bus is in `libs/orion-common/event_bus.py`.
+- **Event-driven:** Services communicate via Redis pub/sub channels (e.g., `orion.media.generated`). Event bus is in `libs/orion-common/event_bus.py`. The `orion.notification.created` channel carries real-time notification payloads from Identity to the Gateway WebSocket Hub.
 - **Strategy pattern:** Providers (LLM, image, video, TTS) are swappable LOCAL/CLOUD via factory. See `services/media/src/providers/factory.py`.
 - **LangGraph orchestration:** Director uses a StateGraph DAG with agents (Analyst, Critique, ScriptGenerator, VisualPrompter) and PostgreSQL checkpointing.
 - **Gateway proxy:** All service requests go through the Go gateway which handles OAuth (GitHub/Google), JWT auth (15-min access tokens), rate limiting, circuit breakers, and reverse proxies to the appropriate service. The gateway forwards `X-User-ID`, `X-User-Role`, and `X-User-Email` headers to downstream services after JWT validation.
 - **User context:** Services use `get_current_user()` dependency to extract the authenticated user from gateway-forwarded headers. All user-scoped queries filter by `user_id` for per-user data isolation.
 - **Shared client factory:** CLI commands use `get_client()` from `cli/src/orion_cli/commands/__init__.py`, not per-module singletons.
 - **DB-dependent tests:** Tests needing PostgreSQL use `@requires_db` skip marker. They run when `DATABASE_URL` is set.
+- **Notification system:** Notifications are a module inside Identity (not a separate service). The notification consumer runs as a background `asyncio.Task` in the Identity lifespan, subscribing to domain events and creating per-user notifications. User preferences are stored in `user_settings.settings` JSON. Gateway relays real-time notifications via per-user WebSocket connections.
 
 ## Agent Teams
 

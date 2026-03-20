@@ -19,14 +19,14 @@ docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.monitoring.
 This starts all Orion services plus:
 
 - **Prometheus** at `http://localhost:9090`
-- **Grafana** at `http://localhost:3001` (default login: `admin` / `admin`)
+- **Grafana** at `http://localhost:3003` (default login: `admin` / `admin`)
 
 ---
 
 ## :lucide-layout-dashboard: Grafana Dashboards
 
 !!! info "Default Dashboards"
-    Orion ships with **three pre-built Grafana dashboards** that are auto-provisioned on startup from `deploy/grafana/provisioning/dashboards/json/`. No manual configuration is required -- just start the monitoring stack and the dashboards are ready to use at `http://localhost:3001`.
+    Orion ships with **three pre-built Grafana dashboards** that are auto-provisioned on startup from `deploy/grafana/provisioning/dashboards/json/`. No manual configuration is required -- just start the monitoring stack and the dashboards are ready to use at `http://localhost:3003`.
 
 Three pre-built dashboards are auto-provisioned from `deploy/grafana/provisioning/dashboards/json/`:
 
@@ -111,14 +111,11 @@ increase(trends_detected_total[24h])
 
 ## :lucide-monitor: Dashboard System Health Page
 
-The Orion Dashboard includes a built-in **System Health** page at `http://localhost:3001/system` (dev) or `http://localhost:3000/system` (prod):
+The Orion Dashboard includes a built-in **System** page at `http://localhost:3001/system`:
 
-![System Health page](../assets/screenshots/system-health.png)
-
-- **System Overview** -- Host info (hostname, OS, architecture, CPU cores, Go version, uptime) and resource usage bars (CPU per-core, memory, disk)
-- **GPU Status** -- Real-time GPU gauge with VRAM usage, utilization %, temperature, power draw, clock speeds, and driver info
-- **Service Status** -- Health status of all 7 microservices (gateway, scout, director, media, editor, pulse, publisher) with queue depths
-- **Infrastructure** -- Connection status for PostgreSQL, Redis, Milvus, Grafana, Prometheus, and pgAdmin
+- **Service status cards** -- health status of each microservice (gateway, scout, director, media, editor, pulse)
+- **GPU utilization gauge** -- real-time GPU usage when running with the GPU profile
+- **Queue depth** -- number of content items in each pipeline stage
 
 The System page polls the gateway `/api/v1/system/health` endpoint and updates in real time.
 

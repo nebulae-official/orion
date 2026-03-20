@@ -27,7 +27,7 @@ graph TB
         ED["Editor :8004"]
         PL["Pulse :8005"]
         PB["Publisher :8006"]
-        DB["Dashboard :3000"]
+        DB["Dashboard :3001"]
 
         PG[("PostgreSQL :5432")]
         RD[("Redis :6379")]

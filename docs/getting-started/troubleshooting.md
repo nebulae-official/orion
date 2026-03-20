@@ -54,8 +54,7 @@ Default port assignments:
 | Editor     | 8004         |
 | Pulse      | 8005         |
 | Publisher  | 8006         |
-| Identity   | 8007         |
-| Dashboard  | 3000 (prod) / 3001 (dev) |
+| Dashboard  | 3001         |
 | PostgreSQL | 5432         |
 | Redis      | 6379         |
 | Milvus     | 19530, 9091  |
@@ -120,7 +119,6 @@ Verify service URLs in `.env` match your runtime environment:
     EDITOR_URL=http://editor:8004
     PULSE_URL=http://pulse:8005
     PUBLISHER_URL=http://publisher:8006
-    IDENTITY_URL=http://identity:8007
     ```
 
 === "Local development"
@@ -134,7 +132,6 @@ Verify service URLs in `.env` match your runtime environment:
     EDITOR_URL=http://localhost:8004
     PULSE_URL=http://localhost:8005
     PUBLISHER_URL=http://localhost:8006
-    IDENTITY_URL=http://localhost:8007
     ```
 
 ### Redis connection refused
@@ -182,7 +179,7 @@ curl http://localhost:9091/metrics | head -20
 
 ### JWT token expired
 
-Access tokens expire after 15 minutes. Refresh tokens last 30 days. Re-authenticate:
+Tokens expire after 24 hours by default. Re-authenticate:
 
 === "CLI"
 
@@ -242,16 +239,17 @@ uv pip install -e ".[dev]"
 
 ```bash
 # Check current migration state
-cd migrations && uv run alembic current
+cd services/scout
+alembic current
 
 # Run all pending migrations
-cd migrations && uv run alembic upgrade head
+alembic upgrade head
 
 # View migration history
-cd migrations && uv run alembic history --verbose
+alembic history --verbose
 
 # Downgrade one step (if needed)
-cd migrations && uv run alembic downgrade -1
+alembic downgrade -1
 ```
 
 ### Type checking or linting failures
@@ -260,13 +258,13 @@ cd migrations && uv run alembic downgrade -1
 cd services/scout
 
 # Run type checker
-uv run mypy src/
+mypy src/
 
 # Run linter with auto-fix
-uv run ruff check src/ --fix
+ruff check src/ --fix
 
 # Run formatter
-uv run ruff format src/ tests/
+black src/ tests/
 ```
 
 ### Service won't start locally

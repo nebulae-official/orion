@@ -77,6 +77,53 @@ class TrendRepository:
 
         return trends, total
 
+    async def get_filtered(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        source: str | None = None,
+        date_from: datetime | None = None,
+        status: str | None = None,
+    ) -> tuple[list[Trend], int]:
+        """Fetch trends with optional source, date, and status filters, paginated."""
+        base_query = select(Trend)
+
+        if source:
+            sources = [s.strip() for s in source.split(",")]
+            base_query = base_query.where(Trend.source.in_(sources))
+
+        if date_from:
+            base_query = base_query.where(Trend.detected_at >= date_from)
+
+        if status:
+            statuses = [s.strip() for s in status.split(",")]
+            valid_statuses = [TrendStatus(s) for s in statuses if s in TrendStatus.__members__]
+            if valid_statuses:
+                base_query = base_query.where(Trend.status.in_(valid_statuses))
+
+        # Total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_result = await self._session.execute(count_query)
+        total = total_result.scalar_one()
+
+        # Paginated results
+        offset = (page - 1) * page_size
+        query = (
+            base_query.order_by(Trend.score.desc(), Trend.detected_at.desc())
+            .offset(offset)
+            .limit(page_size)
+        )
+        result = await self._session.execute(query)
+        trends = list(result.scalars().all())
+
+        return trends, total
+
+    async def get_distinct_sources(self) -> list[str]:
+        """Get all distinct source values from the trends table."""
+        query = select(Trend.source).distinct().order_by(Trend.source)
+        result = await self._session.execute(query)
+        return [row[0] for row in result.all()]
+
     async def exists_by_topic(self, topic: str, hours: int = 24) -> bool:
         """Check if a trend with the same topic was detected recently.
 
@@ -103,8 +150,10 @@ class TrendRepository:
             return None
 
         trend.status = status
-        if status == TrendStatus.expired:
+        if status in (TrendStatus.expired, TrendStatus.discarded):
             trend.expired_at = datetime.now(UTC)
+        elif status == TrendStatus.active:
+            trend.expired_at = None
 
         await self._session.flush()
         await self._session.refresh(trend)

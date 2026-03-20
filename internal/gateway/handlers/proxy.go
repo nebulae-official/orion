@@ -12,8 +12,9 @@ import (
 )
 
 // NewServiceProxy creates a reverse proxy handler that forwards requests to
-// the given backend service URL. It strips the matched route prefix so the
-// backend receives clean paths (e.g., /api/v1/scout/trends -> /trends).
+// the given backend service URL. It rewrites the path to replace the service
+// name segment while preserving the /api/v1/ prefix that backends expect
+// (e.g., /api/v1/scout/trends -> /api/v1/trends).
 func NewServiceProxy(target string, internalToken string) (http.Handler, error) {
 	targetURL, err := url.Parse(target)
 	if err != nil {
@@ -56,14 +57,14 @@ func NewServiceProxy(target string, internalToken string) (http.Handler, error) 
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Strip the /api/v1/{service} prefix from the path before proxying.
-		// Chi sets the route context so we can use the wildcard match.
-		// The path after the service prefix becomes the backend path.
+		// Rewrite /api/v1/{service}/{rest...} → /api/v1/{rest...}
+		// This preserves the /api/v1/ prefix that backend services expect,
+		// only removing the service name segment.
 		parts := strings.SplitN(r.URL.Path, "/", 5) // ["", "api", "v1", "service", "rest..."]
 		if len(parts) >= 5 {
-			r.URL.Path = "/" + parts[4]
+			r.URL.Path = "/api/v1/" + parts[4]
 		} else {
-			r.URL.Path = "/"
+			r.URL.Path = "/api/v1/"
 		}
 		r.URL.RawPath = ""
 

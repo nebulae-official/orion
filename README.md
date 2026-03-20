@@ -1,16 +1,12 @@
 <div align="center">
 
-<img src="docs/assets/orion-logo.svg" alt="Orion Logo" width="80" />
+# ✦ Orion
 
-# Orion
-
-**Autonomous AI Content Agency — from trend to publish, zero human bottleneck.**
+**Digital Twin Content Agency — from trend to publish, fully autonomous.**
 
 [![Go](https://img.shields.io/badge/Go-1.24-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15.2-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Redis](https://img.shields.io/badge/Redis-7.4-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
@@ -19,17 +15,11 @@
 
 <br />
 
-Orion is a **Digital Twin Content Agency** — a swarm of specialized AI microservices that autonomously detect trends, write scripts, generate media, assemble videos, and publish across social platforms. A Go gateway orchestrates everything while a dark-themed Next.js dashboard gives operators full visibility and control.
+A swarm of specialized AI microservices that autonomously detect trends, write scripts, generate media, assemble videos, and publish across social platforms. One Go gateway orchestrates everything. A glassmorphism Next.js dashboard gives operators full visibility and control.
 
 <br />
 
-[Getting Started](#-getting-started) ·
-[Architecture](#-architecture) ·
-[Services](#-services) ·
-[Dashboard](#-dashboard) ·
-[Development](#-development) ·
-[Deployment](#-deployment) ·
-[Tech Stack](#-tech-stack)
+[Quick Start](#-quick-start) · [Architecture](#-architecture) · [Screenshots](#-screenshots) · [Services](#-services) · [CLI](#-cli) · [Development](#-development) · [Docs](#-documentation)
 
 </div>
 
@@ -39,71 +29,47 @@ Orion is a **Digital Twin Content Agency** — a swarm of specialized AI microse
 
 <br />
 
-## How It Works
+## ✦ Overview
 
-```mermaid
-graph LR
-    subgraph Detect
-        Scout["🔭 Scout :8001<br/><sub>Google Trends · RSS · Twitter</sub>"]
-    end
-    subgraph Create
-        Director["🎬 Director :8002<br/><sub>LangGraph · Agent DAGs · Vector Memory</sub>"]
-    end
-    subgraph Produce
-        Media["🎨 Media :8003<br/><sub>ComfyUI · Fal.ai · Batch Gen</sub>"]
-    end
-    subgraph Distribute
-        Editor["✂️ Editor :8004<br/><sub>Whisper STT · TTS · Video Stitch</sub>"]
-        Publisher["📡 Publisher :8006<br/><sub>Twitter · YouTube · TikTok · LinkedIn</sub>"]
-    end
+Orion is a **Digital Twin Content Agency** — an end-to-end autonomous content pipeline powered by AI agents. Point it at a niche, and it will:
 
-    Scout -->|"TREND_DETECTED"| Director
-    Director -->|"CONTENT_CREATED"| Media
-    Media -->|"MEDIA_GENERATED"| Editor
-    Editor -->|"CONTENT_READY"| Publisher
+1. **Detect** trending topics across Google Trends, Twitter/X, RSS, and news APIs
+2. **Script** video content using LangGraph agent workflows with vector memory
+3. **Generate** images via ComfyUI (local) or Fal.ai (cloud) with batch concurrency
+4. **Assemble** videos with TTS narration, auto-captions, and subtitle burning
+5. **Publish** to Twitter/X, YouTube, TikTok, and LinkedIn with safety checks
 
-    Pulse["📊 Pulse :8005<br/><sub>Cost tracking · Latency · Analytics</sub>"]
-    Director -.->|events| Pulse
-    Media -.->|events| Pulse
-    Editor -.->|events| Pulse
-    Publisher -.->|events| Pulse
-
-    style Scout fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
-    style Director fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
-    style Media fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
-    style Editor fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
-    style Publisher fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
-    style Pulse fill:#1a1a2e,stroke:#6366f1,color:#e2e8f0,stroke-dasharray: 5 5
-```
-
-> Every arrow is a **Redis pub/sub event**. Services are fully decoupled — add, remove, or scale any service independently.
+Every stage is a decoupled microservice communicating over Redis pub/sub events. Add, remove, or scale any service independently.
 
 <br />
 
-## Architecture
+## ✦ Architecture
 
 ```mermaid
 graph TB
-    Dashboard["🖥️ <b>Next.js Dashboard</b> :3000<br/><sub>Orion Nebula dark theme · React 19 · Tailwind 4<br/>Queue · Trends · Analytics · Generation · Health · Settings</sub>"]
+    Dashboard["🖥️ Dashboard :3000\nNext.js 15 · React 19 · Tailwind 4"]
+    CLI["⌨️ CLI\nPython · Typer · Rich"]
 
-    Gateway["⚡ <b>Go Gateway</b> :8000<br/><sub>Chi 5.x · JWT Auth · Rate Limiting · Prometheus /metrics<br/>Reverse Proxy · WebSocket Hub (Redis → browser)</sub>"]
+    Gateway["⚡ Go Gateway :8000\nChi 5.x · JWT + OAuth · Rate Limiting\nReverse Proxy · WebSocket Hub · Prometheus"]
 
-    Dashboard -->|"HTTPS / WebSocket"| Gateway
+    Dashboard -->|"HTTPS"| Gateway
+    CLI -->|"HTTPS"| Gateway
 
-    Gateway --> Scout["🔭 Scout<br/>:8001"]
-    Gateway --> Director["🎬 Director<br/>:8002"]
-    Gateway --> Media["🎨 Media<br/>:8003"]
-    Gateway --> Editor["✂️ Editor<br/>:8004"]
-    Gateway --> Pulse["📊 Pulse<br/>:8005"]
-    Gateway --> Publisher["📡 Publisher<br/>:8006"]
+    Gateway --> Identity["🔐 Identity\n:8007"]
+    Gateway --> Scout["🔭 Scout\n:8001"]
+    Gateway --> Director["🎬 Director\n:8002"]
+    Gateway --> Media["🎨 Media\n:8003"]
+    Gateway --> Editor["✂️ Editor\n:8004"]
+    Gateway --> Pulse["📊 Pulse\n:8005"]
+    Gateway --> Publisher["📡 Publisher\n:8006"]
 
     subgraph "Event Bus"
-        Redis["🔴 Redis :6379<br/><sub>Pub/Sub · Cache · Rate Limits</sub>"]
+        Redis["🔴 Redis :6379\nPub/Sub · Cache · Rate Limits"]
     end
 
     subgraph "Data Stores"
-        Postgres["🐘 PostgreSQL :5432<br/><sub>State · Models · History</sub>"]
-        Milvus["🧠 Milvus :19530<br/><sub>Vector Search · Embeddings</sub>"]
+        Postgres["🐘 PostgreSQL :5432\nState · Users · History"]
+        Milvus["🧠 Milvus :19530\nVector Search · Embeddings"]
     end
 
     Scout <-..-> Redis
@@ -112,13 +78,17 @@ graph TB
     Editor <-..-> Redis
     Pulse <-..-> Redis
     Publisher <-..-> Redis
+    Identity <-..-> Redis
 
     Director --> Postgres
     Director --> Milvus
+    Identity --> Postgres
     Pulse --> Postgres
 
     style Dashboard fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style CLI fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
     style Gateway fill:#0d1117,stroke:#00ADD8,color:#e2e8f0
+    style Identity fill:#1a1a2e,stroke:#a78bfa,color:#e2e8f0
     style Scout fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
     style Director fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
     style Media fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
@@ -130,286 +100,246 @@ graph TB
     style Milvus fill:#1a1a2e,stroke:#00b4d8,color:#e2e8f0
 ```
 
-<br />
+### Pipeline Flow
 
-<table>
-<tr>
-<td width="50%">
-
-### Monorepo Structure
-
-```
-orion/
-├── cmd/
-│   └── gateway/          # Go HTTP gateway
-├── internal/
-│   └── gateway/          # Handlers, middleware, proxy
-├── pkg/                  # Shared Go packages
-├── cli/                  # Python/Typer CLI tool
-├── services/
-│   ├── scout/            # Trend detection
-│   ├── director/         # Pipeline orchestration
-│   ├── media/            # Image generation
-│   ├── editor/           # Video assembly + TTS
-│   ├── pulse/            # Analytics engine
-│   └── publisher/        # Social publishing
-├── libs/
-│   └── orion-common/     # Shared Python library
-├── dashboard/            # Next.js admin UI
-├── deploy/               # Docker Compose + configs
-├── migrations/           # Database migrations
-├── docs/                 # Documentation site
-└── tests/                # E2E, benchmark, integration tests
-```
-
-</td>
-<td width="50%">
-
-### Design Principles
-
-**Event-Driven** — Services communicate exclusively through Redis pub/sub events (`orion.*` channels). No direct HTTP calls between services.
-
-**AI-Native, No Vendor Lock-in** — Local-first with Ollama (LLM) and ComfyUI (images). Strategy pattern allows swapping to cloud providers without code changes.
-
-**Single Entry Point** — The Go gateway is the only externally-exposed service. It handles auth, rate limiting, proxying, WebSocket broadcast, and metrics.
-
-**Repository Pattern** — All data access goes through repository interfaces. Routes call services, services call repositories.
-
-**Observable** — Prometheus metrics, structured logging (slog/structlog), health checks on every service, real-time WebSocket dashboard updates.
-
-</td>
-</tr>
-</table>
-
-<br />
-
-## Services
-
-<table>
-<tr>
-<th width="15%">Service</th>
-<th width="8%">Port</th>
-<th width="8%">Lang</th>
-<th width="69%">Description</th>
-</tr>
-
-<tr>
-<td><strong>Gateway</strong></td>
-<td><code>8000</code></td>
-<td>Go</td>
-<td>Central HTTP gateway with Chi 5.x router, JWT authentication, per-service rate limiting (Redis-backed), reverse proxy to all downstream services, WebSocket hub broadcasting Redis events to browser clients, and Prometheus metrics export.</td>
-</tr>
-
-<tr>
-<td><strong>Scout</strong></td>
-<td><code>8001</code></td>
-<td>Python</td>
-<td>Trend detection engine. Polls Google Trends, RSS feeds, Twitter/X, and news APIs on a schedule (APScheduler). Scores topics by relevance, deduplicates with fuzzy matching, applies niche-specific filtering, and emits <code>TREND_DETECTED</code> events.</td>
-</tr>
-
-<tr>
-<td><strong>Director</strong></td>
-<td><code>8002</code></td>
-<td>Python</td>
-<td>Pipeline orchestrator powered by LangGraph. Spawns AI agent workflows — AnalystAgent (content briefs), ScriptGenerator (video scripts with vector memory), CritiqueAgent (quality review), VisualPrompter (image prompts). Persists execution state in PostgreSQL.</td>
-</tr>
-
-<tr>
-<td><strong>Media</strong></td>
-<td><code>8003</code></td>
-<td>Python</td>
-<td>Image generation via ComfyUI WebSocket or Fal.ai cloud fallback. Batch generation with concurrency control (max 3 parallel). Stores asset metadata and file paths, emits <code>MEDIA_GENERATED</code> / <code>MEDIA_FAILED</code> events.</td>
-</tr>
-
-<tr>
-<td><strong>Editor</strong></td>
-<td><code>8004</code></td>
-<td>Python</td>
-<td>Video assembly pipeline. Text-to-speech via configurable providers, automatic caption generation (Faster-Whisper STT), image-to-video stitching, subtitle burning, thumbnail extraction, and codec/bitrate validation.</td>
-</tr>
-
-<tr>
-<td><strong>Pulse</strong></td>
-<td><code>8005</code></td>
-<td>Python</td>
-<td>Analytics engine subscribing to all event channels. Tracks per-stage latency, success rates, failure modes, GPU/API costs. Scheduled cleanup of records older than 90 days. Powers the dashboard analytics charts.</td>
-</tr>
-
-<tr>
-<td><strong>Publisher</strong></td>
-<td><code>8006</code></td>
-<td>Python</td>
-<td>Social media publishing. Manages connected accounts (Twitter/X, YouTube, TikTok, LinkedIn) with encrypted credential storage. Content safety checks, platform-native API posting, and publish history tracking.</td>
-</tr>
-
-<tr>
-<td><strong>Dashboard</strong></td>
-<td><code>3000</code></td>
-<td>TypeScript</td>
-<td>Next.js 15 admin UI with App Router and React 19. Dark "Orion Nebula" design system. Content queue, trend explorer, generation progress, service health, GPU monitoring, provider settings, video preview, and analytics charts (Recharts).</td>
-</tr>
-</table>
-
-<br />
-
-### Event Flow
-
-Services communicate through Redis pub/sub channels. Each event triggers the next stage in the pipeline:
+Every arrow below is a **Redis pub/sub event** — services never call each other directly over HTTP.
 
 ```mermaid
 graph LR
+    Scout["🔭 Scout"]
+    Director["🎬 Director"]
+    Media["🎨 Media"]
+    Editor["✂️ Editor"]
+    Publisher["📡 Publisher"]
+    Pulse["📊 Pulse"]
+
     Scout -->|"orion.trend.detected"| Director
     Director -->|"orion.content.created"| Media
-    Director -->|"orion.content.created"| Pulse
     Media -->|"orion.media.generated"| Editor
-    Media -->|"orion.media.generated"| Pulse
-    Media -->|"orion.media.failed"| Pulse
-    Director -->|"orion.content.updated"| Pulse
-    Dashboard -->|"orion.content.rejected"| Director
+    Editor -->|"orion.content.ready"| Publisher
     Publisher -->|"orion.content.published"| Pulse
-    All["All Services"] -->|"orion.pipeline.stage_changed"| Pulse
 
-    style Pulse fill:#1a1a2e,stroke:#6366f1,color:#e2e8f0
-    style Dashboard fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    Director -.->|events| Pulse
+    Media -.->|events| Pulse
+    Editor -.->|events| Pulse
+
+    style Scout fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style Director fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style Media fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style Editor fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style Publisher fill:#1a1a2e,stroke:#7c3aed,color:#e2e8f0
+    style Pulse fill:#1a1a2e,stroke:#6366f1,color:#e2e8f0,stroke-dasharray: 5 5
 ```
 
 <br />
 
-## Dashboard
+## ✦ Screenshots
 
 <table>
 <tr>
-<td>
-
-The operator dashboard provides real-time visibility into the entire content pipeline:
-
-- **Content Queue** — Browse, filter, approve, reject, and publish generated content
-- **Trends Explorer** — View detected trends with scoring and source attribution
-- **Analytics** — Pipeline funnel, cost breakdown by provider, error trends (Recharts)
-- **Generation Progress** — Real-time stage tracking via WebSocket
-- **System Health** — Service status with auto-refresh, GPU utilization gauge
-- **Settings** — Configure AI providers (LLM, Image, Video, TTS) per-service
-- **Video Preview** — Built-in player with playback controls and script overlay
-
-Built with the **Orion Nebula** design system — a space-inspired dark theme using Tailwind CSS v4 `@theme` directive with semantic color tokens (`bg-surface`, `text-text`, `border-border`, status colors with `-surface` and `-light` variants).
-
+<td width="50%">
+<strong>📊 Dashboard Home</strong><br/>
+<img src="docs/assets/screenshots/readme-dashboard.png" alt="Dashboard" />
+</td>
+<td width="50%">
+<strong>🔭 Trend Detection</strong><br/>
+<img src="docs/assets/screenshots/readme-trends.png" alt="Trends" />
+</td>
+</tr>
+<tr>
+<td width="50%">
+<strong>🎬 Generation Pipeline</strong><br/>
+<img src="docs/assets/screenshots/readme-generation.png" alt="Generation Pipeline" />
+</td>
+<td width="50%">
+<strong>📈 Analytics & Cost Tracking</strong><br/>
+<img src="docs/assets/screenshots/readme-analytics.png" alt="Analytics" />
 </td>
 </tr>
 </table>
 
 <br />
 
-## Getting Started
+## ✦ Quick Start
 
 ### Prerequisites
 
-| Tool                                               | Version | Purpose                |
-| -------------------------------------------------- | ------- | ---------------------- |
-| [Go](https://go.dev/dl/)                           | 1.24+   | Gateway                |
-| [Python](https://python.org)                       | 3.13+   | AI microservices + CLI |
-| [uv](https://docs.astral.sh/uv/)                   | latest  | Python package manager |
-| [Node.js](https://nodejs.org)                      | 22 LTS  | Dashboard              |
-| [Docker](https://docker.com)                       | latest  | Infrastructure         |
-| [Docker Compose](https://docs.docker.com/compose/) | v2+     | Service orchestration  |
+| Tool | Version | Purpose |
+|------|---------|---------|
+| [Docker](https://docker.com) + [Compose](https://docs.docker.com/compose/) | v2+ | Run the full stack |
+| [Go](https://go.dev/dl/) | 1.24+ | Gateway (for local dev) |
+| [Python](https://python.org) + [UV](https://docs.astral.sh/uv/) | 3.13+ | Services & CLI (for local dev) |
+| [Node.js](https://nodejs.org) | 22 LTS | Dashboard (for local dev) |
 
-### Quick Start
+### One-Command Start
 
 ```bash
-# 1. Clone the repository
+# Clone & start
 git clone https://github.com/orion-rigel/orion.git
 cd orion
-
-# 2. Copy environment config
 cp .env.example .env
 
-# 3. Run the full stack with Docker
+# Launch everything
 make up
 
-# 4. Open the dashboard
-open http://localhost:3000
+# Open the dashboard
+open http://localhost:3001
 ```
 
-### With GPU Support (Ollama + ComfyUI)
+### With GPU Support
 
 ```bash
-# Start with local AI models (requires NVIDIA GPU)
+# Includes Ollama (LLM) and ComfyUI (image generation) — requires NVIDIA GPU
 make up-full
 ```
 
-### Local Development (no Docker)
+### With Monitoring
 
 ```bash
-# Install all dependencies
-make setup
-
-# Terminal 1 — Start infrastructure
-docker compose -f deploy/docker-compose.yml up postgres redis milvus
-
-# Terminal 2 — Run the gateway
-make run
-
-# Terminal 3 — Run a Python service
-cd services/scout
-uv run uvicorn src.main:app --reload --port 8001
-
-# Terminal 4 — Run the dashboard
-cd dashboard
-npm install && npm run dev
-
-# Terminal 5 — Use the CLI
-cd cli && uv run orion --help
+# Adds Prometheus (:9090), Alertmanager (:9093), Grafana (:3003)
+make up-monitoring
 ```
 
 <br />
 
-## Development
+## ✦ Services
+
+| Service | Port | Language | Description |
+|---------|------|----------|-------------|
+| **Gateway** | `8000` | Go | Central HTTP gateway — Chi 5.x router, JWT + OAuth authentication (GitHub/Google), per-service rate limiting, reverse proxy, WebSocket hub, Prometheus `/metrics` |
+| **Identity** | `8007` | Python | User management — registration, OAuth linking, profile CRUD, token management, RBAC |
+| **Scout** | `8001` | Python | Trend detection — Google Trends, RSS, Twitter/X, news APIs. Scores and deduplicates topics, emits `TREND_DETECTED` events |
+| **Director** | `8002` | Python | Pipeline orchestrator — LangGraph agent DAGs (Analyst, ScriptGenerator, Critique, VisualPrompter) with PostgreSQL checkpointing and vector memory |
+| **Media** | `8003` | Python | Image generation — ComfyUI (local) or Fal.ai (cloud) with batch concurrency control and asset management |
+| **Editor** | `8004` | Python | Video assembly — TTS narration, Whisper STT captions, image-to-video stitching, subtitle burning, thumbnail extraction |
+| **Pulse** | `8005` | Python | Analytics engine — per-stage latency, success rates, GPU/API cost tracking, 90-day retention with auto-cleanup |
+| **Publisher** | `8006` | Python | Social publishing — Twitter/X, YouTube, TikTok, LinkedIn with encrypted credentials, content safety checks, and publish history |
+| **Dashboard** | `3000` | TypeScript | Next.js 15 operator UI — content queue, trends explorer, generation progress, system health, provider settings, video preview, analytics |
+
+<br />
+
+## ✦ CLI
+
+Orion ships with a full-featured CLI built on Typer and Rich.
+
+```bash
+# Install the CLI
+cd cli && uv sync
+
+# Authenticate
+uv run orion auth login
+
+# Scout commands — manage trend detection
+uv run orion scout list-trends          # View detected trends
+uv run orion scout trigger              # Trigger a manual scan
+uv run orion scout configure            # Configure sources
+
+# System health
+uv run orion system health              # Check all service status
+uv run orion system info                # Show system information
+
+# Content management
+uv run orion content list               # List generated content
+uv run orion pipeline status            # View pipeline status
+```
+
+<br />
+
+## ✦ Development
+
+### Project Structure
+
+```
+orion/
+├── cmd/gateway/              # Go gateway entrypoint
+├── internal/gateway/         # Handlers, middleware, proxy, router
+├── pkg/                      # Shared Go packages
+├── cli/                      # Python CLI (Typer + Rich)
+├── services/
+│   ├── identity/             # User management & auth
+│   ├── scout/                # Trend detection
+│   ├── director/             # Pipeline orchestration (LangGraph)
+│   ├── media/                # Image generation
+│   ├── editor/               # Video assembly + TTS
+│   ├── pulse/                # Analytics engine
+│   └── publisher/            # Social media publishing
+├── libs/orion-common/        # Shared Python library (models, event bus, config)
+├── dashboard/                # Next.js admin dashboard
+├── deploy/                   # Docker Compose files & configs
+├── migrations/               # Alembic database migrations
+├── docs/                     # Documentation (Zensical)
+└── tests/                    # E2E, benchmark, integration tests
+```
+
+### Local Development (No Docker)
+
+```bash
+# 1. Install all dependencies
+make setup
+
+# 2. Start infrastructure only
+docker compose -f deploy/docker-compose.yml up postgres redis milvus -d
+
+# 3. Run the gateway
+make run
+
+# 4. Run a Python service (e.g., Scout)
+cd services/scout && uv run uvicorn src.main:app --reload --port 8001
+
+# 5. Run the dashboard
+cd dashboard && npm install && npm run dev
+
+# 6. Use the CLI
+cd cli && uv run orion --help
+```
+
+### Build, Test, Lint
 
 <table>
 <tr>
-<th width="25%">Go (Gateway)</th>
-<th width="25%">Python (Services)</th>
-<th width="25%">Python (CLI)</th>
-<th width="25%">TypeScript (Dashboard)</th>
+<th>Go (Gateway)</th>
+<th>Python (Services)</th>
+<th>CLI</th>
+<th>Dashboard</th>
 </tr>
 <tr>
 <td>
 
 ```bash
-make build       # Compile binary
-make run         # Run gateway
-make test        # Run tests
-make lint        # golangci-lint
-make lint-fix    # Auto-fix
+make build
+make run
+make test
+make lint
 ```
 
 </td>
 <td>
 
 ```bash
-make py-test      # All service tests
-make py-lint      # Ruff linting
-make py-typecheck # mypy strict
-make py-format    # Black formatting
+make py-test
+make py-lint
+make py-typecheck
+make py-format
 ```
 
 </td>
 <td>
 
 ```bash
-make cli-dev     # Run CLI
-make cli-test    # Run CLI tests
-make cli-lint    # Ruff + mypy
-make cli-build   # Build wheel
+make cli-dev
+make cli-test
+make cli-lint
+make cli-build
 ```
 
 </td>
 <td>
 
 ```bash
-make dash-dev    # Dev server
-make dash-build  # Production build
-make dash-test   # Run tests
-make dash-lint   # ESLint
+make dash-dev
+make dash-build
+make dash-test
+make dash-lint
 ```
 
 </td>
@@ -419,176 +349,70 @@ make dash-lint   # ESLint
 ### Run Everything
 
 ```bash
-make check       # All linters + type checkers (Go, Python, CLI, TypeScript)
-make test-all    # All tests across all languages (Go + Python + CLI + Dashboard)
+make check       # All linters + type checkers across all languages
+make test-all    # All tests (Go + Python + CLI + Dashboard)
 make test-e2e    # End-to-end tests against Docker stack
 make bench       # Performance benchmarks (pytest-benchmark)
-make load-test   # Locust load testing (opens web UI at :8089)
+make load-test   # Locust load testing (web UI at :8089)
 ```
-
-### Code Quality
-
-Pre-commit hooks enforce quality gates on every commit:
-
-- **Go** — `golangci-lint` (vet, staticcheck, errcheck, unused)
-- **Python** — `ruff` (linting + import sort), `mypy` (strict type checking)
-- **TypeScript** — ESLint with strict TypeScript rules
 
 <br />
 
-## Deployment
+## ✦ Design Principles
+
+| Principle | Implementation |
+|-----------|---------------|
+| **Event-Driven** | Services communicate exclusively through Redis pub/sub (`orion.*` channels). No direct HTTP between services. |
+| **AI-Native, No Vendor Lock-in** | Local-first with Ollama (LLM) and ComfyUI (images). Strategy pattern swaps to cloud providers without code changes. |
+| **Single Entry Point** | The Go gateway is the only externally-exposed service — handles auth, rate limiting, proxying, WebSocket broadcast, and metrics. |
+| **Repository Pattern** | All data access goes through repository interfaces. Routes call services, services call repositories. |
+| **Observable** | Prometheus metrics, structured logging (slog/structlog), health checks on every service, Grafana dashboards. |
+| **Multi-Tenant** | Per-user data isolation via `X-User-ID` headers forwarded by the gateway after JWT validation. |
+
+<br />
+
+## ✦ Infrastructure
 
 ### Docker Compose Profiles
 
-| Command           | What It Starts                                                   |
-| ----------------- | ---------------------------------------------------------------- |
-| `make up`         | Gateway + all services + PostgreSQL + Redis + Milvus + Dashboard |
-| `make up-full`    | Everything above + Ollama + ComfyUI (GPU profile)                |
-| `make down`       | Stop all containers                                              |
-| `make down-clean` | Stop and remove all volumes (fresh start)                        |
-| `make logs`       | Follow container logs                                            |
-| `make ps`         | Show running services                                            |
-| `make test-e2e`   | Run E2E tests (uses `docker-compose.e2e.yml`)                    |
+| Command | What It Starts |
+|---------|----------------|
+| `make up` | Gateway + all services + PostgreSQL + Redis + Milvus + Dashboard |
+| `make up-full` | Everything above + Ollama + ComfyUI (GPU profile) |
+| `make up-dev` | Development mode with hot reload |
+| `make up-monitoring` | Adds Prometheus, Alertmanager, Grafana |
+| `make up-tools` | Adds pgAdmin + Databasus (database tools) |
+| `make down` | Stop all containers |
+| `make down-clean` | Stop and remove all volumes (fresh start) |
 
-### Infrastructure
+### Infrastructure Components
 
-| Component  | Image                     | Port    | Volume       |
-| ---------- | ------------------------- | ------- | ------------ |
-| PostgreSQL | `postgres:17-alpine`      | `5432`  | `pgdata`     |
-| Redis      | `redis:7.4-alpine`        | `6379`  | `redisdata`  |
-| Milvus     | `milvusdb/milvus:v2.4.24` | `19530` | `milvusdata` |
-| Ollama     | `ollama/ollama:latest`    | `11434` | `ollamadata` |
-| ComfyUI    | `comfyui:latest`          | `8188`  | `comfydata`  |
-
-All services run on a single Docker bridge network (`orion-net`) with health checks and `unless-stopped` restart policy.
-
-<br />
-
-## Shared Library — orion-common
-
-The `libs/orion-common/` package provides shared infrastructure used by all Python services:
-
-| Module             | Purpose                                                                                          |
-| ------------------ | ------------------------------------------------------------------------------------------------ |
-| `config.py`        | Pydantic `Settings` class — DB, Redis, Milvus, AI provider URLs                                  |
-| `event_bus.py`     | Async Redis pub/sub wrapper for inter-service messaging                                          |
-| `events.py`        | Channel constants (`TREND_DETECTED`, `CONTENT_CREATED`, ...)                                     |
-| `health.py`        | Health check router factory with DB/Redis readiness probes                                       |
-| `logging.py`       | structlog configuration for consistent structured logging                                        |
-| `milvus_client.py` | Vector DB connection and collection initialization                                               |
-| `db/models.py`     | SQLAlchemy ORM — Trend, Content, MediaAsset, Provider, PipelineRun, SocialAccount, PublishRecord |
-| `db/session.py`    | Async session factory and engine management                                                      |
+| Component | Image | Port | Purpose |
+|-----------|-------|------|---------|
+| PostgreSQL | `postgres:17-alpine` | `5432` | State, users, pipeline history |
+| Redis | `redis:7.4-alpine` | `6379` | Pub/sub, cache, rate limits |
+| Milvus | `milvusdb/milvus:v2.4.24` | `19530` | Vector search, embeddings |
+| Ollama | `ollama/ollama:latest` | `11434` | Local LLM inference |
+| ComfyUI | `yanwenkun/comfyui:latest` | `8188` | Local image generation |
+| Prometheus | `prom/prometheus:v2.51.0` | `9090` | Metrics collection |
+| Grafana | `grafana/grafana:10.4.0` | `3003` | Metrics dashboards |
 
 <br />
 
-## Data Model
-
-```mermaid
-erDiagram
-    Trend ||--o{ Content : "generates"
-    Content ||--o{ MediaAsset : "has"
-    Content ||--o{ PipelineRun : "tracks"
-    Content ||--o{ PublishRecord : "published_as"
-    SocialAccount ||--o{ PublishRecord : "publishes_via"
-
-    Trend {
-        string topic
-        string source
-        float score
-        string status
-        json raw_data
-    }
-
-    Content {
-        string title
-        text script_body
-        string hook
-        json visual_prompts
-        string status
-    }
-
-    MediaAsset {
-        string asset_type
-        string provider
-        string file_path
-        json metadata
-    }
-
-    PipelineRun {
-        string stage
-        string status
-        string error_message
-    }
-
-    Provider {
-        string name
-        string type
-        json config
-        int priority
-    }
-
-    SocialAccount {
-        string platform
-        binary credentials
-        bool is_active
-    }
-
-    PublishRecord {
-        string platform
-        string post_id
-        string status
-        datetime published_at
-    }
-```
-
-<br />
-
-## Environment Variables
-
-```bash
-# Application
-APP_ENV=development          # development | staging | production
-GATEWAY_PORT=8000
-DASHBOARD_PORT=3000
-
-# Database
-POSTGRES_USER=orion
-POSTGRES_PASSWORD=orion_dev
-POSTGRES_DB=orion
-
-# Infrastructure
-REDIS_URL=redis://localhost:6379
-MILVUS_HOST=localhost
-MILVUS_PORT=19530
-
-# AI Providers
-OLLAMA_HOST=http://localhost:11434
-COMFYUI_HOST=http://localhost:8188
-```
-
-Copy `.env.example` to `.env` and customize for your environment.
-
-<br />
-
-## Tech Stack
+## ✦ Tech Stack
 
 <table>
-<tr>
-<th>Layer</th>
-<th>Technology</th>
-<th>Version</th>
-</tr>
+<tr><th>Layer</th><th>Technology</th><th>Version</th></tr>
 <tr><td rowspan="2"><strong>Gateway</strong></td><td>Go</td><td>1.24</td></tr>
 <tr><td>Chi (router)</td><td>5.x</td></tr>
 <tr><td rowspan="2"><strong>CLI</strong></td><td>Python</td><td>3.13</td></tr>
-<tr><td>Typer</td><td>0.15.x</td></tr>
+<tr><td>Typer + Rich</td><td>0.15.x</td></tr>
 <tr><td rowspan="5"><strong>Services</strong></td><td>Python</td><td>3.13</td></tr>
 <tr><td>FastAPI</td><td>0.115.x</td></tr>
 <tr><td>Pydantic</td><td>2.10.x</td></tr>
 <tr><td>SQLAlchemy</td><td>2.0.x</td></tr>
 <tr><td>LangGraph</td><td>1.x</td></tr>
-<tr><td rowspan="4"><strong>Dashboard</strong></td><td>Next.js</td><td>15.2</td></tr>
-<tr><td>React</td><td>19</td></tr>
+<tr><td rowspan="3"><strong>Dashboard</strong></td><td>Next.js + React 19</td><td>15.2</td></tr>
 <tr><td>Tailwind CSS</td><td>4.0</td></tr>
 <tr><td>Recharts</td><td>3.8</td></tr>
 <tr><td rowspan="3"><strong>Infrastructure</strong></td><td>PostgreSQL</td><td>17</td></tr>
@@ -596,24 +420,43 @@ Copy `.env.example` to `.env` and customize for your environment.
 <tr><td>Milvus</td><td>2.4</td></tr>
 <tr><td rowspan="2"><strong>AI Models</strong></td><td>Ollama (LLM)</td><td>latest</td></tr>
 <tr><td>ComfyUI (Images)</td><td>latest</td></tr>
+<tr><td><strong>Package Mgmt</strong></td><td>UV (Python) · npm (Node.js)</td><td>latest</td></tr>
 </table>
 
-Full version details: [docs/TECH_STACK.md](docs/TECH_STACK.md)
-
 <br />
 
-## Documentation
+## ✦ Documentation
+
+Full documentation is available in the [`docs/`](docs/) directory, served via [Zensical](https://zensical.dev).
 
 ```bash
-make docs        # Serve docs locally (Zensical)
-make docs-build  # Build static documentation site
+make docs         # Serve docs locally with live reload (:8080)
+make docs-build   # Build static documentation site
 ```
 
-Documentation source lives in [`docs/`](docs/) and is served via [Zensical](https://zensical.dev).
+**Key sections:**
+
+- [Architecture Overview](docs/architecture/index.md) — system design, port map, event flow
+- [Getting Started](docs/getting-started/installation.md) — installation, configuration, troubleshooting
+- [Deployment Guide](docs/deployment/docker.md) — Docker Compose, production, monitoring
+- [Service Reference](docs/services/index.md) — per-service API and configuration docs
+- [Demo Mode Guide](docs/guides/demo-mode.md) — running the dashboard with sample data
 
 <br />
 
-## License
+## ✦ Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Follow the commit format: `feat(ORION-{id}): description`
+4. Run all checks before pushing: `make check && make test-all`
+5. Open a Pull Request
+
+**Commit types:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+<br />
+
+## ✦ License
 
 This project is proprietary. All rights reserved.
 

@@ -468,7 +468,7 @@ func TestRouter_CORSPreflight(t *testing.T) {
 	srv, _ := setupRouter(t)
 
 	req, _ := http.NewRequest("OPTIONS", srv.URL+"/api/v1/scout/trends", nil)
-	req.Header.Set("Origin", "http://localhost:3000")
+	req.Header.Set("Origin", "http://localhost:3001")
 	req.Header.Set("Access-Control-Request-Method", "GET")
 	req.Header.Set("Access-Control-Request-Headers", "Authorization")
 

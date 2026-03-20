@@ -130,7 +130,7 @@ def main() -> None:
         print(f"  {name}: {count} items seeded")
 
     print("\nSeeding complete!")
-    print("View in dashboard: http://localhost:3000")
+    print("View in dashboard: http://localhost:3001")
 
 
 if __name__ == "__main__":

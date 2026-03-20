@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { forgotPassword } from "@/lib/auth";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowLeft, Mail } from "lucide-react";
 
 export default function ForgotPasswordPage(): React.ReactElement {
@@ -98,16 +98,14 @@ export default function ForgotPasswordPage(): React.ReactElement {
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
+                  className="w-full"
+                  loading={loading}
                   disabled={loading}
-                  className={cn(
-                    "flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted hover:shadow-primary/30",
-                    loading && "cursor-not-allowed opacity-60"
-                  )}
                 >
                   {loading ? "Sending..." : "Send reset link"}
-                </button>
+                </Button>
               </form>
 
               <p className="mt-6 text-center text-sm text-text-secondary">

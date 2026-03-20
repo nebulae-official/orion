@@ -149,12 +149,27 @@ py-format: ## Format all Python code with ruff
 # ==============================================================================
 
 .PHONY: dash-dev
-dash-dev: ## Start dashboard dev server
-	cd dashboard && npm run dev
+dash-dev: ## Start dashboard dev server (port 3002, demo data, clean build)
+	@-fuser -k 3002/tcp 2>/dev/null || true
+	@sleep 1
+	cd dashboard && rm -rf .next && NEXT_PUBLIC_DEMO_MODE=true npx next dev -p 3002
+
+.PHONY: dash-prod
+dash-prod: dash-build ## Start dashboard production server (port 3001, no demo data)
+	@-fuser -k 3001/tcp 2>/dev/null || true
+	@sleep 1
+	cd dashboard && npx next start -p 3001
 
 .PHONY: dash-build
 dash-build: ## Build dashboard for production
 	cd dashboard && npm run build
+
+.PHONY: dash-stop
+dash-stop: ## Stop all running dashboard servers (ports 3001 and 3002)
+	@-fuser -k 3001/tcp 2>/dev/null || true
+	@-fuser -k 3002/tcp 2>/dev/null || true
+	@sleep 1
+	@echo "Dashboard servers stopped"
 
 .PHONY: dash-test
 dash-test: ## Run dashboard tests

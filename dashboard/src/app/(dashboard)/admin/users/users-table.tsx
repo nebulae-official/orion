@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   UserPlus,
   CircleUser,
@@ -87,13 +87,10 @@ export function UsersTable({
     <div className="space-y-4">
       {/* Invite Button */}
       <div className="flex justify-end">
-        <button
-          onClick={() => setShowInvite(!showInvite)}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted"
-        >
+        <Button onClick={() => setShowInvite(!showInvite)}>
           <UserPlus className="h-4 w-4" />
           Invite User
-        </button>
+        </Button>
       </div>
 
       {/* Invite Form */}
@@ -103,15 +100,16 @@ export function UsersTable({
             <h3 className="text-sm font-semibold text-text">
               Invite a new user
             </h3>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => {
                 setShowInvite(false);
                 setInviteMessage(null);
               }}
-              className="text-text-muted hover:text-text transition-colors"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
 
           {inviteMessage && (
@@ -169,24 +167,15 @@ export function UsersTable({
                 <option value="admin">Admin</option>
               </select>
             </div>
-            <button
+            <Button
               onClick={handleInvite}
               disabled={inviteLoading || !inviteEmail}
-              className={cn(
-                "flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted whitespace-nowrap",
-                (inviteLoading || !inviteEmail) &&
-                  "cursor-not-allowed opacity-60"
-              )}
+              loading={inviteLoading}
+              className="whitespace-nowrap"
             >
-              {inviteLoading ? (
-                "Sending..."
-              ) : (
-                <>
-                  Send Invite
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
+              Send Invite
+              {!inviteLoading && <ArrowRight className="h-4 w-4" />}
+            </Button>
           </div>
         </div>
       )}
@@ -275,22 +264,21 @@ export function UsersTable({
                   {formatDate(user.created_at)}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() =>
                       handleToggleStatus(user.id, user.is_active)
                     }
                     disabled={actionLoading === user.id}
-                    className={cn(
-                      "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                    className={
                       user.is_active
-                        ? "border-danger/20 text-danger-light hover:bg-danger-surface"
-                        : "border-success/20 text-success hover:bg-success-surface",
-                      actionLoading === user.id &&
-                        "cursor-not-allowed opacity-60"
-                    )}
+                        ? "border-danger/20 text-danger-light hover:bg-danger-surface hover:text-danger-light"
+                        : "border-success/20 text-success hover:bg-success-surface hover:text-success"
+                    }
                   >
                     {user.is_active ? "Disable" : "Enable"}
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}
