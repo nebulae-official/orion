@@ -19,6 +19,9 @@ out/
 next-env.d.ts
 *.tsbuildinfo
 
+# Dashboard — managed as a standalone project, not tracked here
+/dashboard/
+
 # Environment
 .env
 
