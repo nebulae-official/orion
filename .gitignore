@@ -47,6 +47,12 @@ backups/
 
 # Test artifacts
 screenshots/
-.playwright-mcp/
 test-screenshots/
+test-results/
 .playwright-mcp/
+
+# Playwright screenshot dumps (verify-*, reference-*, current-*, prod-*)
+verify-*.png
+reference-*.png
+current-*.png
+prod-*.png
