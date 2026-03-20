@@ -47,6 +47,7 @@ backups/
 
 # Test artifacts
 screenshots/
+!docs/assets/screenshots/
 test-screenshots/
 test-results/
 .playwright-mcp/

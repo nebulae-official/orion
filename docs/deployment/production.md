@@ -5,7 +5,8 @@ Checklist and recommendations for deploying Orion to production.
 ## :material-check-all: Pre-Deployment Checklist
 
 - [ ] Change `ORION_JWT_SECRET` to a strong random value (32+ characters)
-- [ ] Set strong `ORION_ADMIN_PASS` credentials
+- [ ] Create admin user via registration or database seeding (env-var admin is deprecated)
+- [ ] Configure OAuth providers (GitHub/Google) with production callback URLs
 - [ ] Set `APP_ENV=production`
 - [ ] Restrict CORS origins (default allows all)
 - [ ] Enable TLS termination (reverse proxy or load balancer)

@@ -2,6 +2,16 @@
 
 Orion includes built-in Prometheus metrics collection and Grafana dashboards.
 
+## :material-play: Starting the Monitoring Stack
+
+The monitoring stack runs via a separate compose file:
+
+```bash
+make up-monitoring
+# or
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.monitoring.yml up -d
+```
+
 ## :material-chart-line: Stack
 
 ```mermaid
@@ -11,10 +21,14 @@ graph LR
     G --> U["Dashboard\nAlerts"]
 ```
 
-| Component  | Port | Purpose                        |
-| ---------- | ---- | ------------------------------ |
-| Prometheus | 9090 | Metrics collection and storage |
-| Grafana    | 3001 | Visualization and alerting     |
+| Component    | Port | Purpose                        |
+| ------------ | ---- | ------------------------------ |
+| Prometheus   | 9090 | Metrics collection and storage |
+| Alertmanager | 9093 | Alert routing and deduplication|
+| Grafana      | 3001 | Visualization and alerting     |
+
+!!! warning "Port conflict with dashboard dev server"
+    Grafana binds to port 3001, which is also used by the Next.js dashboard dev server. Run only one at a time, or change the Grafana port in `docker-compose.monitoring.yml`.
 
 ## :material-cog: Prometheus Configuration
 

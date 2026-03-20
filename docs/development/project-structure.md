@@ -13,8 +13,8 @@ orion/
     gateway/              # Gateway internals (not importable externally)
       router/             # Chi router setup, route definitions
       middleware/          # Auth, CORS, logging, rate limiting, metrics
-      handler/            # Auth handlers, WebSocket hub
-      proxy/              # Reverse proxy to Python services
+      handlers/           # Auth, OAuth, proxy, status, system, WebSocket
+      proxy/              # Circuit breaker and reverse proxy to Python services
   pkg/
     config/               # Shared Go configuration
   cli/                    # Python/Typer CLI
@@ -87,6 +87,14 @@ orion/
         main.py
         routes/
         service/
+      tests/
+    identity/             # User management & auth (:8007)
+      src/
+        identity/
+          main.py
+          routes/          # auth.py, users.py
+          services/
+          repositories/
       tests/
   libs/
     orion-common/         # Shared Python library

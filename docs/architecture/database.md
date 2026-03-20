@@ -420,6 +420,9 @@ Migrations are managed by Alembic and live in `migrations/versions/`. Each migra
 | `005` | 2026-03-19 | Add user management tables: `users`, `oauth_accounts`, `user_settings`, `refresh_tokens`. Seeds system user and admin user |
 | `006` | 2026-03-19 | Add `created_by` FK to `contents` and `user_id` FK to `social_accounts`. Backfill existing rows with system user |
 | `007` | 2026-03-19 | Enforce `NOT NULL` on `contents.created_by` and `social_accounts.user_id` after backfill |
+| `008` | 2026-03-19 | Add `first_name` and `last_name` columns to `users` table |
+| `009` | 2026-03-20 | Update `trend_status` enum values |
+| `010` | 2026-03-20 | Add `username` column to `users` table |
 
 !!! tip "Running migrations"
     ```bash

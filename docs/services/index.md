@@ -126,7 +126,7 @@ docker compose -f deploy/docker-compose.yml ps
 
 ## :material-layers: Shared Library
 
-All seven Python services depend on `libs/orion-common/`, a shared library that provides cross-cutting concerns:
+All Python services depend on `libs/orion-common/`, a shared library that provides cross-cutting concerns:
 
 - **Config** — `CommonSettings` (Pydantic BaseSettings) with automatic environment variable binding and cached singleton access via `get_settings()`
 - **Database** — SQLAlchemy 2.0 async engine, session factory, declarative base models, and migration utilities
