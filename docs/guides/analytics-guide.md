@@ -8,7 +8,7 @@ How to read the Analytics dashboard and understand pipeline performance, costs, 
 
 Navigate to **Analytics** from the sidebar. The page provides a comprehensive view of your content pipeline performance.
 
-![Analytics overview](../assets/guides/analytics-overview.png)
+![Analytics overview](../assets/screenshots/analytics-page.png)
 
 !!! info "Data Refresh Interval"
     Analytics data refreshes automatically every **60 seconds**. KPI cards and charts pull the latest data from the Pulse service. For immediate updates, reload the page manually.

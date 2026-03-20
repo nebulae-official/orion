@@ -45,6 +45,7 @@ graph TB
         ED["Editor :8004\nVideo Rendering"]
         PL["Pulse :8005\nAnalytics"]
         PB["Publisher :8006\nSocial Publishing"]
+        ID["Identity :8007\nUser Management"]
     end
 
     subgraph AI["AI Infrastructure"]
@@ -70,7 +71,7 @@ graph TB
 
     CLI --> GW
     DB --> GW
-    GW --> SC & DR & MD & ED & PL & PB
+    GW --> SC & DR & MD & ED & PL & PB & ID
     WS --> RD
 
     SC -->|"orion.trend.detected"| RD
@@ -86,7 +87,7 @@ graph TB
     MD --> CU
     ED --> OL
 
-    SC & DR & MD & ED & PL & PB --> PG
+    SC & DR & MD & ED & PL & PB & ID --> PG
     SC & DR & MD & ED & PL & PB --> RD
 ```
 
@@ -163,6 +164,16 @@ Analytics engine on port `8005`. Aggregates events from all services, tracks con
 Social publishing on port `8006`. Manages OAuth connections to social platforms and publishes approved content to Twitter/X, YouTube, TikTok, and Instagram with platform-specific formatting and scheduling.
 
 [:material-arrow-right: Learn more](services/publisher.md)
+
+</div>
+
+<div class="orion-card" markdown>
+
+### :material-shield-account: Identity
+
+User management service on port `8007`. Handles user CRUD, OAuth account linking (GitHub/Google), refresh token rotation with family-based theft detection, password resets, and email verification.
+
+[:material-arrow-right: Learn more](services/identity.md)
 
 </div>
 
@@ -269,6 +280,9 @@ docker compose -f deploy/docker-compose.yml --profile full up -d
 ### Test and lint
 
 ```bash
+# Run all tests (Go + Python + CLI + Dashboard)
+make test-all
+
 # Run all Go tests
 make test
 
@@ -276,10 +290,13 @@ make test
 make lint
 
 # Run Python tests for a specific service
-cd services/scout && pytest
+cd services/scout && uv run pytest
 
 # Run dashboard tests
 cd dashboard && npm test
+
+# Run all linters
+make check
 ```
 
 ### CLI usage
@@ -312,6 +329,20 @@ orion content approve <content-id>
 make cli-test
 make cli-lint
 ```
+
+---
+
+## :material-image: Dashboard Preview
+
+The Orion dashboard provides a glassmorphism-styled admin interface for managing the entire content pipeline.
+
+![Login page](assets/screenshots/login-page.png)
+
+![Dashboard overview](assets/screenshots/dashboard-overview.png)
+
+![System Health monitoring](assets/screenshots/system-health.png)
+
+See the **[Dashboard Tour](guides/dashboard-overview.md)** for a complete walkthrough of every page.
 
 ---
 

@@ -8,7 +8,7 @@ How to monitor service health, GPU status, and configure AI providers.
 
 Navigate to **System Health** from the sidebar. The page is divided into several panels: System Overview, Service Status, Infrastructure, and GPU.
 
-![System Health](../assets/guides/system-health.png)
+![System Health](../assets/screenshots/system-health.png)
 
 ### :lucide-monitor: System Overview
 
@@ -94,7 +94,7 @@ Metrics shown per GPU card:
 
 Navigate to **Settings** from the sidebar to configure AI providers for each generation service.
 
-![Settings page](../assets/guides/settings-page.png)
+![Settings page](../assets/screenshots/settings-page.png)
 
 ### :lucide-layout-grid: Provider Cards
 

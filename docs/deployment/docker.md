@@ -4,11 +4,12 @@ All Orion services are containerized and orchestrated via Docker Compose.
 
 ## :material-docker: Compose Files
 
-| File                            | Purpose                                         |
-| ------------------------------- | ----------------------------------------------- |
-| `deploy/docker-compose.yml`     | Main compose file with all services             |
-| `deploy/docker-compose.dev.yml` | Development overrides (hot reload, debug ports) |
-| `deploy/docker-compose.e2e.yml` | E2E test environment with mock servers          |
+| File                                    | Purpose                                         |
+| --------------------------------------- | ----------------------------------------------- |
+| `deploy/docker-compose.yml`             | Main compose file with all services             |
+| `deploy/docker-compose.dev.yml`         | Development overrides (hot reload, debug ports) |
+| `deploy/docker-compose.monitoring.yml`  | Monitoring stack (Prometheus, Grafana, Alertmanager) |
+| `deploy/docker-compose.e2e.yml`         | E2E test environment with mock servers          |
 
 ## :material-play: Starting Services
 
@@ -63,7 +64,7 @@ All Orion services are containerized and orchestrated via Docker Compose.
 
 | Service  | Image                | Port        | Volume       |
 | -------- | -------------------- | ----------- | ------------ |
-| postgres | postgres:16-alpine   | 5432        | `pgdata`     |
+| postgres | postgres:17-alpine   | 5432        | `pgdata`     |
 | redis    | redis:7.4-alpine     | 6379        | `redisdata`  |
 | milvus   | milvusdb/milvus:v2.4 | 19530, 9091 | `milvusdata` |
 | ollama   | ollama/ollama        | 11434       | `ollamadata` |

@@ -36,9 +36,16 @@ graph TB
 | Component                  | Purpose                                   | Port        |
 | -------------------------- | ----------------------------------------- | ----------- |
 | Prometheus                 | Metrics scraping and storage              | 9090        |
+| Alertmanager               | Alert routing, deduplication, silencing    | 9093        |
 | Grafana                    | Dashboard visualization and alerting      | 3001        |
 | Service /metrics endpoints | Per-service Prometheus metrics            | Per service |
 | Structured logging         | Request-level logging with slog/structlog | --          |
+
+!!! info "Starting the monitoring stack"
+    ```bash
+    make up-monitoring
+    ```
+    This uses `deploy/docker-compose.monitoring.yml` alongside the main compose file.
 
 ## :material-book-open-variant: Sections
 

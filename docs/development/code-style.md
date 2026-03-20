@@ -58,7 +58,7 @@ func (h *Handler) GetTrends(w http.ResponseWriter, r *http.Request) {
 ruff check --fix services/
 
 # Format
-black services/
+ruff format services/
 
 # Type check
 mypy services/

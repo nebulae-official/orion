@@ -6,17 +6,17 @@ Full version inventory for the Orion platform.
 
 | Component | Language   | Version |
 | --------- | ---------- | ------- |
-| Gateway   | Go         | 1.26    |
+| Gateway   | Go         | 1.25    |
 | CLI       | Python     | 3.13    |
-| Services  | Python     | 3.14    |
+| Services  | Python     | 3.13    |
 | Dashboard | TypeScript | 5.x     |
-| Dashboard | Node.js    | 25      |
+| Dashboard | Node.js    | 22 LTS  |
 
 ## Web Frameworks
 
 | Component | Framework | Version  |
 | --------- | --------- | -------- |
-| Gateway   | net/http  | stdlib   |
+| Gateway   | Chi       | 5.x      |
 | Services  | FastAPI   | ≥0.115.0 |
 | Services  | Uvicorn   | ≥0.34.0  |
 | CLI       | Typer     | >=0.15.0 |

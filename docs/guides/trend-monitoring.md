@@ -8,7 +8,7 @@ How to monitor and understand the trends detected by the Orion Scout service.
 
 Navigate to **Trends** from the sidebar. The page shows all trends discovered by the Scout service along with summary statistics.
 
-![Trends page](../assets/guides/trends-page.png)
+![Trends page](../assets/screenshots/trends-page.png)
 
 ---
 

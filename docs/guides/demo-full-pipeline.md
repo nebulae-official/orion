@@ -71,7 +71,7 @@ Trigger the Scout service to scan external sources for trending topics.
 
 === "Dashboard"
 
-    1. Open **http://localhost:3000** and log in with `admin` / `orion_dev`
+    1. Open **http://localhost:3001** (dev) or **http://localhost:3000** (prod) and log in with `admin@orion.local` / `orion_dev`
     2. Navigate to the **Trends** page from the sidebar
     3. Trends are displayed with their virality score, source, and status
     4. New trends detected by Scout appear here automatically via WebSocket updates

@@ -2,12 +2,12 @@
 
 Next.js 15 admin dashboard for monitoring content pipelines, reviewing trends, and managing the Orion platform.
 
-| Property      | Value                   |
-| ------------- | ----------------------- |
-| **Port**      | 3000                    |
-| **Language**  | TypeScript 5.x          |
-| **Framework** | Next.js 15.2 + React 19 |
-| **Source**    | `dashboard/`            |
+| Property      | Value                           |
+| ------------- | ------------------------------- |
+| **Port**      | 3000 (prod) / 3001 (dev)        |
+| **Language**  | TypeScript 5.x                  |
+| **Framework** | Next.js 15.2 + React 19         |
+| **Source**    | `dashboard/`                    |
 
 ## :material-tools: Tech Stack
 
@@ -47,8 +47,24 @@ dashboard/
 
 ### Key Pages
 
-- **System Health** -- System overview (host info, resource bars), service status with uptime/queue sizes for all 7 services, infrastructure panel (Redis/PostgreSQL), and multi-GPU monitoring with 1-second polling
-- **Settings** -- Tabbed interface with four tabs: Providers (provider/model config with Test Connection and Model Parameters), API Keys (manage cloud provider keys), Pipeline (generation, trend detection, and publishing settings), and System (dashboard preferences, data management, environment info)
+| Page | Route | Description |
+| ---- | ----- | ----------- |
+| **Dashboard** | `/` | Overview cards (Content Queue, Trends, Approved, In Review), System Performance chart, Recent Events |
+| **Trends** | `/trends` | Discovered trends table with source/score/status filters, time range selectors, pagination |
+| **Content Queue** | `/queue` | Content items with status filters, detail view, approve/reject actions |
+| **Generation** | `/generation` | Three tabs: Pipeline (content generation), Media (image assets), Video (rendered videos) |
+| **Publishing** | `/publishing` | Publishing history and social account management |
+| **Analytics** | `/analytics` | KPI cards, Content Pipeline funnel, Cost by Provider, Provider Usage, Error Trends, Earnings |
+| **Profile** | `/profile` | User profile, connected OAuth accounts, password change, publishing accounts |
+| **System Health** | `/system` | System overview (host info, CPU/memory/disk bars), GPU status with live gauge, service status for all 7 services, infrastructure panel (PostgreSQL/Redis/Milvus/Grafana/Prometheus/pgAdmin) |
+| **Settings** | `/settings` | Four tabs: Providers (LLM/Image/Video/TTS config), API Keys, Pipeline settings, System preferences |
+| **Admin Users** | `/admin/users` | User management table (admin only) |
+
+![Dashboard overview](../assets/screenshots/dashboard-overview.png)
+
+![Trends page](../assets/screenshots/trends-page.png)
+
+![System Health](../assets/screenshots/system-health.png)
 
 ## :material-cog: Configuration
 

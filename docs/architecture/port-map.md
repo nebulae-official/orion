@@ -39,11 +39,13 @@ Complete port assignments for all Orion services, infrastructure, and tools.
 
 ## :lucide-activity: Monitoring
 
+Monitoring services run via a separate compose file (`deploy/docker-compose.monitoring.yml`).
+
 | Port | Service | Protocol | Description |
 |------|---------|----------|-------------|
 | 9090 | Prometheus | HTTP | Metrics collection |
 | 9093 | Alertmanager | HTTP | Alert routing |
-| 3001 | Grafana | HTTP | Monitoring dashboards |
+| 3001 | Grafana | HTTP | Monitoring dashboards (conflicts with dashboard dev port -- run one at a time) |
 
 ## :lucide-test-tube: E2E Test Mocks
 

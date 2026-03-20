@@ -30,7 +30,7 @@ cd cli && uv run orion system health
 
 ## :material-numeric-2-circle: Authenticate
 
-You need a JWT token to interact with the API. The default development credentials are `admin` / `orion_dev`.
+You need a JWT token to interact with the API. The default development credentials are `admin@orion.local` / `orion_dev`.
 
 === "CLI"
 

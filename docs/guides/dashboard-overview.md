@@ -17,7 +17,7 @@ The login page authenticates you against the Orion Gateway. You can sign in with
 
 New users can click the **Register** link to create an account.
 
-![Login page](../assets/guides/login-page.png)
+![Login page](../assets/screenshots/login-page.png)
 
 ---
 
@@ -38,6 +38,9 @@ Pages available from the sidebar:
 | Publishing | Publishing history across platforms |
 | Generation | Real-time progress tracking for content generation |
 | System Health | System overview, service status, infrastructure, and GPU monitoring |
+| Settings | Configure AI providers, API keys, pipeline behavior, and system preferences |
+| Profile | User profile, connected OAuth accounts, password change, publishing accounts |
+| Admin > Users | User management (admin role only) |
 | Settings | AI providers, API keys, pipeline config, and system preferences (4 tabs) |
 | Profile | View and edit your account, change password, manage OAuth connections |
 | Users (admin) | Manage user accounts, roles, and invitations |
@@ -48,7 +51,7 @@ Pages available from the sidebar:
 
 The landing page after login. It shows four quick-access cards that link directly to the most common workflows.
 
-![Dashboard home](../assets/guides/dashboard-home.png)
+![Dashboard home](../assets/screenshots/dashboard-overview.png)
 
 - **Content Queue** -- Jump straight to pending content
 - **Trends** -- View detected trends
@@ -76,7 +79,7 @@ Key features:
 
 Displays all trends discovered by the Scout service, with summary statistics at the top.
 
-![Trends page](../assets/guides/trends-page.png)
+![Trends page](../assets/screenshots/trends-page.png)
 
 Key features:
 
@@ -123,7 +126,7 @@ Key features:
 
 Real-time progress tracking for content generation pipelines. Each content item shows its progress through the six generation stages.
 
-![Generation page](../assets/guides/generation-page.png)
+![Generation page](../assets/screenshots/generation-pipeline.png)
 
 Generation stages:
 
@@ -164,7 +167,7 @@ The Settings page uses a tabbed interface with four tabs: **Providers**, **API K
 
 Configure AI providers and model selections for each generation service.
 
-![Settings page](../assets/guides/settings-page.png)
+![Settings page](../assets/screenshots/settings-page.png)
 
 Four provider cards (LLM, Image, Video, TTS) let you switch between **Local** and **Cloud** providers, select a model, and save the configuration. The green dot indicates the provider is connected and available. Each card includes a **Test Connection** button to verify provider reachability and a **Model Parameters** accordion for fine-tuning generation settings.
 
@@ -202,10 +205,13 @@ Dashboard preferences and environment information.
 
 The profile page lets you manage your account details and security settings.
 
-- **Account Information** -- View and edit your display name, email address, and avatar
-- **Change Password** -- Update your password (requires current password)
-- **OAuth Connections** -- View linked GitHub and Google accounts, link or unlink providers
-- **User Preferences** -- Personal settings like default landing page and notification preferences
+![Profile page](../assets/screenshots/profile-page.png)
+
+- **Account Card** -- View your avatar, name, email, role, and timezone
+- **Connected Accounts** -- Link or unlink GitHub and Google OAuth accounts
+- **Profile Details** -- Edit your name, avatar URL, bio, and timezone
+- **Change Password** -- Update your password (requires current password and confirmation)
+- **Publishing Accounts** -- Connect YouTube, TikTok, Twitter/X, and Instagram accounts
 
 ---
 

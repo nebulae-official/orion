@@ -1,13 +1,18 @@
 # Auth Current State: Orion Authentication, User Management, and Data Isolation
 
+!!! warning "Historical Document"
+    This document was written on 2026-03-19 as a pre-migration analysis of the **old** single-user auth system. Since then, Orion has been migrated to **DB-backed multi-user authentication** with OAuth (GitHub/Google), the Identity service (port 8007), user registration, profile management, and per-user data isolation. See the [Security](security.md) and [Identity service](../services/identity.md) docs for the current state.
+
 **Generated:** 2026-03-19
-**Scope:** Research-only analysis of the codebase at `/home/gishantsingh/Dev/Projects/orion`
+**Scope:** Research-only analysis of the codebase at its pre-migration state
 
 ---
 
 ## Executive Summary
 
-Orion operates as a single-tenant, single-administrator system. There is exactly one user account — a hardcoded admin — defined entirely through environment variables. No user database table exists. All content, trends, analytics, and publishing records are global with no concept of per-user ownership. There is no OAuth integration, no user registration flow, and no user profile storage. The authentication system is functional and production-hardened at the gateway level (JWT with Redis blacklist), but it is fundamentally a single-user admin tool rather than a multi-user application.
+**Note: The gaps described below have been addressed.** Orion now has DB-backed multi-user authentication, OAuth integration, user profiles, and per-user data scoping. This document is preserved as historical context for the migration.
+
+~~Orion operates as a single-tenant, single-administrator system.~~ Orion has been migrated to a multi-user system with DB-backed authentication. The following analysis describes the state **before** the migration.
 
 ---
 
