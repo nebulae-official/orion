@@ -116,6 +116,8 @@ async def test_update_user_profile(
     updated_user.id = sample_user.id
     updated_user.email = sample_user.email
     updated_user.name = "Updated Name"
+    updated_user.first_name = None
+    updated_user.last_name = None
     updated_user.avatar_url = None
     updated_user.bio = "New bio"
     updated_user.timezone = "UTC"

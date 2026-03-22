@@ -31,6 +31,8 @@ def sample_user() -> MagicMock:
     user.id = uuid.UUID("11111111-1111-1111-1111-111111111111")
     user.email = "test@example.com"
     user.name = "Test User"
+    user.first_name = None
+    user.last_name = None
     user.role = "editor"
     user.avatar_url = None
     user.bio = None

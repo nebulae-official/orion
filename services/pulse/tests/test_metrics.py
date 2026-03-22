@@ -127,3 +127,15 @@ class TestEventAggregator:
             )
 
             repo.create.assert_called_once()
+
+    def test_content_published_maps_to_publisher(self) -> None:
+        """ORION-172: CONTENT_PUBLISHED must map to 'publisher', not 'editor'."""
+        from orion_common.events import Channels
+
+        assert _CHANNEL_SERVICE_MAP[Channels.CONTENT_PUBLISHED] == "publisher"
+
+    def test_trend_expired_maps_to_scout(self) -> None:
+        """ORION-177: TREND_EXPIRED must map to 'scout'."""
+        from orion_common.events import Channels
+
+        assert _CHANNEL_SERVICE_MAP[Channels.TREND_EXPIRED] == "scout"

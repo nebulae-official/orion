@@ -10,27 +10,34 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-
+from orion_common.db.session import get_session
+from src.identity.routes.notifications import _get_service
 from src.identity.routes.notifications import router as notifications_router
 from src.identity.schemas.notifications import NotificationOut
-
 
 USER_ID = "11111111-1111-1111-1111-111111111111"
 USER_HEADERS = {"X-User-ID": USER_ID, "X-User-Role": "editor", "X-User-Email": "test@example.com"}
 
 
 @pytest.fixture
-def mock_redis() -> AsyncMock:
-    redis = AsyncMock()
-    redis.publish = AsyncMock(return_value=1)
-    return redis
+def mock_notification_service() -> AsyncMock:
+    """Shared mock notification service for all tests."""
+    return AsyncMock()
 
 
 @pytest.fixture
-def notification_app(mock_redis: AsyncMock) -> FastAPI:
+def notification_app(mock_notification_service: AsyncMock) -> FastAPI:
     """Create a minimal FastAPI app with notification routes mounted."""
     app = FastAPI(title="Notification Test")
     app.include_router(notifications_router)
+
+    # Override dependencies to avoid real DB/Redis connections
+    async def _mock_session():
+        yield AsyncMock()
+
+    app.dependency_overrides[get_session] = _mock_session
+    app.dependency_overrides[_get_service] = lambda: mock_notification_service
+
     return app
 
 
@@ -60,21 +67,17 @@ def _make_notification_out(**overrides) -> NotificationOut:
 # GET /notifications
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
-async def test_list_notifications(client: AsyncClient) -> None:
+async def test_list_notifications(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """GET /notifications returns paginated notification list."""
     notif = _make_notification_out()
+    mock_notification_service.list_notifications.return_value = ([notif], 1)
 
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.list_notifications.return_value = ([notif], 1)
-        mock_get_svc.return_value = mock_svc
-
-        resp = await client.get("/notifications", headers=USER_HEADERS)
+    resp = await client.get("/notifications", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     data = resp.json()
@@ -86,40 +89,30 @@ async def test_list_notifications(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_list_notifications_unread_filter(client: AsyncClient) -> None:
+async def test_list_notifications_unread_filter(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """GET /notifications?unread=true passes unread filter."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.list_notifications.return_value = ([], 0)
-        mock_get_svc.return_value = mock_svc
+    mock_notification_service.list_notifications.return_value = ([], 0)
 
-        resp = await client.get("/notifications?unread=true", headers=USER_HEADERS)
+    resp = await client.get("/notifications?unread=true", headers=USER_HEADERS)
 
     assert resp.status_code == 200
-    mock_svc.list_notifications.assert_awaited_once()
-    call_kwargs = mock_svc.list_notifications.call_args[1]
+    mock_notification_service.list_notifications.assert_awaited_once()
+    call_kwargs = mock_notification_service.list_notifications.call_args[1]
     assert call_kwargs["unread_only"] is True
 
 
 @pytest.mark.asyncio
-async def test_list_notifications_pagination(client: AsyncClient) -> None:
+async def test_list_notifications_pagination(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """GET /notifications respects page and page_size query params."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.list_notifications.return_value = ([], 0)
-        mock_get_svc.return_value = mock_svc
+    mock_notification_service.list_notifications.return_value = ([], 0)
 
-        resp = await client.get(
-            "/notifications?page=3&page_size=10", headers=USER_HEADERS
-        )
+    resp = await client.get("/notifications?page=3&page_size=10", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     data = resp.json()
@@ -138,45 +131,32 @@ async def test_list_notifications_requires_auth(client: AsyncClient) -> None:
 # PATCH /notifications/{id}/read
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
-async def test_mark_notification_read(client: AsyncClient) -> None:
+async def test_mark_notification_read(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """PATCH /notifications/{id}/read marks a notification as read."""
     notif_id = uuid.uuid4()
+    mock_notification_service.mark_read.return_value = True
 
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.mark_read.return_value = True
-        mock_get_svc.return_value = mock_svc
-
-        resp = await client.patch(
-            f"/notifications/{notif_id}/read", headers=USER_HEADERS
-        )
+    resp = await client.patch(f"/notifications/{notif_id}/read", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
 
 
 @pytest.mark.asyncio
-async def test_mark_notification_read_not_found(client: AsyncClient) -> None:
+async def test_mark_notification_read_not_found(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """PATCH /notifications/{id}/read returns 404 when not found."""
     notif_id = uuid.uuid4()
+    mock_notification_service.mark_read.return_value = False
 
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.mark_read.return_value = False
-        mock_get_svc.return_value = mock_svc
-
-        resp = await client.patch(
-            f"/notifications/{notif_id}/read", headers=USER_HEADERS
-        )
+    resp = await client.patch(f"/notifications/{notif_id}/read", headers=USER_HEADERS)
 
     assert resp.status_code == 404
 
@@ -185,19 +165,16 @@ async def test_mark_notification_read_not_found(client: AsyncClient) -> None:
 # POST /notifications/read-all
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
-async def test_mark_all_read(client: AsyncClient) -> None:
-    """POST /notifications/read-all marks all as read and returns count."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.mark_all_read.return_value = 5
-        mock_get_svc.return_value = mock_svc
 
-        resp = await client.post("/notifications/read-all", headers=USER_HEADERS)
+@pytest.mark.asyncio
+async def test_mark_all_read(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
+    """POST /notifications/read-all marks all as read and returns count."""
+    mock_notification_service.mark_all_read.return_value = 5
+
+    resp = await client.post("/notifications/read-all", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     data = resp.json()
@@ -206,18 +183,14 @@ async def test_mark_all_read(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_mark_all_read_zero(client: AsyncClient) -> None:
+async def test_mark_all_read_zero(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """POST /notifications/read-all returns marked=0 when none are unread."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.mark_all_read.return_value = 0
-        mock_get_svc.return_value = mock_svc
+    mock_notification_service.mark_all_read.return_value = 0
 
-        resp = await client.post("/notifications/read-all", headers=USER_HEADERS)
+    resp = await client.post("/notifications/read-all", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     assert resp.json()["marked"] == 0
@@ -227,37 +200,30 @@ async def test_mark_all_read_zero(client: AsyncClient) -> None:
 # GET /notifications/unread-count
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
-async def test_unread_count(client: AsyncClient) -> None:
-    """GET /notifications/unread-count returns the count."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.get_unread_count.return_value = 12
-        mock_get_svc.return_value = mock_svc
 
-        resp = await client.get("/notifications/unread-count", headers=USER_HEADERS)
+@pytest.mark.asyncio
+async def test_unread_count(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
+    """GET /notifications/unread-count returns the count."""
+    mock_notification_service.get_unread_count.return_value = 12
+
+    resp = await client.get("/notifications/unread-count", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     assert resp.json()["count"] == 12
 
 
 @pytest.mark.asyncio
-async def test_unread_count_zero(client: AsyncClient) -> None:
+async def test_unread_count_zero(
+    client: AsyncClient,
+    mock_notification_service: AsyncMock,
+) -> None:
     """GET /notifications/unread-count returns 0 when all are read."""
-    with (
-        patch(
-            "src.identity.routes.notifications._get_service",
-        ) as mock_get_svc,
-    ):
-        mock_svc = AsyncMock()
-        mock_svc.get_unread_count.return_value = 0
-        mock_get_svc.return_value = mock_svc
+    mock_notification_service.get_unread_count.return_value = 0
 
-        resp = await client.get("/notifications/unread-count", headers=USER_HEADERS)
+    resp = await client.get("/notifications/unread-count", headers=USER_HEADERS)
 
     assert resp.status_code == 200
     assert resp.json()["count"] == 0
@@ -267,22 +233,15 @@ async def test_unread_count_zero(client: AsyncClient) -> None:
 # GET /notifications/preferences
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_get_preferences_defaults(client: AsyncClient) -> None:
     """GET /notifications/preferences returns defaults when no settings exist."""
-    with (
-        patch(
-            "src.identity.routes.notifications.user_repo.get_user_settings",
-            new_callable=AsyncMock,
-            return_value=None,
-        ),
-        patch("src.identity.routes.notifications.get_session") as mock_get_session,
+    with patch(
+        "src.identity.routes.notifications.user_repo.get_user_settings",
+        new_callable=AsyncMock,
+        return_value=None,
     ):
-        mock_session = AsyncMock()
-        mock_get_session.return_value.__aiter__ = AsyncMock(
-            return_value=iter([mock_session])
-        )
-
         resp = await client.get("/notifications/preferences", headers=USER_HEADERS)
 
     assert resp.status_code == 200
@@ -305,19 +264,11 @@ async def test_get_preferences_with_custom_settings(client: AsyncClient) -> None
         }
     }
 
-    with (
-        patch(
-            "src.identity.routes.notifications.user_repo.get_user_settings",
-            new_callable=AsyncMock,
-            return_value=settings_row,
-        ),
-        patch("src.identity.routes.notifications.get_session") as mock_get_session,
+    with patch(
+        "src.identity.routes.notifications.user_repo.get_user_settings",
+        new_callable=AsyncMock,
+        return_value=settings_row,
     ):
-        mock_session = AsyncMock()
-        mock_get_session.return_value.__aiter__ = AsyncMock(
-            return_value=iter([mock_session])
-        )
-
         resp = await client.get("/notifications/preferences", headers=USER_HEADERS)
 
     assert resp.status_code == 200
@@ -328,6 +279,7 @@ async def test_get_preferences_with_custom_settings(client: AsyncClient) -> None
 # ---------------------------------------------------------------------------
 # PUT /notifications/preferences
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_update_preferences(client: AsyncClient) -> None:
@@ -345,13 +297,7 @@ async def test_update_preferences(client: AsyncClient) -> None:
             "src.identity.routes.notifications.user_repo.upsert_user_settings",
             new_callable=AsyncMock,
         ) as mock_upsert,
-        patch("src.identity.routes.notifications.get_session") as mock_get_session,
     ):
-        mock_session = AsyncMock()
-        mock_get_session.return_value.__aiter__ = AsyncMock(
-            return_value=iter([mock_session])
-        )
-
         resp = await client.put(
             "/notifications/preferences",
             headers=USER_HEADERS,
