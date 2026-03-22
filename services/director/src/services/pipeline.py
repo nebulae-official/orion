@@ -10,6 +10,7 @@ from typing import Any
 import structlog
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command
+from orion_common.cost import CostResult
 from orion_common.db.models import ContentStatus, PipelineStatus
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
@@ -23,6 +24,16 @@ from ..metrics import CONFIDENCE_SCORE, CONTENT_TOTAL, GENERATION_DURATION
 from ..repositories.content_repo import ContentRepository
 
 logger = structlog.get_logger(__name__)
+
+# Maps graph node names to (human-readable label, stage number).
+# The graph has: strategist → creator → (optional) analyst.
+_STAGE_MAP: dict[str, tuple[str, int]] = {
+    "strategist": ("Generating & reviewing script", 1),
+    "creator": ("Creating visual prompts", 2),
+    "analyst": ("Analyzing performance", 3),
+}
+
+_STAGES_TOTAL = 4  # up to 3 graph nodes + 1 final "complete"
 
 
 class ContentPipeline:
@@ -39,6 +50,35 @@ class ContentPipeline:
         self._event_bus = event_bus
         self._vector_memory = vector_memory
         self._checkpointer = checkpointer
+
+    async def _emit_stage_progress(
+        self,
+        session: AsyncSession,
+        content_id: uuid.UUID,
+        pipeline_run_id: uuid.UUID,
+        stage_name: str,
+        label: str,
+        stages_completed: int,
+        stages_total: int,
+        user_id: str | None = None,
+    ) -> None:
+        """Persist pipeline progress and emit a PIPELINE_STAGE_CHANGED event."""
+        repo = ContentRepository(session)
+        await repo.update_pipeline_progress(pipeline_run_id, label, stages_completed)
+        await session.commit()
+        await self._event_bus.publish(
+            Channels.PIPELINE_STAGE_CHANGED,
+            {
+                "content_id": str(content_id),
+                "pipeline_run_id": str(pipeline_run_id),
+                "stage": stage_name,
+                "stage_label": label,
+                "stages_completed": stages_completed,
+                "stages_total": stages_total,
+                "status": "running",
+                "user_id": str(user_id) if user_id else None,
+            },
+        )
 
     async def run(
         self,
@@ -93,7 +133,25 @@ class ContentPipeline:
         config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            final_state = await self._graph.ainvoke(initial_state, config=config)
+            # Stream node-by-node so we can emit progress after each step.
+            # stream_mode="updates" yields {node_name: state_update_dict}.
+            final_state = dict(initial_state)
+            async for event in self._graph.astream(initial_state, config=config, stream_mode="updates"):
+                node_name = next(iter(event))
+                final_state.update(event[node_name])
+
+                if node_name in _STAGE_MAP:
+                    label, completed = _STAGE_MAP[node_name]
+                    await self._emit_stage_progress(
+                        session,
+                        content_id,
+                        pipeline_run.id,
+                        node_name,
+                        label,
+                        completed,
+                        _STAGES_TOTAL,
+                        user_id=created_by,
+                    )
         except Exception as exc:
             await repo.update_pipeline_run(pipeline_run.id, PipelineStatus.failed, error_message=str(exc))
             await repo.update_status(content_id, ContentStatus.draft)
@@ -112,6 +170,16 @@ class ContentPipeline:
             raise RuntimeError(f"Pipeline failed: {error_msg}")
 
         await repo.update_pipeline_run(pipeline_run.id, PipelineStatus.completed)
+        await self._emit_stage_progress(
+            session,
+            content_id,
+            pipeline_run.id,
+            "complete",
+            "Pipeline complete",
+            _STAGES_TOTAL,
+            _STAGES_TOTAL,
+            user_id=created_by,
+        )
 
         # 6. Extract results from final state
         script = GeneratedScript(
@@ -165,6 +233,22 @@ class ContentPipeline:
         is_final = not cycling_back
 
         if is_final:
+            # Flatten visual prompts to description strings for the Media
+            # service. The full VisualPromptSet stays in the DB column.
+            visual_prompt_strings = [p["description"] for p in visual_prompts_dict.get("prompts", [])] if visual_prompts_dict else []
+
+            # Estimate LLM cost from script length (proxy for output tokens).
+            # Input tokens are roughly 2x output for prompt+context overhead.
+            output_tokens = len(script.body) // 4 if script.body else 0
+            input_tokens = output_tokens * 2
+            cost = CostResult.estimate(
+                provider="ollama",
+                model="llama3",
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                category="llm_tokens",
+            )
+
             await self._event_bus.publish(
                 Channels.CONTENT_CREATED,
                 {
@@ -172,6 +256,9 @@ class ContentPipeline:
                     "trend_id": str(trend_id),
                     "title": content.title,
                     "status": ContentStatus.review.value,
+                    "visual_prompts": visual_prompt_strings,
+                    "user_id": created_by,
+                    "cost": cost.to_dict(),
                 },
             )
 

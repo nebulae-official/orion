@@ -3,6 +3,7 @@
 from orion_common.auth import CurrentUser, get_current_user, get_optional_user
 from orion_common.cache import RedisCache, get_cache
 from orion_common.config import CommonSettings, get_settings
+from orion_common.cost import CostResult
 from orion_common.db import Base, get_session
 from orion_common.event_bus import EventBus
 from orion_common.event_retry import ReliableEventBus
@@ -15,6 +16,7 @@ __all__ = [
     "Base",
     "Channels",
     "CommonSettings",
+    "CostResult",
     "CurrentUser",
     "EventBus",
     "InternalAuthMiddleware",

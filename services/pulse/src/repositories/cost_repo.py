@@ -31,6 +31,7 @@ class ProviderCost(Base):
     category: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     units: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
     metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
     recorded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
@@ -54,6 +55,7 @@ class CostRepository:
         category: str,
         amount: float,
         units: float,
+        user_id: str | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> ProviderCost:
         """Record a new cost entry."""
@@ -62,6 +64,7 @@ class CostRepository:
             category=category,
             amount=amount,
             units=units,
+            user_id=uuid.UUID(user_id) if user_id else None,
             metadata_=metadata or {},
             recorded_at=datetime.now(UTC),
         )
@@ -80,6 +83,7 @@ class CostRepository:
         self,
         *,
         since: datetime | None = None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Return total costs aggregated by category."""
         query = select(
@@ -90,6 +94,8 @@ class CostRepository:
 
         if since:
             query = query.where(ProviderCost.recorded_at >= since)
+        if user_id:
+            query = query.where(ProviderCost.user_id == uuid.UUID(user_id))
 
         result = await self._session.execute(query)
         rows = result.all()
@@ -151,6 +157,7 @@ class CostRepository:
         self,
         *,
         since: datetime | None = None,
+        user_id: str | None = None,
     ) -> list[dict[str, Any]]:
         """Return costs grouped by provider."""
         query = select(
@@ -162,6 +169,8 @@ class CostRepository:
 
         if since:
             query = query.where(ProviderCost.recorded_at >= since)
+        if user_id:
+            query = query.where(ProviderCost.user_id == uuid.UUID(user_id))
 
         result = await self._session.execute(query)
         rows = result.all()

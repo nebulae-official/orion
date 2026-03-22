@@ -9,6 +9,7 @@ from typing import Any
 import structlog
 from fastapi import FastAPI
 from orion_common.config import get_settings
+from orion_common.cost import CostResult
 from orion_common.db.models import AssetType
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
@@ -71,12 +72,23 @@ async def _handle_content_created(data: dict[str, Any]) -> None:
     # Publish outcome event
     event_bus: EventBus = app.state.event_bus
     if batch_result.results:
+        # Build per-provider cost using the first provider in the batch
+        providers_used = list({r.provider for r in batch_result.results})
+        primary_provider = providers_used[0] if providers_used else "unknown"
+        cost = CostResult.fixed(
+            provider=primary_provider,
+            units=len(batch_result.results),
+            category="image_generation",
+        )
         await event_bus.publish(
             Channels.MEDIA_GENERATED,
             {
                 "content_id": content_id_str,
                 "asset_count": len(batch_result.results),
-                "providers": list({r.provider for r in batch_result.results}),
+                "providers": providers_used,
+                "provider": primary_provider,
+                "user_id": data.get("user_id"),
+                "cost": cost.to_dict(),
             },
         )
     if batch_result.failed:

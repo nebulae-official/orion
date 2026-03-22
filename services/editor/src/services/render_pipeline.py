@@ -6,6 +6,7 @@ import uuid
 from datetime import UTC, datetime
 
 import structlog
+from orion_common.cost import CostResult
 from orion_common.db.models import (
     AssetType,
     Content,
@@ -215,6 +216,13 @@ class RenderPipeline:
             pipeline_run.completed_at = datetime.now(UTC)
             await session.commit()
 
+            # Estimate TTS cost from character count
+            tts_cost = CostResult.fixed(
+                provider=tts_result.provider,
+                units=len(script_text),
+                category="tts_characters",
+            )
+
             # Publish event
             await self._event_bus.publish(
                 Channels.CONTENT_UPDATED,
@@ -226,6 +234,9 @@ class RenderPipeline:
                     "thumbnail_paths": thumbnail_paths,
                     "validation_score": validation_result.confidence_score,
                     "validation_passed": validation_result.valid,
+                    "provider": tts_result.provider,
+                    "user_id": str(content.created_by) if content.created_by else None,
+                    "cost": tts_cost.to_dict(),
                 },
             )
 

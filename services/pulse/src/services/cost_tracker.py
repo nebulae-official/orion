@@ -58,14 +58,22 @@ class CostTracker:
         channel = data.get("_channel", "unknown")
         provider = data.get("provider", "unknown")
         cost_data = data.get("cost", {})
+        user_id = data.get("user_id")
 
         if not cost_data:
             return
 
-        category = self._infer_category(channel, cost_data)
-        units = float(cost_data.get("units", 0))
-        rate = cost_data.get("rate", _COST_RATES.get(category, 0))
-        amount = units * rate
+        # Support CostResult format (estimated_cost_usd) and legacy (units * rate)
+        if "estimated_cost_usd" in cost_data:
+            category = cost_data.get("category") or self._infer_category(channel, cost_data)
+            provider = cost_data.get("provider", provider)
+            units = float(cost_data.get("input_tokens", 0) + cost_data.get("output_tokens", 0))
+            amount = float(cost_data["estimated_cost_usd"])
+        else:
+            category = self._infer_category(channel, cost_data)
+            units = float(cost_data.get("units", 0))
+            rate = cost_data.get("rate", _COST_RATES.get(category, 0))
+            amount = units * rate
 
         if amount <= 0:
             return
@@ -77,10 +85,26 @@ class CostTracker:
                 category=category,
                 amount=amount,
                 units=units,
+                user_id=user_id,
                 metadata={
                     "channel": channel,
-                    "rate": rate,
-                    **{k: v for k, v in cost_data.items() if k not in ("units", "rate")},
+                    "model": cost_data.get("model", ""),
+                    **{
+                        k: v
+                        for k, v in cost_data.items()
+                        if k
+                        not in (
+                            "units",
+                            "rate",
+                            "model",
+                            "provider",
+                            "category",
+                            "estimated_cost_usd",
+                            "input_tokens",
+                            "output_tokens",
+                            "currency",
+                        )
+                    },
                 },
             )
 
