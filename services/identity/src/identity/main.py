@@ -14,7 +14,9 @@ from orion_common.middleware import InternalAuthMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from .routes.auth import router as auth_router
+from .routes.keys import router as keys_router
 from .routes.notifications import router as notifications_router
+from .routes.providers import router as providers_router
 from .routes.users import router as users_router
 from .services.cleanup import prune_expired_tokens
 from .services.notification_consumer import notification_consumer
@@ -65,3 +67,5 @@ app.include_router(health_router)
 app.include_router(auth_router, prefix="/internal")
 app.include_router(users_router)
 app.include_router(notifications_router)
+app.include_router(keys_router)
+app.include_router(providers_router)
