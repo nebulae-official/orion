@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -171,10 +172,11 @@ async def lifespan(app: FastAPI):
         analyst_agent=analyst_agent,
         session_factory=_session_ctx,
         checkpointer=_checkpointer,
-        enable_hitl=True,
+        enable_hitl=os.getenv("DIRECTOR_ENABLE_HITL", "true").lower() == "true",
     )
     _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory, checkpointer=_checkpointer)
     app.state.pipeline = _pipeline
+    app.state.event_bus = _event_bus
 
     # Initialise regeneration service
     _regeneration_service = RegenerationService(
@@ -184,7 +186,12 @@ async def lifespan(app: FastAPI):
     )
 
     # Subscribe to events and start listening
-    await _event_bus.subscribe(Channels.TREND_DETECTED, _handle_trend_detected)
+    auto_trigger = os.getenv("DIRECTOR_AUTO_TRIGGER", "false").lower() == "true"
+    if auto_trigger:
+        await _event_bus.subscribe(Channels.TREND_DETECTED, _handle_trend_detected)
+        logger.info("auto_trigger_enabled", channel="TREND_DETECTED")
+    else:
+        logger.info("auto_trigger_disabled", hint="set DIRECTOR_AUTO_TRIGGER=true to enable")
     await _event_bus.subscribe(Channels.CONTENT_REJECTED, _handle_content_rejected)
     await _event_bus.start_listening()
 

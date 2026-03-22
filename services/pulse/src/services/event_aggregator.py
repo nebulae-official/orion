@@ -38,7 +38,7 @@ _ALL_CHANNELS: list[str] = [
 _CHANNEL_SERVICE_MAP: dict[str, str] = {
     Channels.CONTENT_CREATED: "director",
     Channels.CONTENT_UPDATED: "editor",
-    Channels.CONTENT_PUBLISHED: "editor",
+    Channels.CONTENT_PUBLISHED: "publisher",
     Channels.TREND_DETECTED: "scout",
     Channels.TREND_EXPIRED: "scout",
     Channels.MEDIA_GENERATED: "media",
