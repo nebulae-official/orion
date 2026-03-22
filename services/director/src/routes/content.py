@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from orion_common.auth import CurrentUser, get_current_user
-from orion_common.db.models import ContentStatus
+from orion_common.db.models import ContentStatus, Trend
 from orion_common.db.session import get_session
+from orion_common.events import Channels
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..repositories.content_repo import ContentRepository
@@ -229,3 +233,113 @@ async def get_visual_prompts(
         raise HTTPException(status_code=404, detail="No visual prompts for this content")
 
     return VisualPromptsResponse.model_validate(content.visual_prompts)
+
+
+class PipelineStatusResponse(BaseModel):
+    """Response model for pipeline status."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    pipeline_run_id: uuid.UUID
+    content_id: uuid.UUID
+    status: str
+    current_stage_name: str | None = None
+    stages_completed: int = 0
+    stages_total: int = 5
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+
+
+@router.get("/{content_id}/pipeline-status", response_model=PipelineStatusResponse)
+async def get_pipeline_status(
+    content_id: uuid.UUID,
+    user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> PipelineStatusResponse:
+    """Get the latest pipeline run status for a content item."""
+    repo = ContentRepository(session)
+    content = await repo.get_by_id(content_id)
+
+    if content is None:
+        raise HTTPException(status_code=404, detail="Content not found")
+
+    if not user.is_admin and content.created_by is not None and str(content.created_by) != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorised to access this content")
+
+    run = await repo.get_latest_pipeline_run(content_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No pipeline run found for this content")
+
+    return PipelineStatusResponse(
+        pipeline_run_id=run.id,
+        content_id=run.content_id,
+        status=run.status.value,
+        current_stage_name=run.current_stage_name,
+        stages_completed=run.stages_completed,
+        stages_total=run.stages_total,
+        started_at=run.started_at,
+        completed_at=run.completed_at,
+        error_message=run.error_message,
+    )
+
+
+class RejectContentRequest(BaseModel):
+    """Request body for rejecting content."""
+
+    reason: str = Field(..., min_length=1, max_length=2000, description="Reason for rejection")
+    regenerate: bool = Field(default=False, description="Whether to trigger regeneration")
+
+
+@router.post("/{content_id}/reject", status_code=200)
+async def reject_content(
+    content_id: uuid.UUID,
+    body: RejectContentRequest,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, str]:
+    """Reject a content item and optionally trigger regeneration."""
+    repo = ContentRepository(session)
+    content = await repo.get_by_id(content_id)
+
+    if content is None:
+        raise HTTPException(status_code=404, detail="Content not found")
+
+    if not user.is_admin and content.created_by is not None and str(content.created_by) != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorised to reject this content")
+
+    # Update status to rejected
+    await repo.update_status(content_id, ContentStatus.rejected)
+
+    # Look up the trend topic for the event payload
+    trend_topic = "Unknown"
+    result = await session.execute(select(Trend).where(Trend.id == content.trend_id))
+    trend = result.scalar_one_or_none()
+    if trend is not None:
+        trend_topic = trend.topic
+
+    # Publish CONTENT_REJECTED event for downstream consumers
+    event_bus = getattr(request.app.state, "event_bus", None)
+    if event_bus is not None:
+        await event_bus.publish(
+            Channels.CONTENT_REJECTED,
+            {
+                "content_id": str(content_id),
+                "feedback": body.reason,
+                "trend_topic": trend_topic,
+                "niche": "technology",
+                "user_id": user.user_id,
+            },
+        )
+
+    await session.commit()
+
+    await logger.ainfo(
+        "content_rejected",
+        content_id=str(content_id),
+        user_id=user.user_id,
+        regenerate=body.regenerate,
+    )
+
+    return {"status": "rejected"}
