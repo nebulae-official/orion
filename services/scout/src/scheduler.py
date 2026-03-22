@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import os
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
 from apscheduler import AsyncScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from orion_common.db.models import Trend, TrendStatus
 from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
+from sqlalchemy import select
 
 from src.filters.deduplication import TrendDeduplicator
 from src.filters.niche_filter import NicheConfig, NicheFilter
@@ -20,6 +24,63 @@ logger = structlog.get_logger(__name__)
 
 # Default scan interval in minutes
 DEFAULT_INTERVAL_MINUTES = 30
+# Max trends to expire per run
+EXPIRE_BATCH_LIMIT = 100
+
+
+async def expire_old_trends(event_bus: EventBus) -> int:
+    """Mark active trends older than ``SCOUT_TREND_EXPIRY_DAYS`` as expired.
+
+    Publishes a ``TREND_EXPIRED`` event for each expired trend.
+    Processes at most ``EXPIRE_BATCH_LIMIT`` trends per invocation.
+
+    Returns:
+        Number of trends expired.
+    """
+    expiry_days = int(os.getenv("SCOUT_TREND_EXPIRY_DAYS", "7"))
+    cutoff = datetime.now(UTC) - timedelta(days=expiry_days)
+    expired_count = 0
+
+    async for session in get_session():
+        stmt = (
+            select(Trend)
+            .where(
+                Trend.status == TrendStatus.active,
+                Trend.detected_at < cutoff,
+            )
+            .order_by(Trend.detected_at.asc())
+            .limit(EXPIRE_BATCH_LIMIT)
+        )
+        result = await session.execute(stmt)
+        old_trends = list(result.scalars().all())
+
+        if not old_trends:
+            logger.info("no_trends_to_expire")
+            return 0
+
+        repo = TrendRepository(session)
+        for trend in old_trends:
+            await repo.update_status(trend.id, TrendStatus.expired)
+            await event_bus.publish(
+                Channels.TREND_EXPIRED,
+                {
+                    "trend_id": str(trend.id),
+                    "topic": trend.topic,
+                    "source": trend.source,
+                    "detected_at": trend.detected_at.isoformat(),
+                    "expired_at": datetime.now(UTC).isoformat(),
+                },
+            )
+            expired_count += 1
+
+        await session.commit()
+
+    logger.info(
+        "trend_expiration_complete",
+        expired=expired_count,
+        cutoff_days=expiry_days,
+    )
+    return expired_count
 
 
 async def fetch_and_process_trends(
@@ -162,6 +223,14 @@ class TrendScheduler:
         except Exception:
             logger.exception("scheduled_scan_error")
 
+    async def _expiration_job(self) -> None:
+        """Job callback for expiring old trends every 6 hours."""
+        logger.info("trend_expiration_starting")
+        try:
+            await expire_old_trends(self._event_bus)
+        except Exception:
+            logger.exception("trend_expiration_error")
+
     async def start(self) -> None:
         """Start the scheduler with the configured interval."""
         self._scheduler = AsyncScheduler()
@@ -170,6 +239,11 @@ class TrendScheduler:
             self._scheduled_job,
             IntervalTrigger(minutes=self._interval_minutes),
             id="trend_ingestion",
+        )
+        await self._scheduler.add_schedule(
+            self._expiration_job,
+            IntervalTrigger(hours=6),
+            id="trend_expiration",
         )
         await self._scheduler.start_in_background()
         logger.info(
