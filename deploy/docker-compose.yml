@@ -68,17 +68,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      identity:
+        condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
     mem_limit: 512m
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
       interval: 30s
@@ -245,19 +240,22 @@ services:
     env_file:
       - ../.env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://orion:orion@postgres:5432/orion
-      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-orion}:${POSTGRES_PASSWORD:-orion_dev}@postgres:5432/${POSTGRES_DB:-orion}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redisdev}@redis:6379/0
       - ORION_INTERNAL_TOKEN=${ORION_INTERNAL_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8007/health')\""]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 15s
     networks:
       - orion-net
     restart: unless-stopped
@@ -267,17 +265,18 @@ services:
     build:
       context: ../dashboard
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:3000:3000"
     env_file:
       - ../.env
     depends_on:
-      - gateway
+      gateway:
+        condition: service_healthy
     networks:
       - orion-net
     restart: unless-stopped
     mem_limit: 512m
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://$(hostname):3000 || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

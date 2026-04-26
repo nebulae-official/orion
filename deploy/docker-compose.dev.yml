@@ -79,6 +79,30 @@ services:
       LOG_LEVEL: debug
     restart: "no"
 
+  publisher:
+    build:
+      context: ..
+      dockerfile: services/publisher/Dockerfile
+      target: dev
+    volumes:
+      - ../services/publisher/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
+  identity:
+    build:
+      context: ..
+      dockerfile: services/identity/Dockerfile
+      target: dev
+    volumes:
+      - ../services/identity/src:/app/src:ro
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+    restart: "no"
+
   dashboard:
     build:
       context: ../dashboard
