@@ -4,7 +4,7 @@
 
 **Digital Twin Content Agency — from trend to publish, fully autonomous.**
 
-[![Go](https://img.shields.io/badge/Go-1.24-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15.2-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -167,7 +167,7 @@ graph LR
 | Tool | Version | Purpose |
 |------|---------|---------|
 | [Docker](https://docker.com) + [Compose](https://docs.docker.com/compose/) | v2+ | Run the full stack |
-| [Go](https://go.dev/dl/) | 1.24+ | Gateway (for local dev) |
+| [Go](https://go.dev/dl/) | 1.25+ | Gateway (for local dev) |
 | [Python](https://python.org) + [UV](https://docs.astral.sh/uv/) | 3.13+ | Services & CLI (for local dev) |
 | [Node.js](https://nodejs.org) | 22 LTS | Dashboard (for local dev) |
 
@@ -403,7 +403,7 @@ make load-test   # Locust load testing (web UI at :8089)
 
 <table>
 <tr><th>Layer</th><th>Technology</th><th>Version</th></tr>
-<tr><td rowspan="2"><strong>Gateway</strong></td><td>Go</td><td>1.24</td></tr>
+<tr><td rowspan="2"><strong>Gateway</strong></td><td>Go</td><td>1.25</td></tr>
 <tr><td>Chi (router)</td><td>5.x</td></tr>
 <tr><td rowspan="2"><strong>CLI</strong></td><td>Python</td><td>3.13</td></tr>
 <tr><td>Typer + Rich</td><td>0.15.x</td></tr>
@@ -421,6 +421,7 @@ make load-test   # Locust load testing (web UI at :8089)
 <tr><td rowspan="2"><strong>AI Models</strong></td><td>Ollama (LLM)</td><td>latest</td></tr>
 <tr><td>ComfyUI (Images)</td><td>latest</td></tr>
 <tr><td><strong>Package Mgmt</strong></td><td>UV (Python) · npm (Node.js)</td><td>latest</td></tr>
+<tr><td><strong>Formatter / Linter</strong></td><td>ruff (Python) · golangci-lint (Go)</td><td>latest</td></tr>
 </table>
 
 <br />

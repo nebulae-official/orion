@@ -8,7 +8,7 @@ Orion — Digital Twin Content Agency. Autonomous AI agents detect trends, gener
 
 ## Tech Stack
 
-- **Gateway:** Go 1.24, Chi 5.x, slog
+- **Gateway:** Go 1.25, Chi 5.x, slog
 - **CLI:** Python 3.13, Typer, httpx, Rich
 - **Services:** Python 3.13, FastAPI 0.115.x, Pydantic 2.10.x, SQLAlchemy 2.0.x
 - **Dashboard:** Next.js 15.2, React 19, Tailwind CSS 4.0, TypeScript
