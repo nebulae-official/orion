@@ -23,6 +23,10 @@ def get_llm_provider(
     If *user_preferences* contains ``llm_provider``, it takes precedence
     over the environment variable.  Falls back to the env var otherwise.
 
+    Per-user API keys are injected at request time via the ``request_api_key``
+    context variable in ``CloudLLMProvider`` — not here.  See
+    ``routes/content.py`` for the injection point.
+
     Supported values (case-insensitive):
     - ``LOCAL`` (default) — Ollama running on ``settings.ollama_host``
     - ``CLOUD`` — OpenAI-compatible cloud API

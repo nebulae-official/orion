@@ -1,5 +1,6 @@
 """Orion Scout Service — trend detection and ingestion."""
 
+import os
 from contextlib import asynccontextmanager
 
 import structlog
@@ -22,8 +23,11 @@ configure_logging()
 logger = structlog.get_logger()
 settings = get_settings()
 
-# Default active niche (configurable via env in a future iteration)
-ACTIVE_NICHE = "tech"
+# Active niche — override by setting SCOUT_ACTIVE_NICHE in the environment.
+# Must be one of the keys in DEFAULT_NICHE_CONFIGS (tech, gaming, finance, health).
+# Falls back to "tech" if unset or unrecognised.
+_env_niche = os.getenv("SCOUT_ACTIVE_NICHE", "tech")
+ACTIVE_NICHE = _env_niche if _env_niche in DEFAULT_NICHE_CONFIGS else "tech"
 
 
 @asynccontextmanager

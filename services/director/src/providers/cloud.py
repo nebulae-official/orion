@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextvars
 import os
 
 import httpx
@@ -13,6 +14,13 @@ logger = structlog.get_logger(__name__)
 
 _DEFAULT_BASE_URL = "https://api.deepseek.com"
 _DEFAULT_MODEL = "deepseek-chat"
+
+# Per-async-task API key override.  Set this context variable before calling
+# pipeline.run() to inject a per-user API key without mutating shared state.
+# Each asyncio Task gets its own copy, so concurrent requests are isolated.
+request_api_key: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "cloud_llm_request_api_key", default=None
+)
 
 
 class CloudLLMProvider(LLMProvider):
@@ -29,6 +37,10 @@ class CloudLLMProvider(LLMProvider):
         self._base_url = (base_url or os.getenv("DIRECTOR_CLOUD_BASE_URL", _DEFAULT_BASE_URL)).rstrip("/")
         self._model = model or os.getenv("DIRECTOR_CLOUD_MODEL", _DEFAULT_MODEL)
         self._timeout = timeout
+
+    def _effective_api_key(self) -> str:
+        """Return the per-request key if set, otherwise fall back to the instance default."""
+        return request_api_key.get() or self._api_key
 
     async def generate(
         self,
@@ -51,7 +63,7 @@ class CloudLLMProvider(LLMProvider):
         }
 
         headers = {
-            "Authorization": f"Bearer {self._api_key}",
+            "Authorization": f"Bearer {self._effective_api_key()}",
             "Content-Type": "application/json",
         }
 
@@ -81,4 +93,4 @@ class CloudLLMProvider(LLMProvider):
 
     async def is_available(self) -> bool:
         """Return True when an API key is configured."""
-        return bool(self._api_key)
+        return bool(self._effective_api_key())

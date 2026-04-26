@@ -153,6 +153,27 @@ class ContentRepository:
         await self._session.flush()
         return run
 
+    async def update_pipeline_progress(
+        self,
+        run_id: uuid.UUID,
+        stage_name: str,
+        stages_completed: int,
+    ) -> None:
+        """Update pipeline run progress tracking fields."""
+        run = await self._session.get(PipelineRun, run_id)
+        if run is None:
+            return
+        run.stages_completed = stages_completed
+        run.current_stage_name = stage_name
+        await self._session.flush()
+
+    async def get_latest_pipeline_run(self, content_id: uuid.UUID) -> PipelineRun | None:
+        """Get the most recent pipeline run for a content item."""
+        result = await self._session.execute(
+            select(PipelineRun).where(PipelineRun.content_id == content_id).order_by(PipelineRun.started_at.desc()).limit(1)
+        )
+        return result.scalar_one_or_none()
+
     # ------------------------------------------------------------------
     # Cache helpers
     # ------------------------------------------------------------------

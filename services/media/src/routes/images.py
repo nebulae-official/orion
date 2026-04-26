@@ -5,12 +5,15 @@ from __future__ import annotations
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from orion_common.config import get_settings
 from orion_common.db.models import AssetType
 from orion_common.db.session import get_session
+from orion_common.identity_client import IdentityClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..providers.base import ImageProvider, ImageRequest
+from ..providers.fal_ai import request_fal_api_key
 from ..repositories.asset_repo import MediaAssetRepository
 from ..schemas import (
     BatchGenerateRequest,
@@ -51,12 +54,29 @@ def _get_batch_generator() -> BatchGenerator:
     return _batch_generator
 
 
+async def _inject_user_fal_key(request: Request) -> None:
+    """Fetch and inject the authenticated user's Fal.ai key (if stored)."""
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return
+    _settings = get_settings()
+    identity = IdentityClient(
+        base_url=_settings.identity_url,
+        internal_token=_settings.internal_token,
+    )
+    user_fal_key = await identity.get_api_key(user_id=user_id, provider="fal_ai")
+    if user_fal_key:
+        request_fal_api_key.set(user_fal_key)
+
+
 @router.post("/generate", response_model=GenerateImageResponse)
 async def generate_image(
     body: GenerateImageRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ) -> GenerateImageResponse:
     """Generate a single image from a text prompt."""
+    await _inject_user_fal_key(request)
     provider = _get_provider()
     request = ImageRequest(
         prompt=body.prompt,
@@ -98,9 +118,11 @@ async def generate_image(
 @router.post("/batch", response_model=BatchGenerateResponse)
 async def generate_batch(
     body: BatchGenerateRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ) -> BatchGenerateResponse:
     """Generate a batch of images for a content piece."""
+    await _inject_user_fal_key(request)
     batch_gen = _get_batch_generator()
 
     prompts = [

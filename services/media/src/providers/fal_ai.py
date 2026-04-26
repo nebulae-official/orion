@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import os
 from pathlib import Path
 
@@ -10,6 +11,12 @@ import httpx
 import structlog
 
 from .base import ImageProvider, ImageRequest, ImageResult
+
+# Per-async-task API key override for the Fal.ai provider.
+# Set this before calling a generation method to inject a per-user key.
+request_fal_api_key: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "fal_ai_request_api_key", default=None
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -45,17 +52,21 @@ class FalAIProvider(ImageProvider):
         self._poll_interval = poll_interval
         self._max_poll_attempts = max_poll_attempts
 
+    def _effective_api_key(self) -> str:
+        """Return the per-request key if set, otherwise fall back to the instance default."""
+        return request_fal_api_key.get() or self._api_key
+
     async def is_available(self) -> bool:
         """Provider is available when a valid API key is configured."""
-        return bool(self._api_key)
+        return bool(self._effective_api_key())
 
     async def generate(self, request: ImageRequest) -> ImageResult:
         """Submit a generation job to Fal.ai, poll for result, download."""
-        if not self._api_key:
+        if not self._effective_api_key():
             raise RuntimeError("FAL_API_KEY is not configured")
 
         headers = {
-            "Authorization": f"Key {self._api_key}",
+            "Authorization": f"Key {self._effective_api_key()}",
             "Content-Type": "application/json",
         }
 
