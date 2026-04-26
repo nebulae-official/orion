@@ -66,6 +66,7 @@ type oauthLinkResponse struct {
 	Email           string `json:"email"`
 	Name            string `json:"name"`
 	Role            string `json:"role"`
+	AvatarURL       string `json:"avatar_url"`
 	RefreshToken    string `json:"refresh_token"`
 	NeedsOnboarding bool   `json:"needs_onboarding"`
 }
@@ -471,8 +472,9 @@ func (h *OAuthHandler) completeOAuthLogin(w http.ResponseWriter, r *http.Request
 	// Set cookies for the dashboard.
 	secure := !h.cfg.IsDevelopment()
 
+	// Cookie names must match what the dashboard reads (middleware + auth.ts).
 	http.SetCookie(w, &http.Cookie{
-		Name:     "access_token",
+		Name:     "orion_token",
 		Value:    tokenStr,
 		Path:     "/",
 		HttpOnly: true,
@@ -481,14 +483,44 @@ func (h *OAuthHandler) completeOAuthLogin(w http.ResponseWriter, r *http.Request
 		MaxAge:   int(tokenExpiry.Seconds()),
 	})
 
+	// orion_token_expiry is a non-HttpOnly ISO timestamp read by the middleware.
+	expiresAt := time.Now().Add(tokenExpiry)
 	http.SetCookie(w, &http.Cookie{
-		Name:     "refresh_token",
+		Name:     "orion_token_expiry",
+		Value:    expiresAt.UTC().Format(time.RFC3339),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(tokenExpiry.Seconds()),
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "orion_refresh_token",
 		Value:    user.RefreshToken,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   7 * 24 * 3600, // 7 days
+		MaxAge:   30 * 24 * 3600, // 30 days — matches dashboard expectation
+	})
+
+	// orion_user is a non-HttpOnly JSON cookie read by client-side session hooks.
+	userPayload, _ := json.Marshal(map[string]string{
+		"id":         user.UserID,
+		"email":      user.Email,
+		"name":       user.Name,
+		"role":       user.Role,
+		"avatar_url": user.AvatarURL,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "orion_user",
+		Value:    string(userPayload),
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(tokenExpiry.Seconds()),
 	})
 
 	// Redirect new users to onboarding instead of the normal redirect URL.

@@ -46,7 +46,7 @@ class AuthResponse(BaseModel):
 class OAuthLinkRequest(BaseModel):
     provider: str
     provider_user_id: str
-    email: str
+    provider_email: str
     name: str
     access_token: str | None = None
     avatar_url: str | None = None
@@ -60,7 +60,8 @@ class RefreshResponse(BaseModel):
     user_id: str
     email: str
     role: str
-    new_refresh_token: str
+    name: str
+    refresh_token: str
 
 
 class RevokeRequest(BaseModel):
@@ -119,12 +120,12 @@ async def oauth_link(
         await session.flush()
     else:
         # Try to find an existing user by email
-        user = await user_repo.get_by_email(session, body.email)
+        user = await user_repo.get_by_email(session, body.provider_email)
         if user is None:
             # Create new user (OAuth-only, no password)
             user = await user_repo.create_user(
                 session,
-                email=body.email,
+                email=body.provider_email,
                 password_hash=None,
                 name=body.name,
                 role="editor",
@@ -140,7 +141,7 @@ async def oauth_link(
             user_id=user.id,
             provider=body.provider,
             provider_user_id=body.provider_user_id,
-            provider_email=body.email,
+            provider_email=body.provider_email,
             access_token=body.access_token,
         )
 
@@ -210,7 +211,8 @@ async def refresh_token(
         user_id=str(user.id),
         email=user.email,
         role=user.role,
-        new_refresh_token=new_raw,
+        name=user.name,
+        refresh_token=new_raw,
     )
 
 

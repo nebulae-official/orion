@@ -359,6 +359,9 @@ class PipelineRun(Base):
         nullable=False,
         default=PipelineStatus.pending,
     )
+    stages_completed: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    stages_total: Mapped[int] = mapped_column(Integer, default=5, server_default="5")
+    current_stage_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

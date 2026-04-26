@@ -62,6 +62,12 @@ class CommonSettings(BaseSettings):
         alias="ORION_INTERNAL_TOKEN",
     )
 
+    # Identity service — used by pipeline services to fetch per-user API keys
+    identity_url: str = Field(
+        default="http://identity:8007",
+        description="Base URL of the Identity service (internal network)",
+    )
+
     @property
     def database_url(self) -> str:
         """Async database URL for SQLAlchemy (asyncpg driver)."""

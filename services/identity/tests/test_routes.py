@@ -199,7 +199,7 @@ async def test_refresh_token_rotation(
 
     assert resp.status_code == 200
     data = resp.json()
-    assert data["new_refresh_token"] == "new_raw_token"
+    assert data["refresh_token"] == "new_raw_token"
     assert data["user_id"] == str(sample_user.id)
 
 

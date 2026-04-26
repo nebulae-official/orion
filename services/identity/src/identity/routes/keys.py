@@ -22,6 +22,8 @@ ALLOWED_PROVIDERS = frozenset(
         "elevenlabs",
         "deepseek",
         "groq",
+        "replicate",
+        "runway",
     }
 )
 
@@ -45,6 +47,11 @@ class KeyMetadata(BaseModel):
 
 class KeyListResponse(BaseModel):
     keys: list[KeyMetadata]
+
+
+class KeyValueResponse(BaseModel):
+    provider: str
+    api_key: str
 
 
 class MessageResponse(BaseModel):
@@ -82,6 +89,30 @@ async def list_keys(
     repo = KeyRepository(session)
     keys = await repo.list_providers(user_id)
     return KeyListResponse(keys=[KeyMetadata(**k) for k in keys])
+
+
+@router.get("/{provider}", response_model=KeyValueResponse)
+async def get_key(
+    provider: str,
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> KeyValueResponse:
+    """Return the decrypted API key for a provider.
+
+    This endpoint is intended for internal service-to-service calls (e.g.
+    Director fetching the user's OpenAI key before running a pipeline).
+    The ``X-Internal-Token`` header is validated by the ``InternalAuthMiddleware``
+    already applied to the whole app.
+    """
+    if provider not in ALLOWED_PROVIDERS:
+        raise HTTPException(status_code=400, detail=f"Unknown provider: {provider}")
+
+    user_id = _get_user_id(request)
+    repo = KeyRepository(session)
+    api_key = await repo.get_decrypted(user_id, provider)
+    if api_key is None:
+        raise HTTPException(status_code=404, detail=f"No key stored for provider: {provider}")
+    return KeyValueResponse(provider=provider, api_key=api_key)
 
 
 @router.delete("/{provider}", response_model=MessageResponse)

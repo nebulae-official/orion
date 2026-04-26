@@ -45,8 +45,20 @@ func main() {
 		rdb := redis.NewClient(opt)
 		ctx := context.Background()
 
-		// Start per-user notification relay
+		// Start per-user notification relay (orion.notification.created → targeted send)
 		handlers.StartNotificationRelay(ctx, rdb, hub)
+
+		// Start per-user pipeline progress relay (orion.pipeline.stage_changed → targeted send)
+		handlers.StartPipelineProgressRelay(ctx, rdb, hub)
+
+		// Broadcast the remaining orion.* channels to all clients.
+		// orion.notification.created and orion.pipeline.stage_changed are handled
+		// above with per-user targeting — exclude them here to avoid duplicates
+		// and accidental cross-user leakage.
+		excludedChannels := map[string]struct{}{
+			"orion.notification.created":   {},
+			"orion.pipeline.stage_changed": {},
+		}
 
 		pubsub := rdb.PSubscribe(ctx, "orion.*")
 		defer pubsub.Close()
@@ -54,6 +66,9 @@ func main() {
 		slog.Info("ws_redis_subscription_started")
 		ch := pubsub.Channel()
 		for msg := range ch {
+			if _, skip := excludedChannels[msg.Channel]; skip {
+				continue
+			}
 			wsMsg := handlers.WSMessage{
 				Type:      msg.Channel,
 				Payload:   json.RawMessage(msg.Payload),
