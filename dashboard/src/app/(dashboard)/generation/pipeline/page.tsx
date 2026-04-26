@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { serverFetch } from "@/lib/api-client";
+import { fetchPipelineStatus } from "@/lib/actions";
 import { DEMO_MODE } from "@/lib/config";
 import { demoContent, demoPipelineRuns } from "@/lib/demo-data";
 import type { PipelineRun } from "@/lib/demo-data";
@@ -326,6 +327,16 @@ export default async function PipelinePage({
         token,
       );
       contentItems = res.items;
+
+      // Fetch pipeline status for each content item in parallel
+      const pipelineResults = await Promise.all(
+        contentItems.map((item) => fetchPipelineStatus(item.id)),
+      );
+      for (const run of pipelineResults) {
+        if (run) {
+          pipelineRuns.push(run);
+        }
+      }
     } catch {
       fetchError = true;
     }

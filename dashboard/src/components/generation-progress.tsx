@@ -158,13 +158,14 @@ export function GenerationProgress(): React.ReactElement {
     const base =
       process.env.NEXT_PUBLIC_GATEWAY_URL?.replace(/^http/, "ws") ??
       "ws://localhost:8000";
-    return `${base}/ws/progress`;
+    // The gateway WebSocket endpoint is /ws (not /ws/progress — that path does not exist).
+    return `${base}/ws`;
   }, []);
 
   const handleMessage = useCallback((msg: WebSocketMessage) => {
     const { type, payload } = msg;
 
-    if (type === "pipeline.progress") {
+    if (type === "pipeline_progress") {
       const contentId = payload.content_id as string;
       const stageName = payload.stage as string;
       const status = payload.status as StageProgress["status"];

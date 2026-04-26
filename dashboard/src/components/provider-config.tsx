@@ -131,7 +131,14 @@ export function ProviderConfig(): React.ReactElement {
 
   const checkStatus = useCallback(async (service: string): Promise<{ status: "connected" | "disconnected"; error?: string }> => {
     if (DEMO_MODE) {
-      return { status: "connected" };
+      // Show realistic mix of statuses in demo mode
+      const demoStatuses: Record<string, { status: "connected" | "disconnected"; error?: string }> = {
+        llm: { status: "connected" },
+        image: { status: "connected" },
+        video: { status: "disconnected", error: "Connection refused" },
+        tts: { status: "disconnected", error: "Model not found" },
+      };
+      return demoStatuses[service] ?? { status: "connected" };
     }
     try {
       await apiClient.get(`/api/v1/providers/${service}/status`);
@@ -144,17 +151,17 @@ export function ProviderConfig(): React.ReactElement {
         } else if (err.status === 401 || err.status === 403) {
           errorMessage = "Authentication failed";
         } else if (err.status === 408) {
-          errorMessage = "Connection timed out";
+          errorMessage = "Timeout";
         } else if (err.status === 503) {
-          errorMessage = "Service unavailable";
+          errorMessage = "Connection refused";
         } else {
           errorMessage = err.message;
         }
       } else if (err instanceof Error) {
         if (err.message.includes("fetch") || err.message.includes("ECONNREFUSED")) {
-          errorMessage = "Service not running";
+          errorMessage = "Connection refused";
         } else if (err.message.includes("timeout") || err.message.includes("ETIMEDOUT")) {
-          errorMessage = "Connection timed out";
+          errorMessage = "Timeout";
         } else {
           errorMessage = err.message;
         }
@@ -233,12 +240,17 @@ export function ProviderConfig(): React.ReactElement {
     setMessage(null);
 
     if (DEMO_MODE) {
-      // Simulate a connection test
+      // Simulate a connection test with realistic delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await checkStatus(service);
       setConfigs((prev) =>
-        prev.map((c) => (c.service === service ? { ...c, status: "connected", errorMessage: undefined } : c))
+        prev.map((c) => (c.service === service ? { ...c, status: result.status, errorMessage: result.error } : c))
       );
-      setMessage({ type: "success", text: `${config.label} connection successful.` });
+      if (result.status === "connected") {
+        setMessage({ type: "success", text: `${config.label} connection successful.` });
+      } else {
+        setMessage({ type: "error", text: `${config.label} connection failed: ${result.error ?? "Unknown error"}.` });
+      }
       setTesting(null);
       return;
     }
@@ -307,7 +319,21 @@ export function ProviderConfig(): React.ReactElement {
                 <h3 className="text-lg font-semibold text-text">
                   {config.label}
                 </h3>
-                <StatusDot status={config.status} />
+                <div className="flex items-center gap-2">
+                  <StatusDot status={config.status} />
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      config.status === "connected" && "text-success",
+                      config.status === "disconnected" && "text-danger",
+                      config.status === "checking" && "text-warning"
+                    )}
+                  >
+                    {config.status === "connected" && "Connected"}
+                    {config.status === "disconnected" && "Disconnected"}
+                    {config.status === "checking" && "Checking..."}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-4">
