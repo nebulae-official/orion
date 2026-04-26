@@ -1,5 +1,5 @@
 # Tooling artifacts
-.codex/
+.codex
 
 # Go binaries
 bin/
