@@ -1,3 +1,6 @@
+# Tooling artifacts
+.codex/
+
 # Go binaries
 bin/
 /gateway
