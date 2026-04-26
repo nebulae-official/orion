@@ -162,6 +162,15 @@
   --radius-os-lg: 0.25rem;
   --radius-os-xl: 0.5rem;
   --radius-os-full: 0.75rem;
+
+  /* ── ORION-196 DS-01: Alias Tokens ──────────── */
+  /* These map the ticket spec names to the existing palette.
+     --color-secondary overrides the M3 value above (#bdf4ff → cyan). */
+  --color-bg-deep: #080B14;
+  --color-surface-1: var(--color-surface);
+  --color-surface-2: var(--color-surface-elevated);
+  --color-secondary: var(--color-cyan);
+  --color-accent: var(--color-gold);
 }
 
 /* ═══════════════════════════════════════════════
@@ -243,6 +252,9 @@ html:not(.dark) {
 
   /* ── Gradients (light) ─────────────────────── */
   --gradient-sidebar: linear-gradient(180deg, #F8F8FA 0%, #FFFFFF 100%);
+
+  /* ── ORION-196 DS-01: Alias Tokens (light) ──── */
+  --color-bg-deep: var(--color-bg);
 }
 
 /* ── Global Styles ──────────────────────────── */
