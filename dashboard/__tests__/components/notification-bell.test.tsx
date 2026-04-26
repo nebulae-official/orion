@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { NotificationBell } from "@/components/notification-bell";
 
 // Mock the useWebSocket hook
 const mockOnMessage = vi.fn();
 vi.mock("@/hooks/use-websocket", () => ({
-  useWebSocket: (opts: { onMessage: (msg: unknown) => void }) => {
+  useWebSocket: (opts: { url: string; onMessage: (msg: unknown) => void }) => {
     // Store the callback so tests can trigger it
     mockOnMessage.mockImplementation(opts.onMessage);
     return {
@@ -16,7 +16,7 @@ vi.mock("@/hooks/use-websocket", () => ({
       disconnect: vi.fn(),
     };
   },
-  type WebSocketMessage: {},
+  WebSocketMessage: {},
 }));
 
 // Mock NotificationCenter
@@ -80,7 +80,9 @@ describe("NotificationBell", () => {
     render(<NotificationBell initialCount={3} wsUrl="ws://test" />);
 
     // Simulate a WebSocket notification
-    mockOnMessage({ type: "notification" });
+    act(() => {
+      mockOnMessage({ type: "notification" });
+    });
 
     expect(screen.getByText("4")).toBeInTheDocument();
   });
@@ -89,7 +91,9 @@ describe("NotificationBell", () => {
     render(<NotificationBell initialCount={3} wsUrl="ws://test" />);
 
     // Simulate a non-notification WebSocket message
-    mockOnMessage({ type: "system.update" });
+    act(() => {
+      mockOnMessage({ type: "system.update" });
+    });
 
     expect(screen.getByText("3")).toBeInTheDocument();
   });

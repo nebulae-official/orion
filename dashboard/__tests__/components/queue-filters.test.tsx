@@ -58,7 +58,7 @@ describe("QueueFilters", () => {
     render(<QueueFilters currentSort="score" />);
 
     const scoreButton = screen.getByText("Score");
-    expect(scoreButton).toHaveClass("bg-surface-elevated");
+    expect(scoreButton).toHaveClass("bg-primary");
   });
 
   it("navigates when a status filter is clicked", () => {

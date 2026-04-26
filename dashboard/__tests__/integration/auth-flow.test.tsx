@@ -99,7 +99,7 @@ describe("Auth Flow Integration", () => {
     });
 
     // Button should be disabled
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button", { name: /signing in/i });
     expect(button).toBeDisabled();
 
     // Resolve the login

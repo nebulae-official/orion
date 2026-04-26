@@ -22,12 +22,12 @@ describe("Button", () => {
   it("applies secondary variant classes", () => {
     render(<Button variant="secondary">Secondary</Button>);
     const button = screen.getByRole("button", { name: "Secondary" });
-    expect(button.className).toContain("glass-card");
+    expect(button.className).toContain("bg-surface-elevated");
     expect(button.className).toContain("text-text-secondary");
   });
 
-  it("applies danger variant classes", () => {
-    render(<Button variant="danger">Delete</Button>);
+  it("applies destructive variant classes", () => {
+    render(<Button variant="destructive">Delete</Button>);
     const button = screen.getByRole("button", { name: "Delete" });
     expect(button.className).toContain("bg-danger");
   });
