@@ -13,7 +13,9 @@ from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from .routes.admin_keys import router as admin_keys_router
 from .routes.auth import router as auth_router
+from .routes.internal_keys import router as internal_keys_router
 from .routes.keys import router as keys_router
 from .routes.notifications import router as notifications_router
 from .routes.providers import router as providers_router
@@ -30,9 +32,7 @@ session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
     bind=engine, expire_on_commit=False
 )
 
-redis_client: aioredis.Redis = aioredis.from_url(
-    settings.redis_url, decode_responses=True
-)
+redis_client: aioredis.Redis = aioredis.from_url(settings.redis_url, decode_responses=True)
 
 
 async def token_cleanup_loop(engine) -> None:
@@ -50,9 +50,7 @@ async def token_cleanup_loop(engine) -> None:
 async def lifespan(app: FastAPI):
     logger.info("service_starting", service="identity")
     cleanup_task = asyncio.create_task(token_cleanup_loop(engine))
-    consumer_task = asyncio.create_task(
-        notification_consumer(redis_client, session_factory)
-    )
+    consumer_task = asyncio.create_task(notification_consumer(redis_client, session_factory))
     yield
     consumer_task.cancel()
     cleanup_task.cancel()
@@ -69,3 +67,5 @@ app.include_router(users_router)
 app.include_router(notifications_router)
 app.include_router(keys_router)
 app.include_router(providers_router)
+app.include_router(admin_keys_router)
+app.include_router(internal_keys_router)
