@@ -6,7 +6,7 @@ import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
-import { getDemoContentPage } from "@/lib/demo-data";
+import { getDemoContentCounts, getDemoContentPage } from "@/lib/demo-data";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
 
 interface QueuePageProps {
@@ -82,13 +82,16 @@ export default async function QueuePage({
   }
 
   const totalPages = Math.ceil(data.total / limit);
+  const statusCounts = DEMO_MODE ? getDemoContentCounts() : undefined;
 
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Content Queue</h1>
+        <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">
+          Content Queue
+        </h1>
         <p className="mt-2 text-text-secondary">
-          Review and manage content in the pipeline.
+          Review, approve and manage all generated content.
         </p>
       </div>
 
@@ -98,7 +101,11 @@ export default async function QueuePage({
         </div>
       )}
 
-      <QueueFilters currentStatus={status} currentSort={sort} />
+      <QueueFilters
+        currentStatus={status}
+        currentSort={sort}
+        statusCounts={statusCounts}
+      />
 
       {data.items.length === 0 ? (
         <div className="mt-6">
@@ -111,7 +118,7 @@ export default async function QueuePage({
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((content) => (
               <ContentCard key={content.id} content={content} />
             ))}

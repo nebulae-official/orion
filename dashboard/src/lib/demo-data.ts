@@ -417,6 +417,22 @@ export const demoPipelineActivity: PipelineActivityDay[] =
 // Paginated helpers
 // ---------------------------------------------------------------------------
 
+export function getDemoContentCounts(): Record<ContentStatus | "all", number> {
+  const counts: Record<ContentStatus | "all", number> = {
+    all: demoContent.length,
+    draft: 0,
+    generating: 0,
+    review: 0,
+    approved: 0,
+    published: 0,
+    rejected: 0,
+  };
+  for (const c of demoContent) {
+    counts[c.status]++;
+  }
+  return counts;
+}
+
 export function getDemoContentPage(
   status?: ContentStatus,
   page = 1,
