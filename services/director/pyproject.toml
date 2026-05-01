@@ -11,7 +11,7 @@ dependencies = [
     "orion-common",
     "langgraph>=1.0.0,<2.0.0",
     "langgraph-checkpoint-postgres>=2.0.0",
-    "psycopg[binary]>=3.1.0",
+    "psycopg[binary]>=3.3.3",
 ]
 
 [tool.uv.sources]
