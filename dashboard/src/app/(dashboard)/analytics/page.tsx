@@ -9,13 +9,14 @@ import {
   demoCostSummary,
   demoProviderCosts,
   demoErrorTrend,
+  demoVolumeData,
   demoEarnings,
 } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/charts/stat-card";
 import { FunnelChart } from "@/components/charts/funnel-chart";
-import { CostChart } from "@/components/charts/cost-chart";
-import { ProviderPie } from "@/components/charts/provider-pie";
+import { OutputVelocityChart } from "@/components/charts/output-velocity-chart";
+import { CostBreakdown } from "@/components/charts/cost-breakdown";
 import { ErrorTrend } from "@/components/charts/error-trend";
 import { EarningsChart } from "@/components/charts/earnings-chart";
 import { EarningsTrend } from "@/components/charts/earnings-trend";
@@ -109,28 +110,55 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
   const hasData = DEMO_MODE || funnel.generated > 0;
 
-  const approvalRate =
+  const costPerVideo =
+    funnel.published > 0 ? costs.total_cost / funnel.published : 0;
+
+  const pipelineSuccess =
     funnel.generated > 0
-      ? ((funnel.approved / funnel.generated) * 100).toFixed(1)
+      ? ((funnel.published / funnel.generated) * 100).toFixed(1)
       : "0";
 
-  const funnelData = [
-    { stage: "Generated", count: funnel.generated, color: "var(--color-primary-light)" },
-    { stage: "In Review", count: funnel.review, color: "var(--color-gold)" },
-    { stage: "Approved", count: funnel.approved, color: "var(--color-success)" },
-    { stage: "Published", count: funnel.published, color: "var(--color-cyan)" },
-    { stage: "Rejected", count: funnel.rejected, color: "var(--color-danger)" },
+  // Five-stage funnel: map current pipeline stages to reference labels
+  const funnelStages = [
+    {
+      label: "Detected",
+      count: funnel.generated,
+      gradient: "linear-gradient(180deg,rgba(124,58,237,0.6),rgba(124,58,237,0.2))",
+    },
+    {
+      label: "Scripted",
+      count: funnel.review,
+      gradient: "linear-gradient(180deg,rgba(124,58,237,0.5),rgba(124,58,237,0.15))",
+    },
+    {
+      label: "Rendered",
+      count: funnel.approved,
+      gradient: "linear-gradient(180deg,rgba(34,211,238,0.5),rgba(34,211,238,0.15))",
+    },
+    {
+      label: "Approved",
+      count: Math.max(funnel.approved, funnel.published),
+      gradient: "linear-gradient(180deg,rgba(16,185,129,0.5),rgba(16,185,129,0.15))",
+    },
+    {
+      label: "Published",
+      count: funnel.published,
+      gradient: "linear-gradient(180deg,rgba(16,185,129,0.7),rgba(16,185,129,0.3))",
+    },
   ];
 
   return (
     <div className="p-8">
+      {/* Page header */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <BarChart3 className="h-8 w-8 text-primary-light" />
           <div>
-            <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Analytics</h1>
+            <h1 className="font-[family-name:var(--font-headline)] text-3xl font-bold text-text">
+              Analytics
+            </h1>
             <p className="mt-1 text-text-secondary">
-              Pipeline performance, costs, and provider usage.
+              Pipeline performance, cost tracking and conversion funnel.
             </p>
           </div>
         </div>
@@ -152,129 +180,146 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
       ) : null}
 
       {hasData && (
-      <>
-      <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <StatCard title="Total Generated" value={funnel.generated} />
-        <StatCard title="Approval Rate" value={`${approvalRate}%`} />
-        <StatCard
-          title="Total Cost"
-          value={`$${costs.total_cost.toFixed(2)}`}
-          subtitle="Last 30 days"
-        />
-      </div>
-
-      <div className="mb-6">
-        <FunnelChart data={funnelData} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <CostChart data={providerCosts} />
-        <ProviderPie data={providerCosts} />
-      </div>
-
-      <div className="mt-6">
-        <ErrorTrend data={errors} />
-      </div>
-
-      {/* Earnings Section */}
-      <div className="mt-10">
-        <div className="mb-6 flex items-center gap-3">
-          <DollarSign className="h-7 w-7 text-emerald-400" />
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
-            Earnings
-          </h2>
-        </div>
-
-        {DEMO_MODE ? (
-          <>
-            <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div className="glass-card luminous-border rounded-xl p-6">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-emerald-400" />
-                  <p className="text-sm font-medium text-text-muted">Total Earnings</p>
-                </div>
-                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
-                  ${demoEarnings.total_earnings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <div className="glass-card luminous-border rounded-xl p-6">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-400" />
-                  <p className="text-sm font-medium text-text-muted">Earnings This Month</p>
-                </div>
-                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
-                  ${demoEarnings.earnings_this_month.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <div className="glass-card luminous-border rounded-xl p-6">
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-emerald-400" />
-                  <p className="text-sm font-medium text-text-muted">Avg Per Post</p>
-                </div>
-                <p className="mt-1 font-[family-name:var(--font-display)] text-3xl font-bold text-emerald-400">
-                  ${demoEarnings.avg_per_post.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <EarningsChart data={demoEarnings.by_platform} />
-              <EarningsTrend data={demoEarnings.trend} />
-            </div>
-
-            <div className="glass-card luminous-border rounded-xl p-6">
-              <h3 className="mb-4 text-lg font-semibold text-text">Top Earning Content</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-text-muted">
-                      <th className="pb-3 pr-4 font-medium">Rank</th>
-                      <th className="pb-3 pr-4 font-medium">Title</th>
-                      <th className="pb-3 pr-4 font-medium">Platform</th>
-                      <th className="pb-3 text-right font-medium">Earnings</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoEarnings.top_content.map((item, index) => (
-                      <tr key={item.content_id} className="border-b border-border/50 last:border-0">
-                        <td className="py-3 pr-4 text-text-muted">#{index + 1}</td>
-                        <td className="py-3 pr-4 text-text">{item.title}</td>
-                        <td className="py-3 pr-4">
-                          <span
-                            className={cn(
-                              "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium",
-                              item.platform === "youtube" && "bg-red-500/15 text-red-400",
-                              item.platform === "tiktok" && "bg-cyan-500/15 text-cyan-400",
-                              item.platform === "instagram" && "bg-pink-500/15 text-pink-400",
-                              item.platform === "twitter" && "bg-blue-500/15 text-blue-400",
-                            )}
-                          >
-                            {item.platform === "youtube" && "YouTube"}
-                            {item.platform === "tiktok" && "TikTok"}
-                            {item.platform === "instagram" && "Instagram"}
-                            {item.platform === "twitter" && "Twitter"}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right font-medium text-emerald-400">
-                          ${item.earnings.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="glass-card luminous-border rounded-xl p-12 text-center">
-            <DollarSign className="mx-auto mb-3 h-10 w-10 text-text-dim" />
-            <p className="text-text-muted">
-              Earnings data will appear once platform integrations are connected.
-            </p>
+        <>
+          {/* KPI row — 4 cards */}
+          <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              title="Total Cost"
+              value={`$${costs.total_cost.toFixed(2)}`}
+              trend={{ direction: "down", label: "vs last week", positiveDirection: "down" }}
+            />
+            <StatCard
+              title="Cost / Video"
+              value={`$${costPerVideo.toFixed(2)}`}
+              trend={{ direction: "down", label: "vs last week", positiveDirection: "down" }}
+            />
+            <StatCard
+              title="Videos Published"
+              value={funnel.published}
+              trend={{ direction: "up", label: "vs last week" }}
+            />
+            <StatCard
+              title="Pipeline Success"
+              value={`${pipelineSuccess}%`}
+              trend={{ direction: "up", label: "vs last week" }}
+            />
           </div>
-        )}
-      </div>
-      </>
+
+          {/* Output Velocity + Cost Breakdown */}
+          <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <OutputVelocityChart data={DEMO_MODE ? demoVolumeData : []} />
+            <CostBreakdown providers={providerCosts} totalCost={costs.total_cost} />
+          </div>
+
+          {/* Pipeline Funnel */}
+          <div className="mb-5">
+            <FunnelChart stages={funnelStages} />
+          </div>
+
+          {/* Error trend */}
+          <div className="mb-5">
+            <ErrorTrend data={errors} />
+          </div>
+
+          {/* Earnings Section */}
+          <div className="mt-10">
+            <div className="mb-6 flex items-center gap-3">
+              <DollarSign className="h-7 w-7 text-emerald-400" />
+              <h2 className="font-[family-name:var(--font-headline)] text-2xl font-bold text-text">
+                Earnings
+              </h2>
+            </div>
+
+            {DEMO_MODE ? (
+              <>
+                <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+                  <div className="glass-card luminous-border rounded-xl p-6">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-emerald-400" />
+                      <p className="text-sm font-medium text-text-muted">Total Earnings</p>
+                    </div>
+                    <p className="mt-1 font-[family-name:var(--font-headline)] text-3xl font-bold text-emerald-400">
+                      ${demoEarnings.total_earnings.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="glass-card luminous-border rounded-xl p-6">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-emerald-400" />
+                      <p className="text-sm font-medium text-text-muted">Earnings This Month</p>
+                    </div>
+                    <p className="mt-1 font-[family-name:var(--font-headline)] text-3xl font-bold text-emerald-400">
+                      ${demoEarnings.earnings_this_month.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                  <div className="glass-card luminous-border rounded-xl p-6">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-emerald-400" />
+                      <p className="text-sm font-medium text-text-muted">Avg Per Post</p>
+                    </div>
+                    <p className="mt-1 font-[family-name:var(--font-headline)] text-3xl font-bold text-emerald-400">
+                      ${demoEarnings.avg_per_post.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <EarningsChart data={demoEarnings.by_platform} />
+                  <EarningsTrend data={demoEarnings.trend} />
+                </div>
+
+                <div className="glass-card luminous-border rounded-xl p-6">
+                  <h3 className="mb-4 text-lg font-semibold text-text">Top Earning Content</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-text-muted">
+                          <th className="pb-3 pr-4 font-medium">Rank</th>
+                          <th className="pb-3 pr-4 font-medium">Title</th>
+                          <th className="pb-3 pr-4 font-medium">Platform</th>
+                          <th className="pb-3 text-right font-medium">Earnings</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {demoEarnings.top_content.map((item, index) => (
+                          <tr key={item.content_id} className="border-b border-border/50 last:border-0">
+                            <td className="py-3 pr-4 text-text-muted">#{index + 1}</td>
+                            <td className="py-3 pr-4 text-text">{item.title}</td>
+                            <td className="py-3 pr-4">
+                              <span
+                                className={cn(
+                                  "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium",
+                                  item.platform === "youtube" && "bg-red-500/15 text-red-400",
+                                  item.platform === "tiktok" && "bg-cyan-500/15 text-cyan-400",
+                                  item.platform === "instagram" && "bg-pink-500/15 text-pink-400",
+                                  item.platform === "twitter" && "bg-blue-500/15 text-blue-400",
+                                )}
+                              >
+                                {item.platform === "youtube" && "YouTube"}
+                                {item.platform === "tiktok" && "TikTok"}
+                                {item.platform === "instagram" && "Instagram"}
+                                {item.platform === "twitter" && "Twitter"}
+                              </span>
+                            </td>
+                            <td className="py-3 text-right font-medium text-emerald-400">
+                              ${item.earnings.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="glass-card luminous-border rounded-xl p-12 text-center">
+                <DollarSign className="mx-auto mb-3 h-10 w-10 text-text-dim" />
+                <p className="text-text-muted">
+                  Earnings data will appear once platform integrations are connected.
+                </p>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
