@@ -20,7 +20,7 @@ test.describe("Trends Page", () => {
   test("3 stat cards visible", async ({ page }) => {
     await page.goto("/trends");
 
-    await expect(page.getByText("Total Found")).toBeVisible();
+    await expect(page.getByText("Total Detected")).toBeVisible();
     await expect(page.getByText("Used for Content")).toBeVisible();
     await expect(page.getByText("Discarded")).toBeVisible();
   });

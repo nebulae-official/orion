@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { TrendTable } from "@/components/trend-table";
 
 const mockTrends = [
@@ -40,12 +40,14 @@ describe("TrendTable", () => {
 
   it("renders table with column headers", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("Topic")).toBeInTheDocument();
-    expect(screen.getByText("Source")).toBeInTheDocument();
-    expect(screen.getByText("Virality")).toBeInTheDocument();
-    expect(screen.getByText("Status")).toBeInTheDocument();
-    expect(screen.getByText(/Created/)).toBeInTheDocument();
+    expect(table.getByText("Topic")).toBeInTheDocument();
+    expect(table.getByText("Source")).toBeInTheDocument();
+    expect(table.getByText("Virality")).toBeInTheDocument();
+    expect(table.getByText("Status")).toBeInTheDocument();
+    expect(table.getByText(/Detected/)).toBeInTheDocument();
+    expect(table.getByText("Niche")).toBeInTheDocument();
   });
 
   it("renders trend data rows", () => {
@@ -58,10 +60,11 @@ describe("TrendTable", () => {
 
   it("renders source names", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("Reddit")).toBeInTheDocument();
-    expect(screen.getByText("Twitter")).toBeInTheDocument();
-    expect(screen.getByText("HackerNews")).toBeInTheDocument();
+    expect(table.getByText("Reddit")).toBeInTheDocument();
+    expect(table.getByText("Twitter")).toBeInTheDocument();
+    expect(table.getByText("HackerNews")).toBeInTheDocument();
   });
 
   it("renders virality scores formatted to one decimal", () => {
@@ -74,14 +77,16 @@ describe("TrendTable", () => {
 
   it("renders status badges", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("NEW")).toBeInTheDocument();
-    expect(screen.getByText("PROCESSING")).toBeInTheDocument();
-    expect(screen.getByText("USED")).toBeInTheDocument();
+    expect(table.getByText("NEW")).toBeInTheDocument();
+    expect(table.getByText("PROCESSING")).toBeInTheDocument();
+    expect(table.getByText("USED")).toBeInTheDocument();
   });
 
   it("sorts by column when header is clicked", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
     // Default sort is by created_at descending
     const rows = screen.getAllByRole("row");
@@ -89,7 +94,7 @@ describe("TrendTable", () => {
     expect(rows[1]).toHaveTextContent("AI Content Generation");
 
     // Click on Topic to sort by topic
-    fireEvent.click(screen.getByText("Topic"));
+    fireEvent.click(table.getByText("Topic"));
 
     // Sort should now show descending by topic
     const rowsAfterSort = screen.getAllByRole("row");
@@ -98,25 +103,27 @@ describe("TrendTable", () => {
 
   it("toggles sort direction when same column is clicked twice", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
     // Click on Virality to sort descending
-    fireEvent.click(screen.getByText("Virality"));
+    fireEvent.click(table.getByText("Virality"));
     let rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("Short Form Video"); // 9.2
 
     // Click again to sort ascending (header now shows "Virality ↓")
-    fireEvent.click(screen.getByText(/Virality/));
+    fireEvent.click(table.getByText(/Virality/));
     rows = screen.getAllByRole("row");
     expect(rows[1]).toHaveTextContent("Machine Learning"); // 7.1
   });
 
   it("shows sort indicator arrow on active column", () => {
     render(<TrendTable trends={mockTrends} />);
+    const table = within(screen.getByRole("table"));
 
-    // Default sort is created_at descending
+    // Default sort is detected_at descending
     // The arrow character is included in the header text
-    const createdHeader = screen.getByText(/Created/);
-    expect(createdHeader.textContent).toContain("\u2193"); // down arrow
+    const detectedHeader = table.getByText(/Detected/);
+    expect(detectedHeader.textContent).toContain("\u2193"); // down arrow
   });
 
   it("renders a table element", () => {
