@@ -7,7 +7,7 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
     "orion-common",
-    "apscheduler>=3.10.0",
+    "apscheduler>=3.11.2",
 ]
 
 [tool.uv.sources]
