@@ -24,6 +24,7 @@ ALLOWED_PROVIDERS = frozenset(
         "groq",
         "replicate",
         "runway",
+        "nvidia_nim",
     }
 )
 
