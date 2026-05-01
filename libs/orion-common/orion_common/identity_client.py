@@ -75,3 +75,34 @@ class IdentityClient:
                 provider=provider,
             )
             return None
+
+    async def get_system_api_key(self, provider: str) -> str | None:
+        """Return the decrypted system-level API key for *provider*, or ``None``.
+
+        Returns ``None`` when:
+        - no admin has configured a key for that provider, or
+        - the Identity service is unreachable (degrades gracefully).
+        """
+        url = f"{self._base_url}/api/v1/internal/system-keys/{provider}"
+
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                resp = await client.get(url, headers=self._headers)
+
+            if resp.status_code == 404:
+                return None
+
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("key")  # type: ignore[return-value]
+
+        except httpx.HTTPStatusError as exc:
+            logger.warning(
+                "identity_system_key_fetch_http_error",
+                provider=provider,
+                status=exc.response.status_code,
+            )
+            return None
+        except Exception:  # Identity service down — treat as not configured
+            logger.warning("identity_system_key_fetch_failed", provider=provider)
+            return None
