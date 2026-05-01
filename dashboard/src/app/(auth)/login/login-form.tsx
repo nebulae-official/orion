@@ -5,8 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/lib/auth";
 import { GATEWAY_URL } from "@/lib/config";
-import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, Github, Chrome } from "lucide-react";
+import { ArrowRight, Check, Chrome, Github } from "lucide-react";
+import {
+  AuthCard,
+  AuthCardHeading,
+  AuthShell,
+  AuthStatusLine,
+} from "../auth-shell";
 
 export default function LoginForm(): React.ReactElement {
   const router = useRouter();
@@ -35,149 +40,138 @@ export default function LoginForm(): React.ReactElement {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-bg overflow-hidden">
-      {/* Background glow effects */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary opacity-[0.04] blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-cyan opacity-[0.04] blur-[120px]" />
-      </div>
+    <AuthShell>
+      <AuthCard>
+        <AuthStatusLine />
+        <AuthCardHeading
+          eyebrow="Operator Sign-In"
+          title="Welcome back."
+          subtitle="Authenticate to open the Orion OS dashboard."
+        />
 
-      <div className="relative w-full max-w-md px-4">
-        {/* Card */}
-        <div className="rounded-2xl border border-border bg-surface p-8 shadow-2xl shadow-black/20">
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
-              <Sparkles className="h-6 w-6 text-white" />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="rounded-lg border border-danger/20 bg-danger-surface px-4 py-3 text-sm text-danger-light">
+              {error}
             </div>
-            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
-              Welcome to Orion
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              Sign in to the Content Agency dashboard
-            </p>
-          </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="rounded-lg border border-danger/20 bg-danger-surface px-4 py-3 text-sm text-danger-light">
-                {error}
-              </div>
-            )}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
+              >
+                Email or Username
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="text"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="a.khoury@orion.space"
+              />
+            </div>
 
-            <div className="space-y-4">
-              <div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
                 <label
-                  htmlFor="email"
-                  className="mb-1.5 block text-sm font-medium text-text-secondary"
+                  htmlFor="password"
+                  className="block text-[12.5px] font-medium text-text-secondary"
                 >
-                  Email or Username
+                  Password
                 </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="text"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="Enter your email or username"
-                />
+                <Link
+                  href="/forgot-password"
+                  className="text-[11.5px] font-medium text-primary-light transition-colors hover:text-cyan-light"
+                >
+                  Forgot?
+                </Link>
               </div>
-
-              <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-text-secondary"
-                  >
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs text-primary hover:text-primary-muted transition-colors"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="Enter your password"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="Enter mission key"
+              />
             </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              loading={loading}
-              disabled={loading}
-            >
-              {loading ? (
-                "Signing in..."
-              ) : (
-                <>
-                  Sign in
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-text-muted">or continue with</span>
-            <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* OAuth buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=${encodeURIComponent(redirect)}`;
-              }}
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(redirect)}`;
-              }}
-            >
-              <Chrome className="h-4 w-4" />
-              Google
-            </Button>
+          <div className="flex items-center gap-2 text-[12.5px] text-text-secondary">
+            <span className="flex size-4 items-center justify-center rounded border border-white/[0.14] bg-surface-elevated text-primary-light">
+              <Check className="size-[11px] stroke-[3]" />
+            </span>
+            Keep me signed in on this device
           </div>
 
-          {/* Create account link */}
-          <p className="mt-6 text-center text-sm text-text-secondary">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/register"
-              className="font-medium text-primary hover:text-primary-muted transition-colors"
-            >
-              Create an account
-            </Link>
-          </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-primary-muted px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-8px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+          >
+            {loading ? (
+              "Signing in..."
+            ) : (
+              <>
+                Sign in
+                <ArrowRight className="size-3.5" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="my-[22px] flex items-center gap-3 font-[family-name:var(--font-display)] text-[11px] uppercase tracking-[0.18em] text-text-muted before:h-px before:flex-1 before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent after:h-px after:flex-1 after:bg-gradient-to-r after:from-transparent after:via-white/15 after:to-transparent">
+          Or continue with
         </div>
 
-        {/* Subtle brand footer */}
-        <p className="mt-6 text-center text-xs text-text-dim">
-          Orion Digital Twin Content Agency
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-transparent px-3.5 py-2.5 text-[13.5px] font-medium text-text transition-all hover:border-white/[0.14] hover:bg-surface-elevated"
+            onClick={() => {
+              window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/github?redirect=${encodeURIComponent(redirect)}`;
+            }}
+          >
+            <Github className="size-4" />
+            GitHub
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-transparent px-3.5 py-2.5 text-[13.5px] font-medium text-text transition-all hover:border-white/[0.14] hover:bg-surface-elevated"
+            onClick={() => {
+              window.location.href = `${GATEWAY_URL}/api/v1/auth/oauth/google?redirect=${encodeURIComponent(redirect)}`;
+            }}
+          >
+            <Chrome className="size-4" />
+            Google
+          </button>
+        </div>
+
+        <p className="mt-[22px] text-center text-[12.5px] text-text-secondary">
+          By continuing, you accept the{" "}
+          <Link
+            href="/terms"
+            className="font-medium text-primary-light transition-colors hover:text-cyan-light"
+          >
+            Operator Terms
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            className="font-medium text-primary-light transition-colors hover:text-cyan-light"
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthShell>
   );
 }

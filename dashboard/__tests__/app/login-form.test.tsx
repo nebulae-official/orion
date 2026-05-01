@@ -48,9 +48,9 @@ describe("LoginForm", () => {
   it("renders the login form", () => {
     render(<LoginForm />);
 
-    expect(screen.getByText("Welcome to Orion")).toBeInTheDocument();
+    expect(screen.getByText("Welcome back.")).toBeInTheDocument();
     expect(
-      screen.getByText("Sign in to the Content Agency dashboard")
+      screen.getByText("Authenticate to open the Orion OS dashboard."),
     ).toBeInTheDocument();
   });
 
@@ -78,12 +78,11 @@ describe("LoginForm", () => {
     expect(screen.getByText("Sign in")).toBeInTheDocument();
   });
 
-  it("renders Orion branding footer", () => {
+  it("renders Operator Terms footer", () => {
     render(<LoginForm />);
 
-    expect(
-      screen.getByText("Orion Digital Twin Content Agency")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Operator Terms")).toBeInTheDocument();
+    expect(screen.getByText("Privacy Policy")).toBeInTheDocument();
   });
 
   it("updates username on input change", () => {
@@ -169,7 +168,7 @@ describe("LoginForm", () => {
     render(<LoginForm />);
 
     expect(
-      screen.getByPlaceholderText("Enter your email or username")
+      screen.getByPlaceholderText("a.khoury@orion.space"),
     ).toBeInTheDocument();
   });
 
@@ -177,7 +176,7 @@ describe("LoginForm", () => {
     render(<LoginForm />);
 
     expect(
-      screen.getByPlaceholderText("Enter your password")
+      screen.getByPlaceholderText("Enter mission key"),
     ).toBeInTheDocument();
   });
 });

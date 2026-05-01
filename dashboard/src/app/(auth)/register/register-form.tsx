@@ -3,8 +3,13 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { register } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import {
+  AuthCard,
+  AuthCardHeading,
+  AuthShell,
+  AuthStatusLine,
+} from "../auth-shell";
 
 export default function RegisterForm(): React.ReactElement {
   const [name, setName] = useState("");
@@ -42,172 +47,155 @@ export default function RegisterForm(): React.ReactElement {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-bg overflow-hidden">
-      {/* Background glow effects */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary opacity-[0.04] blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-cyan opacity-[0.04] blur-[120px]" />
-      </div>
+    <AuthShell
+      topPrompt="Already have access?"
+      topHref="/login"
+      topLinkText="Sign in ->"
+    >
+      <AuthCard>
+        <AuthStatusLine />
+        <AuthCardHeading
+          eyebrow="Operator Access"
+          title="Create your account."
+          subtitle="Join Orion OS and activate your content command center."
+        />
 
-      <div className="relative w-full max-w-md px-4">
-        {/* Card */}
-        <div className="rounded-2xl border border-border bg-surface p-8 shadow-2xl shadow-black/20">
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
-              <Sparkles className="h-6 w-6 text-white" />
+        {success ? (
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-surface">
+              <CheckCircle className="h-6 w-6 text-success" />
             </div>
-            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
-              Create your account
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              Join the Orion Content Agency
+            <h2 className="text-lg font-semibold text-text">
+              Verification email sent
+            </h2>
+            <p className="text-sm text-text-secondary">
+              We&apos;ve sent a verification link to{" "}
+              <span className="font-medium text-text">{email}</span>. Please
+              check your inbox and click the link to activate your account.
             </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-muted transition-colors"
+            >
+              Back to sign in
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
+        ) : (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="rounded-lg border border-danger/20 bg-danger-surface px-4 py-3 text-sm text-danger-light">
+                  {error}
+                </div>
+              )}
 
-          {success ? (
-            <div className="space-y-4 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-surface">
-                <CheckCircle className="h-6 w-6 text-success" />
-              </div>
-              <h2 className="text-lg font-semibold text-text">
-                Verification email sent
-              </h2>
-              <p className="text-sm text-text-secondary">
-                We&apos;ve sent a verification link to{" "}
-                <span className="font-medium text-text">{email}</span>. Please
-                check your inbox and click the link to activate your account.
-              </p>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-muted transition-colors"
-              >
-                Back to sign in
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          ) : (
-            <>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
-                  <div className="rounded-lg border border-danger/20 bg-danger-surface px-4 py-3 text-sm text-danger-light">
-                    {error}
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="mb-1.5 block text-sm font-medium text-text-secondary"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Your full name"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="mb-1.5 block text-sm font-medium text-text-secondary"
-                    >
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="you@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="mb-1.5 block text-sm font-medium text-text-secondary"
-                    >
-                      Password
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="At least 8 characters"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="confirm-password"
-                      className="mb-1.5 block text-sm font-medium text-text-secondary"
-                    >
-                      Confirm Password
-                    </label>
-                    <input
-                      id="confirm-password"
-                      name="confirm-password"
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Confirm your password"
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="Amina Khoury"
+                  />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  loading={loading}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    "Creating account..."
-                  ) : (
-                    <>
-                      Create account
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="a.khoury@orion.space"
+                  />
+                </div>
 
-              <p className="mt-6 text-center text-sm text-text-secondary">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="font-medium text-primary hover:text-primary-muted transition-colors"
-                >
-                  Sign in
-                </Link>
-              </p>
-            </>
-          )}
-        </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="At least 8 characters"
+                  />
+                </div>
 
-        {/* Subtle brand footer */}
-        <p className="mt-6 text-center text-xs text-text-dim">
-          Orion Digital Twin Content Agency
-        </p>
-      </div>
-    </div>
+                <div>
+                  <label
+                    htmlFor="confirm-password"
+                    className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
+                  >
+                    Confirm Password
+                  </label>
+                  <input
+                    id="confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="Confirm your password"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-primary-muted px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-8px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              >
+                {loading ? (
+                  "Creating account..."
+                ) : (
+                  <>
+                    Create account
+                    <ArrowRight className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-text-secondary">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-primary hover:text-primary-muted transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </>
+        )}
+      </AuthCard>
+    </AuthShell>
   );
 }

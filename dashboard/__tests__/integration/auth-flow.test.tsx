@@ -36,7 +36,9 @@ describe("Auth Flow Integration", () => {
 
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
   it("redirects to dashboard on successful login", async () => {
@@ -83,7 +85,7 @@ describe("Auth Flow Integration", () => {
     mockLogin.mockReturnValue(
       new Promise((resolve) => {
         resolveLogin = resolve;
-      })
+      }),
     );
     const user = userEvent.setup();
 
@@ -125,7 +127,7 @@ describe("Auth Flow Integration", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Network error. Please try again.")
+        screen.getByText("Network error. Please try again."),
       ).toBeInTheDocument();
     });
   });
@@ -133,9 +135,9 @@ describe("Auth Flow Integration", () => {
   it("renders branding text", () => {
     render(<LoginForm />);
 
-    expect(screen.getByText("Welcome to Orion")).toBeInTheDocument();
+    expect(screen.getByText("Welcome back.")).toBeInTheDocument();
     expect(
-      screen.getByText("Sign in to the Content Agency dashboard")
+      screen.getByText("Authenticate to open the Orion OS dashboard."),
     ).toBeInTheDocument();
   });
 });

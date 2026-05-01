@@ -5,8 +5,19 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { resetPassword } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { Sparkles, ArrowRight, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle,
+  AlertTriangle,
+} from "lucide-react";
 import { Suspense } from "react";
+import {
+  AuthCard,
+  AuthCardHeading,
+  AuthShell,
+  AuthStatusLine,
+} from "../auth-shell";
 
 function ResetPasswordForm(): React.ReactElement {
   const searchParams = useSearchParams();
@@ -103,7 +114,7 @@ function ResetPasswordForm(): React.ReactElement {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-text-secondary"
+              className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
             >
               New Password
             </label>
@@ -114,7 +125,7 @@ function ResetPasswordForm(): React.ReactElement {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
               placeholder="At least 8 characters"
             />
           </div>
@@ -122,7 +133,7 @@ function ResetPasswordForm(): React.ReactElement {
           <div>
             <label
               htmlFor="confirm-password"
-              className="mb-1.5 block text-sm font-medium text-text-secondary"
+              className="mb-1.5 block text-[12.5px] font-medium text-text-secondary"
             >
               Confirm New Password
             </label>
@@ -133,7 +144,7 @@ function ResetPasswordForm(): React.ReactElement {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="block w-full rounded-lg border border-border bg-surface-elevated px-4 py-2.5 text-sm text-text placeholder-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-lg border border-white/[0.08] bg-surface-elevated px-3.5 py-[11px] text-sm text-text outline-none placeholder:text-text-muted transition-[border-color,box-shadow,background] focus:border-primary focus:ring-1 focus:ring-primary"
               placeholder="Confirm your new password"
             />
           </div>
@@ -143,8 +154,8 @@ function ResetPasswordForm(): React.ReactElement {
           type="submit"
           disabled={loading}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-muted hover:shadow-primary/30",
-            loading && "cursor-not-allowed opacity-60"
+            "inline-flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-primary-muted px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-8px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 hover:brightness-110",
+            loading && "cursor-not-allowed opacity-60",
           )}
         >
           {loading ? "Resetting..." : "Reset password"}
@@ -166,39 +177,23 @@ function ResetPasswordForm(): React.ReactElement {
 
 export default function ResetPasswordPage(): React.ReactElement {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-bg overflow-hidden">
-      {/* Background glow effects */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary opacity-[0.04] blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-cyan opacity-[0.04] blur-[120px]" />
-      </div>
+    <AuthShell
+      topPrompt="Remembered your credentials?"
+      topHref="/login"
+      topLinkText="Sign in ->"
+    >
+      <AuthCard>
+        <AuthStatusLine />
+        <AuthCardHeading
+          eyebrow="Credential Reset"
+          title="Set new password."
+          subtitle="Choose a new mission key for your Orion account."
+        />
 
-      <div className="relative w-full max-w-md px-4">
-        {/* Card */}
-        <div className="rounded-2xl border border-border bg-surface p-8 shadow-2xl shadow-black/20">
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold text-text">
-              Set new password
-            </h1>
-            <p className="mt-2 text-sm text-text-secondary">
-              Choose a new password for your account
-            </p>
-          </div>
-
-          <Suspense fallback={<div className="h-48" />}>
-            <ResetPasswordForm />
-          </Suspense>
-        </div>
-
-        {/* Subtle brand footer */}
-        <p className="mt-6 text-center text-xs text-text-dim">
-          Orion Digital Twin Content Agency
-        </p>
-      </div>
-    </div>
+        <Suspense fallback={<div className="h-48" />}>
+          <ResetPasswordForm />
+        </Suspense>
+      </AuthCard>
+    </AuthShell>
   );
 }
