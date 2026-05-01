@@ -414,6 +414,32 @@ export const demoPipelineActivity: PipelineActivityDay[] =
   generatePipelineActivity();
 
 // ---------------------------------------------------------------------------
+// Analytics — Output Velocity (30-day rendered vs published)
+// ---------------------------------------------------------------------------
+
+export interface VolumeDataPoint {
+  day: string;
+  rendered: number;
+  published: number;
+}
+
+function generateVolumeData(): VolumeDataPoint[] {
+  const data: VolumeDataPoint[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86_400_000);
+    const label = d.toLocaleDateString("en", { month: "short", day: "numeric" });
+    // Upward trend: start ~3/day, reach ~8/day by day 30
+    const trendBase = Math.round(((29 - i) / 29) * 6 + 2);
+    const rendered = trendBase + Math.floor(Math.random() * 3);
+    const published = Math.max(0, rendered - 1 - Math.floor(Math.random() * 2));
+    data.push({ day: label, rendered, published });
+  }
+  return data;
+}
+
+export const demoVolumeData: VolumeDataPoint[] = generateVolumeData();
+
+// ---------------------------------------------------------------------------
 // Paginated helpers
 // ---------------------------------------------------------------------------
 
