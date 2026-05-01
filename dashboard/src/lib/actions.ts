@@ -317,3 +317,56 @@ export async function deleteApiKey(
     return { success: false, error: "Network error. Please try again." };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Admin system key management (admin users only)
+// ---------------------------------------------------------------------------
+
+export interface SystemKeyStatus {
+  provider: string;
+  is_configured: boolean;
+}
+
+/**
+ * List all providers and their system key configuration status.
+ * Admin only — non-admins receive 403 from Identity.
+ */
+export async function listSystemKeys(): Promise<SystemKeyStatus[]> {
+  try {
+    const response = await authenticatedFetch("/api/v1/identity/admin/keys");
+    if (!response.ok) return [];
+    const data = await response.json() as { keys: SystemKeyStatus[] };
+    return data.keys ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Store or replace a system-level API key for a provider.
+ * Admin only. Key is sent over TLS and encrypted at rest in Identity.
+ */
+export async function saveSystemKey(
+  provider: string,
+  key: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await authenticatedFetch(
+      `/api/v1/identity/admin/keys/${provider}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ key }),
+      },
+    );
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ message: "Save failed" }));
+      return { success: false, error: body.detail ?? body.message ?? "Failed to save system key" };
+    }
+
+    revalidatePath("/settings/admin-keys");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error. Please try again." };
+  }
+}

@@ -20,6 +20,7 @@ import {
   X,
   Users,
   UserCircle,
+  KeyRound,
 } from "lucide-react";
 
 interface NavItem {
@@ -39,6 +40,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "API Keys", href: "/settings/admin-keys", icon: <KeyRound className="h-5 w-5" /> },
 ];
 
 const FOOTER_NAV_ITEMS: NavItem[] = [
