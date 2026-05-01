@@ -13,7 +13,7 @@ test.describe("Content Queue", () => {
       page.getByRole("heading", { name: "Content Queue" })
     ).toBeVisible();
     await expect(
-      page.getByText("Review and manage content in the pipeline.")
+      page.getByText("Review, approve and manage all generated content.")
     ).toBeVisible();
   });
 
@@ -22,17 +22,17 @@ test.describe("Content Queue", () => {
 
     const tabs = [
       "All",
-      "Draft",
-      "Generating",
       "In Review",
       "Approved",
-      "Published",
+      "Generating",
       "Rejected",
+      "Published",
+      "Draft",
     ];
 
     for (const tab of tabs) {
       await expect(
-        page.getByRole("button", { name: tab, exact: true })
+        page.getByRole("button", { name: new RegExp(`^${tab}`) })
       ).toBeVisible();
     }
   });
@@ -40,45 +40,40 @@ test.describe("Content Queue", () => {
   test("content items render in demo mode", async ({ page }) => {
     await page.goto("/queue");
 
-    // In demo mode, content cards should appear.
-    // If not in demo mode, there will be a "No content found" or error message.
-    // Check for at least one content card or the "No content found" message.
-    const contentGrid = page.locator(
-      '[class*="grid"] [class*="rounded"]'
-    );
-    const noContent = page.getByText("No content found.");
+    // In demo mode, a grid of content cards is rendered.
+    // Fall back to the empty-state title if demo data is absent.
+    const contentCard = page.locator('[class*="grid"] [class*="rounded"]');
+    const emptyState = page.getByText("Your content queue is empty");
 
-    // Wait for either content cards or the empty message
-    await expect(contentGrid.first().or(noContent)).toBeVisible();
+    await expect(contentCard.first().or(emptyState)).toBeVisible();
   });
 
-  test("sort buttons are functional", async ({ page }) => {
+  test("sort toggle button is visible and functional", async ({ page }) => {
     await page.goto("/queue");
 
-    const dateBtn = page.getByRole("button", { name: "Date", exact: true });
-    const scoreBtn = page.getByRole("button", { name: "Score", exact: true });
+    // There is a single sort toggle button — it shows the current sort label.
+    // Default sort is "date", so the button renders "Date".
+    const sortBtn = page.getByRole("button", { name: /^(Date|Score)$/ });
+    await expect(sortBtn).toBeVisible();
 
-    await expect(dateBtn).toBeVisible();
-    await expect(scoreBtn).toBeVisible();
-
-    await scoreBtn.click();
+    // Clicking when label is "Date" navigates to ?sort=score.
+    await sortBtn.click();
     await page.waitForURL(/sort=score/);
     expect(page.url()).toContain("sort=score");
   });
 
-  test("clicking a filter tab changes active state", async ({ page }) => {
+  test("clicking a filter tab updates URL", async ({ page }) => {
     await page.goto("/queue");
 
     const approvedBtn = page.getByRole("button", {
-      name: "Approved",
-      exact: true,
+      name: /^Approved/,
     });
     await approvedBtn.click();
 
     await page.waitForURL(/status=approved/);
     expect(page.url()).toContain("status=approved");
 
-    // The "Approved" button should now be active (has bg-primary)
-    await expect(approvedBtn).toHaveClass(/bg-primary/);
+    // Active filter has bg-primary-surface class.
+    await expect(approvedBtn).toHaveClass(/bg-primary-surface/);
   });
 });

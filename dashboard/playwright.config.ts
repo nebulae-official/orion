@@ -5,13 +5,13 @@ export default defineConfig({
   timeout: 30000,
   retries: 1,
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3002",
     headless: true,
     screenshot: "only-on-failure",
   },
   webServer: {
     command: "NEXT_PUBLIC_DEMO_MODE=true npm run dev",
-    port: 3000,
+    port: 3002,
     timeout: 60000,
     reuseExistingServer: true,
   },
