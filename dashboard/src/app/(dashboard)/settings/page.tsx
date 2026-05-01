@@ -10,7 +10,7 @@ export default function SettingsPage(): React.ReactElement {
           <div>
             <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold text-text">Settings</h1>
             <p className="mt-1 text-text-secondary">
-              Configure AI providers, API keys, pipeline behavior, and system preferences.
+              API keys, providers, pipeline configuration and account.
             </p>
           </div>
         </div>
