@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ListVideo } from "lucide-react";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
 import { getDemoContentPage } from "@/lib/demo-data";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
@@ -99,8 +101,13 @@ export default async function QueuePage({
       <QueueFilters currentStatus={status} currentSort={sort} />
 
       {data.items.length === 0 ? (
-        <div className="mt-12 text-center">
-          <p className="text-text-muted">No content found.</p>
+        <div className="mt-6">
+          <EmptyState
+            icon={<ListVideo className="h-7 w-7" />}
+            title="Your content queue is empty"
+            description="Generated content awaiting review will appear here. Trigger a generation run to get started."
+            action={{ label: "Go to Pipeline", href: "/generation/pipeline" }}
+          />
         </div>
       ) : (
         <>

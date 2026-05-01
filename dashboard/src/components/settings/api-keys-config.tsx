@@ -84,6 +84,12 @@ const DEFAULT_ENTRIES: ApiKeyEntry[] = [
     description: "Ultra-fast LLM inference",
     status: "not-set",
   },
+  {
+    provider: "nvidia_nim",
+    label: "NVIDIA NIM",
+    description: "NVIDIA NIM inference microservices",
+    status: "not-set",
+  },
 ];
 
 const DEMO_ENTRIES: ApiKeyEntry[] = [
@@ -95,6 +101,7 @@ const DEMO_ENTRIES: ApiKeyEntry[] = [
   { provider: "runway", label: "Runway", description: "Gen-3 video generation", status: "not-set" },
   { provider: "deepseek", label: "DeepSeek", description: "DeepSeek LLM models", status: "not-set" },
   { provider: "groq", label: "Groq", description: "Ultra-fast LLM inference", status: "not-set" },
+  { provider: "nvidia_nim", label: "NVIDIA NIM", description: "NVIDIA NIM inference microservices", status: "not-set" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -191,6 +198,11 @@ export function ApiKeysConfig(): React.ReactElement {
 
   return (
     <div className="space-y-6">
+      {/* Subtitle */}
+      <p className="text-sm text-text-muted">
+        Your personal keys override system defaults. Leave blank to use system keys.
+      </p>
+
       {/* Security notice */}
       <div className="flex items-start gap-3 rounded-lg border border-success/30 bg-success-surface px-4 py-3">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />

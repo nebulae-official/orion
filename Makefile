@@ -93,6 +93,17 @@ COMPOSE_E2E := $(COMPOSE) -f deploy/docker-compose.e2e.yml
 test-e2e: ## Run E2E tests (starts Docker stack)
 	uv run pytest tests/e2e/ -v -m e2e
 
+.PHONY: test-integration
+test-integration: ## Run testcontainer-backed integration tests for all services
+	@for svc in $(SERVICES); do \
+		echo "==> Integration tests: $$svc"; \
+		(cd services/$$svc && TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock uv run pytest tests/test_integration.py -v -m integration) || exit 1; \
+	done
+
+.PHONY: test-e2e-pipeline
+test-e2e-pipeline: ## Run cross-service pipeline e2e tests (P1-P3, testcontainers)
+	TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock uv run --group e2e pytest tests/e2e/test_pipeline_e2e.py -v -m "integration or e2e"
+
 # ==============================================================================
 # Performance Benchmarks
 # ==============================================================================
@@ -113,7 +124,7 @@ load-test: ## Run Locust load test (opens web UI at :8089)
 py-test: ## Run Python tests for all services
 	@for svc in $(SERVICES); do \
 		echo "==> Testing $$svc"; \
-		(cd services/$$svc && uv run pytest) || exit 1; \
+		(cd services/$$svc && TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock uv run pytest) || exit 1; \
 	done
 
 .PHONY: py-lint

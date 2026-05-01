@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { Send } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
 import { demoPublishRecords } from "@/lib/demo-data";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn, formatDate } from "@/lib/utils";
 import type { PublishRecord } from "@/types/api";
 
@@ -50,12 +52,12 @@ export default async function PublishingPage(): Promise<React.ReactElement> {
       )}
 
       {records.length === 0 ? (
-        <div className="glass-card luminous-border rounded-xl p-12 text-center">
-          <p className="text-text-muted">No publishing records yet</p>
-          <p className="mt-1 text-sm text-text-dim">
-            Approve content and click Publish to get started
-          </p>
-        </div>
+        <EmptyState
+          icon={<Send className="h-7 w-7" />}
+          title="Nothing published yet"
+          description="Approved content will be posted automatically and appear here once published."
+          action={{ label: "Review Queue", href: "/queue" }}
+        />
       ) : (
         <div className="overflow-hidden glass-card luminous-border rounded-xl">
           <table className="min-w-full divide-y divide-border">

@@ -6,33 +6,12 @@ import { DEMO_MODE } from "@/lib/config";
 import { demoContent, demoPipelineRuns } from "@/lib/demo-data";
 import type { PipelineRun } from "@/lib/demo-data";
 import { StatCard } from "@/components/charts/stat-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PIPELINE_STAGES, PipelineStageIndicator } from "@/components/pipeline-stage-indicator";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
-import {
-  Search,
-  FileText,
-  MessageSquare,
-  Palette,
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
-  Clock,
-  XCircle,
-  Filter,
-} from "lucide-react";
+import { Loader2, AlertCircle, Clock, XCircle, Filter, Sparkles } from "lucide-react";
 import { PipelinePoller } from "./pipeline-poller";
-
-// -----------------------------------------------------------------------
-// Pipeline stage definitions
-// -----------------------------------------------------------------------
-
-const PIPELINE_STAGES = [
-  { key: "analyst", label: "Analyst", icon: Search },
-  { key: "critique", label: "Critique", icon: MessageSquare },
-  { key: "script", label: "Script", icon: FileText },
-  { key: "visuals", label: "Visual Prompts", icon: Palette },
-  { key: "done", label: "Done", icon: CheckCircle2 },
-] as const;
 
 // -----------------------------------------------------------------------
 // Status badge styles
@@ -71,131 +50,6 @@ const STATUS_BADGE: Record<
     className: "bg-danger-surface text-danger-light",
   },
 };
-
-// -----------------------------------------------------------------------
-// Stage indicator component
-// -----------------------------------------------------------------------
-
-function stageStatusForContent(
-  content: Content,
-  pipelineRun: PipelineRun | undefined,
-  stageIndex: number,
-): "completed" | "running" | "pending" | "failed" {
-  if (content.status === "rejected" || pipelineRun?.status === "failed") {
-    const failedAt = pipelineRun?.stages_completed ?? 0;
-    // Map stages_completed (out of 6) to our 5-stage display
-    const displayFailed = Math.min(
-      Math.floor((failedAt / (pipelineRun?.stages_total ?? 6)) * PIPELINE_STAGES.length),
-      PIPELINE_STAGES.length - 1,
-    );
-    if (stageIndex < displayFailed) return "completed";
-    if (stageIndex === displayFailed) return "failed";
-    return "pending";
-  }
-
-  if (
-    content.status === "approved" ||
-    content.status === "published" ||
-    content.status === "review"
-  ) {
-    return "completed";
-  }
-
-  if (content.status === "generating" && pipelineRun) {
-    const completedStages = pipelineRun.stages_completed;
-    const total = pipelineRun.stages_total;
-    const displayCompleted = Math.floor(
-      (completedStages / total) * PIPELINE_STAGES.length,
-    );
-    if (stageIndex < displayCompleted) return "completed";
-    if (stageIndex === displayCompleted) return "running";
-    return "pending";
-  }
-
-  if (content.status === "draft") {
-    return "pending";
-  }
-
-  return "pending";
-}
-
-function PipelineStageIndicator({
-  content,
-  pipelineRun,
-}: {
-  content: Content;
-  pipelineRun: PipelineRun | undefined;
-}): React.ReactElement {
-  return (
-    <div className="flex items-start gap-0">
-      {PIPELINE_STAGES.map((stage, idx) => {
-        const status = stageStatusForContent(content, pipelineRun, idx);
-        const Icon = stage.icon;
-
-        return (
-          <div key={stage.key} className="flex items-start">
-            {/* Connector line — vertically centered to the icon row */}
-            {idx > 0 && (
-              <div className="flex h-7 items-center">
-                <div
-                  className={cn(
-                    "h-0.5 w-6 sm:w-8",
-                    status === "completed"
-                      ? "bg-success-light/50"
-                      : status === "running"
-                        ? "bg-primary-light/50"
-                        : status === "failed"
-                          ? "bg-danger-light/50"
-                          : "bg-border",
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Stage circle + label — fixed width for consistent spacing */}
-            <div className="flex w-11 flex-col items-center gap-1">
-              <div
-                className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
-                  status === "completed" &&
-                    "bg-success-surface text-success-light",
-                  status === "running" &&
-                    "bg-primary-surface text-primary-light",
-                  status === "failed" &&
-                    "bg-danger-surface text-danger-light",
-                  status === "pending" &&
-                    "bg-surface-elevated text-text-dim",
-                )}
-                title={`${stage.label}: ${status}`}
-              >
-                {status === "completed" ? (
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                ) : status === "running" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : status === "failed" ? (
-                  <XCircle className="h-3.5 w-3.5" />
-                ) : (
-                  <Icon className="h-3.5 w-3.5" />
-                )}
-              </div>
-              <span
-                className={cn(
-                  "w-full text-center text-[10px] leading-tight",
-                  status === "completed" && "text-success-light",
-                  status === "running" && "text-primary-light",
-                  status === "failed" && "text-danger-light",
-                  status === "pending" && "text-text-dim",
-                )}
-              >
-                {stage.label}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // -----------------------------------------------------------------------
 // Duration helper
@@ -460,15 +314,20 @@ export default async function PipelinePage({
 
       {/* Content table */}
       {filteredContent.length === 0 ? (
-        <div className="glass-card luminous-border rounded-xl p-12 text-center">
-          <Clock className="mx-auto mb-3 h-10 w-10 text-text-dim" />
-          <p className="text-text-muted">No pipeline items found</p>
-          <p className="mt-1 text-sm text-text-dim">
-            {statusFilter
-              ? "Try changing the status filter."
-              : "Content will appear here when generation starts."}
-          </p>
-        </div>
+        statusFilter ? (
+          <div className="glass-card luminous-border rounded-xl p-12 text-center">
+            <Clock className="mx-auto mb-3 h-10 w-10 text-text-dim" />
+            <p className="text-text-muted">No items match this filter</p>
+            <p className="mt-1 text-sm text-text-dim">Try changing the status filter.</p>
+          </div>
+        ) : (
+          <EmptyState
+            icon={<Sparkles className="h-7 w-7" />}
+            title="No content in the pipeline"
+            description="Content will appear here as trends are processed through the generation pipeline."
+            action={{ label: "View Trends", href: "/trends" }}
+          />
+        )
       ) : (
         <div className="glass-card luminous-border overflow-hidden rounded-xl">
           <div className="overflow-x-auto">

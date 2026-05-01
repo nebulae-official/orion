@@ -50,7 +50,7 @@ export function TrendPagination({
     <div className="flex items-center justify-center gap-1">
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon"
         disabled={currentPage <= 1}
         onClick={() => goToPage(currentPage - 1)}
       >
@@ -79,7 +79,7 @@ export function TrendPagination({
 
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon"
         disabled={currentPage >= totalPages}
         onClick={() => goToPage(currentPage + 1)}
       >

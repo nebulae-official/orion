@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { BarChart3, DollarSign, TrendingUp } from "lucide-react";
 import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   demoFunnel,
   demoCostSummary,
@@ -106,6 +107,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
     }
   }
 
+  const hasData = DEMO_MODE || funnel.generated > 0;
+
   const approvalRate =
     funnel.generated > 0
       ? ((funnel.approved / funnel.generated) * 100).toFixed(1)
@@ -139,6 +142,17 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
         </div>
       )}
 
+      {!hasData ? (
+        <EmptyState
+          icon={<BarChart3 className="h-7 w-7" />}
+          title="No data yet"
+          description="Analytics populate as content is generated and published through the pipeline."
+          action={{ label: "View Pipeline", href: "/generation/pipeline" }}
+        />
+      ) : null}
+
+      {hasData && (
+      <>
       <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
         <StatCard title="Total Generated" value={funnel.generated} />
         <StatCard title="Approval Rate" value={`${approvalRate}%`} />
@@ -260,6 +274,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

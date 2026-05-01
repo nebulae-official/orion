@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -10,8 +11,51 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from src.identity.repositories.system_key_repository import SystemAPIKey
 from src.identity.routes.auth import router as auth_router
 from src.identity.routes.users import router as users_router
+
+# ---------------------------------------------------------------------------
+# DB integration helpers
+# ---------------------------------------------------------------------------
+
+requires_db = pytest.mark.skipif(
+    os.getenv("DATABASE_URL") is None,
+    reason="Requires running PostgreSQL (set DATABASE_URL)",
+)
+
+
+@pytest_asyncio.fixture(scope="function")
+async def db_session() -> AsyncSession:
+    """Real AsyncSession backed by PostgreSQL. Truncates system_api_keys before and after.
+
+    Tests must carry the requires_db marker so this fixture is never called without
+    DATABASE_URL set. The table is created (checkfirst=True) on first use — no Alembic
+    required for the standalone system_api_keys table.
+    """
+    # Ensure encryption key is available before any encrypt/decrypt call.
+    if "ORION_ENCRYPTION_KEY" not in os.environ:
+        from cryptography.fernet import Fernet  # noqa: PLC0415
+
+        os.environ["ORION_ENCRYPTION_KEY"] = Fernet.generate_key().decode()
+
+    url = os.environ["DATABASE_URL"]
+    engine = create_async_engine(url, echo=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(SystemAPIKey.__table__.create, checkfirst=True)
+        await conn.execute(SystemAPIKey.__table__.delete())  # clean slate
+
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with factory() as session:
+        yield session
+        await session.rollback()
+
+    async with engine.begin() as conn:
+        await conn.execute(SystemAPIKey.__table__.delete())  # teardown
+
+    await engine.dispose()
 
 
 @pytest.fixture

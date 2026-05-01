@@ -6,6 +6,7 @@ import { DEMO_MODE } from "@/lib/config";
 import { demoTrends } from "@/lib/demo-data";
 import { StatCard } from "@/components/charts/stat-card";
 import { TrendTable } from "@/components/trend-table";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { Trend } from "@/types/api";
 
 interface TrendListResponse {
@@ -71,7 +72,16 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
         <StatCard title="Discarded" value={discarded} />
       </div>
 
-      <TrendTable trends={trends} />
+      {trends.length === 0 ? (
+        <EmptyState
+          icon={<TrendingUp className="h-7 w-7" />}
+          title="No trends detected yet"
+          description="Start a trend scan to discover trending topics from social platforms and news sources."
+          action={{ label: "Scan Now", href: "/generation" }}
+        />
+      ) : (
+        <TrendTable trends={trends} />
+      )}
     </div>
   );
 }

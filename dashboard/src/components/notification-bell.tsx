@@ -29,17 +29,22 @@ export function NotificationBell({
 
   useWebSocket({ url: wsUrl, onMessage: handleMessage });
 
+  const displayCount = unreadCount > 9 ? "9+" : String(unreadCount);
+
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hover:text-violet-300 transition-colors relative"
-        aria-label="Notifications"
+        className="relative transition-colors hover:text-violet-300"
+        aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
-            {unreadCount > 99 ? "99+" : unreadCount}
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-75" />
+            <span className="relative inline-flex min-w-4 items-center justify-center rounded-full bg-danger px-1 py-0.5 text-[10px] font-bold leading-none text-white">
+              {displayCount}
+            </span>
           </span>
         )}
       </button>
