@@ -13,8 +13,14 @@ import {
 import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
 import { demoMediaAssets } from "@/lib/demo-data";
-import { StatCard } from "@/components/charts/stat-card";
 import { cn, formatRelativeTime } from "@/lib/utils";
+import {
+  GenerationBadge,
+  GenerationCard,
+  GenerationEyebrow,
+  GenerationProgressTrack,
+  GenerationSectionHeading,
+} from "@/components/generation-ui-kit";
 import type { MediaAsset } from "@/types/api";
 import { MediaPoller } from "./media-poller";
 
@@ -149,7 +155,6 @@ export default async function MediaPage(): Promise<React.ReactElement> {
 
   return (
     <div className="space-y-6">
-      {/* Smart polling when batches are active */}
       {hasRunning && <MediaPoller />}
 
       {fetchError && (
@@ -158,20 +163,15 @@ export default async function MediaPage(): Promise<React.ReactElement> {
         </div>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Provider Status Strip                                               */}
-      {/* ------------------------------------------------------------------ */}
       <section aria-label="Media providers">
-        <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-text">
-          Providers
-        </h2>
+        <GenerationSectionHeading>Media Providers</GenerationSectionHeading>
         <div className="flex flex-wrap gap-4">
           {providers.map((provider) => (
-            <div
+            <GenerationCard
               key={provider.name}
-              className="glass-card luminous-border flex min-w-[220px] flex-1 items-start gap-4 rounded-xl p-4"
+              className="flex min-w-[220px] flex-1 items-start gap-4 p-4"
             >
-              <div className="mt-0.5 rounded-lg bg-surface-elevated p-2">
+              <div className="mt-0.5 rounded-lg border border-border bg-surface-elevated/70 p-2">
                 {provider.type === "LOCAL" ? (
                   <Monitor className="h-5 w-5 text-primary-light" />
                 ) : (
@@ -180,17 +180,10 @@ export default async function MediaPage(): Promise<React.ReactElement> {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-text">{provider.name}</span>
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-xs font-medium",
-                      provider.type === "LOCAL"
-                        ? "bg-primary-surface text-primary-light"
-                        : "bg-[hsl(270,60%,20%)] text-[hsl(270,80%,75%)]"
-                    )}
-                  >
+                  <span className="font-[family-name:var(--font-display)] font-semibold text-text">{provider.name}</span>
+                  <GenerationBadge tone={provider.type === "LOCAL" ? "violet" : "blue"}>
                     {provider.type}
-                  </span>
+                  </GenerationBadge>
                 </div>
                 <div className="mt-1 flex items-center gap-1.5">
                   {provider.status === "online" ? (
@@ -209,37 +202,39 @@ export default async function MediaPage(): Promise<React.ReactElement> {
                   {provider.models.map((model) => (
                     <span
                       key={model}
-                      className="rounded bg-surface-elevated px-1.5 py-0.5 text-[11px] text-text-dim"
+                      className="rounded border border-border bg-surface-elevated/70 px-1.5 py-0.5 font-mono text-[11px] text-text-dim"
                     >
                       {model}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+            </GenerationCard>
           ))}
         </div>
       </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Status Summary Cards                                                */}
-      {/* ------------------------------------------------------------------ */}
       <section aria-label="Media statistics">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Images Generated" value={totalImages} subtitle={`${mediaAssets.length} total assets`} />
-          <StatCard title="Success Rate" value={`${successRate}%`} subtitle={`${completedBatches} of ${completedBatches + failedBatches} batches`} />
-          <StatCard title="Active Batches" value={activeBatches} subtitle={hasRunning ? "Processing now" : "All idle"} />
-          <StatCard title="Average per Content" value={avgPerContent} subtitle="Assets per content item" />
+          {[
+            ["Total Images Generated", totalImages, `${mediaAssets.length} total assets`],
+            ["Success Rate", `${successRate}%`, `${completedBatches} of ${completedBatches + failedBatches} batches`],
+            ["Active Batches", activeBatches, hasRunning ? "Processing now" : "All idle"],
+            ["Average per Content", avgPerContent, "Assets per content item"],
+          ].map(([title, value, subtitle]) => (
+            <GenerationCard key={title} className="p-5">
+              <GenerationEyebrow>{title}</GenerationEyebrow>
+              <div className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tabular-nums text-text">
+                {value}
+              </div>
+              <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>
+            </GenerationCard>
+          ))}
         </div>
       </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Active Batch Progress                                               */}
-      {/* ------------------------------------------------------------------ */}
       <section aria-label="Batch progress">
-        <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-text">
-          Batch Jobs
-        </h2>
+        <GenerationSectionHeading>Batch Jobs</GenerationSectionHeading>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {batches.map((batch) => {
             const pct = batch.total_images > 0
@@ -248,24 +243,30 @@ export default async function MediaPage(): Promise<React.ReactElement> {
             const cfg = STATUS_CONFIG[batch.status];
 
             return (
-              <div
+              <GenerationCard
                 key={batch.id}
-                className="glass-card luminous-border rounded-xl p-5"
+                className="p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-text">
+                    <p className="truncate font-[family-name:var(--font-display)] font-medium text-text">
                       {batch.content_title}
                     </p>
-                    <p className="mt-0.5 text-xs text-text-dim">
+                    <p className="mt-0.5 font-mono text-xs text-text-dim">
                       {batch.provider} &middot; {batch.content_id}
                     </p>
                   </div>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium",
-                      cfg.badgeClass
-                    )}
+                  <GenerationBadge
+                    tone={
+                      batch.status === "completed"
+                        ? "green"
+                        : batch.status === "failed"
+                          ? "red"
+                          : batch.status === "queued"
+                            ? "amber"
+                            : "violet"
+                    }
+                    className="whitespace-nowrap"
                   >
                     {cfg.spinning ? (
                       <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -277,10 +278,9 @@ export default async function MediaPage(): Promise<React.ReactElement> {
                       <Clock className="h-3 w-3" />
                     )}
                     {cfg.label}
-                  </span>
+                  </GenerationBadge>
                 </div>
 
-                {/* Progress bar */}
                 <div className="mt-3">
                   <div className="mb-1 flex items-center justify-between text-xs">
                     <span className="text-text-secondary">
@@ -288,18 +288,12 @@ export default async function MediaPage(): Promise<React.ReactElement> {
                     </span>
                     <span className="text-text-muted">{pct}%</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full glass-track">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        batch.status === "failed" ? "bg-danger-light" : "bg-primary"
-                      )}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <GenerationProgressTrack
+                    value={pct}
+                    tone={batch.status === "failed" ? "red" : batch.status === "running" ? "cyan" : "violet"}
+                  />
                 </div>
 
-                {/* Error message */}
                 {batch.error && (
                   <p className="mt-2 flex items-center gap-1.5 text-xs text-danger-light">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -307,38 +301,31 @@ export default async function MediaPage(): Promise<React.ReactElement> {
                   </p>
                 )}
 
-                {/* Timing */}
-                <p className="mt-2 text-xs text-text-dim">
+                <p className="mt-2 font-mono text-xs text-text-dim">
                   Started {formatRelativeTime(batch.started_at)}
                   {batch.completed_at && ` \u00B7 Finished ${formatRelativeTime(batch.completed_at)}`}
                 </p>
-              </div>
+              </GenerationCard>
             );
           })}
         </div>
       </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Image Grid                                                          */}
-      {/* ------------------------------------------------------------------ */}
       <section aria-label="Generated media assets">
-        <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-text">
-          Generated Assets
-        </h2>
+        <GenerationSectionHeading>Generated Assets</GenerationSectionHeading>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {mediaAssets.map((asset, idx) => (
-            <div
+            <GenerationCard
               key={asset.id}
-              className="glass-card luminous-border overflow-hidden rounded-xl"
+              className="overflow-hidden"
             >
-              {/* Placeholder thumbnail */}
               <div
                 className={cn(
                   "flex h-32 items-center justify-center bg-gradient-to-br",
                   GRADIENT_PALETTES[idx % GRADIENT_PALETTES.length]
                 )}
               >
-                <ImageIcon className="h-8 w-8 text-white/50" />
+                <ImageIcon className="h-8 w-8 text-white/55" />
               </div>
               <div className="p-3">
                 <div className="flex items-center justify-between gap-2">
@@ -359,7 +346,7 @@ export default async function MediaPage(): Promise<React.ReactElement> {
                   <span>{formatRelativeTime(asset.created_at)}</span>
                 </div>
               </div>
-            </div>
+            </GenerationCard>
           ))}
         </div>
       </section>

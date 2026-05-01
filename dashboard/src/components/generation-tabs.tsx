@@ -13,15 +13,15 @@ interface Tab {
 
 const TABS: Tab[] = [
   { label: "Pipeline", href: "/generation/pipeline", icon: <GitBranch className="h-4 w-4" /> },
-  { label: "Media", href: "/generation/media", icon: <ImageIcon className="h-4 w-4" /> },
-  { label: "Video", href: "/generation/video", icon: <Film className="h-4 w-4" /> },
+  { label: "Media Assets", href: "/generation/media", icon: <ImageIcon className="h-4 w-4" /> },
+  { label: "Video Assembly", href: "/generation/video", icon: <Film className="h-4 w-4" /> },
 ];
 
 export function GenerationTabs(): React.ReactElement {
   const pathname = usePathname();
 
   return (
-    <div className="flex gap-1 border-b border-border">
+    <div className="flex gap-0 overflow-x-auto border-b border-border">
       {TABS.map((tab) => {
         const isActive = pathname === tab.href;
         return (
@@ -29,11 +29,10 @@ export function GenerationTabs(): React.ReactElement {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-              "border-b-2 -mb-px",
+              "flex shrink-0 items-center gap-2 border-b-2 px-5 py-2.5 font-[family-name:var(--font-label)] text-xs font-medium uppercase tracking-[0.08em] transition-colors -mb-px",
               isActive
-                ? "border-violet-400 text-violet-300"
-                : "border-transparent text-text-muted hover:text-text-secondary hover:border-text-dim"
+                ? "border-primary text-primary-light"
+                : "border-transparent text-text-secondary hover:text-text"
             )}
           >
             {tab.icon}

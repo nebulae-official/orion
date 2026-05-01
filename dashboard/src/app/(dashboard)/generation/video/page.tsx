@@ -2,8 +2,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
-import { StatCard } from "@/components/charts/stat-card";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
+import {
+  GenerationBadge,
+  GenerationCard,
+  GenerationEyebrow,
+  GenerationProgressTrack,
+  GenerationSectionHeading,
+} from "@/components/generation-ui-kit";
 import {
   Film,
   Mic,
@@ -308,50 +314,46 @@ function ActiveRenderCard({
   const badge = STATUS_BADGE[job.status];
 
   return (
-    <div className="glass-card luminous-border rounded-xl p-6">
+    <GenerationCard className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Film className="h-5 w-5 text-primary-light" />
+          <div className="rounded-lg border border-border bg-surface-elevated/70 p-2">
+            <Film className="h-5 w-5 text-primary-light" />
+          </div>
           <div>
-            <h3 className="text-sm font-semibold text-text">
+            <h3 className="font-[family-name:var(--font-display)] text-sm font-semibold text-text">
               {job.content_title}
             </h3>
-            <p className="text-xs text-text-dim">{job.content_id}</p>
+            <p className="font-mono text-xs text-text-dim">{job.content_id}</p>
           </div>
         </div>
-        <span
-          className={cn(
-            "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-            badge.className,
-          )}
+        <GenerationBadge
+          tone={
+            job.status === "completed"
+              ? "green"
+              : job.status === "failed"
+                ? "red"
+                : job.status === "queued"
+                  ? "amber"
+                  : "violet"
+          }
         >
           {badge.label}
-        </span>
+        </GenerationBadge>
       </div>
 
-      {/* Stage tracker */}
       <div className="mb-4 flex justify-center">
         <RenderStageTracker stages={job.stages} />
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1.5 w-full overflow-hidden rounded-full glass-track">
-        <div
-          className={cn(
-            "h-full rounded-full transition-all duration-500",
-            job.status === "rendering"
-              ? "bg-primary-light"
-              : job.status === "queued"
-                ? "bg-warning-light"
-                : "bg-success-light",
-          )}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <GenerationProgressTrack
+        value={progress}
+        tone={job.status === "queued" ? "amber" : job.status === "failed" ? "red" : "violet"}
+      />
       <p className="mt-1.5 text-right text-[10px] text-text-dim">
         {progress}% complete
       </p>
-    </div>
+    </GenerationCard>
   );
 }
 
@@ -424,46 +426,34 @@ export default async function VideoPage(): Promise<React.ReactElement> {
 
   return (
     <div className="space-y-6">
-      {/* Poller for active renders */}
       <VideoPoller hasActiveRenders={hasActiveRenders} />
 
-      {/* Error banner */}
       {fetchError && (
         <div className="rounded-xl border border-warning-surface bg-warning-surface/30 p-4 text-sm text-warning-light">
           Unable to load render data. The Editor service may not be running.
         </div>
       )}
 
-      {/* Status summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Renders"
-          value={totalRenders}
-          subtitle="All render jobs"
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${successRate}%`}
-          subtitle="Completed vs failed"
-        />
-        <StatCard
-          title="Active Renders"
-          value={activeRenders}
-          subtitle="Rendering or queued"
-        />
-        <StatCard
-          title="Avg Render Time"
-          value={formatDuration(avgRenderTime)}
-          subtitle="Across completed jobs"
-        />
+        {[
+          ["Total Renders", totalRenders, "All render jobs"],
+          ["Success Rate", `${successRate}%`, "Completed vs failed"],
+          ["Active Renders", activeRenders, "Rendering or queued"],
+          ["Avg Render Time", formatDuration(avgRenderTime), "Across completed jobs"],
+        ].map(([title, value, subtitle]) => (
+          <GenerationCard key={title} className="p-5">
+            <GenerationEyebrow>{title}</GenerationEyebrow>
+            <div className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tabular-nums text-text">
+              {value}
+            </div>
+            <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>
+          </GenerationCard>
+        ))}
       </div>
 
-      {/* Active renders section */}
       {activeJobs.length > 0 && (
         <div>
-          <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-text">
-            Active Renders
-          </h2>
+          <GenerationSectionHeading>Active Renders</GenerationSectionHeading>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {activeJobs.map((job) => (
               <ActiveRenderCard key={job.id} job={job} />
@@ -472,24 +462,21 @@ export default async function VideoPage(): Promise<React.ReactElement> {
         </div>
       )}
 
-      {/* Render history table */}
       <div>
-        <h2 className="mb-3 font-[family-name:var(--font-display)] text-lg font-semibold text-text">
-          Render History
-        </h2>
+        <GenerationSectionHeading>Render History</GenerationSectionHeading>
         {historyJobs.length === 0 ? (
-          <div className="glass-card luminous-border rounded-xl p-12 text-center">
+          <GenerationCard className="p-12 text-center">
             <Clock className="mx-auto mb-3 h-10 w-10 text-text-dim" />
             <p className="text-text-muted">No completed renders yet</p>
             <p className="mt-1 text-sm text-text-dim">
               Completed and failed render jobs will appear here.
             </p>
-          </div>
+          </GenerationCard>
         ) : (
-          <div className="glass-card luminous-border overflow-hidden rounded-xl">
+          <GenerationCard className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
-                <thead className="bg-surface-elevated">
+              <table className="min-w-full">
+                <thead className="border-y border-border bg-surface-elevated/70">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-muted">
                       Content Title
@@ -508,12 +495,12 @@ export default async function VideoPage(): Promise<React.ReactElement> {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-border/60">
                   {historyJobs.map((job) => {
                     const badge = STATUS_BADGE[job.status];
 
                     return (
-                      <tr key={job.id} className="group">
+                      <tr key={job.id} className="group transition-colors hover:bg-surface-hover/60">
                         <td className="px-6 py-4">
                           <span className="text-sm font-medium text-text">
                             {job.content_title}
@@ -529,14 +516,19 @@ export default async function VideoPage(): Promise<React.ReactElement> {
                           )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4">
-                          <span
-                            className={cn(
-                              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                              badge.className,
-                            )}
+                          <GenerationBadge
+                            tone={
+                              job.status === "completed"
+                                ? "green"
+                                : job.status === "failed"
+                                  ? "red"
+                                  : job.status === "queued"
+                                    ? "amber"
+                                    : "violet"
+                            }
                           >
                             {badge.label}
-                          </span>
+                          </GenerationBadge>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-text-muted">
                           {formatDuration(job.total_duration_seconds)}
@@ -561,7 +553,7 @@ export default async function VideoPage(): Promise<React.ReactElement> {
                 </tbody>
               </table>
             </div>
-          </div>
+          </GenerationCard>
         )}
       </div>
     </div>
