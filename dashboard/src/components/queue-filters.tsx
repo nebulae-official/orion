@@ -2,36 +2,34 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ContentStatus } from "@/types/api";
-import { Button } from "@/components/ui/button";
 
 const STATUSES: { value: ContentStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "draft", label: "Draft" },
-  { value: "generating", label: "Generating" },
   { value: "review", label: "In Review" },
   { value: "approved", label: "Approved" },
-  { value: "published", label: "Published" },
+  { value: "generating", label: "Generating" },
   { value: "rejected", label: "Rejected" },
+  { value: "published", label: "Published" },
+  { value: "draft", label: "Draft" },
 ];
 
-const SORT_OPTIONS: { value: "date" | "score"; label: string }[] = [
-  { value: "date", label: "Date" },
-  { value: "score", label: "Score" },
-];
+type StatusCounts = Partial<Record<ContentStatus | "all", number>>;
 
 interface QueueFiltersProps {
   currentStatus?: ContentStatus;
   currentSort: string;
+  statusCounts?: StatusCounts;
 }
 
 export function QueueFilters({
   currentStatus,
   currentSort,
+  statusCounts,
 }: QueueFiltersProps): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  function updateParams(key: string, value: string | null): void {
+  function updateParam(key: string, value: string | null): void {
     const params = new URLSearchParams(searchParams.toString());
     if (value === null || value === "all") {
       params.delete(key);
@@ -43,38 +41,59 @@ export function QueueFilters({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
-      {/* Status filters */}
-      <div className="flex flex-wrap gap-1">
-        {STATUSES.map((s) => {
-          const isActive =
-            s.value === "all" ? !currentStatus : currentStatus === s.value;
-          return (
-            <Button
-              key={s.value}
-              variant={isActive ? "default" : "outline"}
-              size="sm"
-              onClick={() => updateParams("status", s.value)}
-            >
-              {s.label}
-            </Button>
-          );
-        })}
-      </div>
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="mr-1 select-none font-[family-name:var(--font-display)] text-[11px] font-medium uppercase tracking-[0.2em] text-text-muted">
+        Filter
+      </span>
 
-      {/* Sort */}
-      <div className="ml-auto flex items-center gap-2">
-        <span className="text-sm text-text-muted">Sort by:</span>
-        {SORT_OPTIONS.map((s) => (
-          <Button
+      {STATUSES.map((s) => {
+        const isActive =
+          s.value === "all" ? !currentStatus : currentStatus === s.value;
+        const count = statusCounts?.[s.value];
+        return (
+          <button
             key={s.value}
-            variant={currentSort === s.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => updateParams("sort", s.value)}
+            onClick={() => updateParam("status", s.value)}
+            className={[
+              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1.5",
+              "font-[family-name:var(--font-display)] text-[11px] font-medium tracking-[0.12em]",
+              "transition-all duration-200",
+              isActive
+                ? "border-primary bg-primary-surface text-primary-light"
+                : "border-border bg-transparent text-text-secondary hover:border-border-light hover:text-text",
+            ].join(" ")}
           >
             {s.label}
-          </Button>
-        ))}
+            {count !== undefined && (
+              <span className="opacity-60">{count}</span>
+            )}
+          </button>
+        );
+      })}
+
+      <div className="ml-auto">
+        <button
+          onClick={() =>
+            updateParam("sort", currentSort === "score" ? "date" : "score")
+          }
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-transparent px-3 py-1.5 font-[family-name:var(--font-display)] text-[12px] font-medium text-text-secondary transition-all duration-200 hover:border-border-light hover:text-text"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3.5 w-3.5"
+            stroke="currentColor"
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18" />
+            <path d="M7 12h10" />
+            <path d="M10 18h4" />
+          </svg>
+          {currentSort === "score" ? "Score" : "Date"}
+        </button>
       </div>
     </div>
   );
