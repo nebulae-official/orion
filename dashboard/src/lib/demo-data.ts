@@ -28,6 +28,10 @@ function hoursAgo(n: number): string {
   return new Date(Date.now() - n * 3_600_000).toISOString();
 }
 
+function minutesAgo(n: number): string {
+  return new Date(Date.now() - n * 60_000).toISOString();
+}
+
 // ---------------------------------------------------------------------------
 // Trends
 // ---------------------------------------------------------------------------
@@ -227,6 +231,7 @@ export const demoPublishRecords: PublishRecord[] = [
   { id: "pub-005", content_id: "c-008", platform: "youtube", platform_post_id: null, status: "pending", error_message: null, published_at: null, created_at: daysAgo(4) },
   { id: "pub-006", content_id: "c-010", platform: "twitter", platform_post_id: null, status: "pending", error_message: null, published_at: null, created_at: daysAgo(5) },
   { id: "pub-007", content_id: "c-012", platform: "instagram", platform_post_id: "ig-indie42", status: "published", error_message: null, published_at: daysAgo(4.5), created_at: daysAgo(8) },
+  { id: "pub-008", content_id: "c-013", platform: "twitter", platform_post_id: "tw-k8s9c1d", status: "published", error_message: null, published_at: minutesAgo(8), created_at: hoursAgo(1) },
 ];
 
 // ---------------------------------------------------------------------------
