@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="tileBg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"></stop>
+      <stop offset="1" stop-color="#4C1D95"></stop>
+    </linearGradient>
+    <linearGradient id="tileFg" x1="38" y1="38" x2="142" y2="142" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA"></stop>
+      <stop offset="1" stop-color="#22D3EE"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="180" height="180" rx="40" ry="40" fill="url(#tileBg)"></rect>
+  <rect x="0.5" y="0.5" width="179" height="179" rx="39.5" ry="39.5" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"></rect>
+  <g transform="translate(90,90)">
+    <circle cx="0" cy="0" r="52" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"></circle>
+    <circle cx="0" cy="0" r="36" fill="none" stroke="url(#tileFg)" stroke-width="2.4"></circle>
+    <circle cx="-36" cy="0" r="5" fill="#FFFFFF"></circle>
+    <circle cx="18" cy="-31.2" r="5" fill="#22D3EE"></circle>
+    <circle cx="18" cy="31.2" r="5" fill="#A78BFA"></circle>
+    <circle cx="0" cy="0" r="9" fill="#FFFFFF"></circle>
+  </g>
+</svg>

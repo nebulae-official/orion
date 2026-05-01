@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — Generation</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .tab-bar { display:flex; gap:0; border-bottom:1px solid var(--ui-border); margin-bottom:24px; }
+  .tab { font-family:"Space Grotesk",sans-serif; font-size:12px; font-weight:500; letter-spacing:.08em; padding:10px 20px; cursor:pointer; color:var(--ui-fg2); border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .2s; background:none; border-top:none; border-left:none; border-right:none; }
+  .tab:hover { color:var(--ui-fg1); }
+  .tab.active { color:var(--ui-primary-text); border-bottom-color:var(--ui-primary); }
+  .agent-row { display:grid; grid-template-columns:120px 1fr 80px 100px; gap:16px; align-items:center; padding:14px 0; border-bottom:1px solid var(--ui-hairline); }
+  .agent-row:last-child { border-bottom:none; }
+  .agent-name { font-family:"Space Grotesk",sans-serif; font-size:13px; font-weight:500; color:var(--ui-fg1); }
+  .agent-sub  { font-size:11px; color:var(--ui-fg3); font-family:"JetBrains Mono",monospace; margin-top:2px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dot-green  { background:var(--ui-success); box-shadow:0 0 8px var(--ui-success); animation:pulse 2s ease-in-out infinite; }
+  .dot-amber  { background:var(--ui-warning); box-shadow:0 0 8px var(--ui-warning); animation:pulse 2.5s ease-in-out infinite; }
+  .dot-grey   { background:var(--ui-fg3); }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .stage-pill { display:inline-flex; align-items:center; gap:6px; font-family:"Space Grotesk",sans-serif; font-size:10px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; padding:3px 10px; border-radius:9999px; }
+  .timeline-node { display:flex; align-items:flex-start; gap:16px; padding:14px 0; position:relative; }
+  .timeline-node::before { content:""; position:absolute; left:9px; top:36px; bottom:0; width:1px; background:var(--ui-hairline); }
+  .timeline-node:last-child::before { display:none; }
+  .t-icon { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+  .t-icon svg { width:10px; height:10px; stroke:#fff; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+
+<div class="tab-bar">
+  <button class="tab active">Pipeline</button>
+  <button class="tab">Media Assets</button>
+  <button class="tab">Video Assembly</button>
+</div>
+
+<div class="o-2col" style="gap:20px;">
+  <!-- Agent swarm status -->
+  <div>
+    <div class="o-card o-card-pad" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="o-eyebrow" style="margin-bottom:4px;">Swarm</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);">Agent Status</div>
+        </div>
+        <span class="o-badge o-badge-green">5 / 5 Online</span>
+      </div>
+      <div>
+        <div class="agent-row">
+          <div><div style="display:flex;align-items:center;gap:8px;"><span class="status-dot dot-green"></span><span class="agent-name">Scout</span></div><div class="agent-sub">:8001 · healthy</div></div>
+          <div><div class="o-track"><div class="o-fill" style="width:95%;background:var(--ui-success);box-shadow:0 0 8px rgba(52,211,153,.4);"></div></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">95%</div>
+          <div><span class="stage-pill o-badge-green">Active</span></div>
+        </div>
+        <div class="agent-row">
+          <div><div style="display:flex;align-items:center;gap:8px;"><span class="status-dot dot-green"></span><span class="agent-name">Director</span></div><div class="agent-sub">:8002 · healthy</div></div>
+          <div><div class="o-track"><div class="o-fill" style="width:72%;background:var(--ui-primary);box-shadow:0 0 8px rgba(124,58,237,.4);"></div></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">72%</div>
+          <div><span class="stage-pill o-badge-violet">Scripting</span></div>
+        </div>
+        <div class="agent-row">
+          <div><div style="display:flex;align-items:center;gap:8px;"><span class="status-dot dot-amber"></span><span class="agent-name">Media</span></div><div class="agent-sub">:8003 · busy</div></div>
+          <div><div class="o-track"><div class="o-fill" style="width:48%;background:#06B6D4;box-shadow:0 0 8px rgba(6,182,212,.4);"></div></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">48%</div>
+          <div><span class="stage-pill o-badge-amber">Rendering</span></div>
+        </div>
+        <div class="agent-row">
+          <div><div style="display:flex;align-items:center;gap:8px;"><span class="status-dot dot-amber"></span><span class="agent-name">Editor</span></div><div class="agent-sub">:8004 · busy</div></div>
+          <div><div class="o-track"><div class="o-fill" style="width:21%;background:var(--ui-warning);box-shadow:0 0 8px rgba(245,158,11,.4);"></div></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">21%</div>
+          <div><span class="stage-pill o-badge-amber">Assembling</span></div>
+        </div>
+        <div class="agent-row">
+          <div><div style="display:flex;align-items:center;gap:8px;"><span class="status-dot dot-green"></span><span class="agent-name">Publisher</span></div><div class="agent-sub">:8006 · healthy</div></div>
+          <div><div class="o-track"><div class="o-fill" style="width:64%;background:#A78BFA;box-shadow:0 0 8px rgba(167,139,250,.4);"></div></div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">64%</div>
+          <div><span class="stage-pill o-badge-violet">Queued</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active jobs -->
+    <div class="o-card o-card-pad">
+      <div class="o-eyebrow" style="margin-bottom:12px;">Active Jobs</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--ui-elevated);border-radius:8px;border:1px solid var(--ui-border);">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Perseid Swarm — Video</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_3f8a2 · Editor</div></div>
+          <span class="o-badge o-badge-amber">In Progress</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--ui-elevated);border-radius:8px;border:1px solid var(--ui-border);">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">LangGraph Pipeline — Script</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_9c1d4 · Director</div></div>
+          <span class="o-badge o-badge-violet">Generating</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--ui-elevated);border-radius:8px;border:1px solid var(--ui-border);">
+          <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Vector Index — Images</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_7b5e1 · Media · Fal.ai</div></div>
+          <span class="o-badge o-badge-blue">Rendering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event timeline -->
+  <div class="o-card o-card-pad">
+    <div class="o-eyebrow" style="margin-bottom:16px;">Pipeline Timeline</div>
+    <div>
+      <div class="timeline-node">
+        <div class="t-icon" style="background:rgba(52,211,153,0.2);"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Scout detected trend</div><div style="font-size:11.5px;color:var(--ui-fg2);margin-top:2px;">#LangGraph velocity spike</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:3px;">2m ago · scout.trend.detected</div></div>
+      </div>
+      <div class="timeline-node">
+        <div class="t-icon" style="background:rgba(167,139,250,0.2);color:#A78BFA;"><svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg></div>
+        <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Director created script</div><div style="font-size:11.5px;color:var(--ui-fg2);margin-top:2px;">4 scenes · 320 words · v1.2</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:3px;">5m ago · director.script.created</div></div>
+      </div>
+      <div class="timeline-node">
+        <div class="t-icon" style="background:rgba(6,182,212,0.2);"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg></div>
+        <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Media generating images</div><div style="font-size:11.5px;color:var(--ui-fg2);margin-top:2px;">4 / 8 scenes · Fal.ai SDXL</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:3px;">ongoing · media.generation.progress</div></div>
+      </div>
+      <div class="timeline-node" style="opacity:.45;">
+        <div class="t-icon" style="background:var(--ui-elevated);"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg2);">Editor assemble video</div><div style="font-size:11.5px;color:var(--ui-fg3);margin-top:2px;">Waiting for Media · TTS ready</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:3px;">pending · editor.assembly.queued</div></div>
+      </div>
+      <div class="timeline-node" style="opacity:.3;">
+        <div class="t-icon" style="background:var(--ui-elevated);"><svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/></svg></div>
+        <div><div style="font-size:13px;font-weight:500;color:var(--ui-fg2);">Publisher post to platforms</div><div style="font-size:11.5px;color:var(--ui-fg3);margin-top:2px;">Twitter/X · YouTube Shorts</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:3px;">queued · publisher.schedule</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+OrionShell.init({
+  active: 'generation',
+  title: 'Generation',
+  subtitle: 'Live pipeline — agent swarm status and job tracking.',
+  iconPath: '<path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/>'
+});
+</script>
+</body></html>

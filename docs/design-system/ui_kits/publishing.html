@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — Publishing</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .platform-card { border-radius:12px; background:var(--ui-panel); backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--ui-border); box-shadow:var(--ui-shadow-card); padding:20px 22px; display:flex; align-items:center; gap:16px; }
+  .platform-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px; }
+  .platform-name { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:15px; color:var(--ui-fg1); }
+  .platform-meta { font-size:12px; color:var(--ui-fg3); margin-top:2px; }
+  .publish-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 120px; gap:12px; align-items:center; padding:14px 0; border-bottom:1px solid var(--ui-hairline); }
+  .publish-row:last-child { border-bottom:none; }
+</style>
+
+<!-- Platform summary -->
+<div class="o-grid-4" style="margin-bottom:24px;">
+  <div class="platform-card">
+    <div class="platform-icon" style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);">𝕏</div>
+    <div>
+      <div class="platform-name">Twitter / X</div>
+      <div class="platform-meta">41 published · 3 queued</div>
+      <div style="margin-top:6px;"><span class="o-badge o-badge-green" style="font-size:11px;">Connected</span></div>
+    </div>
+  </div>
+  <div class="platform-card">
+    <div class="platform-icon" style="background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.2);">▶</div>
+    <div>
+      <div class="platform-name">YouTube</div>
+      <div class="platform-meta">28 published · 2 queued</div>
+      <div style="margin-top:6px;"><span class="o-badge o-badge-green" style="font-size:11px;">Connected</span></div>
+    </div>
+  </div>
+  <div class="platform-card">
+    <div class="platform-icon" style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.10);">♪</div>
+    <div>
+      <div class="platform-name">TikTok</div>
+      <div class="platform-meta">20 published · 1 queued</div>
+      <div style="margin-top:6px;"><span class="o-badge o-badge-green" style="font-size:11px;">Connected</span></div>
+    </div>
+  </div>
+  <div class="platform-card">
+    <div class="platform-icon" style="background:rgba(10,102,194,0.15);border:1px solid rgba(10,102,194,0.25);">in</div>
+    <div>
+      <div class="platform-name">LinkedIn</div>
+      <div class="platform-meta">Not configured</div>
+      <div style="margin-top:6px;"><span class="o-badge o-badge-grey" style="font-size:11px;">Disabled</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Publish history table -->
+<div class="o-card">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--ui-border);">
+    <div>
+      <div class="o-eyebrow" style="margin-bottom:4px;">Publisher</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);">Publish History</div>
+    </div>
+    <button class="o-btn-ghost" style="font-size:12px;padding:6px 14px;">Export CSV</button>
+  </div>
+  <div style="padding:0 20px;">
+    <div class="publish-row" style="border-bottom:1px solid var(--ui-border);">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);">Content</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);">Platform</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);">Status</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);">Published</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);text-align:right;">Cost</div>
+    </div>
+    <div class="publish-row">
+      <div><div style="font-size:13.5px;font-weight:500;color:var(--ui-fg1);">The Quiet Genius of a Well-Tuned Vector Index</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_9c1d4</div></div>
+      <div><span class="o-badge o-badge-grey">𝕏 Twitter</span></div>
+      <div><span class="o-badge o-badge-blue">📡 Live</span></div>
+      <div style="font-size:12px;color:var(--ui-fg2);font-family:'JetBrains Mono',monospace;">8m ago</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);">$0.42</div>
+    </div>
+    <div class="publish-row">
+      <div><div style="font-size:13.5px;font-weight:500;color:var(--ui-fg1);">LangGraph in 60 Seconds — the Pipeline Pattern</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_7b5e1</div></div>
+      <div><span class="o-badge o-badge-grey">▶ YouTube</span></div>
+      <div><span class="o-badge o-badge-green">✓ Published</span></div>
+      <div style="font-size:12px;color:var(--ui-fg2);font-family:'JetBrains Mono',monospace;">1h ago</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);">$0.38</div>
+    </div>
+    <div class="publish-row">
+      <div><div style="font-size:13.5px;font-weight:500;color:var(--ui-fg1);">Perseid Meteor Shower 2026 — Peak Viewing Guide</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_2a9f3</div></div>
+      <div><span class="o-badge o-badge-grey">♪ TikTok</span></div>
+      <div><span class="o-badge o-badge-green">✓ Published</span></div>
+      <div style="font-size:12px;color:var(--ui-fg2);font-family:'JetBrains Mono',monospace;">2h ago</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);">$0.31</div>
+    </div>
+    <div class="publish-row">
+      <div><div style="font-size:13.5px;font-weight:500;color:var(--ui-fg1);">Open-source TTS in 2026 — What Actually Works</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_1c4b8</div></div>
+      <div><span class="o-badge o-badge-grey">𝕏 Twitter</span></div>
+      <div><span class="o-badge o-badge-amber">⏱ Scheduled</span></div>
+      <div style="font-size:12px;color:var(--ui-fg2);font-family:'JetBrains Mono',monospace;">4:30 PM</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);">—</div>
+    </div>
+    <div class="publish-row">
+      <div><div style="font-size:13.5px;font-weight:500;color:var(--ui-fg1);">ComfyUI Custom Node Deep Dive</div><div style="font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;margin-top:2px;">job_5d2a7</div></div>
+      <div><span class="o-badge o-badge-grey">▶ YouTube</span></div>
+      <div><span class="o-badge o-badge-red">✕ Failed</span></div>
+      <div style="font-size:12px;color:var(--ui-fg2);font-family:'JetBrains Mono',monospace;">3h ago</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);">$0.00</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+OrionShell.init({
+  active: 'publishing',
+  title: 'Publishing',
+  subtitle: 'Platform connections, publish history and scheduled posts.',
+  iconPath: '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>'
+});
+</script>
+</body></html>

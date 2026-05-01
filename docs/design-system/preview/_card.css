@@ -1,0 +1,43 @@
+/* Shared preview card chrome — thin wrapper so all cards share the same background stage. */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  color: #F1F5F9;
+  background: #080b14;
+  overflow: hidden;
+  position: relative;
+}
+/* Full-bleed card: the nebula bg + glass card layers sit on top */
+.card-root {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+}
+.card-root.tight { padding: 14px 18px; }
+.card-root.pad-top { align-items: flex-start; padding-top: 18px; }
+.muted-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #080b14;
+  background-image:
+    radial-gradient(at 18% 20%, rgba(168, 85, 247, 0.22) 0, transparent 55%),
+    radial-gradient(at 85% 15%, rgba( 34,211,238, 0.18) 0, transparent 50%),
+    radial-gradient(at 60% 90%, rgba(139, 92, 246, 0.14) 0, transparent 50%);
+}
+.stage { position: relative; z-index: 10; width: 100%; }
+.eyebrow {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #A78BFA;
+}
+.row { display: flex; gap: 12px; align-items: stretch; }
+.col { display: flex; flex-direction: column; gap: 8px; }

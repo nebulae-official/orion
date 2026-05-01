@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Orion — 6 Brand Directions</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070a12;
+    --panel: rgba(15, 22, 38, 0.55);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --fg1: #EDF1FA;
+    --fg2: #9AA3B5;
+    --fg3: #5F6A80;
+    --violet: #8B5CF6;
+    --violet-dim: #7C3AED;
+    --violet-light: #A78BFA;
+    --cyan: #22D3EE;
+    --cyan-dim: #0891B2;
+    --ink: #0B0F1A;
+  }
+  html, body { margin:0; padding:0; }
+  body {
+    background: var(--bg); color: var(--fg1);
+    font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+    min-height: 100vh; position: relative;
+  }
+  body::before {
+    content:""; position: fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(at 18% 18%, rgba(168,85,247,0.22) 0, transparent 55%),
+      radial-gradient(at 85% 12%, rgba(34,211,238,0.18) 0, transparent 52%),
+      radial-gradient(at 55% 100%, rgba(139,92,246,0.14) 0, transparent 55%);
+  }
+  main { position: relative; z-index: 1; max-width: 1480px; margin: 0 auto; padding: 64px 56px 96px; }
+
+  .top {
+    display:flex; align-items:flex-end; justify-content:space-between; gap: 48px; margin-bottom: 48px;
+    border-bottom: 1px solid var(--border); padding-bottom: 32px;
+  }
+  .eyebrow {
+    font-family: "Space Grotesk", sans-serif; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--violet-light);
+  }
+  h1 {
+    margin: 12px 0 0; font-family: "Space Grotesk", sans-serif;
+    font-size: 52px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.02;
+  }
+  h1 .grad {
+    background: linear-gradient(110deg, #A78BFA 0%, #22D3EE 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .top p { max-width: 460px; color: var(--fg2); font-size: 14.5px; line-height: 1.6; margin: 0; }
+  .top .meta {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--fg3);
+    text-align: right; line-height: 1.7;
+  }
+  .top .meta strong { color: var(--fg1); font-weight: 500; }
+
+  .section-label {
+    display:flex; align-items:center; gap: 18px; margin: 64px 0 24px;
+  }
+  .section-label .num {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--fg3);
+  }
+  .section-label h2 {
+    margin: 0; font-family: "Space Grotesk", sans-serif;
+    font-size: 22px; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .section-label .rule { flex: 1; height: 1px; background: var(--border); }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    border-radius: 18px; background: var(--panel); backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 50px rgba(0,0,0,0.4);
+    overflow: hidden; display:flex; flex-direction:column;
+  }
+  .card .hd {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+  }
+  .card .hd .id {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--fg3);
+    letter-spacing: 0.08em;
+  }
+  .card .hd .name {
+    font-family: "Space Grotesk", sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.005em;
+  }
+  .card .hd .name span { color: var(--violet-light); }
+  .card .hd .tag {
+    font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg2);
+    padding: 4px 10px; border-radius: 9999px; border: 1px solid var(--border-strong);
+  }
+
+  .stage {
+    position: relative; aspect-ratio: 16 / 9;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(at 20% 25%, rgba(168,85,247,0.14) 0, transparent 55%),
+      radial-gradient(at 80% 75%, rgba(34,211,238,0.10) 0, transparent 52%),
+      #0a0e1a;
+  }
+  .stage.light {
+    background:
+      radial-gradient(at 20% 25%, rgba(168,85,247,0.05) 0, transparent 55%),
+      radial-gradient(at 80% 75%, rgba(34,211,238,0.04) 0, transparent 52%),
+      #F4F4F7;
+  }
+
+  .footnote {
+    padding: 16px 22px; display:flex; align-items:center; justify-content:space-between;
+    border-top: 1px solid var(--border); color: var(--fg2); font-size: 12.5px;
+  }
+  .footnote .desc { line-height: 1.5; padding-right: 16px; }
+  .footnote .desc strong { color: var(--fg1); font-weight: 500; }
+  .footnote .lockup { flex-shrink: 0; }
+
+  .hero-stage {
+    position: relative; padding: 56px 32px;
+    display:flex; flex-direction: column; align-items:center; justify-content: center; gap: 28px;
+    aspect-ratio: unset;
+  }
+
+  /* Symbol + wordmark row helpers inside footnote */
+  .ft-row { display:flex; align-items:center; gap: 14px; }
+
+  /* Common wordmark sizing */
+  .wm { display: inline-block; }
+
+  /* caption */
+  .caption {
+    display:flex; align-items:center; gap: 10px; margin-top: 14px;
+    font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--fg3);
+  }
+  .caption span { display:inline-block; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; }
+
+  /* ⸻ HERO (brand statement) ⸻ */
+  .hero {
+    margin: 32px 0 56px; padding: 56px; border-radius: 24px;
+    border: 1px solid var(--border); background: var(--panel);
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 30px 80px rgba(0,0,0,0.4);
+    display:grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+  }
+  @media (max-width: 1100px) { .hero { grid-template-columns: 1fr; } }
+  .hero .left h3 {
+    margin: 0; font-family: "Space Grotesk", sans-serif;
+    font-size: 28px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;
+  }
+  .hero .left p { color: var(--fg2); font-size: 14.5px; line-height: 1.7; }
+  .hero .left ul {
+    list-style:none; padding: 0; margin: 24px 0 0;
+    display:grid; gap: 10px;
+  }
+  .hero .left li {
+    display:flex; align-items:flex-start; gap: 12px; font-size: 13.5px; color: var(--fg2); line-height: 1.55;
+  }
+  .hero .left li strong { color: var(--fg1); font-weight: 500; }
+  .hero .left li .bu {
+    flex-shrink: 0; margin-top: 6px; width: 5px; height: 5px; border-radius: 50%;
+    background: linear-gradient(135deg, #A78BFA, #22D3EE);
+    box-shadow: 0 0 8px rgba(167,139,250,0.7);
+  }
+
+  /* Shared swatch row */
+  .swatches { display:flex; gap: 8px; margin-top: 28px; }
+  .sw {
+    padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--fg2);
+    display:flex; align-items:center; gap:8px;
+  }
+  .sw .dot { width: 14px; height: 14px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- TOP -->
+  <div class="top">
+    <div>
+      <div class="eyebrow">Orion Brand System · v1.0 · 6 Directions</div>
+      <h1>Six marks.<br>One <span class="grad">mission control</span>.</h1>
+    </div>
+    <p>Each direction is a distinct answer to the same brief: what does an autonomous content swarm look like, when compressed into a single glyph? All six share the nebula palette; they diverge in metaphor, geometry, and voice.</p>
+    <div class="meta">
+      <div><strong>Client</strong> · Orion OS</div>
+      <div><strong>Scope</strong> · Symbol + wordmark</div>
+      <div><strong>Palette</strong> · Violet→cyan nebula</div>
+      <div><strong>Type</strong> · Space Grotesk</div>
+    </div>
+  </div>
+
+  <!-- HERO / BRAND PRINCIPLES -->
+  <div class="hero">
+    <div class="left">
+      <div class="eyebrow" style="margin-bottom:16px;">The brief</div>
+      <h3>Orion runs a swarm of agents that turn trending signal into published content. The mark should feel like the control panel of a quiet, powerful machine.</h3>
+      <ul>
+        <li><span class="bu"></span><span><strong>Constellation of actors.</strong> Scout, Director, Media, Editor, Publisher — five specialized agents orbiting one human operator.</span></li>
+        <li><span class="bu"></span><span><strong>Signal, then synthesis.</strong> The product listens before it speaks; the mark should hint at capture and emission.</span></li>
+        <li><span class="bu"></span><span><strong>Precision over theatrics.</strong> Infrastructure tool tone — Linear / Palantir / Bloomberg, not SaaS-startup.</span></li>
+        <li><span class="bu"></span><span><strong>Works at 16px.</strong> Legible as a favicon, scales to 512px tile without losing soul.</span></li>
+      </ul>
+      <div class="swatches">
+        <div class="sw"><span class="dot" style="background:#7C3AED;"></span>#7C3AED</div>
+        <div class="sw"><span class="dot" style="background:#A78BFA;"></span>#A78BFA</div>
+        <div class="sw"><span class="dot" style="background:#22D3EE;"></span>#22D3EE</div>
+        <div class="sw"><span class="dot" style="background:#0891B2;"></span>#0891B2</div>
+      </div>
+    </div>
+    <div class="right" style="display:flex; align-items:center; justify-content:center;">
+      <!-- Preview of direction #1, at scale -->
+      <svg width="420" height="260" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" aria-label="Orion preview mark">
+        <defs>
+          <linearGradient id="heroGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#22D3EE"/>
+          </linearGradient>
+          <radialGradient id="heroGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#A78BFA" stop-opacity="0.55"/>
+            <stop offset="1" stop-color="#A78BFA" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- glow -->
+        <circle cx="130" cy="130" r="110" fill="url(#heroGlow)"/>
+        <!-- constellation aperture (direction #1 preview) -->
+        <g transform="translate(130,130)">
+          <circle cx="0" cy="0" r="56" fill="none" stroke="url(#heroGrad)" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="0" cy="0" r="36" fill="none" stroke="url(#heroGrad)" stroke-width="1.5" opacity="0.7"/>
+          <!-- 3 orbital dots -->
+          <circle cx="-36" cy="0" r="4" fill="#A78BFA"/>
+          <circle cx="18" cy="-31" r="4" fill="#22D3EE"/>
+          <circle cx="18" cy="31" r="4" fill="#A78BFA"/>
+          <!-- core -->
+          <circle cx="0" cy="0" r="9" fill="url(#heroGrad)"/>
+          <circle cx="0" cy="0" r="14" fill="none" stroke="url(#heroGrad)" stroke-width="1.5"/>
+        </g>
+        <!-- wordmark -->
+        <text x="230" y="145" font-family="Space Grotesk, sans-serif" font-size="44" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">orion</text>
+        <text x="230" y="168" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="500" letter-spacing="0.28em" fill="#9AA3B5">MISSION CONTROL</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ⸻ GRID OF 6 DIRECTIONS ⸻ -->
+  <div class="section-label">
+    <span class="num">01 — 06</span>
+    <h2>Six directions</h2>
+    <div class="rule"></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ═════════════════ DIRECTION 01 — APERTURE ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D01</div>
+        <div class="name">The <span>Aperture</span></div>
+        <div class="tag">Instrument</div>
+      </div>
+      <div class="stage">
+        <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d01g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(70,100)">
+            <circle cx="0" cy="0" r="48" fill="none" stroke="url(#d01g)" stroke-width="1.2" opacity="0.35"/>
+            <circle cx="0" cy="0" r="32" fill="none" stroke="url(#d01g)" stroke-width="1.5" opacity="0.75"/>
+            <circle cx="-32" cy="0" r="3.5" fill="#A78BFA"/>
+            <circle cx="16" cy="-28" r="3.5" fill="#22D3EE"/>
+            <circle cx="16" cy="28" r="3.5" fill="#A78BFA"/>
+            <circle cx="0" cy="0" r="7.5" fill="url(#d01g)"/>
+            <circle cx="0" cy="0" r="12" fill="none" stroke="url(#d01g)" stroke-width="1.4"/>
+          </g>
+          <text x="140" y="108" font-family="Space Grotesk, sans-serif" font-size="38" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">orion</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>A lens onto the swarm.</strong> Concentric rings + 3 orbiting nodes + a gradient core. Reads as "aperture," "viewport," or "mission-control dish."</div>
+        <div class="lockup"><div class="caption"><span>constellation</span><span>aperture</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════ DIRECTION 02 — O-HUNTER (wordmark-led) ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D02</div>
+        <div class="name">The <span>Hunter</span></div>
+        <div class="tag">Wordmark-led</div>
+      </div>
+      <div class="stage">
+        <svg width="340" height="200" viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d02g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <!-- Custom-drawn ORION wordmark where the O hosts the 3-star belt of Orion -->
+          <g transform="translate(24,76)">
+            <!-- O (custom circle, heavy) -->
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#EDF1FA" stroke-width="8"/>
+            <!-- 3-star belt inside the O, diagonal -->
+            <g>
+              <circle cx="18" cy="34" r="2.6" fill="#A78BFA"/>
+              <circle cx="28" cy="28" r="2.6" fill="url(#d02g)"/>
+              <circle cx="38" cy="22" r="2.6" fill="#22D3EE"/>
+              <line x1="18" y1="34" x2="38" y2="22" stroke="url(#d02g)" stroke-width="0.8" opacity="0.55"/>
+            </g>
+            <!-- rion -->
+            <text x="64" y="43" font-family="Space Grotesk, sans-serif" font-size="44" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">rion</text>
+          </g>
+          <text x="28" y="145" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="500" letter-spacing="0.28em" fill="#9AA3B5">CONTENT · AUTONOMY · OS</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>The O becomes a sky.</strong> Orion's three-star belt is literally set inside the wordmark's O — the symbol and logotype are one object.</div>
+        <div class="lockup"><div class="caption"><span>literal</span><span>belt-of-orion</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════ DIRECTION 03 — THE OPERATOR ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D03</div>
+        <div class="name">The <span>Operator</span></div>
+        <div class="tag">Monogram</div>
+      </div>
+      <div class="stage">
+        <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d03g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <!-- Geometric O with a cut/notch on the upper-right quadrant (antenna / input) -->
+          <g transform="translate(72,100)">
+            <!-- O ring -->
+            <path d="M 0,-40 A 40,40 0 1 1 22,-33.4" fill="none" stroke="url(#d03g)" stroke-width="9" stroke-linecap="round"/>
+            <path d="M 30,-28 A 40,40 0 1 1 0,-40" fill="none" stroke="#EDF1FA" stroke-width="9" stroke-linecap="round" opacity="0"/>
+            <!-- inner dot (signal) -->
+            <circle cx="0" cy="0" r="6" fill="url(#d03g)"/>
+            <!-- antenna / input notch -->
+            <line x1="26" y1="-30" x2="38" y2="-42" stroke="#22D3EE" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="40" cy="-44" r="3" fill="#22D3EE"/>
+          </g>
+          <text x="140" y="113" font-family="Space Grotesk, sans-serif" font-size="34" font-weight="600" letter-spacing="-0.015em" fill="#EDF1FA">Orion</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>An O with a signal antenna.</strong> The break in the ring + the trailing node reads as both "O" and "an instrument tuned to something." Cleanest at favicon scale.</div>
+        <div class="lockup"><div class="caption"><span>monogram</span><span>signal-in</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════ DIRECTION 04 — THE SWARM ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D04</div>
+        <div class="name">The <span>Swarm</span></div>
+        <div class="tag">Agent-native</div>
+      </div>
+      <div class="stage">
+        <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d04g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <!-- 5 satellites around a core — Scout, Director, Media, Editor, Publisher -->
+          <g transform="translate(72,100)" stroke-linecap="round">
+            <!-- spokes -->
+            <g stroke="url(#d04g)" stroke-width="1.2" opacity="0.55">
+              <line x1="0" y1="0" x2="0" y2="-36"/>
+              <line x1="0" y1="0" x2="34" y2="-11"/>
+              <line x1="0" y1="0" x2="21" y2="29"/>
+              <line x1="0" y1="0" x2="-21" y2="29"/>
+              <line x1="0" y1="0" x2="-34" y2="-11"/>
+            </g>
+            <!-- satellites -->
+            <circle cx="0" cy="-36" r="4.5" fill="#A78BFA"/>
+            <circle cx="34" cy="-11" r="4.5" fill="#22D3EE"/>
+            <circle cx="21" cy="29" r="4.5" fill="#A78BFA"/>
+            <circle cx="-21" cy="29" r="4.5" fill="#22D3EE"/>
+            <circle cx="-34" cy="-11" r="4.5" fill="#A78BFA"/>
+            <!-- core -->
+            <circle cx="0" cy="0" r="9" fill="url(#d04g)"/>
+            <circle cx="0" cy="0" r="13" fill="none" stroke="url(#d04g)" stroke-width="1.5"/>
+          </g>
+          <text x="142" y="113" font-family="Space Grotesk, sans-serif" font-size="34" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">Orion</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>A literal swarm.</strong> Five satellites — one per agent — around a gradient core. Most explicit about what the product IS.</div>
+        <div class="lockup"><div class="caption"><span>swarm</span><span>5-agents</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════ DIRECTION 05 — THE PULSE ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D05</div>
+        <div class="name">The <span>Pulse</span></div>
+        <div class="tag">Signal</div>
+      </div>
+      <div class="stage">
+        <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d05g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+          </defs>
+          <!-- Sine-like pulse that enters a ring (captured signal) -->
+          <g transform="translate(44,100)">
+            <path d="M 0,0 Q 10,-14 20,0 T 40,0 T 60,0" fill="none" stroke="url(#d05g)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="78" cy="0" r="16" fill="none" stroke="url(#d05g)" stroke-width="3"/>
+            <circle cx="78" cy="0" r="4" fill="url(#d05g)"/>
+          </g>
+          <text x="160" y="113" font-family="Space Grotesk, sans-serif" font-size="34" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">Orion</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>Signal into synthesis.</strong> A wave entering a ring — the product's job in one gesture. Sparse, kinetic, distinct at any size.</div>
+        <div class="lockup"><div class="caption"><span>signal→ring</span><span>capture</span></div></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════ DIRECTION 06 — THE PRISM ═════════════════ -->
+    <div class="card">
+      <div class="hd">
+        <div class="id">D06</div>
+        <div class="name">The <span>Prism</span></div>
+        <div class="tag">Seal</div>
+      </div>
+      <div class="stage">
+        <svg width="320" height="200" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d06g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#A78BFA"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+            <linearGradient id="d06g2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#A78BFA" stop-opacity="0.9"/>
+              <stop offset="1" stop-color="#7C3AED" stop-opacity="0.3"/>
+            </linearGradient>
+          </defs>
+          <!-- Hexagonal seal with inner slit where light fractures -->
+          <g transform="translate(72,100)">
+            <polygon points="0,-40 34.6,-20 34.6,20 0,40 -34.6,20 -34.6,-20" fill="url(#d06g2)" opacity="0.18" stroke="url(#d06g)" stroke-width="1.5"/>
+            <!-- Refracted beams -->
+            <line x1="-22" y1="0" x2="22" y2="0" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="-22" y1="-8" x2="22" y2="-8" stroke="#C4B5FD" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+            <line x1="-22" y1="8" x2="22" y2="8" stroke="#22D3EE" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
+          </g>
+          <text x="142" y="113" font-family="Space Grotesk, sans-serif" font-size="34" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">Orion</text>
+        </svg>
+      </div>
+      <div class="footnote">
+        <div class="desc"><strong>Input → refracted output.</strong> A hexagonal prism splitting one stream into three wavelengths — "one trend, many formats." Seal-like and ownable.</div>
+        <div class="lockup"><div class="caption"><span>prism</span><span>refraction</span></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ⸻ SCALE BEHAVIOR ⸻ -->
+  <div class="section-label">
+    <span class="num">07</span>
+    <h2>Scale — all six, at 64 / 32 / 16 px</h2>
+    <div class="rule"></div>
+  </div>
+
+  <div class="card" style="padding: 0;">
+    <div class="hd">
+      <div class="id">scale.test</div>
+      <div class="name">Size integrity — <span>16px to 64px</span></div>
+      <div class="tag">Favicon check</div>
+    </div>
+    <div style="padding: 36px 40px; display:grid; grid-template-columns: repeat(6, 1fr); gap: 20px;">
+      <!-- For each direction, stack 3 sizes vertically -->
+      <!-- Repeat the 6 symbols at small sizes -->
+      <script type="application/json" id="icons-data">placeholder</script>
+
+      <!-- Direction 01 -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s01g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#s01g)" stroke-width="1.5" opacity="0.75"/><circle cx="-32" cy="0" r="3.5" fill="#A78BFA"/><circle cx="16" cy="-28" r="3.5" fill="#22D3EE"/><circle cx="16" cy="28" r="3.5" fill="#A78BFA"/><circle cx="0" cy="0" r="7.5" fill="url(#s01g)"/></g></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#s01g)" stroke-width="3" opacity="0.75"/><circle cx="-32" cy="0" r="5" fill="#A78BFA"/><circle cx="16" cy="-28" r="5" fill="#22D3EE"/><circle cx="16" cy="28" r="5" fill="#A78BFA"/><circle cx="0" cy="0" r="10" fill="url(#s01g)"/></g></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#s01g)" stroke-width="6" opacity="0.85"/><circle cx="0" cy="0" r="14" fill="url(#s01g)"/></g></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D01 · Aperture</div>
+      </div>
+
+      <!-- Direction 02 — belt-O -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s02g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><circle cx="50" cy="50" r="32" fill="none" stroke="#EDF1FA" stroke-width="10"/><circle cx="37" cy="58" r="4" fill="#A78BFA"/><circle cx="50" cy="50" r="4" fill="url(#s02g)"/><circle cx="63" cy="42" r="4" fill="#22D3EE"/></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="none" stroke="#EDF1FA" stroke-width="12"/><circle cx="37" cy="58" r="5" fill="#A78BFA"/><circle cx="50" cy="50" r="5" fill="url(#s02g)"/><circle cx="63" cy="42" r="5" fill="#22D3EE"/></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="#EDF1FA" stroke-width="16"/><circle cx="50" cy="50" r="8" fill="url(#s02g)"/></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D02 · Hunter</div>
+      </div>
+
+      <!-- Direction 03 — Operator -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s03g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(46,54)"><path d="M 0,-32 A 32,32 0 1 1 18,-27" fill="none" stroke="url(#s03g)" stroke-width="8" stroke-linecap="round"/><circle cx="0" cy="0" r="5" fill="url(#s03g)"/><line x1="22" y1="-25" x2="32" y2="-35" stroke="#22D3EE" stroke-width="3" stroke-linecap="round"/><circle cx="34" cy="-37" r="3" fill="#22D3EE"/></g></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><g transform="translate(46,54)"><path d="M 0,-32 A 32,32 0 1 1 18,-27" fill="none" stroke="url(#s03g)" stroke-width="10" stroke-linecap="round"/><circle cx="0" cy="0" r="7" fill="url(#s03g)"/><circle cx="34" cy="-37" r="4" fill="#22D3EE"/></g></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><g transform="translate(46,54)"><path d="M 0,-32 A 32,32 0 1 1 18,-27" fill="none" stroke="url(#s03g)" stroke-width="16" stroke-linecap="round"/><circle cx="34" cy="-37" r="6" fill="#22D3EE"/></g></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D03 · Operator</div>
+      </div>
+
+      <!-- Direction 04 — Swarm -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s04g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(50,50)" stroke-linecap="round"><g stroke="url(#s04g)" stroke-width="1.5" opacity="0.55"><line x1="0" y1="0" x2="0" y2="-32"/><line x1="0" y1="0" x2="30" y2="-10"/><line x1="0" y1="0" x2="19" y2="26"/><line x1="0" y1="0" x2="-19" y2="26"/><line x1="0" y1="0" x2="-30" y2="-10"/></g><circle cx="0" cy="-32" r="4" fill="#A78BFA"/><circle cx="30" cy="-10" r="4" fill="#22D3EE"/><circle cx="19" cy="26" r="4" fill="#A78BFA"/><circle cx="-19" cy="26" r="4" fill="#22D3EE"/><circle cx="-30" cy="-10" r="4" fill="#A78BFA"/><circle cx="0" cy="0" r="8" fill="url(#s04g)"/></g></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><g transform="translate(50,50)"><circle cx="0" cy="-32" r="6" fill="#A78BFA"/><circle cx="30" cy="-10" r="6" fill="#22D3EE"/><circle cx="19" cy="26" r="6" fill="#A78BFA"/><circle cx="-19" cy="26" r="6" fill="#22D3EE"/><circle cx="-30" cy="-10" r="6" fill="#A78BFA"/><circle cx="0" cy="0" r="11" fill="url(#s04g)"/></g></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><g transform="translate(50,50)"><circle cx="0" cy="-32" r="10" fill="#A78BFA"/><circle cx="30" cy="-10" r="10" fill="#22D3EE"/><circle cx="19" cy="26" r="10" fill="#A78BFA"/><circle cx="-19" cy="26" r="10" fill="#22D3EE"/><circle cx="-30" cy="-10" r="10" fill="#A78BFA"/><circle cx="0" cy="0" r="16" fill="url(#s04g)"/></g></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D04 · Swarm</div>
+      </div>
+
+      <!-- Direction 05 — Pulse -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s05g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(12,50)"><path d="M 0,0 Q 8,-12 16,0 T 32,0 T 48,0" fill="none" stroke="url(#s05g)" stroke-width="3" stroke-linecap="round"/><circle cx="64" cy="0" r="14" fill="none" stroke="url(#s05g)" stroke-width="3"/><circle cx="64" cy="0" r="4" fill="url(#s05g)"/></g></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><g transform="translate(12,50)"><path d="M 0,0 Q 8,-12 16,0 T 32,0" fill="none" stroke="url(#s05g)" stroke-width="5" stroke-linecap="round"/><circle cx="62" cy="0" r="18" fill="none" stroke="url(#s05g)" stroke-width="5"/><circle cx="62" cy="0" r="6" fill="url(#s05g)"/></g></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><circle cx="58" cy="50" r="30" fill="none" stroke="url(#s05g)" stroke-width="8"/><line x1="10" y1="50" x2="24" y2="50" stroke="url(#s05g)" stroke-width="8" stroke-linecap="round"/></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D05 · Pulse</div>
+      </div>
+
+      <!-- Direction 06 — Prism -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+        <svg width="64" height="64" viewBox="0 0 100 100"><defs><linearGradient id="s06g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient><linearGradient id="s06f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A78BFA" stop-opacity="0.9"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0.3"/></linearGradient></defs><polygon points="50,18 78,34 78,66 50,82 22,66 22,34" fill="url(#s06f)" opacity="0.18" stroke="url(#s06g)" stroke-width="2"/><line x1="32" y1="50" x2="68" y2="50" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="42" x2="68" y2="42" stroke="#C4B5FD" stroke-width="2" stroke-linecap="round" opacity="0.6"/><line x1="32" y1="58" x2="68" y2="58" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" opacity="0.85"/></svg>
+        <svg width="32" height="32" viewBox="0 0 100 100"><polygon points="50,14 80,32 80,68 50,86 20,68 20,32" fill="url(#s06f)" opacity="0.25" stroke="url(#s06g)" stroke-width="4"/><line x1="30" y1="50" x2="70" y2="50" stroke="url(#s06g)" stroke-width="5" stroke-linecap="round"/></svg>
+        <svg width="16" height="16" viewBox="0 0 100 100"><polygon points="50,10 84,30 84,70 50,90 16,70 16,30" fill="none" stroke="url(#s06g)" stroke-width="8"/></svg>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--fg3);">D06 · Prism</div>
+      </div>
+    </div>
+    <div class="footnote">
+      <div class="desc">Readability at <strong>16px is non-negotiable for favicon</strong>. Strongest at tiny sizes: D01, D02, D06. Weakest: D04 (swarm dissolves), D03 (antenna detail disappears — but reads fine as a plain ring).</div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATION -->
+  <div class="section-label">
+    <span class="num">08</span>
+    <h2>Recommendation</h2>
+    <div class="rule"></div>
+  </div>
+
+  <div class="card">
+    <div class="hd">
+      <div class="id">R</div>
+      <div class="name">Pick a pair: one <span>symbol</span>, one <span>wordmark</span></div>
+      <div class="tag">Designer's pick</div>
+    </div>
+    <div style="padding: 32px 40px; display:grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px;">Primary pick</div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size: 22px; font-weight: 600; margin: 0 0 10px;">D01 Aperture</h3>
+        <p style="color:var(--fg2); font-size: 14px; line-height: 1.65; margin:0;">The aperture best captures Orion's soul: a control-room viewport onto a constellation of agents. Reads at 16px, survives on dark and light, ownable without being cute.</p>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px;">Strong runners-up</div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size: 22px; font-weight: 600; margin: 0 0 10px;">D02 Hunter · D06 Prism</h3>
+        <p style="color:var(--fg2); font-size: 14px; line-height: 1.65; margin:0;"><strong style="color:var(--fg1);">D02</strong> wins if you want the "Orion" name taken literally — the constellation lives inside the O. <strong style="color:var(--fg1);">D06</strong> wins if you want the clearest visual metaphor for "one trend → many formats."</p>
+      </div>
+    </div>
+    <div class="footnote">
+      <div class="desc">Next: pick one direction, I'll build the full brand book — horizontal/stacked lockups, app-icon tile, favicon, mono variants, clearspace rules, and a drop-in usage demo on the dashboard.</div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

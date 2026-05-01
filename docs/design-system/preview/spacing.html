@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Spacing</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .row-sp { display:flex; gap: 18px; align-items: baseline; }
+  .tag { font-family:'Space Grotesk',sans-serif; font-size:11px; color:#A78BFA; letter-spacing:0.1em; text-transform:uppercase; min-width: 70px; }
+  .bar { background: linear-gradient(90deg, #7C3AED 0%, #A78BFA 100%); height: 8px; border-radius: 4px; box-shadow: 0 0 8px rgba(124,58,237,0.35); }
+  .lbl { font-size:11px; color:#94A3B8; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage">
+    <div style="display:flex; flex-direction:column; gap:11px;">
+      <div class="row-sp"><span class="tag">2 / 8px</span><div class="bar" style="width:8px;"></div><span class="lbl">gap-2 · icon-text</span></div>
+      <div class="row-sp"><span class="tag">3 / 12px</span><div class="bar" style="width:12px;"></div><span class="lbl">gap-3 · nav items</span></div>
+      <div class="row-sp"><span class="tag">4 / 16px</span><div class="bar" style="width:16px;"></div><span class="lbl">space-y-4 · in-card</span></div>
+      <div class="row-sp"><span class="tag">6 / 24px</span><div class="bar" style="width:24px;"></div><span class="lbl">p-6 · card padding, gap-6 cards</span></div>
+      <div class="row-sp"><span class="tag">8 / 32px</span><div class="bar" style="width:32px;"></div><span class="lbl">p-8 · hero padding, mb-8 sections</span></div>
+      <div class="row-sp"><span class="tag">12 / 48px</span><div class="bar" style="width:48px;"></div><span class="lbl">mt-12 · major section break</span></div>
+    </div>
+  </div>
+</div>
+</body></html>

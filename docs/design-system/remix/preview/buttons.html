@@ -1,0 +1,181 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Buttons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  /* ── Shared base ───────────────────────────────────── */
+  button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: "Geist", sans-serif; font-weight: 500;
+    cursor: pointer; border: none; outline: none;
+    transition: all 0.2s ease;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  button:focus-visible { outline: 2px solid #A78BFA; outline-offset: 2px; }
+
+  /* ── Sizes — ALL variants use the same padding scale ── */
+  .sm  { padding: 8px 16px;  font-size: 12px; border-radius: 8px;  }
+  .md  { padding: 10px 20px; font-size: 14px; border-radius: 8px;  }
+  .lg  { padding: 13px 26px; font-size: 15px; border-radius: 10px; }
+
+  /* ── Variants ──────────────────────────────────────── */
+
+  /* Primary — solid violet, colored glow */
+  .primary {
+    background: #7C3AED;
+    color: #FFF;
+    box-shadow: 0 10px 28px -6px rgba(124,58,237,0.50),
+                inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .primary:hover { background: #6D28D9; box-shadow: 0 14px 32px -6px rgba(124,58,237,0.65), inset 0 1px 0 rgba(255,255,255,0.18); transform: translateY(-1px); }
+  .primary:active { transform: translateY(0); }
+
+  /* Secondary — glass */
+  .secondary {
+    background: rgba(13, 18, 32, 0.52);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    color: #C4B5FD;
+    border: 1px solid rgba(167,139,250,0.22);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10),
+                0 4px 16px rgba(0,0,0,0.25);
+  }
+  .secondary:hover { background: rgba(124,58,237,0.14); border-color: rgba(167,139,250,0.38); color: #EDF1FA; }
+
+  /* Outline — glass frame, no fill */
+  .outline {
+    background: rgba(13, 18, 32, 0.28);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    color: #9AA3B5;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .outline:hover { background: rgba(124,58,237,0.10); border-color: rgba(167,139,250,0.30); color: #C4B5FD; }
+
+  /* Ghost — fully transparent, glass on hover */
+  .ghost {
+    background: transparent;
+    color: #9AA3B5;
+    border: 1px solid transparent;
+  }
+  .ghost:hover {
+    background: rgba(13, 18, 32, 0.38);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-color: rgba(255,255,255,0.08);
+    color: #EDF1FA;
+  }
+
+  /* Destructive — solid red, colored glow */
+  .danger {
+    background: #EF4444;
+    color: #FFF;
+    box-shadow: 0 10px 28px -6px rgba(239,68,68,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .danger:hover { background: #DC2626; box-shadow: 0 14px 32px -6px rgba(239,68,68,0.60), inset 0 1px 0 rgba(255,255,255,0.18); transform: translateY(-1px); }
+
+  /* Disabled state — applied to all */
+  .disabled, button:disabled {
+    opacity: 0.45; cursor: not-allowed; pointer-events: none;
+  }
+
+  /* ── Layout helpers ────────────────────────────────── */
+  .row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    gap: 10px 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .row:last-child { border-bottom: none; }
+  .lbl {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #5F6A80;
+  }
+  .btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  /* Size comparison: all three sizes of primary side-by-side */
+  .size-row { display: flex; align-items: center; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="card-root pad-top" style="height:auto; min-height:100vh;">
+  <div class="muted-bg"></div>
+  <div class="stage" style="padding: 22px 0;">
+
+    <!-- Variant showcase — all md -->
+    <div class="row">
+      <span class="lbl">Primary</span>
+      <div class="btns">
+        <button class="primary md">Generate</button>
+        <button class="primary md">Sign in →</button>
+        <button class="primary md" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="lbl">Secondary</span>
+      <div class="btns">
+        <button class="secondary md">Cancel</button>
+        <button class="secondary md">Settings</button>
+        <button class="secondary md" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="lbl">Outline</span>
+      <div class="btns">
+        <button class="outline md">Filter</button>
+        <button class="outline md">Export</button>
+        <button class="outline md" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="lbl">Ghost</span>
+      <div class="btns">
+        <button class="ghost md">Skip</button>
+        <button class="ghost md">View logs →</button>
+        <button class="ghost md" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <span class="lbl">Destructive</span>
+      <div class="btns">
+        <button class="danger md">Delete</button>
+        <button class="danger md">Reject</button>
+        <button class="danger md" disabled>Disabled</button>
+      </div>
+    </div>
+
+    <!-- Size scale — primary across sm / md / lg -->
+    <div class="row" style="margin-top:8px;">
+      <span class="lbl">Sizes</span>
+      <div class="size-row">
+        <button class="primary sm">Small</button>
+        <button class="primary md">Medium</button>
+        <button class="primary lg">Large</button>
+      </div>
+    </div>
+
+    <!-- Same scale for glass/secondary -->
+    <div class="row">
+      <span class="lbl">Glass sizes</span>
+      <div class="size-row">
+        <button class="secondary sm">Small</button>
+        <button class="secondary md">Medium</button>
+        <button class="secondary lg">Large</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body></html>

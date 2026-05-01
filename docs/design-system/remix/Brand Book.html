@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Orion — Brand Book (D01 Aperture)</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070a12; --panel: rgba(15,22,38,0.55); --elevated: #161f33;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.14);
+    --fg1: #EDF1FA; --fg2: #9AA3B5; --fg3: #5F6A80;
+    --violet: #7C3AED; --violet-light: #A78BFA; --cyan: #22D3EE; --cyan-dim: #0891B2;
+  }
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--fg1);font-family:"Geist",ui-sans-serif,system-ui,sans-serif;min-height:100vh;position:relative;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(at 18% 18%,rgba(168,85,247,0.22) 0,transparent 55%),radial-gradient(at 85% 12%,rgba(34,211,238,0.18) 0,transparent 52%),radial-gradient(at 55% 100%,rgba(139,92,246,0.14) 0,transparent 55%);}
+  main{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:56px 48px 96px;}
+  .eyebrow{font-family:"Space Grotesk",sans-serif;font-size:11px;font-weight:500;letter-spacing:0.28em;text-transform:uppercase;color:var(--violet-light);}
+  h1{margin:10px 0 0;font-family:"Space Grotesk",sans-serif;font-size:46px;font-weight:700;letter-spacing:-0.025em;line-height:1.04;}
+  h1 .grad{background:linear-gradient(110deg,#A78BFA 0%,#22D3EE 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:48px;padding-bottom:28px;margin-bottom:40px;border-bottom:1px solid var(--border);}
+  .top p{max-width:440px;color:var(--fg2);font-size:14.5px;line-height:1.65;margin:0;}
+  .top .meta{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--fg3);text-align:right;line-height:1.7;}
+  .top .meta strong{color:var(--fg1);font-weight:500;}
+  .section{display:flex;align-items:center;gap:18px;margin:56px 0 22px;}
+  .section .num{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--fg3);}
+  .section h2{margin:0;font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:600;letter-spacing:-0.01em;}
+  .section .rule{flex:1;height:1px;background:var(--border);}
+  .card{border-radius:18px;background:var(--panel);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 20px 50px rgba(0,0,0,0.4);overflow:hidden;}
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);}
+  .hd .id{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--fg3);letter-spacing:0.08em;}
+  .hd .name{font-family:"Space Grotesk",sans-serif;font-size:14.5px;font-weight:600;}
+  .hd .name span{color:var(--violet-light);}
+  .hd .tag{font-family:"Space Grotesk",sans-serif;font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--fg2);padding:4px 10px;border-radius:9999px;border:1px solid var(--border-strong);}
+  .stage{display:flex;align-items:center;justify-content:center;background:radial-gradient(at 20% 25%,rgba(168,85,247,0.14) 0,transparent 55%),radial-gradient(at 80% 75%,rgba(34,211,238,0.10) 0,transparent 52%),#0a0e1a;padding:56px 32px;min-height:260px;}
+  .stage.light{background:radial-gradient(at 20% 25%,rgba(168,85,247,0.05) 0,transparent 55%),radial-gradient(at 80% 75%,rgba(34,211,238,0.04) 0,transparent 52%),#F4F4F7;}
+  .stage.plain-dark{background:#0B0F1A;}
+  .stage.plain-light{background:#F4F4F7;}
+  .footnote{padding:14px 22px;border-top:1px solid var(--border);color:var(--fg2);font-size:12.5px;line-height:1.55;}
+  .footnote strong{color:var(--fg1);font-weight:500;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  @media(max-width:1000px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+  /* Utility for mono label */
+  .mono{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--fg3);letter-spacing:0.08em;}
+
+  /* Dashboard demo */
+  .demo-shell{display:flex;background:#0a0e1a;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+  .demo-shell .sb{width:200px;padding:20px 18px;border-right:1px solid var(--border);background:#0c1322;}
+  .demo-shell .mn{flex:1;padding:20px 24px;}
+  .demo-shell .row{display:flex;align-items:center;gap:10px;font-family:"Space Grotesk",sans-serif;font-size:12.5px;color:var(--fg2);padding:8px 10px;border-radius:6px;}
+  .demo-shell .row.active{background:rgba(124,58,237,0.10);color:var(--violet-light);border-left:2px solid var(--violet-light);padding-left:8px;}
+  .demo-shell h4{margin:0 0 8px;font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.01em;}
+  .demo-shell .sub{color:var(--fg2);font-size:13px;}
+</style>
+</head>
+<body>
+<main>
+
+<div class="top">
+  <div>
+    <div class="eyebrow">Orion Brand Book · Direction 01 — Aperture</div>
+    <h1>The Aperture<br><span class="grad">brought to production</span>.</h1>
+  </div>
+  <p>The complete brand package for D01: primary symbol, wordmark, lockups, favicon, monochrome variants, clearspace, and in-context usage. Every asset is pure SVG, no raster fallback needed.</p>
+  <div class="meta">
+    <div><strong>Direction</strong> · D01 Aperture</div>
+    <div><strong>Primary</strong> · Violet→Cyan gradient</div>
+    <div><strong>Mono</strong> · White on dark · Ink on light</div>
+    <div><strong>Min size</strong> · 16 × 16 px</div>
+  </div>
+</div>
+
+<!-- ── 01 PRIMARY MARK ───────────────────── -->
+<div class="section"><span class="num">01</span><h2>Primary symbol</h2><div class="rule"></div></div>
+
+<div class="card">
+  <div class="hd">
+    <div class="id">mark.primary</div>
+    <div class="name">The <span>Aperture</span> — hero</div>
+    <div class="tag">Full color</div>
+  </div>
+  <div class="stage" style="padding:80px 40px;">
+    <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="m01g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+        <radialGradient id="m01glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#A78BFA" stop-opacity="0.4"/><stop offset="1" stop-color="#A78BFA" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="110" cy="110" r="100" fill="url(#m01glow)"/>
+      <g transform="translate(110,110)">
+        <circle cx="0" cy="0" r="78" fill="none" stroke="url(#m01g)" stroke-width="1.5" opacity="0.28"/>
+        <circle cx="0" cy="0" r="54" fill="none" stroke="url(#m01g)" stroke-width="2" opacity="0.72"/>
+        <circle cx="-54" cy="0" r="6" fill="#A78BFA"/>
+        <circle cx="27" cy="-46.8" r="6" fill="#22D3EE"/>
+        <circle cx="27" cy="46.8" r="6" fill="#A78BFA"/>
+        <circle cx="0" cy="0" r="13" fill="url(#m01g)"/>
+        <circle cx="0" cy="0" r="20" fill="none" stroke="url(#m01g)" stroke-width="2"/>
+      </g>
+    </svg>
+  </div>
+  <div class="footnote"><strong>Construction:</strong> two concentric rings + three satellite nodes at 0°/120°/240°, with a gradient core and precision halo. The three satellites echo Orion's belt; the rings read as aperture / viewport / dish.</div>
+</div>
+
+<!-- ── 02 WORDMARK ───────────────────────── -->
+<div class="section"><span class="num">02</span><h2>Wordmark</h2><div class="rule"></div></div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="hd"><div class="id">wordmark.primary</div><div class="name">orion · <span>Space Grotesk</span></div><div class="tag">Lowercase</div></div>
+    <div class="stage"><svg width="360" height="100" viewBox="0 0 360 100"><text x="180" y="66" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="60" font-weight="700" letter-spacing="-0.03em" fill="#EDF1FA">orion</text></svg></div>
+    <div class="footnote"><strong>Primary logotype.</strong> Space Grotesk, 700, tight tracking (−0.03em), lowercase. Custom kerning: the <em>r</em>–<em>i</em> pair is tightened by 8 units; <em>o</em>–<em>n</em> terminals are optically balanced.</div>
+  </div>
+  <div class="card">
+    <div class="hd"><div class="id">wordmark.caps</div><div class="name">ORION · <span>tracked caps</span></div><div class="tag">Display</div></div>
+    <div class="stage"><svg width="360" height="100" viewBox="0 0 360 100"><text x="180" y="60" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" letter-spacing="0.22em" fill="#EDF1FA">ORION</text></svg></div>
+    <div class="footnote"><strong>Display variant.</strong> Same family, 700, +0.22em tracking, uppercase. Use for signage, slide titles, printed collateral — never inline with body copy.</div>
+  </div>
+</div>
+
+<!-- ── 03 LOCKUPS ───────────────────────── -->
+<div class="section"><span class="num">03</span><h2>Lockups</h2><div class="rule"></div></div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="hd"><div class="id">lockup.horizontal</div><div class="name">Horizontal <span>lockup</span></div><div class="tag">Primary</div></div>
+    <div class="stage"><svg width="440" height="140" viewBox="0 0 440 140">
+      <defs><linearGradient id="lh1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+      <g transform="translate(64,70)">
+        <circle cx="0" cy="0" r="34" fill="none" stroke="url(#lh1)" stroke-width="1.5" opacity="0.72"/>
+        <circle cx="-34" cy="0" r="4" fill="#A78BFA"/>
+        <circle cx="17" cy="-29.4" r="4" fill="#22D3EE"/>
+        <circle cx="17" cy="29.4" r="4" fill="#A78BFA"/>
+        <circle cx="0" cy="0" r="8" fill="url(#lh1)"/>
+        <circle cx="0" cy="0" r="13" fill="none" stroke="url(#lh1)" stroke-width="1.5"/>
+      </g>
+      <text x="128" y="82" font-family="Space Grotesk, sans-serif" font-size="48" font-weight="700" letter-spacing="-0.03em" fill="#EDF1FA">orion</text>
+    </svg></div>
+    <div class="footnote"><strong>Most-used lockup.</strong> Symbol left, wordmark right. Baseline-aligned; clearspace = 1× symbol radius (34px at this scale).</div>
+  </div>
+  <div class="card">
+    <div class="hd"><div class="id">lockup.stacked</div><div class="name">Stacked <span>lockup</span></div><div class="tag">Secondary</div></div>
+    <div class="stage"><svg width="240" height="220" viewBox="0 0 240 220">
+      <defs><linearGradient id="ls1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+      <g transform="translate(120,80)">
+        <circle cx="0" cy="0" r="40" fill="none" stroke="url(#ls1)" stroke-width="1.5" opacity="0.72"/>
+        <circle cx="-40" cy="0" r="4.5" fill="#A78BFA"/>
+        <circle cx="20" cy="-34.6" r="4.5" fill="#22D3EE"/>
+        <circle cx="20" cy="34.6" r="4.5" fill="#A78BFA"/>
+        <circle cx="0" cy="0" r="9" fill="url(#ls1)"/>
+        <circle cx="0" cy="0" r="14" fill="none" stroke="url(#ls1)" stroke-width="1.5"/>
+      </g>
+      <text x="120" y="176" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" letter-spacing="-0.02em" fill="#EDF1FA">orion</text>
+      <text x="120" y="198" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="500" letter-spacing="0.3em" fill="#9AA3B5">MISSION CONTROL</text>
+    </svg></div>
+    <div class="footnote"><strong>For square formats.</strong> Symbol above, wordmark below with optional tagline (tracked 0.3em). Use for social avatars, splash screens, title cards.</div>
+  </div>
+</div>
+
+<!-- ── 04 APP ICON & FAVICON ───────────────────────── -->
+<div class="section"><span class="num">04</span><h2>App icon · Favicon</h2><div class="rule"></div></div>
+
+<div class="grid-3">
+  <div class="card">
+    <div class="hd"><div class="id">icon.squircle</div><div class="name">App icon <span>squircle</span></div><div class="tag">iOS / macOS</div></div>
+    <div class="stage plain-dark" style="padding:40px;">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <defs>
+          <linearGradient id="ai1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#4C1D95"/></linearGradient>
+          <linearGradient id="ai2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+        </defs>
+        <rect x="0" y="0" width="180" height="180" rx="40" ry="40" fill="url(#ai1)"/>
+        <rect x="0" y="0" width="180" height="180" rx="40" ry="40" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+        <g transform="translate(90,90)">
+          <circle cx="0" cy="0" r="52" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="36" fill="none" stroke="url(#ai2)" stroke-width="2.4"/>
+          <circle cx="-36" cy="0" r="5" fill="#FFF"/>
+          <circle cx="18" cy="-31.2" r="5" fill="#22D3EE"/>
+          <circle cx="18" cy="31.2" r="5" fill="#A78BFA"/>
+          <circle cx="0" cy="0" r="9" fill="#FFF"/>
+        </g>
+      </svg>
+    </div>
+    <div class="footnote"><strong>Violet tile, white core.</strong> For OS launchers where contrast against wallpapers matters. Corner radius 40/180 = 22.2% (Apple squircle).</div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><div class="id">icon.solid</div><div class="name">Solid <span>tile</span></div><div class="tag">Web · Slack</div></div>
+    <div class="stage plain-dark" style="padding:40px;">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <defs><linearGradient id="at1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+        <rect x="0" y="0" width="180" height="180" rx="28" ry="28" fill="#0B0F1A" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <g transform="translate(90,90)">
+          <circle cx="0" cy="0" r="52" fill="none" stroke="url(#at1)" stroke-width="2" opacity="0.28"/>
+          <circle cx="0" cy="0" r="36" fill="none" stroke="url(#at1)" stroke-width="2.5"/>
+          <circle cx="-36" cy="0" r="5" fill="#A78BFA"/>
+          <circle cx="18" cy="-31.2" r="5" fill="#22D3EE"/>
+          <circle cx="18" cy="31.2" r="5" fill="#A78BFA"/>
+          <circle cx="0" cy="0" r="9" fill="url(#at1)"/>
+          <circle cx="0" cy="0" r="14" fill="none" stroke="url(#at1)" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="footnote"><strong>Dark tile.</strong> Matches the dashboard. For web avatars, Slack, GitHub orgs.</div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><div class="id">favicon</div><div class="name">Favicon <span>16–32px</span></div><div class="tag">Browser tab</div></div>
+    <div class="stage plain-dark" style="padding:40px;gap:28px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="background:#1a2234;padding:10px;border-radius:8px;border:1px solid var(--border);"><svg width="32" height="32" viewBox="0 0 100 100"><defs><linearGradient id="fv1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#fv1)" stroke-width="3" opacity="0.75"/><circle cx="-32" cy="0" r="5" fill="#A78BFA"/><circle cx="16" cy="-28" r="5" fill="#22D3EE"/><circle cx="16" cy="28" r="5" fill="#A78BFA"/><circle cx="0" cy="0" r="10" fill="url(#fv1)"/></g></svg></div>
+        <div class="mono">32×32</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div style="background:#1a2234;padding:10px;border-radius:8px;border:1px solid var(--border);"><svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="fv2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#fv2)" stroke-width="7" opacity="0.9"/><circle cx="0" cy="0" r="16" fill="url(#fv2)"/></g></svg></div>
+        <div class="mono">16×16</div>
+      </div>
+    </div>
+    <div class="footnote"><strong>Radical simplification.</strong> Below 24px, satellites vanish — the core + ring do the work. Reads cleanly in Chrome's 16px tab chrome.</div>
+  </div>
+</div>
+
+<!-- ── 05 MONOCHROME VARIANTS ───────────────────────── -->
+<div class="section"><span class="num">05</span><h2>Monochrome variants</h2><div class="rule"></div></div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="hd"><div class="id">mono.white</div><div class="name">White <span>on dark</span></div><div class="tag">Reverse</div></div>
+    <div class="stage plain-dark">
+      <svg width="440" height="140" viewBox="0 0 440 140">
+        <g transform="translate(64,70)">
+          <circle cx="0" cy="0" r="34" fill="none" stroke="#EDF1FA" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="-34" cy="0" r="4" fill="#EDF1FA"/>
+          <circle cx="17" cy="-29.4" r="4" fill="#EDF1FA"/>
+          <circle cx="17" cy="29.4" r="4" fill="#EDF1FA"/>
+          <circle cx="0" cy="0" r="8" fill="#EDF1FA"/>
+          <circle cx="0" cy="0" r="13" fill="none" stroke="#EDF1FA" stroke-width="1.5"/>
+        </g>
+        <text x="128" y="82" font-family="Space Grotesk, sans-serif" font-size="48" font-weight="700" letter-spacing="-0.03em" fill="#EDF1FA">orion</text>
+      </svg>
+    </div>
+    <div class="footnote"><strong>For press, single-color print, embroidery.</strong> All elements collapse to #EDF1FA; the outer halo ring drops to 50% opacity for hierarchy.</div>
+  </div>
+  <div class="card">
+    <div class="hd"><div class="id">mono.ink</div><div class="name">Ink <span>on light</span></div><div class="tag">Print</div></div>
+    <div class="stage plain-light">
+      <svg width="440" height="140" viewBox="0 0 440 140">
+        <g transform="translate(64,70)">
+          <circle cx="0" cy="0" r="34" fill="none" stroke="#0B0F1A" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="-34" cy="0" r="4" fill="#0B0F1A"/>
+          <circle cx="17" cy="-29.4" r="4" fill="#0B0F1A"/>
+          <circle cx="17" cy="29.4" r="4" fill="#0B0F1A"/>
+          <circle cx="0" cy="0" r="8" fill="#0B0F1A"/>
+          <circle cx="0" cy="0" r="13" fill="none" stroke="#0B0F1A" stroke-width="1.5"/>
+        </g>
+        <text x="128" y="82" font-family="Space Grotesk, sans-serif" font-size="48" font-weight="700" letter-spacing="-0.03em" fill="#0B0F1A">orion</text>
+      </svg>
+    </div>
+    <div class="footnote"><strong>For business cards, letterhead, invoices.</strong> Everything #0B0F1A. No gradient — monochrome is monochrome.</div>
+  </div>
+</div>
+
+<!-- ── 06 CLEARSPACE & SIZING ───────────────────────── -->
+<div class="section"><span class="num">06</span><h2>Clearspace & sizing rules</h2><div class="rule"></div></div>
+
+<div class="card">
+  <div class="hd"><div class="id">clearspace</div><div class="name">Protect the <span>aperture</span></div><div class="tag">Construction</div></div>
+  <div class="stage" style="padding:60px;">
+    <svg width="640" height="240" viewBox="0 0 640 240">
+      <defs>
+        <linearGradient id="cs1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+        <pattern id="csgrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(167,139,250,0.10)" stroke-width="0.5"/></pattern>
+      </defs>
+      <rect width="640" height="240" fill="url(#csgrid)" opacity="0.8"/>
+      <!-- clearspace box -->
+      <rect x="40" y="40" width="560" height="160" fill="none" stroke="rgba(167,139,250,0.4)" stroke-width="1" stroke-dasharray="3 4"/>
+      <!-- X measurement: equal to symbol radius -->
+      <g transform="translate(120,120)">
+        <circle cx="0" cy="0" r="40" fill="none" stroke="url(#cs1)" stroke-width="1.5" opacity="0.72"/>
+        <circle cx="-40" cy="0" r="5" fill="#A78BFA"/>
+        <circle cx="20" cy="-34.6" r="5" fill="#22D3EE"/>
+        <circle cx="20" cy="34.6" r="5" fill="#A78BFA"/>
+        <circle cx="0" cy="0" r="10" fill="url(#cs1)"/>
+        <circle cx="0" cy="0" r="15" fill="none" stroke="url(#cs1)" stroke-width="1.5"/>
+      </g>
+      <text x="200" y="132" font-family="Space Grotesk, sans-serif" font-size="52" font-weight="700" letter-spacing="-0.03em" fill="#EDF1FA">orion</text>
+      <!-- X callouts -->
+      <text x="40" y="30" font-family="JetBrains Mono,monospace" font-size="10" fill="#9AA3B5">X</text>
+      <text x="595" y="30" font-family="JetBrains Mono,monospace" font-size="10" fill="#9AA3B5" text-anchor="end">X = symbol radius</text>
+      <line x1="40" y1="35" x2="80" y2="35" stroke="rgba(167,139,250,0.4)" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="footnote">
+    <strong>Clearspace = X,</strong> where X equals the symbol's outer-ring radius. No text, no UI chrome, no other graphics enter the dotted zone. <strong>Minimum sizes:</strong> digital symbol 16×16 px, print 8×8 mm; horizontal lockup 96×32 px digital / 20×8 mm print.
+  </div>
+</div>
+
+<!-- ── 07 MISUSE ───────────────────────── -->
+<div class="section"><span class="num">07</span><h2>Misuse</h2><div class="rule"></div></div>
+
+<div class="grid-3">
+  <div class="card">
+    <div class="hd"><div class="id">no.stretch</div><div class="name">Don't <span>stretch</span></div><div class="tag">✕</div></div>
+    <div class="stage" style="padding:40px;">
+      <svg width="280" height="120" viewBox="0 0 280 120" preserveAspectRatio="none">
+        <defs><linearGradient id="ns1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+        <g transform="translate(140,60)"><ellipse cx="0" cy="0" rx="60" ry="30" fill="none" stroke="url(#ns1)" stroke-width="2"/><ellipse cx="0" cy="0" rx="18" ry="9" fill="url(#ns1)"/></g>
+      </svg>
+    </div>
+    <div class="footnote">Never scale on one axis. The aperture must stay circular.</div>
+  </div>
+  <div class="card">
+    <div class="hd"><div class="id">no.recolor</div><div class="name">Don't <span>recolor</span></div><div class="tag">✕</div></div>
+    <div class="stage" style="padding:40px;">
+      <svg width="220" height="120" viewBox="0 0 220 120">
+        <g transform="translate(110,60)">
+          <circle cx="0" cy="0" r="36" fill="none" stroke="#EF4444" stroke-width="2" opacity="0.72"/>
+          <circle cx="-36" cy="0" r="4" fill="#F59E0B"/>
+          <circle cx="18" cy="-31" r="4" fill="#22C55E"/>
+          <circle cx="18" cy="31" r="4" fill="#EC4899"/>
+          <circle cx="0" cy="0" r="9" fill="#F59E0B"/>
+        </g>
+      </svg>
+    </div>
+    <div class="footnote">Never use off-brand colors. Violet → cyan, or monochrome. Nothing else.</div>
+  </div>
+  <div class="card">
+    <div class="hd"><div class="id">no.rotate</div><div class="name">Don't <span>rotate</span></div><div class="tag">✕</div></div>
+    <div class="stage" style="padding:40px;">
+      <svg width="220" height="120" viewBox="0 0 220 120">
+        <defs><linearGradient id="nr1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+        <g transform="translate(110,60) rotate(37)">
+          <circle cx="0" cy="0" r="36" fill="none" stroke="url(#nr1)" stroke-width="2" opacity="0.72"/>
+          <circle cx="-36" cy="0" r="4" fill="#A78BFA"/>
+          <circle cx="18" cy="-31" r="4" fill="#22D3EE"/>
+          <circle cx="18" cy="31" r="4" fill="#A78BFA"/>
+          <circle cx="0" cy="0" r="9" fill="url(#nr1)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="footnote">Satellites sit at fixed 0°/120°/240°. Rotating breaks the constellation reference.</div>
+  </div>
+</div>
+
+<!-- ── 08 IN CONTEXT ───────────────────────── -->
+<div class="section"><span class="num">08</span><h2>In context — dashboard</h2><div class="rule"></div></div>
+
+<div class="card">
+  <div class="hd"><div class="id">usage.dashboard</div><div class="name">Applied to <span>Orion OS</span></div><div class="tag">Live preview</div></div>
+  <div class="stage" style="padding:28px;">
+    <div class="demo-shell" style="width:100%;height:360px;">
+      <div class="sb">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+          <svg width="30" height="30" viewBox="0 0 100 100"><defs><linearGradient id="us1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g transform="translate(50,50)"><circle cx="0" cy="0" r="32" fill="none" stroke="url(#us1)" stroke-width="3" opacity="0.75"/><circle cx="-32" cy="0" r="5" fill="#A78BFA"/><circle cx="16" cy="-28" r="5" fill="#22D3EE"/><circle cx="16" cy="28" r="5" fill="#A78BFA"/><circle cx="0" cy="0" r="10" fill="url(#us1)"/></g></svg>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.02em;">orion</div>
+        </div>
+        <div class="row active">Overview</div>
+        <div class="row">Trends</div>
+        <div class="row">Queue</div>
+        <div class="row">Agents</div>
+        <div class="row">Settings</div>
+      </div>
+      <div class="mn">
+        <div class="eyebrow" style="color:var(--violet-light);margin-bottom:10px;">MISSION CONTROL · LIVE</div>
+        <h4>Good morning, Amina.</h4>
+        <div class="sub">5 agents online · 3 items awaiting review · 12 in pipeline</div>
+        <div style="display:flex;gap:16px;margin-top:24px;">
+          <div style="flex:1;background:#0c1322;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div class="mono" style="color:var(--violet-light);">TRENDS/24H</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;margin-top:4px;">248</div>
+          </div>
+          <div style="flex:1;background:#0c1322;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div class="mono" style="color:var(--violet-light);">SCRIPTS</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;margin-top:4px;">37</div>
+          </div>
+          <div style="flex:1;background:#0c1322;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div class="mono" style="color:var(--violet-light);">PUBLISHED</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;margin-top:4px;">12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footnote"><strong>Drop-in replacement.</strong> The new mark sits quietly in the sidebar — same 30×30 footprint as the old sparkles icon. Next: I'll swap the assets into <code style="font-family:'JetBrains Mono',monospace;background:rgba(124,58,237,0.10);color:var(--violet-light);padding:1px 6px;border-radius:4px;">assets/</code> and update the dashboard + auth kit references.</div>
+</div>
+
+</main>
+</body>
+</html>

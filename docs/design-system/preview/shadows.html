@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Shadows</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .s { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+  .s .box { width: 100%; height: 60px; background: rgba(26,34,52,0.9); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+  .s .lbl { font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; color:#F1F5F9; }
+  .s .sub { font-size:10px; color:#94A3B8; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+      <div class="s">
+        <div class="box" style="box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 32px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20);"></div>
+        <div class="lbl">Card</div>
+        <div class="sub">inset hi + ambient + contact</div>
+      </div>
+      <div class="s">
+        <div class="box" style="background:#7C3AED; box-shadow: 0 10px 25px -5px rgba(124,58,237,0.45);"></div>
+        <div class="lbl">Primary</div>
+        <div class="sub">shadow-primary/25 — violet halo</div>
+      </div>
+      <div class="s">
+        <div class="box" style="background:#EF4444; box-shadow: 0 10px 25px -5px rgba(239,68,68,0.45);"></div>
+        <div class="lbl">Danger</div>
+        <div class="sub">shadow-danger/25</div>
+      </div>
+      <div class="s">
+        <div style="width:16px; height:16px; border-radius:50%; background:#34D399; box-shadow: 0 0 10px rgba(52,211,153,0.7); margin-top:22px;"></div>
+        <div class="lbl">Glow · Emerald</div>
+        <div class="sub">status dot</div>
+      </div>
+      <div class="s">
+        <div style="width:16px; height:16px; border-radius:50%; background:#A78BFA; box-shadow: 0 0 10px rgba(167,139,250,0.7); margin-top:22px;"></div>
+        <div class="lbl">Glow · Violet</div>
+        <div class="sub">status dot</div>
+      </div>
+      <div class="s">
+        <div style="width:16px; height:16px; border-radius:50%; background:#22D3EE; box-shadow: 0 0 10px rgba(34,211,238,0.7); margin-top:22px;"></div>
+        <div class="lbl">Glow · Cyan</div>
+        <div class="sub">status dot</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

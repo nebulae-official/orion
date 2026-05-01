@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="apG" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA"></stop>
+      <stop offset="1" stop-color="#22D3EE"></stop>
+    </linearGradient>
+    <radialGradient id="apGlow" cx="64" cy="64" r="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA" stop-opacity="0.35"></stop>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="url(#apGlow)"></circle>
+  <g transform="translate(64,64)">
+    <circle cx="0" cy="0" r="44" fill="none" stroke="url(#apG)" stroke-width="1.2" opacity="0.28"></circle>
+    <circle cx="0" cy="0" r="30" fill="none" stroke="url(#apG)" stroke-width="1.8" opacity="0.8"></circle>
+    <circle cx="-30" cy="0" r="4" fill="#A78BFA"></circle>
+    <circle cx="15" cy="-26" r="4" fill="#22D3EE"></circle>
+    <circle cx="15" cy="26" r="4" fill="#A78BFA"></circle>
+    <circle cx="0" cy="0" r="7.5" fill="url(#apG)"></circle>
+    <circle cx="0" cy="0" r="12" fill="none" stroke="url(#apG)" stroke-width="1.4"></circle>
+  </g>
+</svg>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — Trends</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .virality-bar { height: 5px; background: var(--ui-hairline); border-radius: 9999px; overflow: hidden; margin-top: 6px; }
+  .virality-fill { height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #7C3AED, #22D3EE); }
+  .source-chip { display: inline-flex; align-items: center; gap: 5px; font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--ui-fg3); }
+  .sort-btn { background: none; border: none; cursor: pointer; font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--ui-fg3); padding: 10px 12px; transition: color .2s; }
+  .sort-btn:hover, .sort-btn.active { color: var(--ui-primary-text); }
+  .sort-btn.active::after { content: " ↓"; }
+  .trend-score { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; color: var(--ui-fg1); }
+</style>
+
+<!-- Stats row -->
+<div class="o-grid-3" style="margin-bottom: 24px;">
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Total Detected</div>
+    <div class="o-stat-value">2,418</div>
+    <div class="o-stat-sub">Last 24 hours · 12 niches</div>
+  </div>
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Used for Content</div>
+    <div class="o-stat-value">147</div>
+    <div class="o-stat-sub">6.1% conversion rate</div>
+  </div>
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Discarded</div>
+    <div class="o-stat-value">312</div>
+    <div class="o-stat-sub">Low virality or duplicate</div>
+  </div>
+</div>
+
+<!-- Trend table -->
+<div class="o-card">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding: 16px 20px; border-bottom: 1px solid var(--ui-border);">
+    <div>
+      <div class="o-eyebrow" style="margin-bottom:4px;">Scout</div>
+      <div style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; color:var(--ui-fg1);">Detected Trends</div>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button class="sort-btn active">Virality</button>
+      <button class="sort-btn">Source</button>
+      <button class="sort-btn">Status</button>
+      <button class="sort-btn">Time</button>
+    </div>
+  </div>
+  <table class="o-table">
+    <thead><tr>
+      <th>Topic</th><th>Source</th><th>Virality</th><th>Status</th><th>Niche</th><th>Detected</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><div style="font-weight:500;">#LangGraph orchestration patterns</div><div style="font-size:11px; color:var(--ui-fg3); margin-top:2px; font-family:'JetBrains Mono',monospace;">orion.trend.detected</div></td>
+        <td><span class="source-chip">𝕏 Twitter/X</span></td>
+        <td><div class="trend-score">9.4</div><div class="virality-bar"><div class="virality-fill" style="width:94%;"></div></div></td>
+        <td><span class="o-badge o-badge-blue">NEW</span></td>
+        <td><span class="o-badge o-badge-violet">AI / Infra</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">2m ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">Vector databases in production</div><div style="font-size:11px; color:var(--ui-fg3); margin-top:2px; font-family:'JetBrains Mono',monospace;">orion.trend.detected</div></td>
+        <td><span class="source-chip">📰 RSS</span></td>
+        <td><div class="trend-score">8.7</div><div class="virality-bar"><div class="virality-fill" style="width:87%;"></div></div></td>
+        <td><span class="o-badge o-badge-amber">PROCESSING</span></td>
+        <td><span class="o-badge o-badge-violet">AI / Infra</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">14m ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">Perseid meteor shower 2026 peak</div></td>
+        <td><span class="source-chip">📡 Google Trends</span></td>
+        <td><div class="trend-score">8.1</div><div class="virality-bar"><div class="virality-fill" style="width:81%;"></div></div></td>
+        <td><span class="o-badge o-badge-green">USED</span></td>
+        <td><span class="o-badge o-badge-violet">Astronomy</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">28m ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">Rust async runtime comparison</div></td>
+        <td><span class="source-chip">📰 RSS</span></td>
+        <td><div class="trend-score">7.8</div><div class="virality-bar"><div class="virality-fill" style="width:78%;"></div></div></td>
+        <td><span class="o-badge o-badge-blue">NEW</span></td>
+        <td><span class="o-badge o-badge-violet">Dev Tools</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">41m ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">ComfyUI custom node ecosystem</div></td>
+        <td><span class="source-chip">𝕏 Twitter/X</span></td>
+        <td><div class="trend-score">7.2</div><div class="virality-bar"><div class="virality-fill" style="width:72%;"></div></div></td>
+        <td><span class="o-badge o-badge-amber">PROCESSING</span></td>
+        <td><span class="o-badge o-badge-violet">AI / Media</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">1h ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">Open-source TTS models 2026</div></td>
+        <td><span class="source-chip">📰 News API</span></td>
+        <td><div class="trend-score">6.9</div><div class="virality-bar"><div class="virality-fill" style="width:69%;"></div></div></td>
+        <td><span class="o-badge o-badge-green">USED</span></td>
+        <td><span class="o-badge o-badge-violet">AI / Infra</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">1h ago</td>
+      </tr>
+      <tr>
+        <td><div style="font-weight:500;">Retro computing nostalgia wave</div></td>
+        <td><span class="source-chip">📡 Google Trends</span></td>
+        <td><div class="trend-score">4.1</div><div class="virality-bar"><div class="virality-fill" style="width:41%; background:#F59E0B;"></div></div></td>
+        <td><span class="o-badge o-badge-grey">DISCARDED</span></td>
+        <td><span class="o-badge o-badge-grey">Retro Tech</span></td>
+        <td style="color:var(--ui-fg3); font-size:12px; font-family:'JetBrains Mono',monospace;">2h ago</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<script>
+OrionShell.init({
+  active: 'trends',
+  title: 'Trends',
+  subtitle: 'Discovered trends and their pipeline status.',
+  iconPath: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>'
+});
+</script>
+</body></html>

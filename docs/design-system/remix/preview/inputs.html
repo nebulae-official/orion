@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Inputs</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  input { font-family: inherit; background: #1a2234; border: 1px solid #1e293b; border-radius: 8px; color:#F1F5F9; padding: 10px 14px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
+  input::placeholder { color: #64748B; }
+  input.focused { border-color: #7C3AED; box-shadow: 0 0 0 1px #7C3AED; }
+  .label { font-size: 13px; color: #94A3B8; margin-bottom: 6px; display:block; font-weight:500; }
+  .pill-search { position: relative; }
+  .pill-search input { background:#0e0e0e; border:none; border-radius: 9999px; padding: 8px 14px 8px 36px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #CCC3D8; font-family:'Space Grotesk',sans-serif; font-weight:500; }
+  .pill-search .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748B; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items:end;">
+      <div>
+        <label class="label">Email or Username</label>
+        <input type="text" placeholder="Enter your email or username">
+      </div>
+      <div>
+        <label class="label">Password</label>
+        <input type="password" class="focused" value="•••••••••••••••">
+      </div>
+      <div>
+        <label class="label" style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#64748B;">Top-nav search (pill)</label>
+        <div class="pill-search">
+          <svg class="ico" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" placeholder="SEARCH SYSTEM…">
+        </div>
+      </div>
+      <div>
+        <label class="label">Disabled</label>
+        <input type="text" value="api-key-••••" disabled style="opacity:0.55; cursor:not-allowed;">
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

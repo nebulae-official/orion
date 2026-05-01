@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — System Health</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .service-card { border-radius:12px; background:var(--ui-panel); backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--ui-border); box-shadow:var(--ui-shadow-card); padding:18px 20px; }
+  .svc-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .svc-name { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:14px; color:var(--ui-fg1); }
+  .svc-host { font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ui-fg3); margin-top:2px; }
+  .svc-stat { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .svc-stat-item { background:var(--ui-elevated); border-radius:8px; padding:10px 12px; border:1px solid var(--ui-hairline); }
+  .svc-stat-lbl { font-family:"Space Grotesk",sans-serif; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ui-fg3); }
+  .svc-stat-val { font-family:"JetBrains Mono",monospace; font-size:18px; font-weight:500; color:var(--ui-fg1); margin-top:4px; font-variant-numeric:tabular-nums; }
+  .pulse-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dot-green { background:var(--ui-success); box-shadow:0 0 8px var(--ui-success); animation:pulse 2s ease-in-out infinite; }
+  .dot-amber { background:var(--ui-warning); box-shadow:0 0 8px var(--ui-warning); animation:pulse 2.5s ease-in-out infinite; }
+  .dot-red   { background:var(--ui-danger);  box-shadow:0 0 8px var(--ui-danger); }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .log-line { font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--ui-fg2); padding:5px 0; border-bottom:1px solid var(--ui-hairline); line-height:1.5; }
+  .log-line:last-child { border-bottom:none; }
+  .log-time { color:var(--ui-fg3); margin-right:10px; }
+  .log-level-info { color:var(--ui-cyan); }
+  .log-level-warn { color:var(--ui-warning); }
+  .log-level-err  { color:var(--ui-danger); }
+  .infra-row { display:grid; grid-template-columns:140px 1fr 80px 80px; gap:14px; align-items:center; padding:12px 0; border-bottom:1px solid var(--ui-hairline); }
+  .infra-row:last-child { border-bottom:none; }
+</style>
+
+<!-- Summary strip -->
+<div class="o-grid-4" style="margin-bottom:24px;">
+  <div class="o-card o-card-pad" style="display:flex;align-items:center;gap:14px;">
+    <div class="pulse-dot dot-green" style="width:14px;height:14px;"></div>
+    <div><div class="o-stat-label">Services</div><div class="o-stat-value" style="font-size:24px;">7 / 7</div><div class="o-stat-sub">All healthy</div></div>
+  </div>
+  <div class="o-card o-card-pad" style="display:flex;align-items:center;gap:14px;">
+    <div class="pulse-dot dot-green" style="width:14px;height:14px;"></div>
+    <div><div class="o-stat-label">Uptime</div><div class="o-stat-value" style="font-size:24px;">99.8%</div><div class="o-stat-sub">Last 30 days</div></div>
+  </div>
+  <div class="o-card o-card-pad" style="display:flex;align-items:center;gap:14px;">
+    <div class="pulse-dot dot-amber" style="width:14px;height:14px;"></div>
+    <div><div class="o-stat-label">Queue Depth</div><div class="o-stat-value" style="font-size:24px;">23</div><div class="o-stat-sub">Media backpressure</div></div>
+  </div>
+  <div class="o-card o-card-pad" style="display:flex;align-items:center;gap:14px;">
+    <div class="pulse-dot dot-green" style="width:14px;height:14px;"></div>
+    <div><div class="o-stat-label">Redis Pub/Sub</div><div class="o-stat-value" style="font-size:24px;">12</div><div class="o-stat-sub">Active channels</div></div>
+  </div>
+</div>
+
+<div class="o-2col" style="gap:20px;margin-bottom:20px;">
+  <!-- Service grid -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Gateway</div><div class="svc-host">:8000 · Go</div></div>
+        <span class="o-badge o-badge-green">Healthy</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Req/s</div><div class="svc-stat-val">142</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">P95 Latency</div><div class="svc-stat-val">38ms</div></div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Scout</div><div class="svc-host">:8001 · Python</div></div>
+        <span class="o-badge o-badge-green">Active</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Trends/hr</div><div class="svc-stat-val">101</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Scan Cycle</div><div class="svc-stat-val">5min</div></div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Director</div><div class="svc-host">:8002 · Python</div></div>
+        <span class="o-badge o-badge-green">Active</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Scripts/hr</div><div class="svc-stat-val">24</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">LLM Model</div><div class="svc-stat-val" style="font-size:13px;">gpt-4o</div></div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Media</div><div class="svc-host">:8003 · Python</div></div>
+        <span class="o-badge o-badge-amber">Busy</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Queue</div><div class="svc-stat-val">23</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Provider</div><div class="svc-stat-val" style="font-size:13px;">Fal.ai</div></div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Editor</div><div class="svc-host">:8004 · Python</div></div>
+        <span class="o-badge o-badge-green">Active</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Videos/hr</div><div class="svc-stat-val">18</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">TTS</div><div class="svc-stat-val" style="font-size:13px;">ElevenL.</div></div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="svc-head">
+        <div><div class="svc-name">Publisher</div><div class="svc-host">:8006 · Python</div></div>
+        <span class="o-badge o-badge-green">Active</span>
+      </div>
+      <div class="svc-stat">
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Posts/hr</div><div class="svc-stat-val">12</div></div>
+        <div class="svc-stat-item"><div class="svc-stat-lbl">Platforms</div><div class="svc-stat-val">3</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log stream -->
+  <div class="o-card o-card-pad">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="o-eyebrow">System Logs</div>
+      <span class="o-live-chip"><span class="p"></span>LIVE</span>
+    </div>
+    <div>
+      <div class="log-line"><span class="log-time">14:32:07</span><span class="log-level-info">INFO</span>  scout  trend.detected topic="#LangGraph" score=9.4</div>
+      <div class="log-line"><span class="log-time">14:31:52</span><span class="log-level-info">INFO</span>  director  script.created job=9c1d4 scenes=4 words=320</div>
+      <div class="log-line"><span class="log-time">14:31:40</span><span class="log-level-warn">WARN</span>  media  queue.depth=23 threshold=20 backpressure=true</div>
+      <div class="log-line"><span class="log-time">14:30:18</span><span class="log-level-info">INFO</span>  publisher  video.shipped job=7b5e1 platform=youtube</div>
+      <div class="log-line"><span class="log-time">14:29:55</span><span class="log-level-err">ERR</span>   media  index.rebuild.failed niche=design retry=1</div>
+      <div class="log-line"><span class="log-time">14:28:12</span><span class="log-level-info">INFO</span>  editor  tts.complete job=3f8a2 duration=12.4s</div>
+      <div class="log-line"><span class="log-time">14:27:01</span><span class="log-level-info">INFO</span>  gateway  health.check all_services=ok</div>
+      <div class="log-line"><span class="log-time">14:26:44</span><span class="log-level-info">INFO</span>  scout  scan.complete trends_found=101 new=14</div>
+      <div class="log-line"><span class="log-time">14:25:33</span><span class="log-level-info">INFO</span>  pulse  metrics.flush latency_p95=38ms errors=1</div>
+      <div class="log-line"><span class="log-time">14:24:18</span><span class="log-level-warn">WARN</span>  director  llm.retry attempt=2 job=9c1d4 reason=rate_limit</div>
+    </div>
+  </div>
+</div>
+
+<!-- Infra table -->
+<div class="o-card">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--ui-border);">
+    <div class="o-eyebrow" style="margin-bottom:4px;">Infrastructure</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);">Data stores &amp; supporting services</div>
+  </div>
+  <div style="padding:0 20px;">
+    <div class="infra-row">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:13px;color:var(--ui-fg1);">PostgreSQL</div>
+      <div><div class="o-track"><div class="o-fill" style="width:42%;background:var(--ui-primary);"></div></div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);text-align:right;">42% disk</div>
+      <div style="text-align:right;"><span class="o-badge o-badge-green">Healthy</span></div>
+    </div>
+    <div class="infra-row">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:13px;color:var(--ui-fg1);">Redis</div>
+      <div><div class="o-track"><div class="o-fill" style="width:18%;background:var(--ui-danger);"></div></div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);text-align:right;">18% mem</div>
+      <div style="text-align:right;"><span class="o-badge o-badge-green">Healthy</span></div>
+    </div>
+    <div class="infra-row">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:13px;color:var(--ui-fg1);">Milvus</div>
+      <div><div class="o-track"><div class="o-fill" style="width:31%;background:#22D3EE;"></div></div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg2);text-align:right;">31% vecs</div>
+      <div style="text-align:right;"><span class="o-badge o-badge-green">Healthy</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+OrionShell.init({
+  active: 'system',
+  title: 'System Health',
+  subtitle: 'Service status, live log stream and infrastructure metrics.',
+  iconPath: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.5.5 0 0 1-.96 0L9.68 3.18a.5.5 0 0 0-.96 0l-2.35 8.36A2 2 0 0 1 4.44 13H2"/>'
+});
+</script>
+</body></html>

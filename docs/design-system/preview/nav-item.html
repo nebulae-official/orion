@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Nav Items</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .nav { display:flex; flex-direction:column; gap:4px; width: 260px; padding:14px; }
+  .item { display:flex; align-items:center; gap:12px; padding: 10px 16px; font-family:'Space Grotesk',sans-serif; font-size: 13px; border-radius: 8px; color:#94A3B8; cursor:pointer; }
+  .item.active { color:#C4B5FD; background: rgba(124,58,237,0.1); border-left: 2px solid #A78BFA; padding-left: 14px; }
+  .item.hover { color:#E2E8F0; background: rgba(255,255,255,0.05); }
+  .item svg { width:18px; height:18px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage" style="display:flex; gap:12px; align-items:center;">
+    <div class="nav" style="background: rgba(17,24,39,0.8); backdrop-filter: blur(12px); border: 1px solid #1e293b; border-radius: 12px;">
+      <div class="item active">
+        <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Trends
+      </div>
+      <div class="item hover">
+        <svg viewBox="0 0 24 24"><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/><path d="m16 12 5 3-5 3z"/></svg>
+        Content Queue
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+        Generation
+      </div>
+    </div>
+    <div style="max-width: 280px; font-size:12px; color:#94A3B8; line-height:1.55;">
+      <div style="font-family:'Space Grotesk',sans-serif; font-weight:600; color:#F1F5F9; font-size:13px; margin-bottom:6px;">Sidebar nav item</div>
+      Active = violet-tinted surface + left-border + <code style="font-family:'JetBrains Mono', 'JetBrains Mono', ui-monospace, monospace; font-size:10px; background:rgba(124,58,237,0.10); color:#A78BFA; padding:1px 4px; border-radius:3px;">text-violet-300</code>.
+      Hover = <code style="font-family:'JetBrains Mono', 'JetBrains Mono', ui-monospace, monospace; font-size:10px; background:rgba(124,58,237,0.10); color:#A78BFA; padding:1px 4px; border-radius:3px;">bg-white/5</code>.
+    </div>
+  </div>
+</div>
+</body></html>

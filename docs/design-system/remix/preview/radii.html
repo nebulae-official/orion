@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Radii</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .r { display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .r .box { width: 74px; height: 74px; background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 6px 18px rgba(124,58,237,0.3); }
+  .r .lbl { font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; color:#F1F5F9; }
+  .r .sub { font-size:10px; color:#94A3B8; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage">
+    <div style="display:flex; justify-content: space-between; gap:10px;">
+      <div class="r"><div class="box" style="border-radius:6px;"></div><div class="lbl">sm</div><div class="sub">6px · chips</div></div>
+      <div class="r"><div class="box" style="border-radius:8px;"></div><div class="lbl">md</div><div class="sub">8px · btns</div></div>
+      <div class="r"><div class="box" style="border-radius:12px;"></div><div class="lbl">lg</div><div class="sub">12px · cards</div></div>
+      <div class="r"><div class="box" style="border-radius:16px;"></div><div class="lbl">xl</div><div class="sub">16px · hero</div></div>
+      <div class="r"><div class="box" style="border-radius:20px;"></div><div class="lbl">2xl</div><div class="sub">20px · modal</div></div>
+      <div class="r"><div class="box" style="border-radius:9999px;"></div><div class="lbl">full</div><div class="sub">pill</div></div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Progress Bars</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+<style>
+  .row { display:grid; grid-template-columns: 110px 1fr 40px; gap:14px; align-items:center; }
+  .track { height: 8px; border-radius: 9999px; background: rgba(255,255,255,0.06); box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); overflow:hidden; }
+  .fill { height:100%; border-radius:9999px; }
+  .lbl { font-size:12px; color:#94A3B8; font-family:'Space Grotesk',sans-serif; font-weight:500; }
+  .val { font-size:12px; color:#F1F5F9; font-family: 'JetBrains Mono', ui-monospace, monospace; text-align:right; }
+</style>
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage glass-card luminous-border" style="padding: 18px 22px; width:auto;">
+    <div class="eyebrow" style="margin-bottom:12px;">Pipeline Stage</div>
+    <div style="display:flex; flex-direction:column; gap:11px;">
+      <div class="row"><span class="lbl">Scout</span><div class="track"><div class="fill" style="width:95%; background:#10B981; box-shadow: 0 0 8px rgba(16,185,129,0.4);"></div></div><span class="val">95%</span></div>
+      <div class="row"><span class="lbl">Director</span><div class="track"><div class="fill" style="width:72%; background:#7C3AED; box-shadow: 0 0 8px rgba(124,58,237,0.4);"></div></div><span class="val">72%</span></div>
+      <div class="row"><span class="lbl">Media</span><div class="track"><div class="fill" style="width:48%; background:#06B6D4; box-shadow: 0 0 8px rgba(6,182,212,0.4);"></div></div><span class="val">48%</span></div>
+      <div class="row"><span class="lbl">Editor</span><div class="track"><div class="fill" style="width:21%; background:#F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.4);"></div></div><span class="val">21%</span></div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — Content Queue</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .filter-bar { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; align-items:center; }
+  .filter-btn { font-family:"Space Grotesk",sans-serif; font-size:11px; font-weight:500; letter-spacing:.12em; padding:6px 14px; border-radius:9999px; border:1px solid var(--ui-border); background:transparent; color:var(--ui-fg2); cursor:pointer; transition:all .2s; }
+  .filter-btn:hover { border-color:var(--ui-border-strong); color:var(--ui-fg1); }
+  .filter-btn.active { background:var(--ui-primary-soft); border-color:var(--ui-primary); color:var(--ui-primary-text); }
+  .content-card { border-radius:12px; background:var(--ui-panel); backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--ui-border); box-shadow:var(--ui-shadow-card); overflow:hidden; transition:transform .2s; cursor:pointer; }
+  .content-card:hover { transform:scale(1.01); }
+  .content-thumb { aspect-ratio:16/9; background:var(--ui-elevated); display:flex; align-items:center; justify-content:center; position:relative; }
+  .content-thumb svg { width:28px; height:28px; stroke:var(--ui-fg3); stroke-width:1.5; fill:none; }
+  .content-body { padding:14px 16px; }
+  .content-title { font-size:13.5px; font-weight:500; color:var(--ui-fg1); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .content-meta { font-size:11px; color:var(--ui-fg3); font-family:"JetBrains Mono",monospace; margin-top:4px; }
+  .queue-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .confidence { font-size:11px; color:var(--ui-fg4); margin-left:6px; }
+</style>
+
+<!-- Filter bar + count -->
+<div class="filter-bar">
+  <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ui-fg3);margin-right:4px;">Filter</span>
+  <button class="filter-btn active">All <span style="margin-left:4px;opacity:.6;">23</span></button>
+  <button class="filter-btn">In Review <span style="margin-left:4px;opacity:.6;">8</span></button>
+  <button class="filter-btn">Approved <span style="margin-left:4px;opacity:.6;">5</span></button>
+  <button class="filter-btn">Generating <span style="margin-left:4px;opacity:.6;">4</span></button>
+  <button class="filter-btn">Rejected <span style="margin-left:4px;opacity:.6;">3</span></button>
+  <button class="filter-btn">Published <span style="margin-left:4px;opacity:.6;">3</span></button>
+  <div style="margin-left:auto;display:flex;gap:8px;">
+    <button class="o-btn-ghost" style="font-size:12px;padding:6px 12px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>Sort</button>
+  </div>
+</div>
+
+<div class="queue-grid">
+  <!-- Card 1 -->
+  <div class="content-card">
+    <div class="content-thumb" style="background:linear-gradient(135deg,rgba(124,58,237,0.18),rgba(6,182,212,0.12));">
+      <svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-green" style="font-size:11px;">✓ Approved</span>
+        <span class="confidence">94% conf.</span>
+      </div>
+      <div class="content-title">10 Hidden Patterns in the Perseid Swarm</div>
+      <div class="content-meta">orion.trend.detected · 2m ago · Astronomy</div>
+    </div>
+  </div>
+  <!-- Card 2 -->
+  <div class="content-card">
+    <div class="content-thumb">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-amber" style="font-size:11px;">⏱ In Review</span>
+        <span class="confidence">87% conf.</span>
+      </div>
+      <div class="content-title">The Quiet Genius of a Well-Tuned Vector Index</div>
+      <div class="content-meta">orion.trend.detected · 14m ago · AI / Infra</div>
+    </div>
+  </div>
+  <!-- Card 3 -->
+  <div class="content-card">
+    <div class="content-thumb" style="background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(34,211,238,0.08));">
+      <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-violet" style="font-size:11px;">✦ Generating</span>
+      </div>
+      <div class="content-title">Why Your Editor Is Secretly a Graph Database</div>
+      <div class="content-meta">orion.trend.detected · 28m ago · Dev Tools</div>
+    </div>
+  </div>
+  <!-- Card 4 -->
+  <div class="content-card">
+    <div class="content-thumb">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-blue" style="font-size:11px;">📡 Published</span>
+      </div>
+      <div class="content-title">LangGraph in 60 Seconds — the Pipeline Pattern</div>
+      <div class="content-meta">orion.trend.detected · 1h ago · AI / Infra</div>
+    </div>
+  </div>
+  <!-- Card 5 -->
+  <div class="content-card">
+    <div class="content-thumb">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-red" style="font-size:11px;">✕ Rejected</span>
+        <span class="confidence">42% conf.</span>
+      </div>
+      <div class="content-title">Retro Tech Nostalgia — a Slow-Burn Trend</div>
+      <div class="content-meta">orion.trend.detected · 2h ago · Retro Tech</div>
+    </div>
+  </div>
+  <!-- Card 6 -->
+  <div class="content-card">
+    <div class="content-thumb" style="background:linear-gradient(135deg,rgba(34,211,238,0.10),rgba(124,58,237,0.08));">
+      <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+    </div>
+    <div class="content-body">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span class="o-badge o-badge-grey" style="font-size:11px;">Draft</span>
+      </div>
+      <div class="content-title">Starlight Cyan: A Short Film About a Color</div>
+      <div class="content-meta">orion.trend.detected · 2h ago · Design</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+OrionShell.init({
+  active: 'queue',
+  title: 'Content Queue',
+  subtitle: 'Review, approve and manage all generated content.',
+  iconPath: '<path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/><path d="m16 12 5 3-5 3z"/>'
+});
+</script>
+</body></html>

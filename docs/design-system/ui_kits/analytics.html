@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><title>Orion — Analytics</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="_shell.js"></script>
+</head>
+<body>
+<div id="page-content">
+<style>
+  .chart-wrap { height: 180px; position: relative; }
+  .chart-wrap svg { width: 100%; height: 100%; }
+  .cost-row { display:grid; grid-template-columns:1fr 80px 100px; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--ui-hairline); }
+  .cost-row:last-child { border-bottom:none; }
+  .period-btn { background:none; border:none; cursor:pointer; font-family:"Space Grotesk",sans-serif; font-size:11px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--ui-fg3); padding:6px 10px; border-radius:6px; transition:all .2s; }
+  .period-btn:hover { color:var(--ui-fg1); }
+  .period-btn.active { background:var(--ui-primary-soft); color:var(--ui-primary-text); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+</style>
+
+<!-- KPI row -->
+<div class="o-grid-4" style="margin-bottom:24px;">
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Total Cost</div>
+    <div class="o-stat-value">$24.18</div>
+    <div class="o-stat-sub">↓ 8% vs last week</div>
+  </div>
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Cost / Video</div>
+    <div class="o-stat-value">$0.16</div>
+    <div class="o-stat-sub">↓ 12% vs last week</div>
+  </div>
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Videos Published</div>
+    <div class="o-stat-value">147</div>
+    <div class="o-stat-sub">↑ 24% vs last week</div>
+  </div>
+  <div class="o-card o-card-pad">
+    <div class="o-stat-label">Pipeline Success</div>
+    <div class="o-stat-value">94.2%</div>
+    <div class="o-stat-sub">↑ 1.8pp vs last week</div>
+  </div>
+</div>
+
+<div class="o-2col" style="gap:20px; margin-bottom:20px;">
+  <!-- Volume chart -->
+  <div class="o-card o-card-pad">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div class="o-eyebrow" style="margin-bottom:4px;">Output Velocity</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);">Videos published · 30 days</div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="period-btn">7D</button>
+        <button class="period-btn active">30D</button>
+        <button class="period-btn">Q</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 800 180" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="ag1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C3AED" stop-opacity=".5"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></linearGradient>
+          <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22D3EE" stop-opacity=".35"/><stop offset="1" stop-color="#22D3EE" stop-opacity="0"/></linearGradient>
+        </defs>
+        <g stroke="var(--ui-chart-grid)" stroke-width="1">
+          <line x1="0" y1="30" x2="800" y2="30"/>
+          <line x1="0" y1="80" x2="800" y2="80"/>
+          <line x1="0" y1="130" x2="800" y2="130"/>
+        </g>
+        <path d="M0,150 L57,140 L114,145 L171,128 L228,135 L285,115 L342,120 L399,100 L456,108 L513,88 L570,95 L627,72 L684,80 L800,55 L800,180 L0,180Z" fill="url(#ag2)"/>
+        <path d="M0,150 L57,140 L114,145 L171,128 L228,135 L285,115 L342,120 L399,100 L456,108 L513,88 L570,95 L627,72 L684,80 L800,55" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M0,160 L57,152 L114,158 L171,144 L228,150 L285,135 L342,140 L399,122 L456,130 L513,110 L570,118 L627,94 L684,105 L800,80 L800,180 L0,180Z" fill="url(#ag1)"/>
+        <path d="M0,160 L57,152 L114,158 L171,144 L228,150 L285,135 L342,140 L399,122 L456,130 L513,110 L570,118 L627,94 L684,105 L800,80" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div style="display:flex;gap:18px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ui-hairline);">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ui-fg2);"><span class="legend-dot" style="background:#A78BFA;box-shadow:0 0 8px #A78BFA;"></span>Rendered</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ui-fg2);"><span class="legend-dot" style="background:#22D3EE;box-shadow:0 0 8px #22D3EE;"></span>Published</div>
+      <div style="margin-left:auto;font-size:11px;color:var(--ui-fg3);font-family:'JetBrains Mono',monospace;">peak 147 @ day 30</div>
+    </div>
+  </div>
+
+  <!-- Cost by service -->
+  <div class="o-card o-card-pad">
+    <div class="o-eyebrow" style="margin-bottom:12px;">Cost Breakdown</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);margin-bottom:16px;">By service · this week</div>
+    <div>
+      <div class="cost-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Media · Fal.ai</div>
+          <div class="o-track" style="margin-top:6px;"><div class="o-fill" style="width:68%;background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">68%</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui-fg1);font-weight:500;text-align:right;">$16.44</div>
+      </div>
+      <div class="cost-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Director · LLM</div>
+          <div class="o-track" style="margin-top:6px;"><div class="o-fill" style="width:18%;background:#22D3EE;"></div></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">18%</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui-fg1);font-weight:500;text-align:right;">$4.35</div>
+      </div>
+      <div class="cost-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Editor · TTS</div>
+          <div class="o-track" style="margin-top:6px;"><div class="o-fill" style="width:9%;background:#F59E0B;"></div></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">9%</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui-fg1);font-weight:500;text-align:right;">$2.18</div>
+      </div>
+      <div class="cost-row">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--ui-fg1);">Scout · APIs</div>
+          <div class="o-track" style="margin-top:6px;"><div class="o-fill" style="width:5%;background:#34D399;"></div></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ui-fg1);text-align:right;">5%</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui-fg1);font-weight:500;text-align:right;">$1.21</div>
+      </div>
+    </div>
+    <div class="o-sep"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;color:var(--ui-fg2);">Total this week</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ui-fg1);">$24.18</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pipeline funnel -->
+<div class="o-card o-card-pad">
+  <div class="o-eyebrow" style="margin-bottom:12px;">Pipeline Funnel</div>
+  <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--ui-fg1);margin-bottom:20px;">Trend → Publish conversion</div>
+  <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px; align-items:end; height:80px;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="height:80px;width:100%;background:linear-gradient(180deg,rgba(124,58,237,0.6),rgba(124,58,237,0.2));border-radius:6px 6px 0 0;position:relative;"><div style="position:absolute;bottom:8px;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#fff;">2,418</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="height:58px;width:100%;background:linear-gradient(180deg,rgba(124,58,237,0.5),rgba(124,58,237,0.15));border-radius:6px 6px 0 0;position:relative;"><div style="position:absolute;bottom:6px;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#EDF1FA;">847</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="height:40px;width:100%;background:linear-gradient(180deg,rgba(34,211,238,0.5),rgba(34,211,238,0.15));border-radius:6px 6px 0 0;position:relative;"><div style="position:absolute;bottom:5px;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#EDF1FA;">312</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="height:26px;width:100%;background:linear-gradient(180deg,rgba(16,185,129,0.5),rgba(16,185,129,0.15));border-radius:6px 6px 0 0;position:relative;"><div style="position:absolute;bottom:4px;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#EDF1FA;">201</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="height:16px;width:100%;background:linear-gradient(180deg,rgba(16,185,129,0.7),rgba(16,185,129,0.3));border-radius:6px 6px 0 0;position:relative;"><div style="position:absolute;bottom:2px;width:100%;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:#EDF1FA;">147</div></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:8px;">
+    <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--ui-fg3);letter-spacing:.12em;text-transform:uppercase;">Detected</div>
+    <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--ui-fg3);letter-spacing:.12em;text-transform:uppercase;">Scripted</div>
+    <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--ui-fg3);letter-spacing:.12em;text-transform:uppercase;">Rendered</div>
+    <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--ui-fg3);letter-spacing:.12em;text-transform:uppercase;">Approved</div>
+    <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:var(--ui-fg3);letter-spacing:.12em;text-transform:uppercase;">Published</div>
+  </div>
+</div>
+
+</div>
+<script>
+OrionShell.init({
+  active: 'analytics',
+  title: 'Analytics',
+  subtitle: 'Pipeline performance, cost tracking and conversion funnel.',
+  iconPath: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>'
+});
+</script>
+</body></html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Glass Card Material</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css">
+</head>
+<body>
+<div class="card-root">
+  <div class="muted-bg"></div>
+  <div class="stage">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div class="glass-card luminous-border" style="padding:18px; border-radius:12px;">
+        <div class="eyebrow" style="margin-bottom:8px;">Glass Card</div>
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#F1F5F9;">glass-card + luminous-border</div>
+        <div style="font-size:12px; color:#94A3B8; margin-top:6px; line-height:1.5;">
+          <code style="font-family:'JetBrains Mono', 'JetBrains Mono', ui-monospace, monospace; font-size:11px; background:rgba(124,58,237,0.10); color:#A78BFA; padding:1px 5px; border-radius:4px;">backdrop-filter: blur(24px) saturate(180%)</code>
+          with inset specular edge + ambient shadow. All top-level panels.
+        </div>
+      </div>
+      <div style="background:rgba(13,18,32,0.48); backdrop-filter: blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:18px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3);">
+        <div style="font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#64748B; margin-bottom:8px;">Glass only</div>
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#F1F5F9;">No luminous edge</div>
+        <div style="font-size:12px; color:#94A3B8; margin-top:6px; line-height:1.5;">Sub-panels inside a glass card don't re-apply the luminous edge — single glow layer.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

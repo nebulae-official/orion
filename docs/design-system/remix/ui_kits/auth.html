@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Orion — Auth UI Kit</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --ui-bg: #070a12;
+    --ui-panel: rgba(15, 22, 38, 0.55);
+    --ui-elevated: #161f33;
+    --ui-border: rgba(255,255,255,0.08);
+    --ui-border-strong: rgba(255,255,255,0.14);
+    --ui-fg1: #EDF1FA;
+    --ui-fg2: #9AA3B5;
+    --ui-fg3: #5F6A80;
+    --ui-primary: #8B5CF6;
+    --ui-primary-strong: #7C3AED;
+    --ui-primary-soft: rgba(139,92,246,0.12);
+    --ui-primary-text: #C4B5FD;
+    --ui-success: #34D399;
+    --ui-nebula-a: rgba(168,85,247,0.28);
+    --ui-nebula-b: rgba(34,211,238,0.22);
+    --ui-nebula-c: rgba(139,92,246,0.18);
+    --ui-shadow-card:
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      0 20px 60px rgba(0,0,0,0.45),
+      0 0 60px -20px rgba(124,58,237,0.35);
+  }
+  [data-theme="light"] {
+    --ui-bg: #F4F4F7;
+    --ui-panel: rgba(255,255,255,0.82);
+    --ui-elevated: #F8F8FB;
+    --ui-border: rgba(15,23,42,0.08);
+    --ui-border-strong: rgba(15,23,42,0.14);
+    --ui-fg1: #1A1C23;
+    --ui-fg2: #555968;
+    --ui-fg3: #868A97;
+    --ui-primary: #7C3AED;
+    --ui-primary-strong: #6D28D9;
+    --ui-primary-soft: rgba(109,40,217,0.08);
+    --ui-primary-text: #5B21B6;
+    --ui-success: #059669;
+    --ui-nebula-a: rgba(168,85,247,0.12);
+    --ui-nebula-b: rgba(34,211,238,0.10);
+    --ui-nebula-c: rgba(99,102,241,0.08);
+    --ui-shadow-card:
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 20px 60px rgba(15,23,42,0.10),
+      0 0 60px -20px rgba(124,58,237,0.18);
+  }
+  html, body { margin:0; padding:0; min-height:100vh; }
+  body {
+    background: var(--ui-bg);
+    color: var(--ui-fg1);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv11","ss01";
+    position: relative; overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  body::before {
+    content:""; position: fixed; inset: -10%; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(at 18% 20%, var(--ui-nebula-a) 0, transparent 55%),
+      radial-gradient(at 85% 15%, var(--ui-nebula-b) 0, transparent 50%),
+      radial-gradient(at 60% 90%, var(--ui-nebula-c) 0, transparent 50%);
+    animation: auth-nebula 42s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes auth-nebula {
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(2%, -1.5%) scale(1.04); }
+    100% { transform: translate(-2%, 1.5%) scale(1.02); }
+  }
+  body::after {
+    content:""; position: fixed; inset:0; z-index:0; pointer-events:none;
+    background: linear-gradient(100deg, transparent 0%, transparent 44%, rgba(167,139,250,0.05) 50%, transparent 56%, transparent 100%);
+    background-size: 300% 100%;
+    animation: auth-sweep 18s linear infinite;
+    mix-blend-mode: screen;
+  }
+  [data-theme="light"] body::after { mix-blend-mode: multiply; opacity: 0.5; }
+  @keyframes auth-sweep {
+    0%   { background-position: 150% 0; }
+    100% { background-position: -150% 0; }
+  }
+  #starfield { position: fixed; inset:0; z-index:0; pointer-events:none; opacity: 0.9; }
+  [data-theme="light"] #starfield { opacity: 0.35; }
+
+  /* Logo live motion */
+  @keyframes orbit-a { to { transform: rotate(360deg); } }
+  .top .tile svg .orbit-ring { transform-origin: 50px 50px; animation: orbit-a 22s linear infinite; }
+  .top .tile svg .sat-group  { transform-origin: 50px 50px; animation: orbit-a 28s linear infinite reverse; }
+  .top .tile svg .core       { transform-origin: 50px 50px; animation: pulse 3.2s ease-in-out infinite; }
+
+  /* Rotating status line under status pill */
+  .status-line .label { transition: opacity 0.35s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before, body::after, .top .tile svg *, .status-line .p { animation: none !important; }
+    #starfield { display: none; }
+  }
+  .page { position: relative; z-index:1; min-height: 100vh; display:flex; flex-direction:column; }
+
+  .top { display:flex; align-items:center; justify-content:space-between; padding: 28px 40px; }
+  .top .mark { display:flex; align-items:center; gap:10px; }
+  .top .tile { width: 36px; height: 36px; display:flex; align-items:center; justify-content:center; filter: drop-shadow(0 4px 12px rgba(167,139,250,0.28)); }
+  .top .tile svg { width: 36px; height: 36px; }
+  .top .word { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; letter-spacing: -0.02em; color: var(--ui-fg1); }
+  .top .right { font-family:'Geist',sans-serif; font-size:13px; color: var(--ui-fg2); }
+  .top .right a { color: var(--ui-primary-text); text-decoration:none; font-weight: 500; }
+
+  /* theme toggle */
+  .theme-toggle { display: inline-flex; align-items: center; gap: 4px; padding: 4px; background: var(--ui-panel); backdrop-filter: blur(12px); border: 1px solid var(--ui-border); border-radius: 9999px; margin-right: 14px; }
+  .theme-toggle button { display:inline-flex; align-items:center; gap:6px; padding: 6px 10px; border-radius: 9999px; border: none; cursor: pointer; background: transparent; color: var(--ui-fg2); font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; transition: all 0.2s; }
+  .theme-toggle button.active { background: var(--ui-primary); color: #fff; }
+  .theme-toggle svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  .stage { flex:1; display:flex; align-items:center; justify-content:center; padding: 0 40px 40px; gap: 60px; flex-wrap: wrap; }
+
+  .hero-side { max-width: 420px; }
+  .hero-side .eyebrow { font-family:'Space Grotesk',sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: var(--ui-primary-text); margin-bottom: 18px; }
+  .hero-side h1 { margin: 0; font-family:'Space Grotesk',sans-serif; font-size: 44px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; color: var(--ui-fg1); }
+  .hero-side h1 .grad { background: linear-gradient(135deg, #A78BFA 0%, #22D3EE 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  [data-theme="light"] .hero-side h1 .grad { background: linear-gradient(135deg, #6D28D9 0%, #0891B2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero-side p { font-size: 15px; color: var(--ui-fg2); line-height: 1.6; margin-top: 18px; }
+  .hero-side .chips { display:flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; }
+  .hero-side .chips span { font-family:'Space Grotesk',sans-serif; font-size: 11px; padding: 5px 11px; border-radius: 9999px; background: var(--ui-primary-soft); color: var(--ui-primary-text); letter-spacing: 0.08em; }
+
+  .auth-card {
+    width: 420px;
+    padding: 36px 36px 32px;
+    border-radius: 20px;
+    background: var(--ui-panel);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--ui-border);
+    box-shadow: var(--ui-shadow-card);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .auth-card .eyebrow { font-family:'Space Grotesk',sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ui-primary-text); }
+  .auth-card h2 { margin: 10px 0 6px; font-family:'Space Grotesk',sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; color: var(--ui-fg1); }
+  .auth-card .subtitle { font-size: 13.5px; color: var(--ui-fg2); margin-bottom: 24px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display:flex; justify-content:space-between; font-size: 12.5px; color: var(--ui-fg2); font-weight: 500; margin-bottom: 6px; }
+  .field label .hint { color: var(--ui-primary-text); font-size: 11.5px; text-decoration: none; }
+  .field input {
+    width: 100%; box-sizing: border-box;
+    background: var(--ui-elevated);
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    color: var(--ui-fg1);
+    padding: 11px 14px;
+    font-size: 14px; font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.3s;
+  }
+  .field input::placeholder { color: var(--ui-fg3); }
+  .field input:focus { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+  .field.focused input { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+
+  .checkbox { display:flex; align-items:center; gap:8px; margin: 4px 0 20px; font-size:12.5px; color: var(--ui-fg2); }
+  .checkbox .box { width:16px; height:16px; border-radius: 4px; background: var(--ui-elevated); border:1px solid var(--ui-border-strong); display:flex; align-items:center; justify-content:center; color: var(--ui-primary-text); }
+  .checkbox .box svg { width:11px; height:11px; stroke:currentColor; stroke-width:3; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  .submit {
+    width: 100%;
+    background: var(--ui-primary-strong);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: "Geist", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 14px 30px -8px rgba(124,58,237,0.5);
+    display: inline-flex; align-items:center; justify-content:center; gap: 10px;
+    transition: all 0.2s;
+  }
+  .submit:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .divider { display:flex; align-items:center; gap:12px; margin: 22px 0 18px; color: var(--ui-fg3); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-family:'Space Grotesk',sans-serif; }
+  .divider::before, .divider::after { content:""; height:1px; flex:1; background: linear-gradient(90deg, transparent, var(--ui-border-strong), transparent); }
+
+  .oauth-row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .oauth {
+    display:inline-flex; align-items:center; justify-content:center; gap: 10px;
+    background: transparent; color: var(--ui-fg1);
+    border: 1px solid var(--ui-border); border-radius: 10px;
+    padding: 10px 14px; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .oauth:hover { background: var(--ui-elevated); border-color: var(--ui-border-strong); }
+  .oauth svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  .foot { margin-top: 22px; text-align: center; font-size: 12.5px; color: var(--ui-fg2); }
+  .foot a { color: var(--ui-primary-text); text-decoration: none; font-weight: 500; }
+
+  .status-line { display:flex; align-items:center; gap:8px; margin-bottom: 18px; font-family:'Space Grotesk',sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ui-success); }
+  .status-line .p { width:7px; height:7px; border-radius:50%; background: var(--ui-success); box-shadow: 0 0 8px var(--ui-success); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+</style>
+</head>
+<body>
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="page">
+  <div class="top">
+    <div class="mark">
+      <div class="tile">
+        <svg viewBox="0 0 100 100"><defs><linearGradient id="authAp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><circle class="orbit-ring" cx="50" cy="50" r="32" fill="none" stroke="url(#authAp)" stroke-width="2.5" opacity="0.8" stroke-dasharray="60 22"/><g class="sat-group"><circle cx="18" cy="50" r="5" fill="#A78BFA"/><circle cx="66" cy="22" r="5" fill="#22D3EE"/><circle cx="66" cy="78" r="5" fill="#A78BFA"/></g><circle class="core" cx="50" cy="50" r="9" fill="url(#authAp)"/><circle cx="50" cy="50" r="14" fill="none" stroke="url(#authAp)" stroke-width="1.8"/></svg>
+      </div>
+      <div class="word">orion</div>
+    </div>
+    <div style="display:flex; align-items:center;">
+      <div class="theme-toggle">
+        <button id="t-dark" class="active" onclick="setTheme('dark')"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Dark</button>
+        <button id="t-light" onclick="setTheme('light')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>Light</button>
+      </div>
+      <div class="right">Don't have an account? <a href="#">Request access →</a></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="hero-side">
+      <div class="eyebrow">Orion OS · v2.4</div>
+      <h1>Mission control for an <span class="grad">autonomous content agency</span>.</h1>
+      <p>Sign in to the Orion dashboard to review trends, approve scripts, and steer the swarm. Every action is auditable; every agent is observable.</p>
+      <div class="chips">
+        <span>Scout</span><span>Director</span><span>Media</span><span>Editor</span><span>Publisher</span>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="status-line"><span class="p"></span>All Systems Operational</div>
+      <div class="eyebrow">Operator Sign-In</div>
+      <h2>Welcome back.</h2>
+      <div class="subtitle">Authenticate to open the Orion OS dashboard.</div>
+
+      <div class="field">
+        <label for="email">Email or Username</label>
+        <input id="email" type="text" placeholder="a.khoury@orion.space" value="a.khoury@orion.space">
+      </div>
+
+      <div class="field focused">
+        <label for="pw">Password <a class="hint" href="#">Forgot?</a></label>
+        <input id="pw" type="password" value="•••••••••••••••">
+      </div>
+
+      <div class="checkbox">
+        <div class="box">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Keep me signed in on this device
+      </div>
+
+      <button class="submit">
+        Sign in
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+
+      <div class="divider">Or continue with</div>
+
+      <div class="oauth-row">
+        <button class="oauth">
+          <svg viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          GitHub
+        </button>
+        <button class="oauth">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+          Google
+        </button>
+      </div>
+
+      <div class="foot">By continuing, you accept the <a href="#">Operator Terms</a> and <a href="#">Privacy Policy</a>.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('t-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('t-light').classList.toggle('active', t === 'light');
+    try { localStorage.setItem('orion-theme', t); } catch(e){}
+  }
+  try { var t = localStorage.getItem('orion-theme'); if (t) setTheme(t); } catch(e){}
+</script>
+<script>
+(function(){
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('starfield');
+  if (!canvas || REDUCED) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, stars, dpr;
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio||1,2);
+    w = canvas.width = innerWidth*dpr; h = canvas.height = innerHeight*dpr;
+    canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px';
+    const count = Math.min(140, Math.floor((innerWidth*innerHeight)/14000));
+    stars = Array.from({length:count},()=>({x:Math.random()*w, y:Math.random()*h, r:(Math.random()*1.1+0.3)*dpr, vx:(Math.random()-0.5)*0.035*dpr, vy:(Math.random()-0.5)*0.025*dpr, phase:Math.random()*Math.PI*2, speed:0.5+Math.random()*1.2, hue:Math.random()<0.25?'cyan':(Math.random()<0.55?'violet':'white')}));
+  }
+  const colors={white:[237,241,250],violet:[167,139,250],cyan:[34,211,238]};
+  let t0=performance.now();
+  function frame(now){
+    const dt=(now-t0)/1000; t0=now;
+    const isLight=document.documentElement.getAttribute('data-theme')==='light';
+    ctx.clearRect(0,0,w,h);
+    for(const s of stars){
+      s.x+=s.vx; s.y+=s.vy; s.phase+=dt*s.speed;
+      if(s.x<0)s.x+=w; if(s.x>w)s.x-=w; if(s.y<0)s.y+=h; if(s.y>h)s.y-=h;
+      const tw=0.45+0.55*(0.5+0.5*Math.sin(s.phase));
+      const [r,g,b]=colors[s.hue]; const a=(isLight?0.4:0.85)*tw;
+      ctx.beginPath(); ctx.fillStyle=`rgba(${r},${g},${b},${a})`;
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+      if(s.r>1.3*dpr){ctx.beginPath();ctx.fillStyle=`rgba(${r},${g},${b},${a*0.14})`;ctx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2);ctx.fill();}
+    }
+    requestAnimationFrame(frame);
+  }
+  resize(); addEventListener('resize',resize); requestAnimationFrame(frame);
+
+  /* Rotate status messages on auth card */
+  const statuses = ['All Systems Operational','5 Agents Online','Scout Active · Trending','Director Processing','Publisher Ready'];
+  const statusEl = document.querySelector('.status-line');
+  if(statusEl){
+    let si=0;
+    setInterval(()=>{
+      si=(si+1)%statuses.length;
+      statusEl.style.opacity='0';
+      setTimeout(()=>{ statusEl.childNodes[1].textContent=statuses[si]; statusEl.style.opacity='1'; },350);
+    }, 4000);
+    statusEl.style.transition='opacity 0.35s ease';
+  }
+})();
+</script>
+</body>
+</html>

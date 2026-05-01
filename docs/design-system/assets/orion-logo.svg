@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="88" viewBox="0 0 320 88" fill="none" font-family="Space Grotesk, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="wmG" x1="0" y1="0" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA"></stop>
+      <stop offset="1" stop-color="#22D3EE"></stop>
+    </linearGradient>
+    <radialGradient id="wmGlow" cx="44" cy="44" r="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA" stop-opacity="0.3"></stop>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <circle cx="44" cy="44" r="40" fill="url(#wmGlow)"></circle>
+  <g transform="translate(44,44)">
+    <circle cx="0" cy="0" r="28" fill="none" stroke="url(#wmG)" stroke-width="1.5" opacity="0.72"></circle>
+    <circle cx="-28" cy="0" r="3.5" fill="#A78BFA"></circle>
+    <circle cx="14" cy="-24.2" r="3.5" fill="#22D3EE"></circle>
+    <circle cx="14" cy="24.2" r="3.5" fill="#A78BFA"></circle>
+    <circle cx="0" cy="0" r="6.5" fill="url(#wmG)"></circle>
+    <circle cx="0" cy="0" r="10" fill="none" stroke="url(#wmG)" stroke-width="1.4"></circle>
+  </g>
+  <text x="96" y="56" font-size="40" font-weight="700" letter-spacing="-1.2" fill="#EDF1FA">orion</text>
+</svg>

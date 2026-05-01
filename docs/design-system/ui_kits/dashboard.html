@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Orion — Dashboard UI Kit</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ══════════════════════════════════════════
+     TOKENS — theme-driven
+     Dark by default. data-theme="light" inverts surface ladder.
+     ══════════════════════════════════════════ */
+  :root, [data-theme="dark"] {
+    --ui-bg:        #070a12;  /* darker than before — true deep-space */
+    --ui-bg-2:      #0a0e1a;  /* topnav glass base */
+    --ui-surface:   #0f1626;  /* sidebar */
+    --ui-panel:     rgba(15, 22, 38, 0.55);   /* glass card fill */
+    --ui-elevated:  #161f33;  /* inputs, sub-blocks */
+    --ui-hover:     #1b2540;
+    --ui-border:    rgba(255,255,255,0.07);
+    --ui-border-strong: rgba(255,255,255,0.12);
+    --ui-hairline:  rgba(255,255,255,0.04);
+
+    --ui-fg1:       #EDF1FA;
+    --ui-fg2:       #9AA3B5;
+    --ui-fg3:       #5F6A80;
+    --ui-fg4:       #3C4458;
+
+    --ui-primary:        #8B5CF6;
+    --ui-primary-strong: #7C3AED;
+    --ui-primary-soft:   rgba(139, 92, 246, 0.12);
+    --ui-primary-text:   #C4B5FD;
+    --ui-cyan:           #22D3EE;
+    --ui-success:        #34D399;
+    --ui-warning:        #FBBF24;
+    --ui-danger:         #F87171;
+
+    --ui-chart-grid: rgba(255,255,255,0.05);
+    --ui-nebula-a:   rgba(168, 85, 247, 0.22);
+    --ui-nebula-b:   rgba(34,211,238,  0.16);
+    --ui-nebula-c:   rgba(139, 92,246, 0.12);
+    --ui-shadow-card:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 12px 40px rgba(0,0,0,0.45),
+      0 2px 8px rgba(0,0,0,0.25);
+    --ui-shadow-primary: 0 14px 32px -8px rgba(139,92,246,0.45);
+  }
+
+  [data-theme="light"] {
+    --ui-bg:        #F4F4F7;  /* page — soft neutral, consistent w light */
+    --ui-bg-2:      #FFFFFFCC;
+    --ui-surface:   #FFFFFF;
+    --ui-panel:     rgba(255,255,255,0.72);
+    --ui-elevated:  #F8F8FB;
+    --ui-hover:     #EEEEF3;
+    --ui-border:    rgba(15, 23, 42, 0.08);
+    --ui-border-strong: rgba(15, 23, 42, 0.14);
+    --ui-hairline:  rgba(15, 23, 42, 0.05);
+
+    --ui-fg1:       #1A1C23;
+    --ui-fg2:       #555968;
+    --ui-fg3:       #868A97;
+    --ui-fg4:       #B5B8C2;
+
+    --ui-primary:        #6D28D9;
+    --ui-primary-strong: #5B21B6;
+    --ui-primary-soft:   rgba(109, 40, 217, 0.08);
+    --ui-primary-text:   #5B21B6;
+    --ui-cyan:           #0891B2;
+    --ui-success:        #059669;
+    --ui-warning:        #B45309;
+    --ui-danger:         #B91C1C;
+
+    --ui-chart-grid: rgba(15, 23, 42, 0.06);
+    --ui-nebula-a:   rgba(168, 85, 247, 0.12);
+    --ui-nebula-b:   rgba(34,211,238,  0.10);
+    --ui-nebula-c:   rgba(99, 102,241, 0.08);
+    --ui-shadow-card:
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 12px 40px rgba(15, 23, 42, 0.08),
+      0 2px 8px rgba(15, 23, 42, 0.04);
+    --ui-shadow-primary: 0 14px 32px -8px rgba(109,40,217,0.35);
+  }
+
+  html, body { margin:0; padding:0; }
+  body {
+    background: var(--ui-bg);
+    color: var(--ui-fg1);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv11","ss01","ss03";
+    min-height: 100vh;
+    position: relative;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  /* Nebula overlay — uses token hues, so it tracks theme */
+  body::before {
+    content: "";
+    position: fixed; inset: -10%; z-index: 0;
+    background:
+      radial-gradient(at 18% 20%, var(--ui-nebula-a) 0, transparent 55%),
+      radial-gradient(at 85% 15%, var(--ui-nebula-b) 0, transparent 50%),
+      radial-gradient(at 60% 90%, var(--ui-nebula-c) 0, transparent 50%);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    animation: nebula-drift 38s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes nebula-drift {
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(2%, -1.5%) scale(1.04); }
+    100% { transform: translate(-2%, 1.5%) scale(1.02); }
+  }
+  /* Starfield canvas */
+  #starfield {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+  [data-theme="light"] #starfield { opacity: 0.35; }
+
+  /* Scanline sweep across the viewport */
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(167,139,250,0.06) 50%,
+      transparent 58%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    animation: sweep 14s linear infinite;
+    mix-blend-mode: screen;
+  }
+  [data-theme="light"] body::after { mix-blend-mode: multiply; opacity: 0.6; }
+  @keyframes sweep {
+    0%   { background-position: 150% 0; }
+    100% { background-position: -150% 0; }
+  }
+
+  /* Shared live primitives */
+  @keyframes breathe {
+    0%, 100% { transform: scaleX(1); filter: brightness(1); }
+    50%      { transform: scaleX(0.985); filter: brightness(1.15); }
+  }
+  @keyframes spark-endpoint {
+    0%, 100% { r: 4; opacity: 1; }
+    50%      { r: 6; opacity: 0.75; }
+  }
+  @keyframes spark-endpoint-halo {
+    0%, 100% { r: 8;  opacity: 0.25; }
+    50%      { r: 16; opacity: 0.0; }
+  }
+  @keyframes slide-in-event {
+    0%   { opacity: 0; transform: translateY(-8px); max-height: 0; padding-top:0; padding-bottom:0; }
+    40%  { opacity: 0; }
+    100% { opacity: 1; transform: translateY(0); max-height: 120px; padding-top:12px; padding-bottom:12px; }
+  }
+  @keyframes caret-blink { 0%,49% { opacity:1 } 50%,100% { opacity:0 } }
+  @keyframes orbit-a { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before, body::after,
+    .live-chip .p, .icon-btn .badge-dot,
+    .brand-tile svg .orbit-ring, .brand-tile svg .sat,
+    .chart .endpoint, .chart .endpoint-halo,
+    .pipe-row .fill, .kpi,
+    .nav-item .dot {
+      animation: none !important;
+    }
+    #starfield { display: none; }
+  }
+
+  .app {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ========== SIDEBAR ========== */
+  .sidebar {
+    background: var(--ui-surface);
+    border-right: 1px solid var(--ui-border);
+    display: flex; flex-direction: column;
+    padding: 24px 0 16px;
+    position: sticky; top: 0; height: 100vh;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .brand-tile {
+    width: 40px; height: 40px;
+    display:flex; align-items:center; justify-content:center;
+    filter: drop-shadow(0 6px 16px rgba(167,139,250,0.28));
+  }
+  .brand-tile svg { width: 40px; height: 40px; }
+  .brand-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: var(--ui-fg1); }
+  .brand-tag { font-family: "Space Grotesk", sans-serif; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ui-fg3); margin-top: 2px; }
+
+  .nav-group-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ui-fg3);
+    padding: 18px 24px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px;
+    font-family: "Geist", sans-serif;
+    font-size: 13.5px; font-weight: 500;
+    color: var(--ui-fg2);
+    cursor: pointer; border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-item:hover { background: var(--ui-hover); color: var(--ui-fg1); }
+  .nav-item.active { background: var(--ui-primary-soft); color: var(--ui-primary-text); border-left-color: var(--ui-primary); }
+  .nav-item svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-item .dot { margin-left:auto; width:6px; height:6px; border-radius:50%; background: var(--ui-warning); box-shadow: 0 0 8px var(--ui-warning); }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 24px;
+    border-top: 1px solid var(--ui-border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED, #22D3EE);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 13px;
+    box-shadow: 0 0 0 2px var(--ui-border);
+  }
+  .user-name { font-size: 13.5px; font-weight: 500; color: var(--ui-fg1); font-family:"Geist", sans-serif; }
+  .user-role { font-size: 11.5px; color: var(--ui-fg3); }
+
+  /* ========== TOP NAV ========== */
+  .topnav {
+    position: sticky; top: 0; z-index: 10;
+    height: 64px;
+    padding: 0 32px;
+    display: flex; align-items: center; gap: 16px;
+    background: var(--ui-bg-2);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid var(--ui-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .search-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--ui-elevated);
+    border: 1px solid var(--ui-border);
+    border-radius: 9999px;
+    padding: 8px 16px;
+    flex: 0 1 340px;
+    color: var(--ui-fg2);
+  }
+  .search-pill input {
+    background: transparent; border: none; outline: none;
+    color: var(--ui-fg2); font-family: "Space Grotesk", sans-serif;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+    flex: 1;
+  }
+  .topnav .spacer { flex: 1; }
+  .icon-btn {
+    width: 36px; height: 36px; display: inline-flex; align-items:center; justify-content:center;
+    border-radius: 9999px; background: var(--ui-elevated); color: var(--ui-fg2);
+    border: 1px solid var(--ui-border); position:relative; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { background: var(--ui-hover); color: var(--ui-fg1); }
+  .icon-btn .badge-dot {
+    position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ui-danger); box-shadow: 0 0 8px var(--ui-danger);
+  }
+  .icon-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  .live-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 4px 10px 4px 8px; border-radius: 9999px;
+    background: rgba(16,185,129,0.10); color: var(--ui-success);
+    font-family: "Space Grotesk", sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    border: 1px solid rgba(16,185,129,0.18);
+  }
+  .live-chip .p { width:6px; height:6px; border-radius:50%; background: var(--ui-success); box-shadow: 0 0 8px var(--ui-success); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+  /* ========== MAIN ========== */
+  main { padding: 32px 40px 56px; max-width: 1500px; }
+
+  .page-header {
+    display: flex; align-items: center; gap: 18px;
+    margin-bottom: 32px;
+  }
+  .page-header .tile {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.28), rgba(6,182,212,0.28));
+    border: 1px solid rgba(167,139,250,0.35);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--ui-primary-text);
+    box-shadow: 0 8px 24px -8px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .page-header .tile svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .page-header h1 {
+    margin: 0; font-family: "Space Grotesk", sans-serif;
+    font-size: 32px; font-weight: 700; letter-spacing: -0.02em; color: var(--ui-fg1);
+  }
+  .page-header .subtitle { font-size: 14px; color: var(--ui-fg2); margin-top: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi, .panel {
+    padding: 20px 22px; border-radius: 12px;
+    background: var(--ui-panel);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--ui-border);
+    box-shadow: var(--ui-shadow-card);
+    position: relative; overflow: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .kpi .k-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+  .kpi .k-icon {
+    width: 44px; height: 44px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .kpi .k-icon svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .kpi .delta { font-size: 11.5px; font-family: "Geist", sans-serif; font-weight: 500; padding: 3px 8px; border-radius: 9999px; font-variant-numeric: tabular-nums; }
+  .kpi .delta.up { background: rgba(16,185,129,0.12); color: var(--ui-success); }
+  .kpi .delta.dn { background: rgba(239,68,68,0.12); color: var(--ui-danger); }
+  .kpi .k-label { font-family: "Space Grotesk", sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ui-fg3); }
+  .kpi .k-value { font-family: "Space Grotesk", sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.025em; color: var(--ui-fg1); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .k-sub { font-size: 12.5px; color: var(--ui-fg2); margin-top: 6px; }
+
+  .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px; }
+
+  .panel { padding: 22px 24px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .panel-head h2 { font-family: "Space Grotesk", sans-serif; font-size: 16px; font-weight: 600; color: var(--ui-fg1); margin: 0; letter-spacing: -0.01em; }
+  .panel-head .eyebrow { font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ui-primary-text); }
+
+  /* Chart */
+  .chart { height: 220px; position: relative; }
+  .chart svg { width: 100%; height: 100%; }
+
+  /* Pipeline rows */
+  .pipe-row { display:grid; grid-template-columns: 80px 1fr 44px; gap: 12px; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--ui-hairline); }
+  .pipe-row:last-child { border-bottom:none; }
+  .pipe-row .lbl { font-family: "Geist", sans-serif; font-size: 12.5px; color: var(--ui-fg2); font-weight: 500; }
+  .pipe-row .track { height: 8px; background: var(--ui-hairline); border-radius: 9999px; overflow:hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); }
+  [data-theme="light"] .pipe-row .track { background: rgba(15,23,42,0.06); box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+  .pipe-row .fill { height: 100%; border-radius: 9999px; transform-origin: left center; animation: breathe 4.4s ease-in-out infinite; }
+  .pipe-row:nth-child(2) .fill { animation-delay: -0.6s; animation-duration: 5.2s; }
+  .pipe-row:nth-child(3) .fill { animation-delay: -1.2s; animation-duration: 4.8s; }
+  .pipe-row:nth-child(4) .fill { animation-delay: -1.8s; animation-duration: 6.0s; }
+  .pipe-row:nth-child(5) .fill { animation-delay: -2.4s; animation-duration: 5.6s; }
+
+  /* Brand logo live behaviour */
+  .brand-tile svg .orbit-ring { transform-origin: 50px 50px; animation: orbit-a 22s linear infinite; }
+  .brand-tile svg .sat-group  { transform-origin: 50px 50px; animation: orbit-a 28s linear infinite reverse; }
+  .brand-tile svg .core       { transform-origin: 50px 50px; animation: pulse 3.2s ease-in-out infinite; }
+
+  /* Chart endpoint live pulse */
+  .chart .endpoint      { animation: spark-endpoint      2.2s ease-in-out infinite; }
+  .chart .endpoint-halo { animation: spark-endpoint-halo 2.2s ease-in-out infinite; }
+
+  /* Event injection */
+  .event.live-new { animation: slide-in-event 520ms cubic-bezier(.2,.7,.2,1); overflow: hidden; }
+  .typewriter-caret { display:inline-block; width: 1px; height: 1em; background: var(--ui-primary-text); margin-left: 2px; vertical-align: -2px; animation: caret-blink 1s steps(1) infinite; }
+
+  /* KPI live glow */
+  .kpi .k-value.ticking { transition: color 400ms; }
+  .kpi .k-value.flash { color: var(--ui-primary-text); }
+  .pipe-row .val { text-align:right; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; color: var(--ui-fg1); font-variant-numeric: tabular-nums; }
+
+  /* Queue table */
+  .queue-table { width: 100%; border-collapse: collapse; }
+  .queue-table th {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ui-fg3); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--ui-border);
+  }
+  .queue-table td { padding: 14px 12px; border-bottom: 1px solid var(--ui-hairline); font-size: 13.5px; color: var(--ui-fg1); }
+  .queue-table tr:last-child td { border-bottom: none; }
+  .queue-table tr:hover td { background: var(--ui-hairline); }
+  .queue-table .meta { font-size: 11px; color: var(--ui-fg3); font-family: "JetBrains Mono", ui-monospace, monospace; margin-top: 2px; }
+  .badge { display:inline-flex; align-items:center; gap:4px; padding: 3px 10px; border-radius: 9999px; font-size: 11.5px; font-weight:500; font-family: "Geist", sans-serif; }
+  .badge svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .b-green { background: rgba(16,185,129,0.12); color: var(--ui-success); }
+  .b-amber { background: rgba(245,158,11,0.14); color: var(--ui-warning); }
+  .b-red { background: rgba(239,68,68,0.12); color: var(--ui-danger); }
+  .b-violet { background: var(--ui-primary-soft); color: var(--ui-primary-text); }
+  .b-blue { background: rgba(59,130,246,0.14); color: #60A5FA; }
+  [data-theme="light"] .b-blue { color: #1D4ED8; background: rgba(59,130,246,0.10); }
+  .b-grey { background: var(--ui-elevated); color: var(--ui-fg2); border: 1px solid var(--ui-border); }
+
+  /* Right column: events */
+  .event { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--ui-hairline); }
+  .event:last-child { border-bottom: none; }
+  .event .ebox {
+    width: 28px; height: 28px; border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .event .ebox svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .event .etext { font-size: 13.5px; color: var(--ui-fg1); line-height: 1.45; }
+  .event .emeta { font-size: 11px; color: var(--ui-fg3); margin-top: 2px; font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+  /* Buttons */
+  .btn { display:inline-flex; align-items:center; gap:8px; padding: 8px 16px; border-radius: 8px; font-family: "Geist", sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: var(--ui-primary-strong); color: #fff; box-shadow: var(--ui-shadow-primary); }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--ui-fg2); }
+  .btn-ghost:hover { background: var(--ui-hover); color: var(--ui-fg1); }
+  .btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px;
+    background: var(--ui-panel); backdrop-filter: blur(12px);
+    border: 1px solid var(--ui-border); border-radius: 9999px;
+    box-shadow: var(--ui-shadow-card);
+  }
+  .theme-toggle button {
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 6px 12px; border-radius: 9999px; border: none; cursor: pointer;
+    background: transparent; color: var(--ui-fg2);
+    font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .theme-toggle button.active { background: var(--ui-primary); color: #fff; box-shadow: 0 4px 12px -2px rgba(124,58,237,0.4); }
+  .theme-toggle svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+</style>
+</head>
+<body>
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<!-- Theme toggle -->
+<div class="theme-toggle" role="tablist">
+  <button id="t-dark" class="active" onclick="setTheme('dark')"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Dark</button>
+  <button id="t-light" onclick="setTheme('light')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>Light</button>
+</div>
+
+<div class="app">
+
+  <!-- ========================= SIDEBAR ========================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-tile">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="brandAp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><circle class="orbit-ring" cx="50" cy="50" r="32" fill="none" stroke="url(#brandAp)" stroke-width="2.5" opacity="0.8" stroke-dasharray="60 22"/><g class="sat-group"><circle cx="18" cy="50" r="5" fill="#A78BFA"/><circle cx="66" cy="22" r="5" fill="#22D3EE"/><circle cx="66" cy="78" r="5" fill="#A78BFA"/></g><circle class="core" cx="50" cy="50" r="9" fill="url(#brandAp)"/><circle cx="50" cy="50" r="14" fill="none" stroke="url(#brandAp)" stroke-width="1.8"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">orion</div>
+        <div class="brand-tag">Mission Control</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Operations</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      Trends
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/><path d="m16 12 5 3-5 3z"/></svg>
+      Content Queue
+      <span class="dot"></span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+      Generation
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+      Publishing
+    </div>
+
+    <div class="nav-group-label">Insight</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.5.5 0 0 1-.96 0L9.68 3.18a.5.5 0 0 0-.96 0l-2.35 8.36A2 2 0 0 1 4.44 13H2"/></svg>
+      System Health
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="avatar">AK</div>
+      <div>
+        <div class="user-name">Ari Khoury</div>
+        <div class="user-role">Operator · Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================= MAIN ========================= -->
+  <section>
+    <!-- TOP NAV -->
+    <div class="topnav">
+      <div class="search-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="SEARCH SYSTEM…">
+      </div>
+      <span class="live-chip"><span class="p"></span>LIVE VIEW</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" title="Refresh">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      </button>
+      <button class="icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+        Generate
+      </button>
+    </div>
+
+    <main>
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="tile">
+          <svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        </div>
+        <div>
+          <h1>System Performance</h1>
+          <div class="subtitle">Real-time signal from the Orion content-agency swarm. <span style="color: var(--ui-fg3);">Updated 14s ago.</span></div>
+        </div>
+      </div>
+
+      <!-- KPI GRID -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="k-head">
+            <div class="k-icon" style="background: linear-gradient(135deg, #7C3AED, #6D28D9);">
+              <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div class="delta up">▲ 18.2%</div>
+          </div>
+          <div class="k-label">Trends Detected</div>
+          <div class="k-value ticking" data-kpi="trends" data-kpi-base="2418">2,418</div>
+          <div class="k-sub">Across 12 niches · last 24h</div>
+        </div>
+        <div class="kpi">
+          <div class="k-head">
+            <div class="k-icon" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+              <svg viewBox="0 0 24 24"><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/><path d="m16 12 5 3-5 3z"/></svg>
+            </div>
+            <div class="delta up">▲ 6.4%</div>
+          </div>
+          <div class="k-label">Videos Rendered</div>
+          <div class="k-value ticking" data-kpi="rendered" data-kpi-base="147">147</div>
+          <div class="k-sub">Queue depth 23 · 91% on-time</div>
+        </div>
+        <div class="kpi">
+          <div class="k-head">
+            <div class="k-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+              <svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+            </div>
+            <div class="delta up">▲ 24.1%</div>
+          </div>
+          <div class="k-label">Published Today</div>
+          <div class="k-value ticking" data-kpi="published" data-kpi-base="89">89</div>
+          <div class="k-sub">TikTok 41 · YouTube 28 · IG 20</div>
+        </div>
+        <div class="kpi">
+          <div class="k-head">
+            <div class="k-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="delta dn">▼ 3.1%</div>
+          </div>
+          <div class="k-label">Avg Approval Time</div>
+          <div class="k-value">4.2<span style="font-size:18px; color: var(--ui-fg2); margin-left:4px;">m</span></div>
+          <div class="k-sub">Down from 4.4m yesterday</div>
+        </div>
+      </div>
+
+      <!-- TWO COL -->
+      <div class="two-col">
+        <!-- CHART PANEL -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:4px;">Output Velocity</div>
+              <h2>Content volume — 14 days</h2>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-ghost" style="font-size:11px; padding: 6px 10px;">14D</button>
+              <button class="btn btn-ghost" style="font-size:11px; padding: 6px 10px; background: var(--ui-primary-soft); color: var(--ui-primary-text);">30D</button>
+              <button class="btn btn-ghost" style="font-size:11px; padding: 6px 10px;">Q</button>
+            </div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 800 220" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.45"/>
+                  <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="chartFill2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <g stroke="var(--ui-chart-grid)" stroke-width="1">
+                <line x1="0" y1="40" x2="800" y2="40"/>
+                <line x1="0" y1="90" x2="800" y2="90"/>
+                <line x1="0" y1="140" x2="800" y2="140"/>
+                <line x1="0" y1="190" x2="800" y2="190"/>
+              </g>
+              <path d="M0,160 L60,140 L120,148 L180,120 L240,135 L300,100 L360,110 L420,80 L480,95 L540,70 L600,85 L660,55 L720,65 L800,40 L800,220 L0,220 Z" fill="url(#chartFill2)"/>
+              <path d="M0,160 L60,140 L120,148 L180,120 L240,135 L300,100 L360,110 L420,80 L480,95 L540,70 L600,85 L660,55 L720,65 L800,40" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M0,180 L60,170 L120,175 L180,155 L240,160 L300,140 L360,145 L420,125 L480,130 L540,110 L600,118 L660,95 L720,105 L800,85 L800,220 L0,220 Z" fill="url(#chartFill)"/>
+              <path d="M0,180 L60,170 L120,175 L180,155 L240,160 L300,140 L360,145 L420,125 L480,130 L540,110 L600,118 L660,95 L720,105 L800,85" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle class="endpoint-halo" cx="800" cy="85" r="8" fill="#A78BFA" fill-opacity="0.25"/>
+              <circle class="endpoint" cx="800" cy="85" r="4" fill="#A78BFA"/>
+            </svg>
+          </div>
+          <div style="display:flex; gap:18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ui-hairline);">
+            <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--ui-fg2);"><span style="width:10px;height:10px;border-radius:50%;background:#A78BFA;box-shadow:0 0 8px #A78BFA;"></span> Rendered</div>
+            <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--ui-fg2);"><span style="width:10px;height:10px;border-radius:50%;background:#22D3EE;box-shadow:0 0 8px #22D3EE;"></span> Trends Detected</div>
+            <div style="margin-left:auto; font-size:11px; color: var(--ui-fg3); font-family: 'JetBrains Mono', ui-monospace, monospace;">peak 2,418 @ day 14</div>
+          </div>
+        </div>
+
+        <!-- PIPELINE PANEL -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:4px;">Swarm</div>
+              <h2>Pipeline stages</h2>
+            </div>
+          </div>
+          <div class="pipe-row"><span class="lbl">Scout</span><div class="track"><div class="fill" style="width:95%; background: var(--ui-success); box-shadow: 0 0 8px rgba(16,185,129,0.4);"></div></div><span class="val">95%</span></div>
+          <div class="pipe-row"><span class="lbl">Director</span><div class="track"><div class="fill" style="width:72%; background: var(--ui-primary); box-shadow: 0 0 8px rgba(124,58,237,0.4);"></div></div><span class="val">72%</span></div>
+          <div class="pipe-row"><span class="lbl">Media</span><div class="track"><div class="fill" style="width:48%; background: #06B6D4; box-shadow: 0 0 8px rgba(6,182,212,0.4);"></div></div><span class="val">48%</span></div>
+          <div class="pipe-row"><span class="lbl">Editor</span><div class="track"><div class="fill" style="width:21%; background: var(--ui-warning); box-shadow: 0 0 8px rgba(245,158,11,0.4);"></div></div><span class="val">21%</span></div>
+          <div class="pipe-row"><span class="lbl">Publisher</span><div class="track"><div class="fill" style="width:64%; background: #A78BFA; box-shadow: 0 0 8px rgba(167,139,250,0.4);"></div></div><span class="val">64%</span></div>
+
+          <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--ui-hairline); display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color: var(--ui-fg3);">Total active jobs</div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color: var(--ui-fg1); margin-top:2px; font-variant-numeric: tabular-nums;">84</div>
+            </div>
+            <button class="btn btn-ghost" style="color: var(--ui-primary-text);">View System Logs
+              <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWO COL -->
+      <div class="two-col">
+        <!-- QUEUE TABLE -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:4px;">Review</div>
+              <h2>Content Queue</h2>
+            </div>
+            <button class="btn btn-ghost">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+              Filter
+            </button>
+          </div>
+          <table class="queue-table">
+            <thead>
+              <tr><th>Title</th><th>Niche</th><th>Stage</th><th>Status</th><th style="text-align:right;">Ready</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div>10 Hidden Patterns in the Perseid Swarm</div>
+                  <div class="meta">orion.trend.detected · 2m ago</div>
+                </td>
+                <td><span class="badge b-violet">Astronomy</span></td>
+                <td>Editor</td>
+                <td><span class="badge b-amber">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  In Review</span></td>
+                <td style="text-align:right; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ui-fg2); font-variant-numeric: tabular-nums;">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div>The Quiet Genius of a Well-Tuned Vector Index</div>
+                  <div class="meta">orion.trend.detected · 14m ago</div>
+                </td>
+                <td><span class="badge b-violet">AI / Infra</span></td>
+                <td>Publisher</td>
+                <td><span class="badge b-green">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  Approved</span></td>
+                <td style="text-align:right; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ui-fg2); font-variant-numeric: tabular-nums;">4:12 PM</td>
+              </tr>
+              <tr>
+                <td>
+                  <div>Why Your Editor Is Secretly a Graph Database</div>
+                  <div class="meta">orion.trend.detected · 28m ago</div>
+                </td>
+                <td><span class="badge b-violet">Dev Tools</span></td>
+                <td>Director</td>
+                <td><span class="badge b-blue">
+                  <svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/></svg>
+                  Rendering</span></td>
+                <td style="text-align:right; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ui-fg2); font-variant-numeric: tabular-nums;">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div>LangGraph in 60 Seconds — the Pipeline Pattern</div>
+                  <div class="meta">orion.trend.detected · 1h ago</div>
+                </td>
+                <td><span class="badge b-violet">AI / Infra</span></td>
+                <td>Scout</td>
+                <td><span class="badge b-red">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                  Rejected</span></td>
+                <td style="text-align:right; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ui-fg2); font-variant-numeric: tabular-nums;">—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div>Starlight Cyan: A Short Film About a Color</div>
+                  <div class="meta">orion.trend.detected · 2h ago</div>
+                </td>
+                <td><span class="badge b-violet">Design</span></td>
+                <td>Media</td>
+                <td><span class="badge b-grey">
+                  <span style="width:6px;height:6px;border-radius:50%;background: var(--ui-fg3);"></span>
+                  Draft</span></td>
+                <td style="text-align:right; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ui-fg2); font-variant-numeric: tabular-nums;">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- EVENTS -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow" style="margin-bottom:4px;">Pulse</div>
+              <h2>Recent events</h2>
+            </div>
+            <span class="live-chip"><span class="p"></span>LIVE</span>
+          </div>
+          <div class="event">
+            <div class="ebox" style="background: rgba(16,185,129,0.15); color: var(--ui-success);">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div class="etext">Scout detected a spike in <b style="color: var(--ui-primary-text);">#LangGraph</b> conversation velocity.</div>
+              <div class="emeta">2m ago · scout.trend.spike</div>
+            </div>
+          </div>
+          <div class="event">
+            <div class="ebox" style="background: var(--ui-primary-soft); color: var(--ui-primary-text);">
+              <svg viewBox="0 0 24 24"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>
+            </div>
+            <div>
+              <div class="etext">Director generated 4 scripts for Campaign <b style="color: var(--ui-primary-text);">Orion_Nexus_A</b>.</div>
+              <div class="emeta">5m ago · director.script.generated</div>
+            </div>
+          </div>
+          <div class="event">
+            <div class="ebox" style="background: rgba(34,211,238,0.15); color: #22D3EE;">
+              <svg viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+            </div>
+            <div>
+              <div class="etext">Publisher sent <b style="color: var(--ui-primary-text);">"Quiet Genius…"</b> to YouTube &amp; TikTok.</div>
+              <div class="emeta">8m ago · publisher.video.shipped</div>
+            </div>
+          </div>
+          <div class="event">
+            <div class="ebox" style="background: rgba(245,158,11,0.15); color: var(--ui-warning);">
+              <svg viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+            </div>
+            <div>
+              <div class="etext">Approval requested from <b style="color: var(--ui-primary-text);">you</b> on "Perseid Swarm".</div>
+              <div class="emeta">14m ago · editor.review.requested</div>
+            </div>
+          </div>
+          <div class="event">
+            <div class="ebox" style="background: rgba(239,68,68,0.12); color: var(--ui-danger);">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            </div>
+            <div>
+              <div class="etext">Vector index rebuild failed on niche <code style="font-family:'JetBrains Mono',ui-monospace,monospace; background: rgba(239,68,68,0.10); color: var(--ui-danger); padding:1px 5px; border-radius:4px; font-size:11px;">design</code> — auto-retrying in 30s.</div>
+              <div class="emeta">22m ago · memory.index.failed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </section>
+</div>
+
+<script>
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('t-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('t-light').classList.toggle('active', t === 'light');
+    try { localStorage.setItem('orion-theme', t); } catch(e){}
+  }
+  try { var t = localStorage.getItem('orion-theme'); if (t) setTheme(t); } catch(e){}
+</script>
+
+<script>
+/* ══════════════════════════════════════════
+   ORION LIVE SYSTEM
+   Background starfield + live UI moments.
+   Respects prefers-reduced-motion.
+   ══════════════════════════════════════════ */
+(function(){
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Starfield ---------- */
+  const canvas = document.getElementById('starfield');
+  if (canvas && !REDUCED) {
+    const ctx = canvas.getContext('2d');
+    let w, h, stars, dpr;
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.width  = innerWidth  * dpr;
+      h = canvas.height = innerHeight * dpr;
+      canvas.style.width  = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      const count = Math.min(180, Math.floor((innerWidth * innerHeight) / 12000));
+      stars = Array.from({length: count}, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: (Math.random() * 1.2 + 0.3) * dpr,
+        vx: (Math.random() - 0.5) * 0.04 * dpr,
+        vy: (Math.random() - 0.5) * 0.03 * dpr,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.6 + Math.random() * 1.4,
+        hue: Math.random() < 0.25 ? 'cyan' : (Math.random() < 0.55 ? 'violet' : 'white'),
+      }));
+    }
+    const colors = {
+      white:  [237, 241, 250],
+      violet: [167, 139, 250],
+      cyan:   [ 34, 211, 238],
+    };
+    let t0 = performance.now();
+    function frame(now) {
+      const dt = (now - t0) / 1000; t0 = now;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      ctx.clearRect(0, 0, w, h);
+      for (const s of stars) {
+        s.x += s.vx; s.y += s.vy; s.phase += dt * s.speed;
+        if (s.x < 0) s.x += w; if (s.x > w) s.x -= w;
+        if (s.y < 0) s.y += h; if (s.y > h) s.y -= h;
+        const twinkle = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(s.phase));
+        const [r,g,b] = colors[s.hue];
+        const a = (isLight ? 0.45 : 0.9) * twinkle;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+        // gentle halo on the brighter stars
+        if (s.r > 1.4 * dpr) {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${r},${g},${b},${a * 0.15})`;
+          ctx.arc(s.x, s.y, s.r * 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+    resize();
+    addEventListener('resize', resize);
+    requestAnimationFrame(frame);
+  }
+
+  if (REDUCED) return;
+
+  /* ---------- KPI ticker (random walk) ---------- */
+  const fmt = (n) => n.toLocaleString('en-US');
+  document.querySelectorAll('.k-value[data-kpi]').forEach(el => {
+    let val = parseInt(el.dataset.kpiBase, 10);
+    const drift = (val > 500) ? 3 : (val > 100 ? 1 : 1);
+    setInterval(() => {
+      // Biased-positive random walk, stays within ±2% of base
+      const base = parseInt(el.dataset.kpiBase, 10);
+      const step = Math.round((Math.random() - 0.35) * drift);
+      val = Math.max(Math.round(base * 0.98), Math.min(Math.round(base * 1.03), val + step));
+      el.textContent = fmt(val);
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 350);
+    }, 2400 + Math.random() * 1800);
+  });
+
+  /* ---------- Event feed: typewriter on newest + periodic inject ---------- */
+  const feed = document.querySelectorAll('.panel')[3]; // events panel (2nd panel in 2nd two-col)
+  const eventList = feed ? feed.querySelectorAll('.event') : [];
+  // Typewriter on the first event's main text (subtle)
+  (function typewriter(){
+    if (!eventList.length) return;
+    const el = eventList[0].querySelector('.etext');
+    if (!el) return;
+    const original = el.innerHTML;
+    // cycle once on load
+    const plain = el.textContent;
+    el.innerHTML = '';
+    const caret = document.createElement('span');
+    caret.className = 'typewriter-caret';
+    el.appendChild(caret);
+    let i = 0;
+    (function step(){
+      if (i > plain.length) { el.innerHTML = original; return; }
+      caret.insertAdjacentText('beforebegin', plain[i] || '');
+      i++;
+      setTimeout(step, 22 + Math.random() * 38);
+    })();
+  })();
+
+  // Periodic injector
+  const samples = [
+    { kind:'scout',     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>', bg:'rgba(16,185,129,0.15)', fg:'var(--ui-success)',
+      text:'Scout flagged <b style="color: var(--ui-primary-text);">#VectorOps</b> velocity +42% in last hour.', meta:'scout.trend.spike' },
+    { kind:'director', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.5A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0L14 8.5a2 2 0 0 0 1.4 1.4l6.2 1.6a.5.5 0 0 1 0 1l-6.2 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/></svg>', bg:'var(--ui-primary-soft)', fg:'var(--ui-primary-text)',
+      text:'Director drafted 3 scripts for <b style="color: var(--ui-primary-text);">Perseid_B</b>.', meta:'director.script.generated' },
+    { kind:'publisher', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>', bg:'rgba(34,211,238,0.15)', fg:'#22D3EE',
+      text:'Publisher shipped <b style="color: var(--ui-primary-text);">"Starlight Cyan"</b> to Instagram.', meta:'publisher.video.shipped' },
+    { kind:'editor', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>', bg:'rgba(16,185,129,0.15)', fg:'var(--ui-success)',
+      text:'Editor auto-approved a cut under policy <code style="font-family:\'JetBrains Mono\',monospace;background:rgba(16,185,129,0.08);color:var(--ui-success);padding:1px 5px;border-radius:4px;font-size:11px;">p-safe-v3</code>.', meta:'editor.policy.autoapproved' },
+    { kind:'scout',     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/></svg>', bg:'rgba(245,158,11,0.15)', fg:'var(--ui-warning)',
+      text:'Low-signal niche <b style="color: var(--ui-primary-text);">Retro Tech</b> cooled off — paused scout.', meta:'scout.niche.paused' },
+  ];
+  let sIdx = 0;
+  function pushEvent() {
+    if (!feed) return;
+    const body = feed.querySelector('.event')?.parentElement;
+    if (!body) return;
+    const s = samples[sIdx++ % samples.length];
+    const node = document.createElement('div');
+    node.className = 'event live-new';
+    node.innerHTML =
+      `<div class="ebox" style="background:${s.bg};color:${s.fg};">${s.icon}</div>` +
+      `<div><div class="etext">${s.text}</div><div class="emeta">just now · ${s.meta}</div></div>`;
+    // Insert after panel-head (first child after head)
+    const head = feed.querySelector('.panel-head');
+    head.insertAdjacentElement('afterend', node);
+    // Trim to 6 total events
+    const all = feed.querySelectorAll('.event');
+    if (all.length > 6) all[all.length - 1].remove();
+    // Age timestamps
+    ageEvents();
+  }
+  function ageEvents() {
+    const times = feed ? feed.querySelectorAll('.emeta') : [];
+    times.forEach((m, i) => {
+      if (i === 0) return; // newest stays "just now"
+      const txt = m.textContent;
+      const dotIdx = txt.indexOf('·');
+      const rest = dotIdx >= 0 ? txt.slice(dotIdx) : '';
+      const ages = ['1m ago', '3m ago', '8m ago', '16m ago', '24m ago', '42m ago'];
+      m.textContent = (ages[i] || (i*10 + 'm ago')) + ' ' + rest;
+    });
+  }
+  setTimeout(() => {
+    setInterval(pushEvent, 9000 + Math.random()*3000);
+  }, 4500);
+
+  /* ---------- Sparkline: endpoint gently drifts vertically ---------- */
+  const endpoint = document.querySelector('.chart .endpoint');
+  const halo     = document.querySelector('.chart .endpoint-halo');
+  if (endpoint && halo) {
+    let phase = 0;
+    setInterval(() => {
+      phase += 0.35;
+      const y = 85 + Math.sin(phase) * 4;
+      endpoint.setAttribute('cy', y.toFixed(2));
+      halo.setAttribute('cy', y.toFixed(2));
+    }, 900);
+  }
+
+  /* ---------- Refresh timestamp in page subtitle ---------- */
+  const sub = document.querySelector('.page-header .subtitle span');
+  if (sub) {
+    let secs = 14;
+    setInterval(() => {
+      secs = (secs + 1) % 60;
+      sub.textContent = 'Updated ' + secs + 's ago.';
+    }, 1000);
+  }
+})();
+</script>
+</body>
+</html>
