@@ -607,6 +607,9 @@ body {
 .glass-fill-primary {
   box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
 }
+.glass-fill-cyan {
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
 
 /* ── Glow Shadows (status dots) ──────────── */
 .glow-emerald {
@@ -617,6 +620,63 @@ body {
 }
 .glow-cyan {
   box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+}
+.glow-danger {
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+}
+
+/* ── Generation UI Kit Reference Surface ───── */
+.generation-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 22, 38, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.generation-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(210, 187, 255, 0.18) 0%,
+    transparent 36%
+  );
+  opacity: 0.9;
+}
+
+.generation-card > * {
+  position: relative;
+}
+
+.generation-pulse {
+  animation: generation-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes generation-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+html:not(.dark) .generation-card {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 12px 40px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.04);
 }
 .glow-amber {
   box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
