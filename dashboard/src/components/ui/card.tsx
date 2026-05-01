@@ -49,4 +49,16 @@ const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   }
 );
 
-export { Card, CardHeader, CardTitle, CardContent };
+const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
+  function CardDescription({ className, ...props }, ref): React.ReactElement {
+    return (
+      <p
+        ref={ref}
+        className={cn("text-sm text-text-secondary", className)}
+        {...props}
+      />
+    );
+  }
+);
+
+export { Card, CardHeader, CardTitle, CardContent, CardDescription };
