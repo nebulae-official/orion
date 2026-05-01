@@ -2,23 +2,19 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 from datetime import datetime
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from orion_common.auth import CurrentUser, get_current_user
-from orion_common.config import get_settings
 from orion_common.db.models import ContentStatus, Trend
 from orion_common.db.session import get_session
 from orion_common.events import Channels
-from orion_common.identity_client import IdentityClient
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..providers.cloud import request_api_key
 from ..repositories.content_repo import ContentRepository
 from ..schemas import (
     ContentListItem,
@@ -59,20 +55,7 @@ async def generate_content(
         user_id=user.user_id,
     )
 
-    # Inject the user's stored LLM API key (if any) for this request context.
-    # The CloudLLMProvider reads request_api_key via contextvars, so concurrent
-    # requests are fully isolated — no shared mutable state.
-    _settings = get_settings()
-    identity = IdentityClient(
-        base_url=_settings.identity_url,
-        internal_token=_settings.internal_token,
-    )
-    # Determine which provider slug to look up based on env config.
-    llm_slug = os.getenv("DIRECTOR_CLOUD_PROVIDER_SLUG", "openai")
-    user_llm_key = await identity.get_api_key(user_id=user.user_id, provider=llm_slug)
-    if user_llm_key:
-        request_api_key.set(user_llm_key)
-        await logger.ainfo("cloud_llm_key_injected", provider=llm_slug, user_id=user.user_id)
+    request_user_id.set(user.user_id)
 
     result = await pipeline.run(
         session,
