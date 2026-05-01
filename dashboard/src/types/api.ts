@@ -74,6 +74,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  username?: string;
   role: "admin" | "editor" | "viewer";
   avatar_url: string | null;
   email_verified: boolean;
