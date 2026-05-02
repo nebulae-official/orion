@@ -150,6 +150,9 @@ async def lifespan(app: FastAPI):
     checkpointer_connstr = settings.database_url_sync
     _checkpointer_ctx = AsyncPostgresSaver.from_conn_string(checkpointer_connstr)
     _checkpointer = await _checkpointer_ctx.__aenter__()
+    # Tables are created by Alembic migration 016 before this service starts.
+    # setup() is retained as an idempotent guard (uses IF NOT EXISTS internally)
+    # in case the service is run outside Docker without running migrations first.
     await _checkpointer.setup()
 
     # Create async session factory for analyst node
