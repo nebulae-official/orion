@@ -3,6 +3,7 @@ from __future__ import annotations
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 
+from src.adapters.base import BaseLLMAdapter
 from src.adapters.llm.nvidia_nim import NvidiaNimLLMAdapter
 from src.catalog import Capability, get_entry
 from src.key_resolver import KeyResolver, KeyUnavailableError
@@ -13,6 +14,10 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/llm", tags=["llm"])
 
 _DEFAULT_PROVIDER = "nvidia_nim"
+
+_LLM_ADAPTERS: dict[str, type[BaseLLMAdapter]] = {
+    "nvidia_nim": NvidiaNimLLMAdapter,
+}
 
 
 @router.post("/complete", response_model=LLMCompleteResponse)
@@ -34,8 +39,14 @@ async def complete(body: LLMCompleteRequest, request: Request) -> LLMCompleteRes
     except KeyUnavailableError:
         raise HTTPException(status_code=503, detail="No API key configured for this provider")
 
+    adapter_cls = _LLM_ADAPTERS.get(provider_name)
+    if adapter_cls is None:
+        raise HTTPException(
+            status_code=422, detail=f"No adapter registered for provider '{provider_name}'"
+        )
+
     try:
-        adapter = NvidiaNimLLMAdapter(entry)
+        adapter = adapter_cls(entry)
         result = await adapter.complete(
             api_key=api_key,
             messages=messages,

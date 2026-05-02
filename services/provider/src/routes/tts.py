@@ -3,6 +3,7 @@ from __future__ import annotations
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 
+from src.adapters.base import BaseTTSAdapter
 from src.adapters.tts.nvidia_nim import NvidiaNimTTSAdapter
 from src.catalog import Capability, get_entry
 from src.key_resolver import KeyResolver, KeyUnavailableError
@@ -13,6 +14,10 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/tts", tags=["tts"])
 
 _DEFAULT_PROVIDER = "nvidia_nim"
+
+_TTS_ADAPTERS: dict[str, type[BaseTTSAdapter]] = {
+    "nvidia_nim": NvidiaNimTTSAdapter,
+}
 
 
 @router.post("/speak", response_model=TTSGenerateResponse)
@@ -29,7 +34,12 @@ async def speak(body: TTSGenerateRequest, request: Request) -> TTSGenerateRespon
     except KeyUnavailableError:
         raise HTTPException(status_code=503, detail="No API key configured for this provider")
 
-    adapter = NvidiaNimTTSAdapter(entry)
+    adapter_cls = _TTS_ADAPTERS.get(provider_name)
+    if adapter_cls is None:
+        raise HTTPException(
+            status_code=422, detail=f"No adapter registered for provider '{provider_name}'"
+        )
+    adapter = adapter_cls(entry)
     result = await adapter.speak(
         api_key=api_key,
         text=body.text,

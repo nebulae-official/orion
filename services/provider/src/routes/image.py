@@ -3,6 +3,7 @@ from __future__ import annotations
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 
+from src.adapters.base import BaseImageAdapter
 from src.adapters.image.nvidia_nim import NvidiaNimImageAdapter
 from src.catalog import Capability, get_entry
 from src.key_resolver import KeyResolver, KeyUnavailableError
@@ -13,6 +14,10 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/image", tags=["image"])
 
 _DEFAULT_PROVIDER = "nvidia_nim"
+
+_IMAGE_ADAPTERS: dict[str, type[BaseImageAdapter]] = {
+    "nvidia_nim": NvidiaNimImageAdapter,
+}
 
 
 @router.post("/generate", response_model=ImageGenerateResponse)
@@ -29,7 +34,12 @@ async def generate_image(body: ImageGenerateRequest, request: Request) -> ImageG
     except KeyUnavailableError:
         raise HTTPException(status_code=503, detail="No API key configured for this provider")
 
-    adapter = NvidiaNimImageAdapter(entry)
+    adapter_cls = _IMAGE_ADAPTERS.get(provider_name)
+    if adapter_cls is None:
+        raise HTTPException(
+            status_code=422, detail=f"No adapter registered for provider '{provider_name}'"
+        )
+    adapter = adapter_cls(entry)
     result = await adapter.generate(
         api_key=api_key,
         prompt=body.prompt,
