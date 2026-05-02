@@ -64,7 +64,8 @@ These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.m
 - [x] **#12 — Object storage.** Images and audio land in `/tmp/orion/...`. Across Docker containers, Editor cannot read Media's outputs. Add either (a) shared bind-mount volume in compose, or (b) MinIO container + S3 client in shared lib. **Recommendation: bind-mount for Tier 1 (faster), MinIO for Tier 2.** (Fix: M for bind-mount, L for MinIO)
 - [x] **#13 — LangGraph checkpointer migrations.** `director/src/main.py:150` relies on langgraph auto-creating `checkpoints` + `checkpoint_writes` tables at runtime. Move to Alembic migration so cold starts are deterministic. (Fix: S)
 - [x] **#14 — Provider service requirements.** Verify `nvidia-riva-client` is in `services/provider/pyproject.toml` and Dockerfile. Without it, the TTS path crashes on first call. (Fix: S, audit-only)
-- [ ] **#15 — Health-check smoke test.** With #1–#11 landed: `make up`, verify all 8 services pass health checks, Scout produces a trend, full pipeline produces a video. (Fix: M, verification only)
+- [x] **#15 — Health-check smoke test (partial).** All 9 services return HTTP 200. Scout fires `TREND_DETECTED` events; Director receives them. Pipeline fails at `contents.created_by NOT NULL` — auto-trigger handler calls `_pipeline.run()` without `created_by`; system user `00000000-0000-0000-0000-000000000001` exists but is not passed. Smoke test blocked at Director→DB step. See gap #16.
+- [ ] **#16 — Director auto-trigger `created_by` NULL.** `services/director/src/main.py:65` calls `_pipeline.run()` without `created_by`. Migration 007 enforces `contents.created_by NOT NULL`. Fix: pass `SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000001"` as `created_by` in `_handle_trend_detected`. (Fix: S, one line)
 
 ---
 
@@ -77,7 +78,7 @@ These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.m
 - [x] Notification system working
 - [x] Identity → Provider key resolution verified end-to-end (`key_resolver.py` two-tier user→system; `IdentityClient` + `X-User-ID` contextvar; consuming services do not hardcode keys)
 - [x] **Provider swap test passes** — switching a service's provider requires only a dashboard settings change + new key in Identity. Route files use registry lookup (gap #3 done).
-- [ ] All services start and pass health checks via Docker Compose (verification gate — gap #15)
+- [x] All services start and pass health checks via Docker Compose (verification gate — gap #15, smoke test 2026-05-02)
 - [ ] Cost tracking receives real data from events (works structurally; provider string wrong — gap #10)
 
 #### Scout (Trend Detection)
@@ -86,7 +87,7 @@ These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.m
 - [x] Twitter/X trend provider REMOVED (cleanup task — gap #11)
 - [x] Trends flow into database with deduplication
 - [x] Niche filter scopes trends to active niche
-- [ ] TREND_DETECTED event fires and Director receives it (Scout side works; Director auto-trigger gated — gap #2)
+- [x] TREND_DETECTED event fires and Director receives it (confirmed smoke test 2026-05-02: Scout publishes to `orion.trend.detected`; Director auto-trigger subscription active)
 
 #### Director (Content Creation)
 - [ ] LangGraph pipeline runs end-to-end on a real trend (graph compiles; needs live NIM key smoke test — gap #15)
@@ -230,6 +231,6 @@ Tier 1 runs entirely on free providers. This serves two goals: zero-cost iterati
 
 ---
 
-_Last updated: 2026-05-02 by Nova (post-audit)_
+_Last updated: 2026-05-02 by Nova (post-audit + smoke test)_
 _Helix project removed from scope — separate project, not before Q3/Q4._
 _TTS resolved to NVIDIA NIM Magpie primary (matches existing code + free-NVIDIA strategy); FishSpeech becomes fallback adapter. See `docs/TIER1_AUDIT_2026-05-02.md` for full evidence._
