@@ -10,6 +10,8 @@ dependencies = [
     "litellm>=1.0.0",
     "httpx>=0.27.0",
     "structlog>=24.0.0",
+    "nvidia-riva-client",
+    "grpcio>=1.80.0",
 ]
 
 [tool.uv.sources]

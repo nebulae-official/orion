@@ -135,17 +135,15 @@ async def test_image_explicit_nvidia_nim_provider(client: AsyncClient) -> None:
 
 async def test_tts_explicit_nvidia_nim_provider(client: AsyncClient) -> None:
     """F4 — TTS route accepts explicit provider=nvidia_nim and routes correctly."""
+    mock_resp = MagicMock()
+    mock_resp.audio = b"\x00\x00" * 50
+    mock_tts = MagicMock()
+    mock_tts.synthesize.return_value = mock_resp
 
-    @asynccontextmanager
-    async def _mock_httpx(*args, **kwargs):  # noqa: ARG001
-        mock_client = AsyncMock()
-        mock_resp = MagicMock()
-        mock_resp.raise_for_status = MagicMock()
-        mock_resp.content = b"audio-bytes"
-        mock_client.post = AsyncMock(return_value=mock_resp)
-        yield mock_client
-
-    with patch("httpx.AsyncClient", _mock_httpx):
+    with (
+        patch("riva.client.Auth"),
+        patch("riva.client.SpeechSynthesisService", return_value=mock_tts),
+    ):
         resp = await client.post(
             "/api/v1/tts/speak",
             json={"text": "Hello", "provider": "nvidia_nim"},

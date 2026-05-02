@@ -8,6 +8,8 @@ per-test via provider_app fixture mutation).
 from __future__ import annotations
 
 import base64
+import io
+import wave
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -23,7 +25,6 @@ from .conftest import INTERNAL_HEADERS
 
 _NVIDIA_LLM_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 _NVIDIA_IMAGE_URL = "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell"
-_NVIDIA_TTS_URL = "https://integrate.api.nvidia.com/v1/audio/speech"
 
 
 def _llm_mock_response(content: str, model: str = "meta/llama-3.3-70b-instruct") -> MagicMock:
@@ -237,10 +238,18 @@ async def test_image_generate_502_on_empty_artifacts(client: AsyncClient) -> Non
 
 
 async def test_tts_speak_success(client: AsyncClient) -> None:
-    """C1 — successful TTS returns 200 with base64-encoded audio bytes."""
-    audio_data = b"fake-audio-wav-data"
+    """C1 — successful TTS returns 200 with a valid WAV-wrapped audio payload."""
+    fake_pcm = b"\x00\x00" * 100  # 100 frames of 16-bit silence
 
-    with patch("httpx.AsyncClient", _mock_httpx_client(content=audio_data)):
+    mock_resp = MagicMock()
+    mock_resp.audio = fake_pcm
+    mock_tts = MagicMock()
+    mock_tts.synthesize.return_value = mock_resp
+
+    with (
+        patch("riva.client.Auth"),
+        patch("riva.client.SpeechSynthesisService", return_value=mock_tts),
+    ):
         resp = await client.post(
             "/api/v1/tts/speak",
             json={"text": "Hello world"},
@@ -249,8 +258,11 @@ async def test_tts_speak_success(client: AsyncClient) -> None:
 
     assert resp.status_code == 200
     data = resp.json()
-    decoded = base64.b64decode(data["audio_b64"])
-    assert decoded == audio_data
+    wav_bytes = base64.b64decode(data["audio_b64"])
+    buf = io.BytesIO(wav_bytes)
+    with wave.open(buf, "rb") as wf:
+        assert wf.getframerate() == 44100
+        assert wf.getnchannels() == 1
     assert data["format"] == "wav"
 
 

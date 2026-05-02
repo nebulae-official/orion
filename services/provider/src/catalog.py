@@ -64,7 +64,7 @@ _CATALOG: list[ProviderEntry] = [
         capability=Capability.TTS,
         credential_kind=CredentialKind.API_KEY,
         default_model=os.getenv("PROVIDER_TTS_MODEL", "nvidia/magpie-tts-multilingual"),
-        base_url="https://integrate.api.nvidia.com/v1/audio/speech",
+        base_url=os.getenv("PROVIDER_TTS_BASE_URL", "grpc.nvcf.nvidia.com:443"),
         default_voice=os.getenv("PROVIDER_TTS_VOICE", "Magpie-Multilingual.EN-US.Aria"),
     ),
 ]
