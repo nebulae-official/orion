@@ -8,7 +8,8 @@ from orion_common.events import Channels
 def test_channels_have_orion_prefix() -> None:
     """All channel names should start with 'orion.'."""
     channel_attrs = [
-        attr for attr in dir(Channels)
+        attr
+        for attr in dir(Channels)
         if not attr.startswith("_") and isinstance(getattr(Channels, attr), str)
     ]
     assert len(channel_attrs) > 0, "Channels class should have at least one channel"
@@ -20,7 +21,7 @@ def test_channels_have_orion_prefix() -> None:
 def test_expected_channels_exist() -> None:
     """Core channels required by the system should be defined."""
     assert hasattr(Channels, "CONTENT_CREATED")
-    assert hasattr(Channels, "CONTENT_UPDATED")
+    assert hasattr(Channels, "CONTENT_READY")
     assert hasattr(Channels, "CONTENT_PUBLISHED")
     assert hasattr(Channels, "TREND_DETECTED")
     assert hasattr(Channels, "TREND_EXPIRED")
@@ -32,7 +33,8 @@ def test_expected_channels_exist() -> None:
 def test_channel_values_are_unique() -> None:
     """No two channels should share the same string value."""
     channel_attrs = [
-        attr for attr in dir(Channels)
+        attr
+        for attr in dir(Channels)
         if not attr.startswith("_") and isinstance(getattr(Channels, attr), str)
     ]
     values = [getattr(Channels, attr) for attr in channel_attrs]
@@ -42,7 +44,8 @@ def test_channel_values_are_unique() -> None:
 def test_channel_names_are_dotted() -> None:
     """Channel values should follow dotted naming convention (e.g. orion.content.created)."""
     channel_attrs = [
-        attr for attr in dir(Channels)
+        attr
+        for attr in dir(Channels)
         if not attr.startswith("_") and isinstance(getattr(Channels, attr), str)
     ]
     for attr in channel_attrs:

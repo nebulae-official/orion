@@ -169,9 +169,9 @@ class RegenerationService:
         )
         await session.commit()
 
-        # Publish content updated event
+        # Publish content ready event
         await self._event_bus.publish(
-            Channels.CONTENT_UPDATED,
+            Channels.CONTENT_READY,
             {
                 "content_id": content_id,
                 "status": ContentStatus.review.value,

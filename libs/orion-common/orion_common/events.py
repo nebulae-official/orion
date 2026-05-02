@@ -9,7 +9,7 @@ class Channels:
     """Redis pub/sub channel names used across all Orion services."""
 
     CONTENT_CREATED: str = "orion.content.created"
-    CONTENT_UPDATED: str = "orion.content.updated"
+    CONTENT_READY: str = "orion.content.ready"
     CONTENT_PUBLISHED: str = "orion.content.published"
     CONTENT_REJECTED: str = "orion.content.rejected"
     TREND_DETECTED: str = "orion.trend.detected"

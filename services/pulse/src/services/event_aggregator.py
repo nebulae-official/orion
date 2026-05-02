@@ -25,7 +25,7 @@ logger = structlog.get_logger(__name__)
 # All channels the aggregator listens to
 _ALL_CHANNELS: list[str] = [
     Channels.CONTENT_CREATED,
-    Channels.CONTENT_UPDATED,
+    Channels.CONTENT_READY,
     Channels.CONTENT_PUBLISHED,
     Channels.TREND_DETECTED,
     Channels.TREND_EXPIRED,
@@ -37,7 +37,7 @@ _ALL_CHANNELS: list[str] = [
 # Map channel names to originating service
 _CHANNEL_SERVICE_MAP: dict[str, str] = {
     Channels.CONTENT_CREATED: "director",
-    Channels.CONTENT_UPDATED: "editor",
+    Channels.CONTENT_READY: "editor",
     Channels.CONTENT_PUBLISHED: "publisher",
     Channels.TREND_DETECTED: "scout",
     Channels.TREND_EXPIRED: "scout",

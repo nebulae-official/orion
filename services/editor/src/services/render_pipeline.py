@@ -48,7 +48,7 @@ class RenderPipeline:
     3. Stitch images + audio into a slideshow video
     4. Burn karaoke-style subtitles onto the video
     5. Save the final video as a MediaAsset
-    6. Publish a CONTENT_UPDATED event with status ``review``
+    6. Publish a CONTENT_READY event with status ``review``
     """
 
     def __init__(
@@ -225,7 +225,7 @@ class RenderPipeline:
 
             # Publish event
             await self._event_bus.publish(
-                Channels.CONTENT_UPDATED,
+                Channels.CONTENT_READY,
                 {
                     "content_id": str(content_id),
                     "status": "review",

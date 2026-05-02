@@ -30,7 +30,7 @@ _COST_RATES: dict[str, float] = {
 # Channels that carry cost-relevant events
 _COST_CHANNELS: list[str] = [
     Channels.CONTENT_CREATED,
-    Channels.CONTENT_UPDATED,
+    Channels.CONTENT_READY,
     Channels.MEDIA_GENERATED,
     Channels.PIPELINE_STAGE_CHANGED,
 ]
