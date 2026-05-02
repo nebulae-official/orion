@@ -53,6 +53,13 @@ _CATALOG: list[ProviderEntry] = [
         base_url=os.getenv("PROVIDER_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1"),
     ),
     ProviderEntry(
+        provider="huggingface",
+        capability=Capability.LLM,
+        credential_kind=CredentialKind.API_KEY,
+        default_model=os.getenv("PROVIDER_HF_LLM_MODEL", "HuggingFaceH4/zephyr-7b-beta"),
+        base_url=os.getenv("PROVIDER_HF_BASE_URL", "https://api-inference.huggingface.co"),
+    ),
+    ProviderEntry(
         provider="nvidia_nim",
         capability=Capability.IMAGE,
         credential_kind=CredentialKind.API_KEY,
@@ -88,6 +95,13 @@ _CATALOG: list[ProviderEntry] = [
         credential_kind=CredentialKind.API_KEY,
         default_model=os.getenv("PROVIDER_POLLINATIONS_MODEL", "flux"),
         base_url=os.getenv("PROVIDER_POLLINATIONS_BASE_URL", "https://image.pollinations.ai"),
+    ),
+    ProviderEntry(
+        provider="pollinations",
+        capability=Capability.LLM,
+        credential_kind=CredentialKind.API_KEY,
+        default_model=os.getenv("PROVIDER_POLLINATIONS_LLM_MODEL", "openai"),
+        base_url=os.getenv("PROVIDER_POLLINATIONS_LLM_BASE_URL", "https://text.pollinations.ai"),
     ),
 ]
 

@@ -25,6 +25,8 @@ ALLOWED_PROVIDERS = frozenset(
         "replicate",
         "runway",
         "nvidia_nim",
+        "huggingface",
+        "pollinations",
     }
 )
 
