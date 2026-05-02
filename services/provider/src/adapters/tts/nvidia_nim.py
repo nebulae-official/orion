@@ -8,7 +8,14 @@ import io
 import os
 import wave
 
-import riva.client
+try:
+    import riva.client
+except ModuleNotFoundError as _err:
+    raise ModuleNotFoundError(
+        "nvidia-riva-client is required for the NVIDIA NIM TTS adapter. "
+        "Install it with: pip install nvidia-riva-client"
+    ) from _err
+
 import structlog
 from fastapi import HTTPException
 
