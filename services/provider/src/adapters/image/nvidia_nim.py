@@ -43,7 +43,7 @@ class NvidiaNimImageAdapter(BaseImageAdapter):
             "prompt": prompt,
             "width": width,
             "height": height,
-            "num_inference_steps": steps,
+            "steps": steps,
         }
         if negative_prompt is not None:
             payload["negative_prompt"] = negative_prompt
