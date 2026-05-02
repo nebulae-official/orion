@@ -15,13 +15,11 @@ from orion_common.db.session import get_session
 from orion_common.event_bus import EventBus
 from orion_common.events import Channels
 from orion_common.health import create_health_router
-from orion_common.identity_client import IdentityClient
 from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 
 from .providers.base import ImageRequest
 from .providers.factory import get_image_provider
-from .providers.fal_ai import request_fal_api_key
 from .repositories.asset_repo import MediaAssetRepository
 from .routes.images import configure_router
 from .routes.images import router as images_router
@@ -36,10 +34,7 @@ async def _handle_content_created(data: dict[str, Any]) -> None:
     """Auto-generate images when a CONTENT_CREATED event arrives.
 
     Expects the payload to contain ``content_id`` and ``visual_prompts``
-    (a list of prompt strings).  When ``user_id`` is present the handler
-    fetches the user's Fal.ai key from the Identity service and injects it
-    via the ``request_fal_api_key`` context variable so the provider uses it
-    for this async task only — concurrent tasks are fully isolated.
+    (a list of prompt strings).
     """
     content_id_str = data.get("content_id")
     visual_prompts = data.get("visual_prompts")
@@ -54,18 +49,6 @@ async def _handle_content_created(data: dict[str, Any]) -> None:
         content_id=content_id_str,
         prompt_count=len(visual_prompts),
     )
-
-    # Inject per-user Fal.ai key when available.
-    user_id = data.get("user_id")
-    if user_id:
-        identity = IdentityClient(
-            base_url=settings.identity_url,
-            internal_token=settings.internal_token,
-        )
-        user_fal_key = await identity.get_api_key(user_id=user_id, provider="fal_ai")
-        if user_fal_key:
-            request_fal_api_key.set(user_fal_key)
-            logger.info("fal_ai_key_injected", user_id=user_id)
 
     provider = get_image_provider(settings)
     batch_gen = BatchGenerator(provider, max_concurrent=3)

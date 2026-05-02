@@ -15,7 +15,6 @@ from src.filters.deduplication import TrendDeduplicator
 from src.filters.niche_filter import DEFAULT_NICHE_CONFIGS, NicheFilter
 from src.providers.google_trends import GoogleTrendsProvider
 from src.providers.rss import RSSProvider
-from src.providers.twitter import TwitterProvider
 from src.routes.trends import router as trends_router
 from src.scheduler import TrendScheduler
 
@@ -35,11 +34,9 @@ async def lifespan(app: FastAPI):
     logger.info("service_starting", service="scout")
 
     # Providers
-    twitter_provider = TwitterProvider()
     providers = [
         GoogleTrendsProvider(),
         RSSProvider(),
-        twitter_provider,
     ]
 
     # Event bus
