@@ -35,6 +35,9 @@ configure_logging()
 logger = structlog.get_logger()
 settings = get_settings()
 
+# System user seeded by migration 005; used for auto-triggered pipeline runs.
+SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000001"
+
 # Module-level singletons for event handlers (not used by routes)
 _pipeline: ContentPipeline | None = None
 _event_bus: EventBus | None = None
@@ -67,6 +70,7 @@ async def _handle_trend_detected(payload: dict[str, Any]) -> None:
                 trend_id=trend_id,
                 trend_topic=trend_topic,
                 niche=payload.get("niche", "technology"),
+                created_by=SYSTEM_USER_ID,
             )
     except Exception:
         await logger.aexception(
