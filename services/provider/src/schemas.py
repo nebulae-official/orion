@@ -9,6 +9,7 @@ class LLMCompleteRequest(BaseModel):
     temperature: float = 0.7
     max_tokens: int = 2048
     model: str | None = None
+    provider: str | None = None  # override catalog default; None → "nvidia_nim"
 
 
 class LLMCompleteResponse(BaseModel):
@@ -25,6 +26,7 @@ class ImageGenerateRequest(BaseModel):
     steps: int = 25
     seed: int | None = None
     model: str | None = None
+    provider: str | None = None  # override catalog default; None → "nvidia_nim"
 
 
 class ImageGenerateResponse(BaseModel):
@@ -41,6 +43,7 @@ class TTSGenerateRequest(BaseModel):
     speed: float = 1.0
     response_format: str = "wav"
     model: str | None = None
+    provider: str | None = None  # override catalog default; None → "nvidia_nim"
 
 
 class TTSGenerateResponse(BaseModel):

@@ -13,6 +13,7 @@ from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 
 from src.key_resolver import KeyResolver
+from src.routes.catalog import router as catalog_router
 from src.routes.image import router as image_router
 from src.routes.llm import router as llm_router
 from src.routes.tts import router as tts_router
@@ -28,10 +29,8 @@ async def lifespan(app: FastAPI):
         base_url=settings.identity_url,
         internal_token=settings.internal_token,
     )
-    app.state.key_resolver = KeyResolver(
-        identity_client=identity_client,
-        provider="nvidia_nim",
-    )
+    # Provider is resolved per-request from the catalog — no hardcoded name here.
+    app.state.key_resolver = KeyResolver(identity_client=identity_client)
     logger.info("service_starting", service="provider")
     yield
     logger.info("service_stopping", service="provider")
@@ -42,6 +41,7 @@ app.add_middleware(InternalAuthMiddleware, token=settings.internal_token)
 
 health_router = create_health_router("provider")
 app.include_router(health_router)
+app.include_router(catalog_router)
 app.include_router(llm_router)
 app.include_router(image_router)
 app.include_router(tts_router)

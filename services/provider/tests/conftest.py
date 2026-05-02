@@ -10,6 +10,7 @@ from httpx import ASGITransport, AsyncClient
 from orion_common.health import create_health_router
 from orion_common.middleware import InternalAuthMiddleware
 from src.key_resolver import KeyResolver
+from src.routes.catalog import router as catalog_router
 from src.routes.image import router as image_router
 from src.routes.llm import router as llm_router
 from src.routes.tts import router as tts_router
@@ -34,11 +35,12 @@ async def provider_app() -> FastAPI:
 
     health_router = create_health_router("provider")
     app.include_router(health_router)
+    app.include_router(catalog_router)
     app.include_router(llm_router)
     app.include_router(image_router)
     app.include_router(tts_router)
 
-    app.state.key_resolver = KeyResolver(identity_client=mock_identity, provider="nvidia_nim")
+    app.state.key_resolver = KeyResolver(identity_client=mock_identity)
 
     yield app
 
