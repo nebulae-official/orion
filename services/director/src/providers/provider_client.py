@@ -1,19 +1,14 @@
 from __future__ import annotations
 
-import contextvars
 import os
 
 import httpx
 import structlog
+from orion_common.provider_context import request_user_id
 
 from .base import LLMProvider, LLMResponse
 
 logger = structlog.get_logger(__name__)
-
-# Per-async-task user ID forwarded to the Provider Service as X-User-ID.
-# Set this before calling pipeline.run() so the Provider Service can look up
-# the user's stored nvidia_nim key. Each asyncio Task gets its own copy.
-request_user_id: contextvars.ContextVar[str | None] = contextvars.ContextVar("provider_request_user_id", default=None)
 
 
 class ProviderServiceClient(LLMProvider):

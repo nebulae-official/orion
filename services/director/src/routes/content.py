@@ -11,6 +11,7 @@ from orion_common.auth import CurrentUser, get_current_user
 from orion_common.db.models import ContentStatus, Trend
 from orion_common.db.session import get_session
 from orion_common.events import Channels
+from orion_common.provider_context import request_user_id
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

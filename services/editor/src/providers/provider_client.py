@@ -10,6 +10,7 @@ from uuid import uuid4
 
 import httpx
 import structlog
+from orion_common.provider_context import request_user_id
 
 from .base import TTSProvider, TTSRequest, TTSResult
 
@@ -46,11 +47,17 @@ class ProviderServiceTTSClient(TTSProvider):
             "response_format": fmt,
         }
 
+        headers: dict[str, str] = {}
+        user_id = request_user_id.get()
+        if user_id:
+            headers["X-User-ID"] = user_id
+
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 resp = await client.post(
                     f"{self._provider_url}/api/v1/tts/speak",
                     json=payload,
+                    headers=headers,
                 )
                 resp.raise_for_status()
                 data = resp.json()

@@ -1,4 +1,4 @@
-"""Provider Service image client — delegates image generation to the centralized provider service."""
+"""Provider Service image client — delegates image generation to the provider service."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import httpx
 import structlog
+from orion_common.provider_context import request_user_id
 
 from .base import ImageProvider, ImageRequest, ImageResult
 
@@ -41,11 +42,17 @@ class ProviderServiceImageClient(ImageProvider):
         if request.seed is not None:
             payload["seed"] = request.seed
 
+        headers: dict[str, str] = {}
+        user_id = request_user_id.get()
+        if user_id:
+            headers["X-User-ID"] = user_id
+
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
                 resp = await client.post(
                     f"{self._provider_url}/api/v1/image/generate",
                     json=payload,
+                    headers=headers,
                 )
                 resp.raise_for_status()
                 data = resp.json()

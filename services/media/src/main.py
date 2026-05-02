@@ -20,8 +20,8 @@ from orion_common.logging import configure_logging
 from orion_common.middleware import InternalAuthMiddleware
 
 from .providers.base import ImageRequest
-from .providers.fal_ai import request_fal_api_key
 from .providers.factory import get_image_provider
+from .providers.fal_ai import request_fal_api_key
 from .repositories.asset_repo import MediaAssetRepository
 from .routes.images import configure_router
 from .routes.images import router as images_router
