@@ -4,7 +4,9 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 
 from src.adapters.base import BaseImageAdapter
+from src.adapters.image.huggingface import HuggingFaceImageAdapter
 from src.adapters.image.nvidia_nim import NvidiaNimImageAdapter
+from src.adapters.image.pollinations import PollinationsImageAdapter
 from src.catalog import Capability, get_entry
 from src.key_resolver import KeyResolver, KeyUnavailableError
 from src.schemas import ImageGenerateRequest, ImageGenerateResponse
@@ -17,6 +19,8 @@ _DEFAULT_PROVIDER = "nvidia_nim"
 
 _IMAGE_ADAPTERS: dict[str, type[BaseImageAdapter]] = {
     "nvidia_nim": NvidiaNimImageAdapter,
+    "huggingface": HuggingFaceImageAdapter,
+    "pollinations": PollinationsImageAdapter,
 }
 
 
