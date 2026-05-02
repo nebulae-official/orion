@@ -67,6 +67,28 @@ _CATALOG: list[ProviderEntry] = [
         base_url=os.getenv("PROVIDER_TTS_BASE_URL", "grpc.nvcf.nvidia.com:443"),
         default_voice=os.getenv("PROVIDER_TTS_VOICE", "Magpie-Multilingual.EN-US.Aria"),
     ),
+    ProviderEntry(
+        provider="fish_speech",
+        capability=Capability.TTS,
+        credential_kind=CredentialKind.API_KEY,
+        default_model="default",
+        base_url=os.getenv("FISH_SPEECH_URL", "http://fish_speech:8080"),
+        default_voice=os.getenv("FISH_SPEECH_VOICE", "default"),
+    ),
+    ProviderEntry(
+        provider="huggingface",
+        capability=Capability.IMAGE,
+        credential_kind=CredentialKind.API_KEY,
+        default_model=os.getenv("PROVIDER_HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell"),
+        base_url=os.getenv("PROVIDER_HF_BASE_URL", "https://api-inference.huggingface.co"),
+    ),
+    ProviderEntry(
+        provider="pollinations",
+        capability=Capability.IMAGE,
+        credential_kind=CredentialKind.API_KEY,
+        default_model=os.getenv("PROVIDER_POLLINATIONS_MODEL", "flux"),
+        base_url=os.getenv("PROVIDER_POLLINATIONS_BASE_URL", "https://image.pollinations.ai"),
+    ),
 ]
 
 _DEFAULT_PROVIDER = "nvidia_nim"

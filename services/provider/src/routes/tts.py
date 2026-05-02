@@ -4,6 +4,7 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 
 from src.adapters.base import BaseTTSAdapter
+from src.adapters.tts.fish_speech import FishSpeechTTSAdapter
 from src.adapters.tts.nvidia_nim import NvidiaNimTTSAdapter
 from src.catalog import Capability, get_entry
 from src.key_resolver import KeyResolver, KeyUnavailableError
@@ -17,6 +18,7 @@ _DEFAULT_PROVIDER = "nvidia_nim"
 
 _TTS_ADAPTERS: dict[str, type[BaseTTSAdapter]] = {
     "nvidia_nim": NvidiaNimTTSAdapter,
+    "fish_speech": FishSpeechTTSAdapter,
 }
 
 
