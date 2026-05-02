@@ -242,7 +242,7 @@ class ContentPipeline:
             output_tokens = len(script.body) // 4 if script.body else 0
             input_tokens = output_tokens * 2
             cost = CostResult.estimate(
-                provider="ollama",
+                provider="nvidia_nim",
                 model="llama3",
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
