@@ -50,20 +50,20 @@ The Director outputs JSON matching this schema. If schema validation fails, the 
 
 These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.md`. They are the literal worklist to ship Tier 1. Order matters — items are sequenced by dependency.
 
-- [ ] **#1 — Validator duration constants.** `services/editor/src/video/validator.py:20-21` enforces 55–60s; spec is 40–55s. Change `MIN_DURATION_SECS = 40.0`, `MAX_DURATION_SECS = 55.0`. (Fix: S, one line)
-- [ ] **#2 — Director auto-trigger.** Set `DIRECTOR_AUTO_TRIGGER=true` in `.env` and `deploy/docker-compose.yml` director service env. Without it, Scout fires events into a void. (Fix: S, config)
+- [x] **#1 — Validator duration constants.** `services/editor/src/video/validator.py:20-21` enforces 55–60s; spec is 40–55s. Change `MIN_DURATION_SECS = 40.0`, `MAX_DURATION_SECS = 55.0`. (Fix: S, one line)
+- [x] **#2 — Director auto-trigger.** Set `DIRECTOR_AUTO_TRIGGER=true` in `.env` and `deploy/docker-compose.yml` director service env. Without it, Scout fires events into a void. (Fix: S, config)
 - [x] **#3 — Provider route adapter factory.** Replace hardcoded `NvidiaNimXxxAdapter(entry)` in `services/provider/src/routes/{llm,image,tts}.py` with a registry lookup keyed by `entry.provider`. **This is the architecture validation gate** — until this lands, "swap a provider with zero code changes" is false. (Fix: M, ~10 lines per route + registry module)
-- [ ] **#4 — TTS spec resolved as NIM Magpie primary, FishSpeech fallback.** Update MILESTONE locked-format (done above). Register FishSpeech as a Provider service adapter under `services/provider/src/adapters/tts/fish_speech.py` once #3 lands. Remove the unused factory branch in `editor/src/providers/factory.py`. (Fix: M)
-- [ ] **#5 — HuggingFace image adapter.** Build under `services/provider/src/adapters/image/huggingface.py`, register in catalog. (Fix: M)
-- [ ] **#6 — Pollinations image adapter.** Build under `services/provider/src/adapters/image/pollinations.py`, register in catalog. (Fix: M)
+- [x] **#4 — TTS spec resolved as NIM Magpie primary, FishSpeech fallback.** Update MILESTONE locked-format (done above). Register FishSpeech as a Provider service adapter under `services/provider/src/adapters/tts/fish_speech.py` once #3 lands. Remove the unused factory branch in `editor/src/providers/factory.py`. (Fix: M)
+- [x] **#5 — HuggingFace image adapter.** Build under `services/provider/src/adapters/image/huggingface.py`, register in catalog. (Fix: M)
+- [x] **#6 — Pollinations image adapter.** Build under `services/provider/src/adapters/image/pollinations.py`, register in catalog. (Fix: M)
 - [x] **#7 — Scene-count cost gate.** In Director, after `VisualPrompter` returns, validate `1 hook + 4–5 body + 1 CTA`. Reject content **before** CONTENT_CREATED fires if violated. Wire as a Pydantic model with `validator` decorators or an explicit guard in `pipeline.py`. (Fix: M)
 - [x] **#8 — Dashboard API keys panel wiring.** `dashboard/src/components/settings/settings-api-keys-panel.tsx` renders static demo rows. Replace with the existing `api-keys-config.tsx` component + `saveApiKey` server action that's already wired. Update seed providers to NVIDIA NIM, Hugging Face (Tier 1 free stack), not Anthropic/Fal.ai/ElevenLabs. (Fix: M)
-- [ ] **#9 — CONTENT_READY event.** Rename `CONTENT_UPDATED` → `CONTENT_READY` in `libs/orion-common/orion_common/events.py`. Update Editor `render_pipeline.py:228`. Update any Pulse / Dashboard subscribers. (Fix: S)
-- [ ] **#10 — Cost provider string.** `services/director/src/services/pipeline.py:245` hardcodes `provider="ollama"`. Change to `"nvidia_nim"`. (Fix: S)
-- [ ] **#11 — Dead Twitter/Fal.ai code.** Remove `TwitterProvider` instantiation from `services/scout/src/main.py:38-43`. Remove dead `request_fal_api_key` injection block in `services/media/src/main.py:59-68`. (Fix: S)
+- [x] **#9 — CONTENT_READY event.** Rename `CONTENT_UPDATED` → `CONTENT_READY` in `libs/orion-common/orion_common/events.py`. Update Editor `render_pipeline.py:228`. Update any Pulse / Dashboard subscribers. (Fix: S)
+- [x] **#10 — Cost provider string.** `services/director/src/services/pipeline.py:245` hardcodes `provider="ollama"`. Change to `"nvidia_nim"`. (Fix: S)
+- [x] **#11 — Dead Twitter/Fal.ai code.** Remove `TwitterProvider` instantiation from `services/scout/src/main.py:38-43`. Remove dead `request_fal_api_key` injection block in `services/media/src/main.py:59-68`. (Fix: S)
 - [x] **#12 — Object storage.** Images and audio land in `/tmp/orion/...`. Across Docker containers, Editor cannot read Media's outputs. Add either (a) shared bind-mount volume in compose, or (b) MinIO container + S3 client in shared lib. **Recommendation: bind-mount for Tier 1 (faster), MinIO for Tier 2.** (Fix: M for bind-mount, L for MinIO)
-- [ ] **#13 — LangGraph checkpointer migrations.** `director/src/main.py:150` relies on langgraph auto-creating `checkpoints` + `checkpoint_writes` tables at runtime. Move to Alembic migration so cold starts are deterministic. (Fix: S)
-- [ ] **#14 — Provider service requirements.** Verify `nvidia-riva-client` is in `services/provider/pyproject.toml` and Dockerfile. Without it, the TTS path crashes on first call. (Fix: S, audit-only)
+- [x] **#13 — LangGraph checkpointer migrations.** `director/src/main.py:150` relies on langgraph auto-creating `checkpoints` + `checkpoint_writes` tables at runtime. Move to Alembic migration so cold starts are deterministic. (Fix: S)
+- [x] **#14 — Provider service requirements.** Verify `nvidia-riva-client` is in `services/provider/pyproject.toml` and Dockerfile. Without it, the TTS path crashes on first call. (Fix: S, audit-only)
 - [ ] **#15 — Health-check smoke test.** With #1–#11 landed: `make up`, verify all 8 services pass health checks, Scout produces a trend, full pipeline produces a video. (Fix: M, verification only)
 
 ---
@@ -76,14 +76,14 @@ These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.m
 - [x] PostgreSQL with migrations
 - [x] Notification system working
 - [x] Identity → Provider key resolution verified end-to-end (`key_resolver.py` two-tier user→system; `IdentityClient` + `X-User-ID` contextvar; consuming services do not hardcode keys)
-- [ ] **Provider swap test passes** — switching a service's provider requires only a dashboard settings change + new key in Identity. **Currently fails: route files hardcode adapter classes.** Unblocked by gap #3.
+- [x] **Provider swap test passes** — switching a service's provider requires only a dashboard settings change + new key in Identity. Route files use registry lookup (gap #3 done).
 - [ ] All services start and pass health checks via Docker Compose (verification gate — gap #15)
 - [ ] Cost tracking receives real data from events (works structurally; provider string wrong — gap #10)
 
 #### Scout (Trend Detection)
 - [x] Google Trends provider working
 - [x] RSS provider working
-- [ ] Twitter/X trend provider REMOVED (cleanup task — gap #11)
+- [x] Twitter/X trend provider REMOVED (cleanup task — gap #11)
 - [x] Trends flow into database with deduplication
 - [x] Niche filter scopes trends to active niche
 - [ ] TREND_DETECTED event fires and Director receives it (Scout side works; Director auto-trigger gated — gap #2)
@@ -104,8 +104,8 @@ These are the concrete, evidence-based fixes from `docs/TIER1_AUDIT_2026-05-02.m
 - [ ] Images stored in object storage, URLs accessible to Editor (local `/tmp/...` only — gap #12)
 - [x] MEDIA_GENERATED event fires with image references
 - [x] Per-scene retry on generation failure (max 2 retries)
-- [ ] Adapter is hot-swappable (blocked by gap #3)
-- [ ] Free image provider stack: NVIDIA NIM Flux primary + HuggingFace + Pollinations fallbacks (NIM Flux only — gaps #5, #6)
+- [x] Adapter is hot-swappable (gap #3 done — registry lookup in route files)
+- [x] Free image provider stack: NVIDIA NIM Flux primary + HuggingFace + Pollinations fallbacks
 
 #### Editor (Video Assembly — single locked format)
 - [x] TTS produces narration audio per scene (NIM Magpie via Provider service)
