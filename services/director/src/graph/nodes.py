@@ -11,7 +11,7 @@ from langgraph.types import interrupt
 from ..agents.analyst import AnalystAgent
 from ..agents.critique_agent import CritiqueAgent
 from ..agents.script_generator import GeneratedScript, ScriptGenerator, ScriptRequest
-from ..agents.visual_prompter import VisualPrompter
+from ..agents.visual_prompter import SceneCountError, VisualPrompter
 from .hitl import (
     build_analyst_review_payload,
     build_creator_review_payload,
@@ -101,13 +101,23 @@ async def creator_node(
             style=state.get("visual_style", "cinematic"),
         )
 
-        await logger.ainfo("creator_node_completed", prompt_count=len(prompt_set.prompts))
+        count = len(prompt_set.prompts)
+        if count not in {6, 7}:
+            raise SceneCountError(f"Expected 6-7 visual prompts (1 hook + 4-5 body + 1 CTA), got {count}")
+
+        await logger.ainfo("creator_node_completed", prompt_count=count)
 
         return {
             "visual_prompts": prompt_set.model_dump(),
             "current_stage": PipelineStage.COMPLETE,
         }
 
+    except SceneCountError as exc:
+        await logger.aerror("creator_node_scene_count_invalid", error=str(exc))
+        return {
+            "current_stage": PipelineStage.FAILED,
+            "error": str(exc),
+        }
     except Exception as exc:
         await logger.aexception("creator_node_failed")
         return {

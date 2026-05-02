@@ -36,12 +36,52 @@ VISUAL_JSON = json.dumps(
         "prompts": [
             {
                 "scene_number": 1,
-                "description": "robot typing on keyboard, neon lighting",
+                "description": "hook: robot hand reaches toward glowing circuit board",
+                "style": "cinematic",
+                "camera_angle": "extreme close-up",
+                "mood": "tense",
+                "negative_prompt": "blurry, low quality",
+            },
+            {
+                "scene_number": 2,
+                "description": "body 1: robot typing on keyboard, neon lighting",
                 "style": "cinematic",
                 "camera_angle": "close-up",
                 "mood": "futuristic",
                 "negative_prompt": "blurry, low quality",
-            }
+            },
+            {
+                "scene_number": 3,
+                "description": "body 2: code scrolling on holographic display",
+                "style": "cinematic",
+                "camera_angle": "medium",
+                "mood": "focused",
+                "negative_prompt": "blurry, low quality",
+            },
+            {
+                "scene_number": 4,
+                "description": "body 3: neural network visualization, glowing nodes",
+                "style": "cinematic",
+                "camera_angle": "wide",
+                "mood": "awe",
+                "negative_prompt": "blurry, low quality",
+            },
+            {
+                "scene_number": 5,
+                "description": "body 4: scientist reacting in amazement",
+                "style": "cinematic",
+                "camera_angle": "over-the-shoulder",
+                "mood": "excitement",
+                "negative_prompt": "blurry, low quality",
+            },
+            {
+                "scene_number": 6,
+                "description": "cta: subscribe button animation, glowing",
+                "style": "cinematic",
+                "camera_angle": "front-facing",
+                "mood": "engaging",
+                "negative_prompt": "blurry, low quality",
+            },
         ],
     }
 )
@@ -140,6 +180,52 @@ class TestCreatorNode:
         assert "visual_prompts" in result
         assert result["current_stage"] == PipelineStage.COMPLETE
         assert result["visual_prompts"]["style_guide"] == "cinematic dark tech"
+
+    @pytest.mark.asyncio
+    async def test_creator_fails_on_wrong_scene_count(self, fake_llm) -> None:
+        """Creator sets FAILED when LLM returns fewer prompts than required (not 6-7)."""
+        import json as json_mod
+
+        bad_json = json_mod.dumps(
+            {
+                "style_guide": "cinematic",
+                "prompts": [
+                    {
+                        "scene_number": 1,
+                        "description": "single scene only",
+                        "style": "cinematic",
+                        "camera_angle": "wide",
+                        "mood": "dark",
+                        "negative_prompt": "",
+                    }
+                ],
+            }
+        )
+        fake_llm._response_content = bad_json
+        visual_prompter = VisualPrompter(fake_llm)
+
+        state: OrionState = {
+            "content_id": uuid.uuid4(),
+            "trend_id": uuid.uuid4(),
+            "trend_topic": "AI breakthroughs",
+            "niche": "technology",
+            "target_platform": "youtube_shorts",
+            "tone": "informative",
+            "visual_style": "cinematic",
+            "current_stage": PipelineStage.CREATOR,
+            "script_hook": "Hook",
+            "script_body": "Body",
+            "script_cta": "CTA",
+            "visual_cues": ["scene 1"],
+            "critique_score": 0.8,
+            "critique_feedback": "OK",
+        }
+
+        result = await creator_node(state, visual_prompter=visual_prompter)
+
+        assert result["current_stage"] == PipelineStage.FAILED
+        assert "Expected 6-7 visual prompts" in result["error"]
+        assert "got 1" in result["error"]
 
     @pytest.mark.asyncio
     async def test_creator_sets_failed_on_error(self) -> None:

@@ -15,6 +15,10 @@ from .script_generator import GeneratedScript
 logger = structlog.get_logger(__name__)
 
 
+class SceneCountError(ValueError):
+    """Raised when extract_prompts() returns the wrong number of visual prompts."""
+
+
 class VisualStyle(StrEnum):
     """Supported visual generation styles."""
 
