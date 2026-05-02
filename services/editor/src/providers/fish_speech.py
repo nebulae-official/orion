@@ -14,7 +14,6 @@ from .base import TTSProvider, TTSRequest, TTSResult
 logger = structlog.get_logger(__name__)
 
 DEFAULT_FISH_SPEECH_URL = "http://localhost:8080"
-DEFAULT_OUTPUT_DIR = "/tmp/orion/editor/tts"
 
 
 def _estimate_audio_duration(file_path: str, output_format: str) -> float:
@@ -42,12 +41,12 @@ class FishSpeechProvider(TTSProvider):
     def __init__(
         self,
         base_url: str | None = None,
-        output_dir: str = DEFAULT_OUTPUT_DIR,
+        output_dir: str | None = None,
     ) -> None:
         self._base_url = (base_url or os.getenv("FISH_SPEECH_URL", DEFAULT_FISH_SPEECH_URL)).rstrip(
             "/"
         )
-        self._output_dir = Path(output_dir)
+        self._output_dir = Path(output_dir or os.getenv("EDITOR_TTS_DIR", "/tmp/orion/editor/tts"))
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def synthesize(self, request: TTSRequest) -> TTSResult:

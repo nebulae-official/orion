@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from pathlib import Path
 
@@ -23,11 +24,11 @@ class ComfyUIProvider(ImageProvider):
     execution progress updates, then downloads the resulting image.
     """
 
-    def __init__(self, host: str, output_dir: str = "/tmp/orion/media") -> None:
+    def __init__(self, host: str, output_dir: str | None = None) -> None:
         # Strip trailing slash; host is e.g. "http://localhost:8188"
         self._host = host.rstrip("/")
         self._ws_url = self._host.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
-        self._output_dir = Path(output_dir)
+        self._output_dir = Path(output_dir or os.getenv("MEDIA_OUTPUT_DIR", "/tmp/orion/media"))
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def is_available(self) -> bool:

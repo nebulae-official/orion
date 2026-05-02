@@ -32,12 +32,14 @@ class FalVideoProvider(VideoProvider):
     def __init__(
         self,
         api_key: str | None = None,
-        output_dir: str = "/tmp/orion/media/video",
+        output_dir: str | None = None,
         poll_interval: float = 3.0,
         max_poll_attempts: int = 200,
     ) -> None:
         self._api_key = api_key or os.environ.get("FAL_API_KEY", "")
-        self._output_dir = Path(output_dir)
+        self._output_dir = Path(
+            output_dir or os.environ.get("MEDIA_VIDEO_OUTPUT_DIR", "/tmp/orion/media/video")
+        )
         self._output_dir.mkdir(parents=True, exist_ok=True)
         self._poll_interval = poll_interval
         self._max_poll_attempts = max_poll_attempts

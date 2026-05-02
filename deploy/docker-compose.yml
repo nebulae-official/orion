@@ -18,6 +18,7 @@ volumes:
   ollamadata:
   pgadmindata:
   databasus-data:
+  orion_media: {}
 
 services:
 
@@ -161,6 +162,11 @@ services:
       - "127.0.0.1:8003:8003"
     env_file:
       - ../.env
+    environment:
+      MEDIA_OUTPUT_DIR: /data/media
+      MEDIA_VIDEO_OUTPUT_DIR: /data/media/video
+    volumes:
+      - orion_media:/data/media
     depends_on:
       redis:
         condition: service_healthy
@@ -183,6 +189,10 @@ services:
       - "127.0.0.1:8004:8004"
     env_file:
       - ../.env
+    environment:
+      MEDIA_BASE_DIR: /data/media
+    volumes:
+      - orion_media:/data/media
     depends_on:
       migrations:
         condition: service_completed_successfully

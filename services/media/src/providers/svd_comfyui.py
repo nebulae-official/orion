@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 import uuid
 from pathlib import Path
@@ -117,11 +118,13 @@ class SVDProvider(VideoProvider):
     def __init__(
         self,
         host: str = "http://localhost:8188",
-        output_dir: str = "/tmp/orion/media/video",
+        output_dir: str | None = None,
     ) -> None:
         self._host = host.rstrip("/")
         self._ws_url = self._host.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
-        self._output_dir = Path(output_dir)
+        self._output_dir = Path(
+            output_dir or os.environ.get("MEDIA_VIDEO_OUTPUT_DIR", "/tmp/orion/media/video")
+        )
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     async def is_available(self) -> bool:
