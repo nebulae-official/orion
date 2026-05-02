@@ -100,15 +100,31 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 
 ---
 
-### Gap #18 — LangGraph checkpoint cleanup `AsyncConnection` TypeError 🔴 OPEN
+### Gap #18 — LangGraph checkpoint cleanup `AsyncConnection` TypeError ✅ FIXED
 
 **Discovered:** 2026-05-02 after Gap #17 fixed  
 **Service:** Director (LangGraph checkpointer)  
-**Symptom:** `TypeError: 'AsyncConnection' object is not callable` during checkpoint cleanup after strategist node completes. Pipeline raises `trend_pipeline_failed` and never reaches Media.  
-**Likely root cause:** The asyncpg-backed LangGraph checkpointer is passing a connection object where LangGraph expects a callable (connection factory). This is a known pattern issue with async LangGraph checkpointers — the `AsyncPostgresSaver.from_conn_string()` / `AsyncPostgresSaver(conn)` API changed between LangGraph versions and the two call patterns are not interchangeable.  
-**Related:** 🔗 Gap #13 (Alembic migration for LangGraph tables was added, but the connection setup that consumes those tables may be using the wrong API). Check `services/director/src/main.py` where the checkpointer is initialized — specifically whether it's receiving a connection object or a connection factory callable.  
-**Fix in progress:** Gap #18 agent running now.  
-**Downstream blocked:** Media (image gen), Editor (video assembly), CONTENT_READY event, MP4 output.
+**Commit:** `2e38fb2`  
+**Root cause:** `cleanup_checkpoints` in `services/director/src/services/pipeline.py` called `self._checkpointer.conn.connection()`. In psycopg3, `AsyncConnection.connection` is a property that returns `self` (not a pool method). Calling `()` on the returned `AsyncConnection` raised `TypeError: 'AsyncConnection' object is not callable`. The underlying setup is correct — `from_conn_string` creates an `AsyncConnection` with `autocommit=True`, not a pool.  
+**Fix:** Use `self._checkpointer.conn` directly as the cursor source. Autocommit=True means no explicit commit is needed. Removed the erroneous `.connection()` call and `conn.commit()`.  
+**Verified:** `checkpoints_cleaned` now logs at INFO level. No `checkpoint_cleanup_failed` error.  
+**Related:** 🔗 Gap #13 (migration added the checkpoint tables), 🔗 Risk C (LangGraph psycopg3 compat).  
+**New blocker:** 🔗 Gap #19 — pipeline still fails with a different TypeError after strategist.
+
+---
+
+### Gap #19 — LangGraph `__interrupt__` event breaks `final_state.update()` 🔴 OPEN
+
+**Discovered:** 2026-05-02 after Gap #18 fixed  
+**Service:** Director (pipeline streaming)  
+**Symptom:** After strategist node completes, `trend_pipeline_failed` fires with `TypeError: cannot convert dictionary update sequence element #0 to a sequence`.  
+**Root cause:** In LangGraph 1.x with `stream_mode="updates"`, HITL interrupts are yielded as `{"__interrupt__": [Interrupt(...)]}` — a list value, not a dict. `services/director/src/services/pipeline.py:141` calls `final_state.update(event[node_name])` unconditionally. Python's `dict.update()` raises `TypeError` when given a list of non-(key, value) items.  
+**Fix needed:** Skip or handle `__interrupt__` events in the streaming loop. Either:
+  - Skip any event key starting with `__` (e.g. `if node_name.startswith("__"): continue`), or
+  - Guard with `isinstance(event[node_name], dict)` before calling `.update()`.  
+**Upstream:** `DIRECTOR_ENABLE_HITL` is `true` in the running container — so every pipeline run that reaches an interrupt point hits this bug.  
+**Downstream blocked:** Media (image gen), Editor (video assembly), CONTENT_READY event, MP4 output.  
+**Related:** 🔗 Gap #18 (checkpointer cleanup — now fixed). CONTENT_CREATED did NOT fire. Media did NOT trigger.
 
 ---
 
@@ -140,8 +156,9 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 Smoke test run
   → GAP #16 (created_by null)         ← fixed
       → GAP #17 (LLM 503, no NIM key) ← fixed
-          → GAP #18 (LangGraph checkpoint TypeError) ← IN PROGRESS
-              → [Media image gen]
+          → GAP #18 (LangGraph checkpoint TypeError) ← fixed
+              → GAP #19 (HITL __interrupt__ event in astream loop) ← OPEN
+                  → [Media image gen]
                   → [Editor TTS — Risk B]
                       → [Editor video assembly]
                           → [MP4 output — Gap #15 full pass]
