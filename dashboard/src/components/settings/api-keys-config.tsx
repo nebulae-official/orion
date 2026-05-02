@@ -34,74 +34,25 @@ interface ApiKeyEntry {
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Canonical provider slugs that match Identity service ALLOWED_PROVIDERS. */
+/** Canonical provider slugs that match Identity service ALLOWED_PROVIDERS (Tier 1 free stack). */
 const DEFAULT_ENTRIES: ApiKeyEntry[] = [
-  {
-    provider: "openai",
-    label: "OpenAI",
-    description: "GPT-4o, DALL-E 3, TTS models",
-    status: "not-set",
-  },
-  {
-    provider: "anthropic",
-    label: "Anthropic",
-    description: "Claude models",
-    status: "not-set",
-  },
-  {
-    provider: "fal_ai",
-    label: "Fal.ai",
-    description: "Fast image and video generation",
-    status: "not-set",
-  },
-  {
-    provider: "elevenlabs",
-    label: "ElevenLabs",
-    description: "High-quality text-to-speech",
-    status: "not-set",
-  },
-  {
-    provider: "replicate",
-    label: "Replicate",
-    description: "Stable Diffusion, AnimateDiff, Flux",
-    status: "not-set",
-  },
-  {
-    provider: "runway",
-    label: "Runway",
-    description: "Gen-3 video generation",
-    status: "not-set",
-  },
-  {
-    provider: "deepseek",
-    label: "DeepSeek",
-    description: "DeepSeek LLM models",
-    status: "not-set",
-  },
-  {
-    provider: "groq",
-    label: "Groq",
-    description: "Ultra-fast LLM inference",
-    status: "not-set",
-  },
   {
     provider: "nvidia_nim",
     label: "NVIDIA NIM",
-    description: "NVIDIA NIM inference microservices",
+    description: "LLM + Image + TTS (free tier)",
+    status: "not-set",
+  },
+  {
+    provider: "huggingface",
+    label: "HuggingFace",
+    description: "Image generation fallback (free)",
     status: "not-set",
   },
 ];
 
 const DEMO_ENTRIES: ApiKeyEntry[] = [
-  { provider: "openai", label: "OpenAI", description: "GPT-4o, DALL-E 3, TTS models", status: "saved" },
-  { provider: "anthropic", label: "Anthropic", description: "Claude models", status: "saved" },
-  { provider: "fal_ai", label: "Fal.ai", description: "Fast image and video generation", status: "not-set" },
-  { provider: "elevenlabs", label: "ElevenLabs", description: "High-quality text-to-speech", status: "saved" },
-  { provider: "replicate", label: "Replicate", description: "Stable Diffusion, AnimateDiff, Flux", status: "not-set" },
-  { provider: "runway", label: "Runway", description: "Gen-3 video generation", status: "not-set" },
-  { provider: "deepseek", label: "DeepSeek", description: "DeepSeek LLM models", status: "not-set" },
-  { provider: "groq", label: "Groq", description: "Ultra-fast LLM inference", status: "not-set" },
-  { provider: "nvidia_nim", label: "NVIDIA NIM", description: "NVIDIA NIM inference microservices", status: "not-set" },
+  { provider: "nvidia_nim", label: "NVIDIA NIM", description: "LLM + Image + TTS (free tier)", status: "saved" },
+  { provider: "huggingface", label: "HuggingFace", description: "Image generation fallback (free)", status: "not-set" },
 ];
 
 // ---------------------------------------------------------------------------

@@ -4,20 +4,11 @@ import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { DEMO_MODE } from "@/lib/config";
 import { Button } from "@/components/ui/button";
+import { ApiKeysConfig } from "./api-keys-config";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-interface ApiKeyRow {
-  id: string;
-  name: string;
-  maskedKey: string;
-  iconBg: string;
-  iconText: string;
-  iconLabel: string;
-  status: "active" | "missing";
-}
 
 interface PipelineFormState {
   niche: string;
@@ -32,49 +23,6 @@ interface AutomationToggle {
   subtitle: string;
   enabled: boolean;
 }
-
-// ---------------------------------------------------------------------------
-// Seed data matching the HTML reference
-// ---------------------------------------------------------------------------
-
-const DEMO_API_KEY_ROWS: ApiKeyRow[] = [
-  {
-    id: "anthropic",
-    name: "Anthropic (Claude)",
-    maskedKey: "sk-ant-••••••••••••3a9f",
-    iconBg: "bg-success-surface",
-    iconText: "text-success",
-    iconLabel: "A",
-    status: "active",
-  },
-  {
-    id: "fal_ai",
-    name: "Fal.ai (Image Gen)",
-    maskedKey: "fal-••••••••••••8c2d",
-    iconBg: "bg-info-surface",
-    iconText: "text-info-light",
-    iconLabel: "F",
-    status: "active",
-  },
-  {
-    id: "elevenlabs",
-    name: "ElevenLabs (TTS)",
-    maskedKey: "el-••••••••••••1f7a",
-    iconBg: "bg-warning-surface",
-    iconText: "text-warning-light",
-    iconLabel: "E",
-    status: "active",
-  },
-  {
-    id: "twitter",
-    name: "Twitter / X",
-    maskedKey: "Not configured",
-    iconBg: "bg-surface-elevated",
-    iconText: "text-text-secondary",
-    iconLabel: "𝕏",
-    status: "missing",
-  },
-];
 
 const DEFAULT_PIPELINE: PipelineFormState = {
   niche: "ai-infrastructure",
@@ -149,10 +97,8 @@ export function ApiKeysPanel(): React.ReactElement {
     <div>
       {/* API Keys section */}
       <SectionHeading>API Keys</SectionHeading>
-      <div className="mb-7 space-y-2.5">
-        {DEMO_API_KEY_ROWS.map((row) => (
-          <KeyRow key={row.id} row={row} />
-        ))}
+      <div className="mb-7">
+        <ApiKeysConfig />
       </div>
 
       {/* Pipeline Configuration section */}
@@ -253,58 +199,6 @@ function SectionHeading({
     <h2 className="mb-3 border-b border-border pb-2 font-[family-name:var(--font-display)] text-[11px] font-medium uppercase tracking-[0.2em] text-text-muted">
       {children}
     </h2>
-  );
-}
-
-function KeyRow({ row }: { row: ApiKeyRow }): React.ReactElement {
-  return (
-    <div className="flex items-center gap-3 rounded-[10px] border border-border bg-surface-elevated px-4 py-3">
-      <div
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold",
-          row.iconBg,
-          row.iconText
-        )}
-        aria-hidden
-      >
-        {row.iconLabel}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[13.5px] font-medium text-text">{row.name}</div>
-        <div className="mt-0.5 font-mono text-[11px] text-text-muted">
-          {row.maskedKey}
-        </div>
-      </div>
-      <StatusBadge status={row.status} />
-      {row.status === "active" ? (
-        <Button variant="ghost" size="sm" className="px-3 py-1.5 text-xs">
-          Edit
-        </Button>
-      ) : (
-        <Button size="sm" className="px-3.5 py-1.5 text-xs">
-          Connect
-        </Button>
-      )}
-    </div>
-  );
-}
-
-function StatusBadge({
-  status,
-}: {
-  status: "active" | "missing";
-}): React.ReactElement {
-  if (status === "active") {
-    return (
-      <span className="inline-flex items-center rounded-full bg-success-surface px-2.5 py-1 text-xs font-medium text-success-light">
-        Active
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center rounded-full border border-border bg-surface-elevated px-2.5 py-1 text-xs font-medium text-text-secondary">
-      Missing
-    </span>
   );
 }
 
