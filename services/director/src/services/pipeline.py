@@ -338,11 +338,10 @@ class ContentPipeline:
         if self._checkpointer is None:
             return
         try:
-            async with self._checkpointer.conn.connection() as conn:
-                async with conn.cursor() as cur:
-                    await cur.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,))
-                    await cur.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
-                await conn.commit()
+            conn = self._checkpointer.conn
+            async with conn.cursor() as cur:
+                await cur.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,))
+                await cur.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
             await logger.ainfo("checkpoints_cleaned", thread_id=thread_id)
         except Exception:
             await logger.aexception("checkpoint_cleanup_failed", thread_id=thread_id)
