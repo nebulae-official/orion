@@ -113,18 +113,17 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 
 ---
 
-### Gap #19 — LangGraph `__interrupt__` event breaks `final_state.update()` 🔴 OPEN
+### Gap #19 — LangGraph `__interrupt__` event breaks `final_state.update()` ✅ FIXED
 
 **Discovered:** 2026-05-02 after Gap #18 fixed  
 **Service:** Director (pipeline streaming)  
 **Symptom:** After strategist node completes, `trend_pipeline_failed` fires with `TypeError: cannot convert dictionary update sequence element #0 to a sequence`.  
 **Root cause:** In LangGraph 1.x with `stream_mode="updates"`, HITL interrupts are yielded as `{"__interrupt__": [Interrupt(...)]}` — a list value, not a dict. `services/director/src/services/pipeline.py:141` calls `final_state.update(event[node_name])` unconditionally. Python's `dict.update()` raises `TypeError` when given a list of non-(key, value) items.  
-**Fix needed:** Skip or handle `__interrupt__` events in the streaming loop. Either:
-  - Skip any event key starting with `__` (e.g. `if node_name.startswith("__"): continue`), or
-  - Guard with `isinstance(event[node_name], dict)` before calling `.update()`.  
-**Upstream:** `DIRECTOR_ENABLE_HITL` is `true` in the running container — so every pipeline run that reaches an interrupt point hits this bug.  
-**Downstream blocked:** Media (image gen), Editor (video assembly), CONTENT_READY event, MP4 output.  
-**Related:** 🔗 Gap #18 (checkpointer cleanup — now fixed). CONTENT_CREATED did NOT fire. Media did NOT trigger.
+**Fix applied:** Added `if node_name.startswith("__"): continue` guard in `services/director/src/services/pipeline.py:141` before `final_state.update()`. Skips all LangGraph internal events (`__interrupt__`, `__end__`, `__error__`).  
+**Commit:** (pending)  
+**Upstream:** `DIRECTOR_ENABLE_HITL` is `true` in the running container — so every pipeline run that reaches an interrupt point hit this bug.  
+**Downstream unblocked:** Media (image gen), Editor (video assembly), CONTENT_READY event, MP4 output.  
+**Related:** 🔗 Gap #18 (checkpointer cleanup — fixed). 🔗 Gap #20 — TBD (next blocker after pipeline resumes past interrupt point).
 
 ---
 
@@ -157,7 +156,8 @@ Smoke test run
   → GAP #16 (created_by null)         ← fixed
       → GAP #17 (LLM 503, no NIM key) ← fixed
           → GAP #18 (LangGraph checkpoint TypeError) ← fixed
-              → GAP #19 (HITL __interrupt__ event in astream loop) ← OPEN
+              → GAP #19 (HITL __interrupt__ event in astream loop) ← fixed
+                  → GAP #20 (TBD — next blocker)
                   → [Media image gen]
                   → [Editor TTS — Risk B]
                       → [Editor video assembly]

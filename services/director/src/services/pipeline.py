@@ -138,6 +138,8 @@ class ContentPipeline:
             final_state = dict(initial_state)
             async for event in self._graph.astream(initial_state, config=config, stream_mode="updates"):
                 node_name = next(iter(event))
+                if node_name.startswith("__"):
+                    continue
                 final_state.update(event[node_name])
 
                 if node_name in _STAGE_MAP:
