@@ -131,6 +131,8 @@ services:
       - "127.0.0.1:8002:8002"
     env_file:
       - ../.env
+    environment:
+      DIRECTOR_AUTO_TRIGGER: "true"
     depends_on:
       migrations:
         condition: service_completed_successfully
