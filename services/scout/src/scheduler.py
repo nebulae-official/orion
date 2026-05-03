@@ -132,7 +132,10 @@ async def fetch_and_process_trends(
     filtered = niche_filter.filter_trends(all_trends, niche_config)
 
     # 4. Persist and publish
+    # Collect event payloads first, commit, then publish — avoids publishing
+    # events for trend IDs that aren't yet committed (FK violation race).
     saved_count = 0
+    events_to_publish: list[dict[str, Any]] = []
     async for session in get_session():
         repo = TrendRepository(session)
 
@@ -153,16 +156,15 @@ async def fetch_and_process_trends(
                     }
                 )
                 saved_count += 1
-
-                # 4. Publish TrendDetected event
-                event_payload: dict[str, Any] = {
-                    "trend_id": str(db_trend.id),
-                    "topic": db_trend.topic,
-                    "source": db_trend.source,
-                    "score": db_trend.score,
-                    "detected_at": db_trend.detected_at.isoformat(),
-                }
-                await event_bus.publish(Channels.TREND_DETECTED, event_payload)
+                events_to_publish.append(
+                    {
+                        "trend_id": str(db_trend.id),
+                        "topic": db_trend.topic,
+                        "source": db_trend.source,
+                        "score": db_trend.score,
+                        "detected_at": db_trend.detected_at.isoformat(),
+                    }
+                )
             except Exception:
                 logger.exception(
                     "trend_save_error",
@@ -170,6 +172,10 @@ async def fetch_and_process_trends(
                 )
 
         await session.commit()
+
+    # Publish after commit so Director always finds the trend in the DB.
+    for event_payload in events_to_publish:
+        await event_bus.publish(Channels.TREND_DETECTED, event_payload)
 
     logger.info(
         "trend_ingestion_complete",

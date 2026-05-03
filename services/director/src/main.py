@@ -179,7 +179,7 @@ async def lifespan(app: FastAPI):
         analyst_agent=analyst_agent,
         session_factory=_session_ctx,
         checkpointer=_checkpointer,
-        enable_hitl=os.getenv("DIRECTOR_ENABLE_HITL", "true").lower() == "true",
+        enable_hitl=os.getenv("DIRECTOR_ENABLE_HITL", "false").lower() == "true",
     )
     _pipeline = ContentPipeline(_graph, _event_bus, vector_memory=_vector_memory, checkpointer=_checkpointer)
     app.state.pipeline = _pipeline

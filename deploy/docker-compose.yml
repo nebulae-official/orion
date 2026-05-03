@@ -134,6 +134,7 @@ services:
       - ../.env
     environment:
       DIRECTOR_AUTO_TRIGGER: "true"
+      DIRECTOR_ENABLE_HITL: "false"
     depends_on:
       migrations:
         condition: service_completed_successfully

@@ -138,7 +138,7 @@ class ScriptGenerator:
             prompt=user_prompt,
             system_prompt=system_prompt,
             temperature=0.8,
-            max_tokens=1024,
+            max_tokens=2048,
         )
 
         script = self._parse_response(response.content)
@@ -201,5 +201,13 @@ class ScriptGenerator:
             cleaned = cleaned[: cleaned.rfind("```")]
         cleaned = cleaned.strip()
 
-        data = json.loads(cleaned)
+        try:
+            data = json.loads(cleaned)
+        except json.JSONDecodeError as exc:
+            logger.error(
+                "script_parse_failed",
+                error=str(exc),
+                raw_preview=cleaned[:200],
+            )
+            raise
         return GeneratedScript.model_validate(data)
