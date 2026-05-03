@@ -83,6 +83,14 @@ _CATALOG: list[ProviderEntry] = [
         default_voice=os.getenv("FISH_SPEECH_VOICE", "default"),
     ),
     ProviderEntry(
+        provider="edge_tts",
+        capability=Capability.TTS,
+        credential_kind=CredentialKind.API_KEY,
+        default_model="edge",
+        base_url="https://speech.platform.bing.com",
+        default_voice=os.getenv("EDGE_TTS_VOICE", "en-US-AriaNeural"),
+    ),
+    ProviderEntry(
         provider="huggingface",
         capability=Capability.IMAGE,
         credential_kind=CredentialKind.API_KEY,

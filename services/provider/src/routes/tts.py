@@ -4,6 +4,7 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 
 from src.adapters.base import BaseTTSAdapter
+from src.adapters.tts.edge_tts import EdgeTTSAdapter
 from src.adapters.tts.fish_speech import FishSpeechTTSAdapter
 from src.adapters.tts.nvidia_nim import NvidiaNimTTSAdapter
 from src.catalog import Capability, get_entry
@@ -15,10 +16,12 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/tts", tags=["tts"])
 
 _DEFAULT_PROVIDER = "nvidia_nim"
+_FALLBACK_PROVIDER = "edge_tts"
 
 _TTS_ADAPTERS: dict[str, type[BaseTTSAdapter]] = {
     "nvidia_nim": NvidiaNimTTSAdapter,
     "fish_speech": FishSpeechTTSAdapter,
+    "edge_tts": EdgeTTSAdapter,
 }
 
 
@@ -31,10 +34,24 @@ async def speak(body: TTSGenerateRequest, request: Request) -> TTSGenerateRespon
         raise HTTPException(status_code=422, detail=f"Unknown provider: '{provider_name}'")
 
     key_resolver: KeyResolver = request.app.state.key_resolver
+    user_id = request.headers.get("X-User-ID")
     try:
-        api_key = await key_resolver.resolve(request.headers.get("X-User-ID"), provider_name)
+        api_key = await key_resolver.resolve(user_id, provider_name)
     except KeyUnavailableError:
-        raise HTTPException(status_code=503, detail="No API key configured for this provider")
+        if provider_name != _FALLBACK_PROVIDER and _FALLBACK_PROVIDER in _TTS_ADAPTERS:
+            logger.warning(
+                "tts_key_unavailable_falling_back",
+                primary=provider_name,
+                fallback=_FALLBACK_PROVIDER,
+            )
+            provider_name = _FALLBACK_PROVIDER
+            try:
+                entry = get_entry(Capability.TTS, _FALLBACK_PROVIDER)
+            except KeyError:
+                raise HTTPException(status_code=503, detail="No TTS provider available")
+            api_key = await key_resolver.resolve(user_id, _FALLBACK_PROVIDER)
+        else:
+            raise HTTPException(status_code=503, detail="No API key configured for this provider")
 
     adapter_cls = _TTS_ADAPTERS.get(provider_name)
     if adapter_cls is None:

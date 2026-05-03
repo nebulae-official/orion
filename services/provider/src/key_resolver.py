@@ -31,7 +31,7 @@ _PROVIDER_ENV_VARS: dict[str, str] = {
 }
 
 # Providers that accept anonymous (empty key) requests — rate-limited but functional.
-_ANONYMOUS_PROVIDERS: frozenset[str] = frozenset({"huggingface", "pollinations"})
+_ANONYMOUS_PROVIDERS: frozenset[str] = frozenset({"huggingface", "pollinations", "edge_tts"})
 
 
 class KeyUnavailableError(Exception):
