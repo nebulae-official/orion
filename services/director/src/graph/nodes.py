@@ -102,8 +102,10 @@ async def creator_node(
         )
 
         count = len(prompt_set.prompts)
-        if count not in {6, 7}:
-            raise SceneCountError(f"Expected 6-7 visual prompts (1 hook + 4-5 body + 1 CTA), got {count}")
+        if count < 2:
+            raise SceneCountError(f"Got only {count} visual prompt(s) — need at least 2 (hook + CTA)")
+        if count < 4:
+            await logger.awarning("creator_node_low_prompt_count", prompt_count=count)
 
         await logger.ainfo("creator_node_completed", prompt_count=count)
 

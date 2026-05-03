@@ -31,7 +31,7 @@ class PollinationsLLMAdapter(BaseLLMAdapter):
         messages: list[dict[str, str]],
         model: str | None = None,
         temperature: float = 0.7,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
     ) -> LLMResult:
         effective_model = model or self._entry.default_model
         url = f"{self._entry.base_url}/openai/v1/chat/completions"

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from enum import StrEnum
 
+import json_repair
 import structlog
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -123,9 +124,9 @@ class VisualPrompter:
 
         system_prompt = _SYSTEM_PROMPT.format(style=style)
 
-        # Build the explicit scene list: hook (1) + body cues (N) + CTA (1) = N+2 total.
-        # We construct this ourselves so the LLM cannot miscount.
-        body_cues = script.visual_cues or []
+        # Build the explicit scene list: hook (1) + body cues (max 2) + CTA (1) = 4 total.
+        # Cap body cues to avoid token overflow on free LLM proxies like Pollinations.
+        body_cues = (script.visual_cues or [])[:2]
         scenes: list[str] = [f"Scene 1 [HOOK]: {script.hook}"]
         for i, cue in enumerate(body_cues, start=2):
             scenes.append(f"Scene {i} [BODY]: {cue}")
@@ -144,7 +145,7 @@ class VisualPrompter:
             prompt=user_prompt,
             system_prompt=system_prompt,
             temperature=0.6,
-            max_tokens=2048,
+            max_tokens=4096,
         )
 
         prompt_set = self._parse_response(response.content)
@@ -167,5 +168,13 @@ class VisualPrompter:
             cleaned = cleaned[: cleaned.rfind("```")]
         cleaned = cleaned.strip()
 
-        data = json.loads(cleaned)
+        try:
+            data = json.loads(cleaned)
+        except json.JSONDecodeError as exc:
+            logger.warning("visual_prompts_json_truncated_attempting_repair", error=str(exc))
+            repaired = json_repair.repair_json(cleaned, return_objects=True)
+            if not repaired or not isinstance(repaired, dict):
+                logger.error("visual_prompts_parse_failed", error=str(exc), raw_preview=cleaned[:200])
+                raise
+            data = repaired
         return VisualPromptSet.model_validate(data)

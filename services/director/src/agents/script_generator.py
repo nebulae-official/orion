@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from enum import StrEnum
 
+import json_repair
 import structlog
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -138,7 +139,7 @@ class ScriptGenerator:
             prompt=user_prompt,
             system_prompt=system_prompt,
             temperature=0.8,
-            max_tokens=2048,
+            max_tokens=4096,
         )
 
         script = self._parse_response(response.content)
@@ -204,10 +205,10 @@ class ScriptGenerator:
         try:
             data = json.loads(cleaned)
         except json.JSONDecodeError as exc:
-            logger.error(
-                "script_parse_failed",
-                error=str(exc),
-                raw_preview=cleaned[:200],
-            )
-            raise
+            logger.warning("script_json_truncated_attempting_repair", error=str(exc))
+            repaired = json_repair.repair_json(cleaned, return_objects=True)
+            if not repaired or not isinstance(repaired, dict):
+                logger.error("script_parse_failed", error=str(exc), raw_preview=cleaned[:200])
+                raise
+            data = repaired
         return GeneratedScript.model_validate(data)

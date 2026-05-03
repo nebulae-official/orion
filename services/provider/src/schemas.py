@@ -7,7 +7,7 @@ class LLMCompleteRequest(BaseModel):
     prompt: str
     system_prompt: str | None = None
     temperature: float = 0.7
-    max_tokens: int = 2048
+    max_tokens: int = 4096
     model: str | None = None
     provider: str | None = None  # override catalog default; None → "nvidia_nim"
 

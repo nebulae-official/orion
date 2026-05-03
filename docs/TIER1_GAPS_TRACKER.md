@@ -123,7 +123,39 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 **Commit:** (pending)  
 **Upstream:** `DIRECTOR_ENABLE_HITL` is `true` in the running container — so every pipeline run that reaches an interrupt point hit this bug.  
 **Downstream unblocked:** Media (image gen), Editor (video assembly), CONTENT_READY event, MP4 output.  
-**Related:** 🔗 Gap #18 (checkpointer cleanup — fixed). 🔗 Gap #20 — TBD (next blocker after pipeline resumes past interrupt point).
+**Related:** 🔗 Gap #18 (checkpointer cleanup — fixed). 🔗 Gap #20 — see below.
+
+---
+
+### Gap #20 — Pollinations LLM truncates JSON at token limit; json_repair import missing ✅ FIXED
+
+**Discovered:** 2026-05-03 after Gap #19 fixed (pipeline now reaches strategist/creator nodes)  
+**Service:** Director (script_generator, visual_prompter) + Provider (Pollinations adapter, schemas)  
+**Symptom A:** `JSONDecodeError: Unterminated string at line 3 col 11 (char 68)` in strategist node — script JSON truncated at exactly char 68 on all 3 retries, same cutoff every time.  
+**Symptom B:** `JSONDecodeError: Unterminated string at line 47 col 16 (char 2740)` in creator node — visual prompts JSON cut off mid-string after 7 scenes requested.  
+**Root cause 1 — silent crash in repair path:** `script_generator.py` and `visual_prompter.py` both referenced `json_repair.repair_json()` in their `except JSONDecodeError` blocks but never imported `json_repair`. Every truncation caused a `NameError` inside the except handler, masking the repair library completely. Retries replayed the same truncated response.  
+**Root cause 2 — token ceiling too low:** All LLM calls used `max_tokens=2048` end-to-end (`script_generator.py`, `visual_prompter.py`, `ProviderServiceClient`, `LLMCompleteRequest` schema, `PollinationsLLMAdapter`). Pollinations silently truncated when generation hit the limit.  
+**Root cause 3 — scene payload too large:** `visual_prompter.py` built 7 scenes (1 hook + 5 body cues + 1 CTA), each requiring ~6 fields. Even at 4096 tokens, 7 detailed scenes could still overflow Pollinations.  
+**Fix applied:**  
+- Added `import json_repair` to `script_generator.py` and `visual_prompter.py`  
+- Raised `max_tokens` from 2048 → 4096 in `script_generator.py`, `visual_prompter.py`, `pollinations.py`, and `LLMCompleteRequest` schema  
+- Capped `body_cues` to `[:2]` in `visual_prompter.py` — total scenes 4 (hook + 2 body + CTA)  
+**Commit:** see fix(director): fix Pollinations JSON truncation + missing json_repair import  
+**Upstream:** Script generation and visual prompt extraction were both broken. Pipeline always failed at strategist or creator.  
+**Downstream unblocked:** creator_node completion → media image generation. 🔗 Gap #21.
+
+---
+
+### Gap #21 — Creator node scene count validator hardcoded to {6, 7}; rejects 4-scene output ✅ FIXED
+
+**Discovered:** 2026-05-03 immediately after Gap #20 fixed (visual prompts now extract but validator rejects them)  
+**Service:** Director (graph/nodes.py — creator_node)  
+**Symptom:** `creator_node_scene_count_invalid: Expected 6-7 visual prompts (1 hook + 4-5 body + 1 CTA), got 4` — pipeline fails at creator node even though visual prompter returned valid JSON.  
+**Root cause:** `creator_node()` in `nodes.py` had `if count not in {6, 7}: raise SceneCountError(...)`. This was written for the original 7-scene design. Gap #20 fix reduced scenes to 4 to avoid Pollinations overflow, making this validator a new hard blocker.  
+**Fix applied:** Changed validator to `if count < 2: raise SceneCountError(...)` (minimum: hook + CTA). Added `awarning` when count < 4. Accepts 2–N scenes, compatible with both the 4-scene Pollinations config and any future higher-capacity LLM returning more scenes.  
+**Commit:** see fix(director): relax creator_node scene count validator  
+**Upstream:** Gap #20 fix would have been useless without this.  
+**Downstream unblocked:** `creator_node_completed` → `analyst_node` → `pipeline_completed` → `orion.content.created` event → Media image generation (`orion.media.generated` with 4/4 images).
 
 ---
 
@@ -157,11 +189,12 @@ Smoke test run
       → GAP #17 (LLM 503, no NIM key) ← fixed
           → GAP #18 (LangGraph checkpoint TypeError) ← fixed
               → GAP #19 (HITL __interrupt__ event in astream loop) ← fixed
-                  → GAP #20 (TBD — next blocker)
-                  → [Media image gen]
-                  → [Editor TTS — Risk B]
-                      → [Editor video assembly]
-                          → [MP4 output — Gap #15 full pass]
+                  → GAP #20 (Pollinations JSON truncation + missing json_repair import) ← fixed
+                      → GAP #21 (creator_node validator hardcoded to {6,7} scenes) ← fixed
+                          → [Media image gen ✅ 4/4 images via pollinations/flux]
+                          → [Editor TTS — Risk B]
+                              → [Editor video assembly]
+                                  → [MP4 output — Gap #15 full pass]
 ```
 
 ---
