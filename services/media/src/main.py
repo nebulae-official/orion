@@ -51,7 +51,7 @@ async def _handle_content_created(data: dict[str, Any]) -> None:
     )
 
     provider = get_image_provider(settings)
-    batch_gen = BatchGenerator(provider, max_concurrent=3)
+    batch_gen = BatchGenerator(provider, max_concurrent=1)
 
     prompts = [ImageRequest(prompt=p) for p in visual_prompts]
     batch_request = BatchImageRequest(content_id=content_id, prompts=prompts)
@@ -108,7 +108,7 @@ async def lifespan(app: FastAPI):
 
     # Build provider chain and batch generator
     provider = get_image_provider(settings)
-    batch_gen = BatchGenerator(provider, max_concurrent=3)
+    batch_gen = BatchGenerator(provider, max_concurrent=1)
     configure_router(provider, batch_gen)
 
     # Start event bus
