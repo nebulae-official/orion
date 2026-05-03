@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import uuid
 from pathlib import Path
@@ -15,6 +16,24 @@ from .effects import build_audio_fade_filter
 logger = structlog.get_logger(__name__)
 
 DEFAULT_OUTPUT_DIR = "/tmp/orion/editor/video"
+
+
+async def _probe_audio_duration(audio_path: str) -> float:
+    """Return audio duration in seconds via ffprobe."""
+    proc = await asyncio.create_subprocess_exec(
+        "ffprobe",
+        "-v",
+        "quiet",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "json",
+        audio_path,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, _ = await proc.communicate()
+    return float(json.loads(stdout).get("format", {}).get("duration", 0.0))
 
 
 class VideoConfig(BaseModel):
@@ -53,6 +72,24 @@ class VideoStitcher:
 
         cfg = request.config
         n_images = len(request.image_paths)
+
+        # Derive per-image duration from the actual audio length so that the
+        # video timeline exactly matches the audio track.
+        audio_duration = await _probe_audio_duration(request.audio_path)
+        if audio_duration > 0.0 and n_images > 0:
+            cfg = cfg.model_copy(update={"duration_per_image": audio_duration / n_images})
+            await logger.ainfo(
+                "audio_duration_probed",
+                audio_duration_s=round(audio_duration, 2),
+                duration_per_image_s=round(cfg.duration_per_image, 2),
+            )
+        else:
+            await logger.awarning(
+                "audio_duration_probe_failed",
+                audio_path=request.audio_path,
+                fallback_duration_per_image=cfg.duration_per_image,
+            )
+
         total_duration = n_images * cfg.duration_per_image
 
         # Build ffmpeg command
