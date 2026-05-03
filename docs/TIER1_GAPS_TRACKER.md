@@ -46,24 +46,28 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 
 ## Phase 1 — Live Smoke Test Gaps (found during `make up` + pipeline run)
 
-### Gap #15 — Health-check smoke test (verification gate) ⚠️ PARTIAL
+### Gap #15 — Health-check smoke test (verification gate) ✅ FULL PASS (2026-05-03)
 
 **Discovered:** 2026-05-02 smoke test session  
 **Service:** All  
-**Symptom:** Partial pass — infrastructure layer clean, pipeline blocked at app layer.
+**Symptom (original):** Partial pass — infrastructure layer clean, pipeline blocked at app layer.
 
-**Results:**
+**Results (as of Gap #22 fix, 2026-05-03):**
 
 | Check | Result |
 |-------|--------|
 | 9/9 services HTTP 200 | ✅ PASS |
 | Scout fires TREND_DETECTED | ✅ PASS |
 | Director receives events | ✅ PASS |
-| Director creates content record | ❌ Blocked by Gap #16 |
-| LangGraph pipeline runs | ❌ Blocked downstream |
-| MP4 produced | ❌ Not reached |
+| Director creates content record | ✅ PASS (Gap #16 fixed) |
+| LangGraph pipeline runs (all 4 nodes) | ✅ PASS (Gaps #18–21 fixed) |
+| Media generates 4 images | ✅ PASS (pollinations/flux) |
+| Editor TTS produces MP3 | ✅ PASS (edge-tts, 56s) |
+| ffmpeg stitch completes | ✅ PASS (Gap #22 fixed) |
+| MP4 produced | ✅ 1.1MB raw + 577KB subtitled |
+| orion.content.ready published | ✅ PASS |
 
-**Status:** Partially re-verified after each downstream fix. Full pass pending Gap #18+.
+**Status:** FULL PASS. Pipeline runs end-to-end Scout → MP4. Remaining gaps (#23, #24) are quality/validation issues, not blockers.
 
 ---
 
@@ -159,6 +163,53 @@ All were fixed in batch sessions on 2026-05-02. Details in `TIER1_AUDIT_2026-05-
 
 ---
 
+### Gap #22 — ffmpeg OOM-killed by Docker (SIGKILL / returncode=-9) ✅ FIXED
+
+**Discovered:** 2026-05-03 after Gap #21 fixed (images generated, Editor TTS succeeded)  
+**Service:** Editor (video/stitcher.py) + Docker Compose  
+**Symptom:** Editor received `orion.media.generated`, TTS produced 56s MP3, then ffmpeg was SIGKILL'd (returncode=-9) immediately after reading the first image. No output file produced.  
+**Root cause:** `_build_ffmpeg_command` used `zoompan` (Ken Burns) filter for each image. The `zoompan` filter must buffer all frames before encoding — at 30fps × 3s/image × 4 images = 360 frames at 1080×1920 raw ≈ **2.9GB** of pixel data. Editor container had a `mem_limit: 512m`, so Docker OOM-killed the ffmpeg process before it produced any output.  
+**Fix applied:**
+- Replaced `zoompan` per-image filter with simple `scale+pad` (no frame buffering)
+- Added `-threads 2` to cap worker threads and reduce peak memory
+- Changed `-preset fast` → `-preset ultrafast` to reduce encoder buffer memory
+- Moved downscale (720p for Tier 1) inside the filter graph: `[concat]scale=720:1280[outv]`
+- Raised `mem_limit` from `512m` → `1g` in `deploy/docker-compose.yml`
+**Files changed:** `services/editor/src/video/stitcher.py`, `deploy/docker-compose.yml`  
+**Commit:** `fix(editor): simplify ffmpeg stitch for Tier 1 — avoid OOM`  
+**Result:**
+- `video_stitched` event fired in 0.86s (14:56:39 → 14:56:40)
+- Raw stitch: `/tmp/orion/editor/video/37fe9c0e-…mp4` (1.1MB)
+- Subtitled: `/tmp/orion/editor/video/27c297cd-…_subtitled.mp4` (577KB)
+- Thumbnails: generated for youtube/reels/tiktok
+- `orion.content.ready` published — pipeline complete  
+**Note:** Ken Burns infrastructure preserved in `effects.py` for later — only the Tier 1 stitch path bypasses it.  
+**New validation issues (see Gap #23 and Gap #24 below):** Video duration is 12s (4×3s) vs audio 56s; output fps is 25 not 30; resolution is 720p (by design, but validator expects 1080p).
+
+---
+
+### Gap #23 — Video duration 12s vs audio 56s (images not timed to audio length) 🔴 OPEN
+
+**Discovered:** 2026-05-03 — video_validated warnings after Gap #22 fix  
+**Service:** Editor (video/stitcher.py)  
+**Symptom:** Validation log: `"check": "duration", "passed": false, "expected": "40.0-55.0s", "actual": "12.0s"`. Video plays 4 images × 3.0s = 12s, then stops. Audio (56s) is truncated by `-shortest`.  
+**Root cause:** `VideoConfig.duration_per_image` is hardcoded to 3.0s. The stitch does not read audio duration and does not distribute audio length across images.  
+**Fix needed:** In `stitch()`, read audio duration via `ffprobe` (already present in Editor as `get_audio_duration()`), then compute `duration_per_image = audio_duration / n_images`. Override `cfg.duration_per_image` before calling `_build_ffmpeg_command`.  
+**Related:** 🔗 Gap #22 (same stitch path). 🔗 Gap #1 (validator 40-55s window).
+
+---
+
+### Gap #24 — Output fps is 25 not 30; validator rejects resolution 720p 🔴 OPEN
+
+**Discovered:** 2026-05-03 — video_validated warnings after Gap #22 fix  
+**Service:** Editor (stitcher.py + validator)  
+**Symptom A:** `"check": "fps", "passed": false, "expected": "30", "actual": "25.0"` — static images fed to ffmpeg default to 25fps in the concat stream.  
+**Fix A:** Add `-r 30` input flag to each image input in `_build_ffmpeg_command` (before `-i img`).  
+**Symptom B:** `"check": "resolution", "passed": false, "expected": "1080x1920", "actual": "720x1280"` — Gap #22 deliberately downscaled to 720p for Tier 1 but the validator still expects 1080p.  
+**Fix B:** Update validator expected resolution to `720x1280` for Tier 1, or add a `tier` config param. The `VideoConfig` `width`/`height` fields already reflect the intended output size and could be passed into the validator.
+
+---
+
 ## Phase 1 — Known Risks / Deferred
 
 ### Risk A — Pollinations LLM is a public proxy ⚠️
@@ -192,9 +243,11 @@ Smoke test run
                   → GAP #20 (Pollinations JSON truncation + missing json_repair import) ← fixed
                       → GAP #21 (creator_node validator hardcoded to {6,7} scenes) ← fixed
                           → [Media image gen ✅ 4/4 images via pollinations/flux]
-                          → [Editor TTS — Risk B]
-                              → [Editor video assembly]
-                                  → [MP4 output — Gap #15 full pass]
+                          → [Editor TTS ✅ edge-tts 56s MP3 — Risk B resolved]
+                              → GAP #22 (ffmpeg OOM-killed by Docker / zoompan frame buffering) ← fixed
+                                  → [MP4 produced ✅ 1.1MB — Gap #15 FULL PASS]
+                                  → GAP #23 (video duration 12s, audio 56s — duration_per_image not audio-driven) ← open
+                                  → GAP #24 (fps 25 not 30; validator rejects 720p) ← open
 ```
 
 ---

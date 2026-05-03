@@ -10,7 +10,7 @@ from pathlib import Path
 import structlog
 from pydantic import BaseModel, Field
 
-from .effects import build_audio_fade_filter, build_ken_burns_filter
+from .effects import build_audio_fade_filter
 
 logger = structlog.get_logger(__name__)
 
@@ -99,7 +99,8 @@ class VideoStitcher:
         total_duration: float,
     ) -> list[str]:
         """Construct the ffmpeg command for stitching."""
-        cmd: list[str] = ["ffmpeg", "-y"]
+        # -threads 2 caps worker threads; -preset ultrafast lowers encoder buffer memory
+        cmd: list[str] = ["ffmpeg", "-y", "-threads", "2"]
 
         # Input each image as a loop with its display duration
         for img in image_paths:
@@ -120,28 +121,23 @@ class VideoStitcher:
         n = len(image_paths)
         audio_input_idx = n  # audio is the last input
 
-        # Build complex filter graph
+        # Build complex filter graph — simple scale+pad only (no zoompan / Ken Burns)
+        # zoompan buffers all frames in memory before encoding; OOM-kills the container
         filter_parts: list[str] = []
 
-        # Scale each image and apply Ken Burns effect
         for i in range(n):
-            kb_filter = build_ken_burns_filter(
-                idx=i,
-                width=cfg.width,
-                height=cfg.height,
-                fps=cfg.fps,
-                duration=cfg.duration_per_image,
-            )
             filter_parts.append(
                 f"[{i}:v]scale={cfg.width}:{cfg.height}"
                 f":force_original_aspect_ratio=decrease,"
-                f"pad={cfg.width}:{cfg.height}:(ow-iw)/2:(oh-ih)/2:black,"
-                f"{kb_filter}[v{i}]"
+                f"pad={cfg.width}:{cfg.height}:(ow-iw)/2:(oh-ih)/2:black[v{i}]"
             )
 
-        # Concatenate all video segments
+        # Concatenate all video segments and downscale to 720p for Tier 1
+        # scale=720:1280 halves pixel budget vs 1080p; cannot use -vf with -filter_complex -map
         concat_inputs = "".join(f"[v{i}]" for i in range(n))
-        filter_parts.append(f"{concat_inputs}concat=n={n}:v=1:a=0[outv]")
+        filter_parts.append(
+            f"{concat_inputs}concat=n={n}:v=1:a=0[concat];[concat]scale=720:1280[outv]"
+        )
 
         # Audio fade
         audio_fade = build_audio_fade_filter(total_duration)
@@ -160,7 +156,7 @@ class VideoStitcher:
                 "-c:v",
                 "libx264",
                 "-preset",
-                "fast",
+                "ultrafast",
                 "-crf",
                 "23",
                 "-c:a",

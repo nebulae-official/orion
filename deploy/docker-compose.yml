@@ -204,7 +204,7 @@ services:
     networks:
       - orion-net
     restart: unless-stopped
-    mem_limit: 512m
+    mem_limit: 1g
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8004/health')\""]
       interval: 30s
