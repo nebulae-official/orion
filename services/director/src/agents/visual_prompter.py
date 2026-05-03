@@ -60,7 +60,11 @@ image-generation prompts compatible with Stable Diffusion and Flux models.
 Style: {style}
 
 Rules:
-- Produce one prompt per visual cue / scene in the script.
+- You will receive a numbered scene list. Produce EXACTLY one prompt per scene — \
+no more, no fewer.
+- Scene 1 is always the HOOK (attention-grabbing opener).
+- The last scene is always the CTA (call-to-action, brand mark).
+- Middle scenes are BODY (informational content).
 - Each prompt must include: description, style, camera_angle, mood, and \
 negative_prompt.
 - Descriptions should be detailed, comma-separated keyword phrases suitable for \
@@ -87,16 +91,10 @@ no commentary:
 """
 
 _USER_PROMPT = """\
-Extract visual prompts from the following short-form video script.
+Generate one visual prompt per scene for the following short-form video script.
 
-HOOK: {hook}
-
-BODY: {body}
-
-CTA: {cta}
-
-VISUAL CUES:
-{visual_cues}
+SCENES:
+{scenes}
 """
 
 
@@ -125,19 +123,21 @@ class VisualPrompter:
 
         system_prompt = _SYSTEM_PROMPT.format(style=style)
 
-        visual_cues_text = "\n".join(f"- Scene {i + 1}: {cue}" for i, cue in enumerate(script.visual_cues))
+        # Build the explicit scene list: hook (1) + body cues (N) + CTA (1) = N+2 total.
+        # We construct this ourselves so the LLM cannot miscount.
+        body_cues = script.visual_cues or []
+        scenes: list[str] = [f"Scene 1 [HOOK]: {script.hook}"]
+        for i, cue in enumerate(body_cues, start=2):
+            scenes.append(f"Scene {i} [BODY]: {cue}")
+        scenes.append(f"Scene {len(body_cues) + 2} [CTA]: {script.cta}")
+        total_scenes = len(scenes)
 
-        user_prompt = _USER_PROMPT.format(
-            hook=script.hook,
-            body=script.body,
-            cta=script.cta,
-            visual_cues=visual_cues_text,
-        )
+        user_prompt = _USER_PROMPT.format(scenes="\n".join(scenes))
 
         await logger.ainfo(
             "extracting_visual_prompts",
             style=style,
-            scene_count=len(script.visual_cues),
+            scene_count=total_scenes,
         )
 
         response = await self._llm.generate(
