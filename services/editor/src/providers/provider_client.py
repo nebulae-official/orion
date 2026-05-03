@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
+import json
 import os
-import wave
 from pathlib import Path
 from uuid import uuid4
 
@@ -17,9 +18,16 @@ from .base import TTSProvider, TTSRequest, TTSResult
 logger = structlog.get_logger(__name__)
 
 
-def _wav_duration(file_path: str) -> float:
-    with wave.open(file_path, "rb") as wf:
-        return wf.getnframes() / float(wf.getframerate())
+async def _audio_duration(file_path: str) -> float:
+    """Return audio duration in seconds via ffprobe (works for WAV and MP3)."""
+    proc = await asyncio.create_subprocess_exec(
+        "ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, _ = await proc.communicate()
+    streams = json.loads(stdout).get("streams", [])
+    return float(streams[0].get("duration", 0.0)) if streams else 0.0
 
 
 class ProviderServiceTTSClient(TTSProvider):
@@ -38,13 +46,12 @@ class ProviderServiceTTSClient(TTSProvider):
 
     async def synthesize(self, request: TTSRequest) -> TTSResult:
         voice = os.environ.get("PROVIDER_TTS_VOICE", "Magpie-Multilingual.EN-US.Aria")
-        fmt = request.output_format if request.output_format != "mp3" else "wav"
 
         payload = {
             "text": request.text,
             "voice": voice,
             "speed": request.speed,
-            "response_format": fmt,
+            "response_format": request.output_format,
         }
 
         headers: dict[str, str] = {}
@@ -66,10 +73,12 @@ class ProviderServiceTTSClient(TTSProvider):
             raise
 
         audio_bytes = base64.b64decode(data["audio_b64"])
-        dest = self._output_dir / f"tts_{uuid4().hex}.wav"
+        # Use the actual format returned by the provider (edge-tts always emits mp3).
+        ext = data.get("format", request.output_format)
+        dest = self._output_dir / f"tts_{uuid4().hex}.{ext}"
         dest.write_bytes(audio_bytes)
 
-        duration = _wav_duration(str(dest))
+        duration = await _audio_duration(str(dest))
 
         logger.info("tts_saved", path=str(dest), provider=data.get("provider"), duration=duration)
 

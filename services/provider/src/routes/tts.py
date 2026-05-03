@@ -35,6 +35,7 @@ async def speak(body: TTSGenerateRequest, request: Request) -> TTSGenerateRespon
 
     key_resolver: KeyResolver = request.app.state.key_resolver
     user_id = request.headers.get("X-User-ID")
+    request_voice: str | None = body.voice
     try:
         api_key = await key_resolver.resolve(user_id, provider_name)
     except KeyUnavailableError:
@@ -45,6 +46,7 @@ async def speak(body: TTSGenerateRequest, request: Request) -> TTSGenerateRespon
                 fallback=_FALLBACK_PROVIDER,
             )
             provider_name = _FALLBACK_PROVIDER
+            request_voice = None  # voice IDs are provider-namespaced; let fallback use its default
             try:
                 entry = get_entry(Capability.TTS, _FALLBACK_PROVIDER)
             except KeyError:
@@ -63,7 +65,7 @@ async def speak(body: TTSGenerateRequest, request: Request) -> TTSGenerateRespon
         api_key=api_key,
         text=body.text,
         model=body.model,
-        voice=body.voice,
+        voice=request_voice,
         speed=body.speed,
         response_format=body.response_format,
     )

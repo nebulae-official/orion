@@ -24,13 +24,18 @@ CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8004", "--reload
 # --- runtime stage ---
 FROM python:3.13-slim
 
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/ /app/
 
-RUN addgroup --system orion && adduser --system --ingroup orion orion
+RUN addgroup --system orion && adduser --system --ingroup orion orion && \
+    mkdir -p /tmp/hf_cache && chown -R orion:orion /tmp/hf_cache
+
+ENV HF_HOME=/tmp/hf_cache
 USER orion
 
 EXPOSE 8004
