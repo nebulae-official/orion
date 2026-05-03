@@ -153,6 +153,8 @@ class VideoStitcher:
                 "[outv]",
                 "-map",
                 "[outa]",
+                "-r",
+                str(cfg.fps),
                 "-c:v",
                 "libx264",
                 "-preset",

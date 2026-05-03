@@ -12,9 +12,9 @@ from pydantic import BaseModel, Field
 
 logger = structlog.get_logger(__name__)
 
-# Expected constraints for short-form vertical video
-EXPECTED_WIDTH = 1080
-EXPECTED_HEIGHT = 1920
+# Expected constraints for short-form vertical video (720p — 1080p causes OOM)
+EXPECTED_WIDTH = 720
+EXPECTED_HEIGHT = 1280
 EXPECTED_CODEC = "h264"
 EXPECTED_FPS = 30
 MIN_DURATION_SECS = 40.0
