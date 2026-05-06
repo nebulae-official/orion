@@ -47,6 +47,7 @@ class ProviderServiceClient(LLMProvider):
             content=data["content"],
             model=data["model"],
             usage=data.get("usage"),
+            provider=data.get("provider", ""),
         )
 
     async def is_available(self) -> bool:

@@ -75,9 +75,6 @@ class CostTracker:
             rate = cost_data.get("rate", _COST_RATES.get(category, 0))
             amount = units * rate
 
-        if amount <= 0:
-            return
-
         async with self._session_factory() as session:
             repo = CostRepository(session)
             await repo.create(

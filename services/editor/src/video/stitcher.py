@@ -139,12 +139,15 @@ class VideoStitcher:
         # -threads 2 caps worker threads; -preset ultrafast lowers encoder buffer memory
         cmd: list[str] = ["ffmpeg", "-y", "-threads", "2"]
 
-        # Input each image as a loop with its display duration
+        # Input each image as a loop with its display duration.
+        # -r before -i sets the input framerate for still images (default is 25 fps without it).
         for img in image_paths:
             cmd.extend(
                 [
                     "-loop",
                     "1",
+                    "-r",
+                    str(cfg.fps),
                     "-t",
                     str(cfg.duration_per_image),
                     "-i",

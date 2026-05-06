@@ -11,6 +11,7 @@ class LLMResponse(BaseModel):
     content: str
     model: str
     usage: dict | None = None
+    provider: str = ""
 
 
 class LLMProvider(ABC):

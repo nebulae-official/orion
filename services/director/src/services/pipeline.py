@@ -243,8 +243,9 @@ class ContentPipeline:
             # Input tokens are roughly 2x output for prompt+context overhead.
             output_tokens = len(script.body) // 4 if script.body else 0
             input_tokens = output_tokens * 2
+            actual_provider = final_state.get("llm_provider_used") or "nvidia_nim"
             cost = CostResult.estimate(
-                provider="nvidia_nim",
+                provider=actual_provider,
                 model="llama3",
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,

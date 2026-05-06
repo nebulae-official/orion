@@ -71,5 +71,8 @@ class OrionState(TypedDict):
     # --- HITL tracking (accumulates via operator.add reducer) ---
     hitl_decisions: NotRequired[Annotated[list[dict[str, Any]], operator.add]]
 
+    # --- Provider tracking (populated by strategist node) ---
+    llm_provider_used: NotRequired[str]
+
     # --- Error tracking (optional) ---
     error: NotRequired[str | None]

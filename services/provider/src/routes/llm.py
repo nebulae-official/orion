@@ -80,4 +80,4 @@ async def complete(body: LLMCompleteRequest, request: Request) -> LLMCompleteRes
         logger.error("llm_completion_failed", provider=provider_name, error=str(exc))
         raise HTTPException(status_code=502, detail="LLM provider error") from exc
 
-    return LLMCompleteResponse(content=result.content, model=result.model, usage=result.usage)
+    return LLMCompleteResponse(content=result.content, model=result.model, usage=result.usage, provider=provider_name)

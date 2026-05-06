@@ -104,6 +104,7 @@ class ScriptGenerator:
     ) -> None:
         self._llm = llm_provider
         self._vector_memory = vector_memory
+        self.last_used_provider: str = ""
 
     @retry(
         stop=stop_after_attempt(3),
@@ -142,6 +143,7 @@ class ScriptGenerator:
             max_tokens=4096,
         )
 
+        self.last_used_provider = response.provider
         script = self._parse_response(response.content)
 
         await logger.ainfo(

@@ -17,6 +17,14 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 _RATE_TABLE: dict[tuple[str, str], float] = {
+    # NVIDIA NIM — free tier (rate 0.0; update when we get a paid account)
+    ("nvidia_nim", "*"): 0.0,
+    # Pollinations — free proxy, no token billing
+    ("pollinations", "*"): 0.0,
+    # HuggingFace — free anonymous inference tier
+    ("huggingface", "*"): 0.0,
+    # edge-tts — local Windows TTS, zero external cost
+    ("edge_tts", "*"): 0.0,
     # OpenAI — per token (blended input/output average)
     ("openai", "gpt-4o"): 0.000005,
     ("openai", "gpt-4o-mini"): 0.0000003,

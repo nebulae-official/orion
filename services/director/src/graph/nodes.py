@@ -43,6 +43,7 @@ async def strategist_node(
         )
 
         script: GeneratedScript = await script_generator.generate_script(request)
+        provider_used = script_generator.last_used_provider
 
         script, critique_result = await critique_agent.critique_and_refine(
             script=script,
@@ -64,6 +65,7 @@ async def strategist_node(
             "critique_score": critique_result.confidence_score,
             "critique_feedback": critique_result.feedback,
             "current_stage": PipelineStage.CREATOR,
+            "llm_provider_used": provider_used,
         }
 
         # Increment iteration count on re-entry (feedback loop)
