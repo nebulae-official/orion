@@ -27,7 +27,7 @@ from ..services.render_pipeline import RenderPipeline
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/api/v1/editor", tags=["editor"])
+router = APIRouter(prefix="/api/v1", tags=["editor"])
 
 # Module-level singletons (initialised by main.py lifespan via init_components)
 _render_pipeline: RenderPipeline | None = None

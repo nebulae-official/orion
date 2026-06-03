@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import {
   Activity,
   Bell,
@@ -13,9 +14,10 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
+import { serverFetch } from "@/lib/api-client";
 import { DEMO_MODE } from "@/lib/config";
 import { demoContent, demoTrends, demoPipelineActivity } from "@/lib/demo-data";
-import type { Content, ContentStatus } from "@/types/api";
+import type { Content, ContentStatus, PaginatedResponse, Trend } from "@/types/api";
 
 interface DashboardMetric {
   label: string;
@@ -200,19 +202,34 @@ const statusStyles: Record<
   },
 };
 
-export default function Home(): React.ReactElement {
-  const content = DEMO_MODE ? demoContent : [];
-  const trends = DEMO_MODE ? demoTrends : [];
+export default async function Home(): Promise<React.ReactElement> {
+  let content: Content[] = [];
+  let trendCount = 0;
   const chartData = DEMO_MODE ? demoPipelineActivity : [];
-  const metrics = getDashboardMetrics(content, trends.length);
-  const queueItems = content.slice(0, 5);
   const recentEvents = DEMO_MODE ? recentDemoEvents : [];
   const stages = DEMO_MODE ? pipelineStages : emptyPipelineStages;
-  const activeJobs = DEMO_MODE
-    ? content.filter((item) =>
-        ["draft", "generating", "review", "approved"].includes(item.status)
-      ).length
-    : 0;
+
+  if (DEMO_MODE) {
+    content = demoContent;
+    trendCount = demoTrends.length;
+  } else {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("orion_token")?.value;
+    if (token) {
+      const [contentRes, trendRes] = await Promise.allSettled([
+        serverFetch<PaginatedResponse<Content>>("/api/v1/director/content?limit=50", {}, token),
+        serverFetch<{ items: Trend[]; total: number }>("/api/v1/scout/trends", {}, token),
+      ]);
+      if (contentRes.status === "fulfilled") content = contentRes.value.items;
+      if (trendRes.status === "fulfilled") trendCount = trendRes.value.total;
+    }
+  }
+
+  const metrics = getDashboardMetrics(content, trendCount);
+  const queueItems = content.slice(0, 5);
+  const activeJobs = content.filter((item) =>
+    ["draft", "generating", "review", "approved"].includes(item.status)
+  ).length;
 
   return (
     <div className="px-5 py-8 sm:px-8 lg:px-10 xl:px-11">
@@ -367,9 +384,9 @@ function getDashboardMetrics(
       value: trendCount.toLocaleString("en-US"),
       delta: DEMO_MODE ? "+18.2%" : "0.0%",
       deltaDirection: "up",
-      description: DEMO_MODE
-        ? "Across 12 niches - last 24h"
-        : "Waiting for scout telemetry",
+      description: trendCount > 0
+        ? "From Scout - last 24h"
+        : DEMO_MODE ? "Across 12 niches - last 24h" : "Waiting for scout telemetry",
       icon: <TrendingUp className="h-5 w-5" />,
       iconGradient: "from-primary to-primary-muted",
     },

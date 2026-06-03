@@ -382,7 +382,7 @@ export default async function VideoPage(): Promise<React.ReactElement> {
   } else {
     try {
       const res = await serverFetch<RenderListResponse>(
-        "/api/v1/editor/renders?limit=50",
+        "/api/v1/editor/render?limit=50",
         {},
         token,
       );

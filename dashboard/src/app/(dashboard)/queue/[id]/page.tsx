@@ -15,7 +15,7 @@ import { PipelineStageIndicator } from "@/components/pipeline-stage-indicator";
 import { ImageGallery } from "@/components/content-detail/image-gallery";
 import { ContentScriptSection } from "@/components/content-detail/content-script-section";
 import { ContentDetailPoller } from "@/components/content-detail/content-detail-poller";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, resolveMediaUrl } from "@/lib/utils";
 import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
 import { demoContent, demoTrends, demoMediaAssets } from "@/lib/demo-data";
 import { fetchPipelineStatus } from "@/lib/actions";
@@ -334,8 +334,8 @@ export default async function ContentDetailPage({
 
               {content.video_url ? (
                 <VideoPlayer
-                  videoUrl={content.video_url}
-                  thumbnailUrl={content.thumbnail_url}
+                  videoUrl={resolveMediaUrl(content.video_url)}
+                  thumbnailUrl={resolveMediaUrl(content.thumbnail_url)}
                   segments={segments}
                 />
               ) : (

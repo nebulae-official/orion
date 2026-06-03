@@ -123,10 +123,15 @@ class RenderPipeline:
             await self._set_stage(session, pipeline_run, STAGE_STITCH)
 
             image_assets = await repo.get_by_content_id(content_id, asset_type=AssetType.image)
-            if not image_assets:
+
+            # Exclude any stale thumbnail records (provider="editor") that may exist from
+            # prior runs before Gap-25 was fixed. Slide images come from external providers
+            # (e.g. fal_ai, comfyui) and always have a durable path.
+            slide_assets = [a for a in image_assets if a.provider != "editor"]
+            if not slide_assets:
                 raise ValueError(f"No image assets found for content {content_id}")
 
-            image_paths = [a.file_path for a in image_assets]
+            image_paths = [a.file_path for a in slide_assets]
             video_config = VideoConfig(
                 width=video_width,
                 height=video_height,
@@ -156,26 +161,20 @@ class RenderPipeline:
             title = content.title or "Untitled"
             niche = getattr(content, "niche", "default") or "default"
 
+            # Thumbnails are transient intermediates — not persisted as asset records.
+            # Using get_or_generate ensures idempotency: if the /tmp file already
+            # exists from this container lifetime it is reused; otherwise it is
+            # regenerated from final_video_path (always present at this stage).
             thumbnail_paths: list[str] = []
             for platform in ("youtube", "reels", "tiktok"):
-                thumb_path = await self._thumbnail_gen.generate(
+                thumb_path = await self._thumbnail_gen.get_or_generate(
+                    content_id=content_id,
                     video_path=final_video_path,
                     title=title,
                     platform=platform,
                     niche=niche,
                 )
                 thumbnail_paths.append(thumb_path)
-
-                await repo.create(
-                    content_id=content_id,
-                    asset_type=AssetType.image,
-                    provider="editor",
-                    file_path=thumb_path,
-                    metadata={
-                        "type": "thumbnail",
-                        "platform": platform,
-                    },
-                )
 
             # --- Stage 6: Video Quality Validation ---
             await self._set_stage(session, pipeline_run, STAGE_VALIDATION)

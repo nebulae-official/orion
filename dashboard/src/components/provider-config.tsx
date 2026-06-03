@@ -59,6 +59,7 @@ interface ServiceConfig {
 const PROVIDER_OPTIONS: ProviderOption[] = [
   { value: "LOCAL", label: "Local (Ollama / ComfyUI)" },
   { value: "CLOUD", label: "Cloud (OpenAI / Replicate)" },
+  { value: "NVIDIA_NIM", label: "NVIDIA NIM (API Catalog)" },
 ];
 
 const MODEL_OPTIONS: Record<string, ModelOption[]> = {
@@ -67,16 +68,21 @@ const MODEL_OPTIONS: Record<string, ModelOption[]> = {
     { value: "mistral", label: "Mistral 7B", provider: "LOCAL" },
     { value: "gpt-4o", label: "GPT-4o", provider: "CLOUD" },
     { value: "gpt-4o-mini", label: "GPT-4o Mini", provider: "CLOUD" },
+    { value: "nim-llama3.1-70b", label: "Llama 3.1 70B (NIM)", provider: "NVIDIA_NIM" },
+    { value: "nim-mistral-7b", label: "Mistral 7B (NIM)", provider: "NVIDIA_NIM" },
+    { value: "nim-gemma-7b", label: "Gemma 7B (NIM)", provider: "NVIDIA_NIM" },
   ],
   image: [
     { value: "sdxl", label: "Stable Diffusion XL", provider: "LOCAL" },
     { value: "flux", label: "Flux", provider: "LOCAL" },
     { value: "dall-e-3", label: "DALL-E 3", provider: "CLOUD" },
+    { value: "nim-sdxl", label: "Stable Diffusion XL (NIM)", provider: "NVIDIA_NIM" },
   ],
   video: [
     { value: "animatediff", label: "AnimateDiff", provider: "LOCAL" },
     { value: "svd", label: "Stable Video Diffusion", provider: "LOCAL" },
     { value: "runway-gen3", label: "Runway Gen-3", provider: "CLOUD" },
+    { value: "nim-cosmos", label: "Cosmos (NIM)", provider: "NVIDIA_NIM" },
   ],
   tts: [
     { value: "piper", label: "Piper TTS", provider: "LOCAL" },
@@ -141,7 +147,7 @@ export function ProviderConfig(): React.ReactElement {
       return demoStatuses[service] ?? { status: "connected" };
     }
     try {
-      await apiClient.get(`/api/v1/providers/${service}/status`);
+      await apiClient.get(`/api/v1/director/providers/${service}/status`);
       return { status: "connected" };
     } catch (err: unknown) {
       let errorMessage = "Connection failed";

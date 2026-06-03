@@ -43,8 +43,8 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
     }
   }
 
-  const used = trends.filter((t) => t.status === "USED").length;
-  const discarded = trends.filter((t) => t.status === "DISCARDED").length;
+  const used = trends.filter((t) => t.status === "active" || t.status === "USED").length;
+  const discarded = trends.filter((t) => t.status === "expired" || t.status === "DISCARDED").length;
   const conversionRate =
     total > 0 ? `${((used / total) * 100).toFixed(1)}% conversion rate` : "Awaiting Scout signal";
 
@@ -78,8 +78,8 @@ export default async function TrendsPage(): Promise<React.ReactElement> {
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard title="Total Detected" value={total.toLocaleString()} subtitle="Last 24 hours · 12 niches" />
-        <StatCard title="Used for Content" value={used.toLocaleString()} subtitle={conversionRate} />
-        <StatCard title="Discarded" value={discarded.toLocaleString()} subtitle="Low virality or duplicate" />
+        <StatCard title="Active / Used" value={used.toLocaleString()} subtitle={conversionRate} />
+        <StatCard title="Expired / Discarded" value={discarded.toLocaleString()} subtitle="Low virality or duplicate" />
       </div>
 
       {trends.length === 0 ? (

@@ -40,7 +40,7 @@ class ProviderServiceTTSClient(TTSProvider):
     def __init__(self, output_dir: str | None = None) -> None:
         self._provider_url = os.environ.get("PROVIDER_URL", "http://provider:8008").rstrip("/")
         self._output_dir = Path(
-            output_dir or os.environ.get("EDITOR_OUTPUT_DIR", "/tmp/orion/editor/tts")
+            output_dir or os.environ.get("EDITOR_TTS_DIR", "/tmp/orion/editor/tts")
         )
         self._output_dir.mkdir(parents=True, exist_ok=True)
 

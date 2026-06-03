@@ -5,7 +5,7 @@ import { ListVideo } from "lucide-react";
 import { ContentCard } from "@/components/content-card";
 import { QueueFilters } from "@/components/queue-filters";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DEMO_MODE, GATEWAY_URL } from "@/lib/config";
+import { DEMO_MODE, SERVER_GATEWAY_URL } from "@/lib/config";
 import { getDemoContentCounts, getDemoContentPage } from "@/lib/demo-data";
 import type { Content, ContentStatus, PaginatedResponse } from "@/types/api";
 
@@ -34,7 +34,7 @@ async function fetchContentList(
   searchParams.set("limit", String(params.limit));
 
   const response = await fetch(
-    `${GATEWAY_URL}/api/v1/content?${searchParams.toString()}`,
+    `${SERVER_GATEWAY_URL}/api/v1/director/content?${searchParams.toString()}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

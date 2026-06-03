@@ -27,10 +27,10 @@ export interface Content {
 export interface Trend {
   id: string;
   topic: string;
-  /** Normalized virality score (0-1 or 0-100 depending on source) */
-  virality_score: number;
-  /** Legacy alias for virality_score */
-  score?: number;
+  /** Normalized virality score returned by the scout API */
+  score: number;
+  /** Legacy dashboard alias — use (score ?? virality_score ?? 0) to access */
+  virality_score?: number;
   source: string;
   keywords?: string[];
   status: string;

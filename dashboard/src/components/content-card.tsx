@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn, formatRelativeTime, resolveMediaUrl } from "@/lib/utils";
 import type { Content, ContentStatus } from "@/types/api";
 import {
   Play,
@@ -82,7 +82,7 @@ export function ContentCard({
       >
         {content.thumbnail_url ? (
           <Image
-            src={content.thumbnail_url}
+            src={resolveMediaUrl(content.thumbnail_url) ?? content.thumbnail_url}
             alt={content.title}
             width={400}
             height={225}

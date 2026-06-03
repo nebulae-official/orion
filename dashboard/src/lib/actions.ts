@@ -31,7 +31,7 @@ export async function approveContent(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await authenticatedFetch(
-      `/api/v1/content/${contentId}/approve`,
+      `/api/v1/director/content/${contentId}/approve`,
       { method: "POST" }
     );
 
@@ -54,7 +54,7 @@ export async function rejectContent(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await authenticatedFetch(
-      `/api/v1/content/${contentId}/reject`,
+      `/api/v1/director/content/${contentId}/reject`,
       {
         method: "POST",
         body: JSON.stringify(feedback),
@@ -81,7 +81,7 @@ export async function fetchContent(
     const token = await getAuthToken();
     if (!token) return null;
 
-    const response = await authenticatedFetch(`/api/v1/content/${contentId}`);
+    const response = await authenticatedFetch(`/api/v1/director/content/${contentId}`);
     if (!response.ok) return null;
 
     return (await response.json()) as Content;
@@ -129,7 +129,7 @@ export async function saveProviderConfig(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await authenticatedFetch(
-      `/api/v1/providers/${service}/config`,
+      `/api/v1/director/providers/${service}/config`,
       {
         method: "PUT",
         body: JSON.stringify({ provider, model }),

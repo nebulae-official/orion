@@ -57,7 +57,7 @@ class TestRenderPipeline:
         burner.burn_subtitles.return_value = "/tmp/final_video.mp4"
 
         thumbnail_gen = AsyncMock()
-        thumbnail_gen.generate.return_value = "/tmp/thumb.jpg"
+        thumbnail_gen.get_or_generate.return_value = "/tmp/thumb.jpg"
 
         validator = AsyncMock()
         validation_result = MagicMock()

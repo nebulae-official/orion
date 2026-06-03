@@ -211,7 +211,7 @@ export default async function PipelinePage({
       params.set("limit", "50");
 
       const res = await serverFetch<PaginatedResponse<Content>>(
-        `/api/v1/content?${params.toString()}`,
+        `/api/v1/director/content?${params.toString()}`,
         {},
         token,
       );

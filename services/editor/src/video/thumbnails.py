@@ -15,6 +15,16 @@ logger = structlog.get_logger(__name__)
 
 DEFAULT_OUTPUT_DIR = "/tmp/orion/editor/thumbnails"
 
+
+def _deterministic_thumb_path(output_dir: Path, content_id: uuid.UUID, platform: str) -> Path:
+    """Return the deterministic temp path for a thumbnail.
+
+    The same content_id + platform always maps to the same path,
+    making regeneration idempotent across container restarts.
+    """
+    return output_dir / f"thumb_{content_id}_{platform}.jpg"
+
+
 # Platform-specific output sizes
 THUMBNAIL_SIZES: dict[str, tuple[int, int]] = {
     "youtube": (1280, 720),
@@ -68,6 +78,63 @@ class ThumbnailGenerator:
     def __init__(self, output_dir: str | None = None) -> None:
         self._output_dir = Path(output_dir or os.getenv("EDITOR_THUMBNAIL_DIR", DEFAULT_OUTPUT_DIR))
         self._output_dir.mkdir(parents=True, exist_ok=True)
+
+    async def get_or_generate(
+        self,
+        content_id: uuid.UUID,
+        video_path: str,
+        title: str,
+        platform: str = "youtube",
+        niche: str = "default",
+        frame_time: float = 1.5,
+    ) -> str:
+        """Return the thumbnail for *content_id*, regenerating from *video_path* if missing.
+
+        The thumbnail is written to a deterministic temp path so the same
+        content_id + platform always produces the same filename. If the file
+        already exists (e.g. prior render in the same container lifetime) it is
+        returned immediately without re-extracting a frame.
+
+        If the file is absent (container restart, new container), it is
+        regenerated from *video_path*, which must be a durable path accessible
+        to the container.
+
+        Raises
+        ------
+        RuntimeError
+            If ffmpeg fails to extract a frame from *video_path*.
+        """
+        thumb_path = _deterministic_thumb_path(self._output_dir, content_id, platform)
+
+        if thumb_path.exists():
+            return str(thumb_path)
+
+        await logger.ainfo(
+            "thumbnail_not_found_regenerating",
+            path=str(thumb_path),
+            content_id=str(content_id),
+            platform=platform,
+        )
+
+        # Clamp frame_time to 0-3 seconds (hook section)
+        frame_time = max(0.0, min(frame_time, 3.0))
+
+        width, height = THUMBNAIL_SIZES.get(platform, THUMBNAIL_SIZES["youtube"])
+        style = NICHE_STYLES.get(niche, NICHE_STYLES["default"])
+
+        frame_path = await self._extract_frame(video_path, frame_time, width, height)
+        result = self._apply_text_overlay(frame_path, title, width, height, style, output_path=str(thumb_path))
+        Path(frame_path).unlink(missing_ok=True)
+
+        await logger.ainfo(
+            "thumbnail_regenerated",
+            platform=platform,
+            content_id=str(content_id),
+            resolution=f"{width}x{height}",
+            output=result,
+        )
+
+        return result
 
     async def generate(
         self,
@@ -160,8 +227,13 @@ class ThumbnailGenerator:
         width: int,
         height: int,
         style: NicheStyle,
+        output_path: str | None = None,
     ) -> str:
-        """Apply a dark overlay and title text to the extracted frame."""
+        """Apply a dark overlay and title text to the extracted frame.
+
+        If *output_path* is provided, the result is written there; otherwise a
+        random temp path is used (legacy behaviour, used by ``generate``).
+        """
         img = Image.open(frame_path).convert("RGBA")
         img = img.resize((width, height), Image.LANCZOS)
 
@@ -211,9 +283,9 @@ class ThumbnailGenerator:
             )
 
         # Convert to RGB and save as JPEG
-        output_path = str(self._output_dir / f"thumb_{uuid.uuid4()}.jpg")
-        img.convert("RGB").save(output_path, "JPEG", quality=95)
-        return output_path
+        dest = output_path or str(self._output_dir / f"thumb_{uuid.uuid4()}.jpg")
+        img.convert("RGB").save(dest, "JPEG", quality=95)
+        return dest
 
     @staticmethod
     def _wrap_text(

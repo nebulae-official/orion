@@ -28,7 +28,7 @@ from ..services.batch_generator import BatchGenerator, BatchImageRequest
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/api/v1/media", tags=["media"])
+router = APIRouter(prefix="/api/v1", tags=["media"])
 
 # These will be set during app startup via `configure_router`.
 _provider: ImageProvider | None = None

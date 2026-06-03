@@ -122,21 +122,19 @@ export default async function MediaPage(): Promise<React.ReactElement> {
     batches = DEMO_BATCHES;
     mediaAssets = demoMediaAssets;
   } else {
+    // Fetch providers independently — this is the most critical piece of data
     try {
-      const [providerRes, batchRes, assetRes] = await Promise.all([
-        serverFetch<ProviderInfo[]>("/api/v1/media/providers", {}, token),
-        serverFetch<BatchJob[]>("/api/v1/media/batches", {}, token),
-        serverFetch<{ items: MediaAsset[] }>("/api/v1/media/assets", {}, token),
-      ]);
-      providers = providerRes;
-      batches = batchRes;
-      mediaAssets = assetRes.items;
+      providers = await serverFetch<ProviderInfo[]>("/api/v1/media/providers", {}, token);
     } catch {
       fetchError = true;
-      providers = DEMO_PROVIDERS;
-      batches = DEMO_BATCHES;
-      mediaAssets = demoMediaAssets;
     }
+    // Batch list and asset gallery are best-effort; endpoints may not yet be implemented
+    const [batchRes, assetRes] = await Promise.allSettled([
+      serverFetch<BatchJob[]>("/api/v1/media/batch", {}, token),
+      serverFetch<{ items: MediaAsset[] }>("/api/v1/media/assets", {}, token),
+    ]);
+    if (batchRes.status === "fulfilled") batches = batchRes.value;
+    if (assetRes.status === "fulfilled") mediaAssets = assetRes.value.items;
   }
 
   // Compute stats

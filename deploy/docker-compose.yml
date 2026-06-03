@@ -192,6 +192,9 @@ services:
       - ../.env
     environment:
       MEDIA_BASE_DIR: /data/media
+      EDITOR_OUTPUT_DIR: /data/media/editor/video
+      EDITOR_THUMBNAIL_DIR: /data/media/editor/thumbnails
+      EDITOR_TTS_DIR: /data/media/editor/tts
     volumes:
       - orion_media:/data/media
     depends_on:
@@ -301,6 +304,10 @@ services:
       - "127.0.0.1:3000:3000"
     env_file:
       - ../.env
+    environment:
+      HOSTNAME: "0.0.0.0"
+    volumes:
+      - orion_media:/data/media:ro
     depends_on:
       gateway:
         condition: service_healthy
@@ -309,7 +316,7 @@ services:
     restart: unless-stopped
     mem_limit: 512m
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

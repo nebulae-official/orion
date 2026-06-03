@@ -34,3 +34,16 @@ export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
   return str.slice(0, length) + "...";
 }
+
+/**
+ * Translates a backend media path (/data/media/...) to the dashboard's
+ * local file-serving API route (/api/media/...). Paths that don't start
+ * with the backend prefix are returned unchanged.
+ */
+export function resolveMediaUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("/data/media/")) {
+    return "/api/media/" + url.slice("/data/media/".length);
+  }
+  return url;
+}

@@ -37,11 +37,18 @@ function trendTime(trend: Trend): string {
   return trend.detected_at ?? trend.created_at;
 }
 
+function trendScore(trend: Trend): number {
+  return trend.score ?? trend.virality_score ?? 0;
+}
+
 function sortValue(trend: Trend, key: SortKey): string | number {
   if (key === "detected_at") {
     return trendTime(trend);
   }
-  return trend[key];
+  if (key === "virality_score") {
+    return trendScore(trend);
+  }
+  return trend[key as keyof Trend] as string | number;
 }
 
 function formatScore(score: number): string {
@@ -264,7 +271,7 @@ export function TrendTable({ trends }: TrendTableProps): React.ReactElement {
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {sorted.map((trend) => {
-                const percent = scorePercent(trend.virality_score);
+                const percent = scorePercent(trendScore(trend));
                 const lowScore = percent < 50;
 
                 return (
@@ -283,7 +290,7 @@ export function TrendTable({ trends }: TrendTableProps): React.ReactElement {
                     </td>
                     <td className="w-32 px-3 py-3.5 align-middle">
                       <div className="font-[family-name:var(--font-display)] text-lg font-bold tracking-[-0.02em] text-text">
-                        {formatScore(trend.virality_score)}
+                        {formatScore(trendScore(trend))}
                       </div>
                       <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.04]">
                         <div
