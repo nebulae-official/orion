@@ -7,7 +7,7 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
     "httpx>=0.28.0",
-    "tenacity>=9.0.0",
+    "tenacity>=9.1.4",
     "orion-common",
     "langgraph>=1.0.0,<2.0.0",
     "langgraph-checkpoint-postgres>=2.0.0",
